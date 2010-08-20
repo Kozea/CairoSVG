@@ -21,6 +21,7 @@ Cairo surface creator
 """
 
 import cairo
+import io
 from math import pi
 
 # TODO: find a real way to determine DPI
@@ -82,7 +83,8 @@ class Surface(object):
         """Create the surface from ``tree``."""
         width = size(tree.get("width", 0))
         height = size(tree.get("height", 0))
-        self.cairo = cairo.PDFSurface("test.pdf", width, height)
+        self.bytesio = io.BytesIO()
+        self.cairo = cairo.PDFSurface(self.bytesio, width, height)
         self.context = cairo.Context(self.cairo)
 
         viewbox = tree.get("viewBox")
@@ -92,6 +94,13 @@ class Surface(object):
             self.context.translate(-x1, -y1)
 
         self.draw(tree)
+        self.cairo.finish()
+
+    def read(self):
+        """Read the PDF surface content."""
+        value = self.bytesio.getvalue()
+        self.bytesio.close()
+        return value
 
     def draw(self, node):
         """Draw ``node`` and its children."""
