@@ -22,6 +22,7 @@ Cairo surface creator
 
 import cairo
 import io
+from string import letters
 from math import pi
 
 # TODO: find a real way to determine DPI
@@ -38,12 +39,23 @@ UNITS = {
     "%": NotImplemented}
 
 
+def normalize(string=None):
+    """Normalize a string corresponding to an array of various vaues."""
+    string = string.replace("-", " -")
+    string = string.replace(",", " ")
+
+    while "  " in string:
+        string = string.replace("  ", " ")
+
+    return string
+
+
 def size(string=None):
     """Replace a string with units by a float value."""
     if not string:
         return 0
 
-    if string.replace(".", "", 1).isdigit():
+    if string.replace(".", "", 1).lstrip(" -").isdigit():
         return float(string)
 
     for unit, value in UNITS.items():
@@ -53,10 +65,12 @@ def size(string=None):
 
 def color(string=None):
     """Replace ``string`` representing a color by a RGBA tuple."""
-    if not string:
+    if not string or string == "none":
         return (0, 0, 0, 0)
 
     if "#" in string:
+        if len(string) in (4, 5):
+            string = "#" + "".join(2 * char for char in string[1:])
         if len(string) == 7:
             string += "ff"
         return tuple(int(value, 16)/255. for value in (
@@ -71,8 +85,7 @@ def point(string=None):
     if not string:
         return (0, 0, "")
 
-    x, string = string.split(",", 1)
-    y, string = string.split(" ", 1)
+    x, y, string = string.split(" ", 2)
     return size(x), size(y), string
 
 
@@ -83,15 +96,23 @@ class Surface(object):
         """Create the surface from ``tree``."""
         width = size(tree.get("width", 0))
         height = size(tree.get("height", 0))
-        self.bytesio = io.BytesIO()
-        self.cairo = cairo.PDFSurface(self.bytesio, width, height)
-        self.context = cairo.Context(self.cairo)
 
         viewbox = tree.get("viewBox")
         if viewbox:
             x1, y1, x2, y2 = tuple(size(pos) for pos in viewbox.split())
+            if not width:
+                width = x2 - x1
+                height = y2 - y1
+
+        self.bytesio = io.BytesIO()
+        self.cairo = cairo.PDFSurface(self.bytesio, width, height)
+        self.context = cairo.Context(self.cairo)
+
+        if viewbox:
             self.context.scale(width/(x2 - x1), height/(y2 - y1))
             self.context.translate(-x1, -y1)
+
+        self.context.move_to(0, 0)
 
         self.draw(tree)
         self.cairo.finish()
@@ -104,36 +125,49 @@ class Surface(object):
 
     def draw(self, node):
         """Draw ``node`` and its children."""
+        self.context.save()
+        self.context.move_to(size(node.get("x")), size(node.get("y")))
+
+        # Transform the context according to the ``transform`` attribute
         if node.get("transform"):
-            self.context.save()
+            # TODO: check if multiple-depth transformations work correctly
             transformations = node["transform"].split(")")
             for transformation in transformations:
-                transformation = transformation.strip()
-                for ttype in ("scale", "translate"):
+                for ttype in ("scale", "translate", "matrix"):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
-                        x, y = tuple(size(position.strip()) for position
-                                     in transformation.split(","))
-                        getattr(self.context, ttype)(x, y)
+                        transformation = normalize(transformation) + " "
+                        values = []
+                        while transformation:
+                            value, transformation = transformation.split(" ", 1)
+                            values.append(size(value))
+                        if ttype == "matrix":
+                            matrix = cairo.Matrix(*values)
+                            self.context.set_matrix(matrix)
+                        else:
+                            getattr(self.context, ttype)(*values)
 
+        # Set drawing informations of the node if a method called ``node.tag`` exists
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
+        # Stroke
         self.context.set_line_width(size(node.get("stroke-width")))
         self.context.set_source_rgba(*color(node.get("stroke")))
         self.context.stroke_preserve()
 
+        # Fill
         if node.get("fill-rule") == "evenodd":
             self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
         self.context.set_source_rgba(*color(node.get("fill")))
         self.context.fill()
 
+        # Draw children
         for child in node.children:
             self.draw(child)
 
-        if node.get("transform"):
-            self.context.restore()
+        self.context.restore()
 
     def circle(self, node):
         """Draw a circle ``node``."""
@@ -144,35 +178,96 @@ class Surface(object):
 
     def path(self, node):
         """Draw a path ``node``."""
+        if not node.get("stroke-width"):
+            node["stroke-width"] = "1"
+
         # Add sentinel
-        string = node.get("d", "").strip() + " X X"
+        string = node.get("d", "").strip() + "XX"
+
+        for letter in letters:
+            string = string.replace(letter, " %s " % letter)
+
+        last_letter = None
+
+        string = normalize(string)
             
         while string:
-            letter, string = string.split(" ", 1)
             string = string.strip()
-            if letter == "C":
+            if string.split(" ", 1)[0] in letters:
+                letter, string = string.split(" ", 1)
+            if letter == "c":
+                # Relative curve
+                x1, y1, string = point(string)
+                x2, y2, string = point(string)
+                x3, y3, string = point(string)
+                self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+            elif letter == "C":
                 # Curve
                 x1, y1, string = point(string)
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
-            elif letter == "M":
-                # Current point move
+            elif letter == "h":
+                # Relative horizontal line
+                x, string = string.split(" ", 1)
+                self.context.rel_line_to(size(x), 0)
+            elif letter == "V":
+                # Vertical line
+                x, string = string.split(" ", 1)
+                self.context.line_to(size(x), 0)
+            elif letter == "l":
+                # Relative straight line
                 x, y, string = point(string)
-                self.context.move_to(x, y)
+                self.context.rel_line_to(x, y)
             elif letter == "L":
                 # Straight line
                 x, y, string = point(string)
                 self.context.line_to(x, y)
+            elif letter == "m":
+                # Current point relative move
+                x, y, string = point(string)
+                self.context.rel_move_to(x, y)
+            elif letter == "M":
+                # Current point move
+                x, y, string = point(string)
+                self.context.move_to(x, y)
+            elif letter == "S":
+                # Smooth curve
+                # TODO: manage last_letter in "cs"
+                x, y = self.context.get_current_point()
+                x1 = x3 - x2 if last_letter in "CS" else x
+                y1 = y3 - y2 if last_letter in "CS" else y
+                x2, y2, string = point(string)
+                x3, y3, string = point(string)
+                self.context.curve_to(x1, y1, x2, y2, x3, y3)
+            elif letter == "s":
+                # Relative smooth curve
+                # TODO: manage last_letter in "CS"
+                x1 = x3 - x2 if last_letter in "cs" else 0
+                y1 = y3 - y2 if last_letter in "cs" else 0
+                x2, y2, string = point(string)
+                x3, y3, string = point(string)
+                self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+            elif letter == "v":
+                # Relative vertical line
+                y, string = string.split(" ", 1)
+                self.context.rel_line_to(0, size(y))
+            elif letter == "V":
+                # Vertical line
+                y, string = string.split(" ", 1)
+                self.context.line_to(0, size(y))
             elif letter == "X":
                 # Sentinel: stop
                 string = ""
-            elif letter == "Z":
+            elif letter.lower() == "z":
                 # End of path
                 self.context.close_path()
             else:
                 # TODO: manage other letters
                 raise NotImplemented
+
+            last_letter = letter
+
             string = string.strip()
 
     def line(self, node):

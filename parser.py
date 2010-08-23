@@ -30,7 +30,7 @@ class Node(dict):
         # Inherits from parent properties
         # TODO: use inheritence for some properties only
         if parent:
-            items = dict(parent.items())
+            items = parent.copy()
             for attribute in ("transform", ):
                 if attribute in items:
                     del items[attribute]
