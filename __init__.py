@@ -15,4 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+CairoSVG: A simple SVG reader for Cairo
+
+"""
+
 from . import parser, surface

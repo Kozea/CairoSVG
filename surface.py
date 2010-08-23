@@ -22,7 +22,7 @@ Cairo surface creator
 
 import cairo
 import io
-from string import letters
+from string import ascii_letters
 from math import pi
 
 # TODO: find a real way to determine DPI
@@ -77,7 +77,7 @@ def color(string=None):
             string[1:3], string[3:5], string[5:7], string[7:9]))
 
     # TODO: manage other color types
-    raise NotImplemented
+    raise NotImplementedError
 
 
 def point(string=None):
@@ -148,7 +148,7 @@ class Surface(object):
                         else:
                             getattr(self.context, ttype)(*values)
 
-        # Set drawing informations of the node if a method called ``node.tag`` exists
+        # Set drawing informations of the node if the ``node.tag`` method exists
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
@@ -178,13 +178,14 @@ class Surface(object):
 
     def path(self, node):
         """Draw a path ``node``."""
+        # Set 1 as default stroke-width
         if not node.get("stroke-width"):
             node["stroke-width"] = "1"
 
         # Add sentinel
         string = node.get("d", "").strip() + "XX"
 
-        for letter in letters:
+        for letter in ascii_letters:
             string = string.replace(letter, " %s " % letter)
 
         last_letter = None
@@ -193,7 +194,7 @@ class Surface(object):
             
         while string:
             string = string.strip()
-            if string.split(" ", 1)[0] in letters:
+            if string.split(" ", 1)[0] in ascii_letters:
                 letter, string = string.split(" ", 1)
             if letter == "c":
                 # Relative curve
@@ -264,7 +265,7 @@ class Surface(object):
                 self.context.close_path()
             else:
                 # TODO: manage other letters
-                raise NotImplemented
+                raise NotImplementedError
 
             last_letter = letter
 
@@ -280,14 +281,16 @@ class Surface(object):
     def text(self, node):
         """Draw a text ``node``."""
         # TODO: manage tspan nodes
+        # Set black as default text color
         if not node.get("fill"):
-            # Black is the default text color
             node["fill"] = "#000000"
 
+        # TODO: manage font family, slaint and weight
         self.context.select_font_face(
             "Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         self.context.set_font_size(size(node.get("font-size", "12pt")))
 
+        # TODO: manage y_bearing and *_advance
         x_bearing, y_bearing, width, height, x_advance, y_advance = \
             self.context.text_extents(node.text)
         x, y = size(node.get("x")), size(node.get("y"))

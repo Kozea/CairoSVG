@@ -27,6 +27,8 @@ class Node(dict):
     """SVG node with dict-like properties and children."""
     def __init__(self, node, parent=None):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
+        super(Node, self).__init__()
+
         # Inherits from parent properties
         # TODO: use inheritence for some properties only
         if parent:
