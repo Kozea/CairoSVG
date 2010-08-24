@@ -24,5 +24,5 @@ from . import parser, surface
 
 
 def svg2pdf(svg):
-    """Return a PDF string corresponding to the ``svg`` unicode string."""
+    """Return a PDF string corresponding to the ``svg`` string."""
     return surface.Surface(parser.Tree(svg)).read()
