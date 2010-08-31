@@ -97,18 +97,13 @@ class Surface(object):
         width = size(tree.get("width", 0))
         height = size(tree.get("height", 0))
 
-        viewbox = tree.get("viewBox")
-        if viewbox:
-            x1, y1, x2, y2 = tuple(size(pos) for pos in viewbox.split())
-            if not width:
-                width = x2 - x1
-                height = y2 - y1
-
         self.bytesio = io.BytesIO()
         self.cairo = cairo.PDFSurface(self.bytesio, width, height)
         self.context = cairo.Context(self.cairo)
 
+        viewbox = tree.get("viewBox")
         if viewbox:
+            x1, y1, x2, y2 = tuple(size(pos) for pos in viewbox.split())
             self.context.scale(width/(x2 - x1), height/(y2 - y1))
             self.context.translate(-x1, -y1)
 
