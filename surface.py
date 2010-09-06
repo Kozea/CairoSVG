@@ -22,6 +22,7 @@ Cairo surface creator
 
 import cairo
 import io
+import os
 from string import ascii_letters
 from math import pi
 
@@ -98,19 +99,31 @@ class Surface(object):
         height = size(tree.get("height", 0))
 
         self.bytesio = io.BytesIO()
-        self.cairo = cairo.PDFSurface(self.bytesio, width, height)
-        self.context = cairo.Context(self.cairo)
-
-        viewbox = tree.get("viewBox")
-        if viewbox:
-            x1, y1, x2, y2 = tuple(size(pos) for pos in viewbox.split())
-            self.context.scale(width/(x2 - x1), height/(y2 - y1))
-            self.context.translate(-x1, -y1)
-
-        self.context.move_to(0, 0)
+        if "svg" in tuple(child.tag for child in tree.children):
+            # Real svg pages are in this root svg tag, create a fake surface
+            self.context = cairo.Context(
+                cairo.PDFSurface(os.devnull, width, height))
+        else:
+            self.cairo = cairo.PDFSurface(self.bytesio, width, height)
+            self.context = cairo.Context(self.cairo)
+            self._set_page_size(width, height, tree.get("viewBox"))
+            self.context.move_to(0, 0)
 
         self.draw(tree)
         self.cairo.finish()
+
+    def _set_page_size(self, width, height, viewbox):
+        """Set the active page size."""
+        if viewbox:
+            x1, y1, x2, y2 = tuple(size(pos) for pos in viewbox.split())
+            width = width or (x2 - x1)
+            height = height or (y2 - y1)
+
+        self.cairo.set_size(width, height)
+
+        if viewbox:
+            self.context.scale(width/(x2 - x1), height/(y2 - y1))
+            self.context.translate(-x1, -y1)
 
     def read(self):
         """Read the PDF surface content."""
@@ -163,6 +176,20 @@ class Surface(object):
             self.draw(child)
 
         self.context.restore()
+
+    def svg(self, node):
+        """Draw a svg ``node``."""
+        if not node.root:
+            width = size(node.get("width", 0))
+            height = size(node.get("height", 0))
+            if hasattr(self, "cairo"):
+                self.cairo.show_page()
+            else:
+                self.cairo = cairo.PDFSurface(self.bytesio, width, height)
+                self.context = cairo.Context(self.cairo)
+            self.context.save()
+            self._set_page_size(width, height, node.get("viewBox"))
+            node.root = True
 
     def circle(self, node):
         """Draw a circle ``node``."""

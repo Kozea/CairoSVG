@@ -38,6 +38,7 @@ class Node(dict):
                     del items[attribute]
             self.update(items)
 
+        self.root = False
         self.tag = node.tag.split("}", 1)[1] if "}" in node.tag else node.tag
         self.text = node.text
         self.update(node.attrib.items())
@@ -50,3 +51,4 @@ class Tree(Node):
         """Create the Tree from SVG ``text``."""
         tree = ElementTree.fromstring(text)
         super(Tree, self).__init__(tree)
+        self.root = True
