@@ -167,18 +167,20 @@ class Surface(object):
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
-        # Get node stroke and fill opacity
+        # Get stroke and fill opacity
         opacity = float(node.get("opacity", 1))
+        stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
+        fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
         # Stroke
         self.context.set_line_width(size(node.get("stroke-width")))
-        self.context.set_source_rgba(*color(node.get("stroke"), opacity))
+        self.context.set_source_rgba(*color(node.get("stroke"), stroke_opacity))
         self.context.stroke_preserve()
 
         # Fill
         if node.get("fill-rule") == "evenodd":
             self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-        self.context.set_source_rgba(*color(node.get("fill"), opacity))
+        self.context.set_source_rgba(*color(node.get("fill"), fill_opacity))
         self.context.fill()
 
         # Draw children
