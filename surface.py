@@ -26,6 +26,8 @@ import os
 from string import ascii_letters
 from math import pi
 
+from .colors import COLORS
+
 # TODO: find a real way to determine DPI
 DPI = 72.
 UNITS = {
@@ -69,6 +71,11 @@ def color(string=None):
     if not string or string == "none":
         return (0, 0, 0, 0)
 
+    string = string.strip().lower()
+
+    if string in COLORS:
+        string = COLORS[string]
+
     if "#" in string:
         if len(string) in (4, 5):
             string = "#" + "".join(2 * char for char in string[1:])
@@ -76,9 +83,6 @@ def color(string=None):
             string += "ff"
         return tuple(int(value, 16)/255. for value in (
             string[1:3], string[3:5], string[5:7], string[7:9]))
-
-    # TODO: manage other color types
-    raise NotImplementedError
 
 
 def point(string=None):
