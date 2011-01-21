@@ -311,10 +311,17 @@ class Surface(object):
         if not node.get("fill"):
             node["fill"] = "#000000"
 
-        # TODO: manage font family, slaint and weight
-        self.context.select_font_face(
-            "Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        self.context.set_font_size(size(node.get("font-size", "12pt")))
+        # TODO: manage font variant
+        font_size = size(node.get("font-size", "12pt"))
+        font_family = node.get("font-family", "Sans")
+        font_style = getattr(
+            cairo, ("font_slant_%s" % node.get("font-style")).upper(),
+            cairo.FONT_SLANT_NORMAL)
+        font_weight = getattr(
+            cairo, ("font_weight_%s" % node.get("font-weight")).upper(),
+            cairo.FONT_WEIGHT_NORMAL)
+        self.context.select_font_face(font_family, font_style, font_weight)
+        self.context.set_font_size(font_size)
 
         # TODO: manage y_bearing and *_advance
         x_bearing, y_bearing, width, height, x_advance, y_advance = \
