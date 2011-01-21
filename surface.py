@@ -20,6 +20,9 @@ Cairo surface creator
 
 """
 
+# Ignore small variable names here
+# pylint: disable=C0103
+
 import cairo
 import io
 import os
@@ -345,3 +348,5 @@ class Surface(object):
         self.context.move_to(x, y)
         self.context.text_path(node.text)
         node["fill"] = "#00000000"
+
+# pylint: enable=C0103
