@@ -66,7 +66,7 @@ def size(string=None):
             return float(string.strip(" " + unit)) * value
 
 
-def color(string=None):
+def color(string=None, opacity=1):
     """Replace ``string`` representing a color by a RGBA tuple."""
     if not string or string == "none":
         return (0, 0, 0, 0)
@@ -76,13 +76,13 @@ def color(string=None):
     if string in COLORS:
         string = COLORS[string]
 
-    if "#" in string:
-        if len(string) in (4, 5):
-            string = "#" + "".join(2 * char for char in string[1:])
-        if len(string) == 7:
-            string += "ff"
-        return tuple(int(value, 16)/255. for value in (
-            string[1:3], string[3:5], string[5:7], string[7:9]))
+    if len(string) in (4, 5):
+        string = "#" + "".join(2 * char for char in string[1:])
+    if len(string) == 9:
+        opacity *= int(string[7:9], 16)/255
+    plain_color = tuple(int(value, 16)/255. for value in (
+            string[1:3], string[3:5], string[5:7]))
+    return plain_color + (opacity,)
 
 
 def point(string=None):
@@ -164,15 +164,18 @@ class Surface(object):
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
+        # Get node stroke and fill opacity
+        opacity = float(node.get("opacity", 1))
+
         # Stroke
         self.context.set_line_width(size(node.get("stroke-width")))
-        self.context.set_source_rgba(*color(node.get("stroke")))
+        self.context.set_source_rgba(*color(node.get("stroke"), opacity))
         self.context.stroke_preserve()
 
         # Fill
         if node.get("fill-rule") == "evenodd":
             self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-        self.context.set_source_rgba(*color(node.get("fill")))
+        self.context.set_source_rgba(*color(node.get("fill"), opacity))
         self.context.fill()
 
         # Draw children
@@ -333,8 +336,11 @@ class Surface(object):
         elif text_anchor == "end":
             x -= width + x_bearing
         
+        # Get global text opacity
+        opacity = float(node.get("opacity", 1))
+
         self.context.move_to(x, y)
-        self.context.set_source_rgba(*color(node.get("fill")))
+        self.context.set_source_rgba(*color(node.get("fill"), opacity))
         self.context.show_text(node.text)
         self.context.move_to(x, y)
         self.context.text_path(node.text)
