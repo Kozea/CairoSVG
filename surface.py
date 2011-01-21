@@ -23,7 +23,6 @@ Cairo surface creator
 import cairo
 import io
 import os
-from string import ascii_letters
 from math import pi
 
 from .colors import COLORS
@@ -40,6 +39,7 @@ UNITS = {
     "em": NotImplemented,
     "ex": NotImplemented,
     "%": NotImplemented}
+ASCII_LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 def normalize(string=None):
@@ -214,7 +214,7 @@ class Surface(object):
         # Add sentinel
         string = node.get("d", "").strip() + "XX"
 
-        for letter in ascii_letters:
+        for letter in ASCII_LETTERS:
             string = string.replace(letter, " %s " % letter)
 
         last_letter = None
@@ -223,7 +223,7 @@ class Surface(object):
             
         while string:
             string = string.strip()
-            if string.split(" ", 1)[0] in ascii_letters:
+            if string.split(" ", 1)[0] in ASCII_LETTERS:
                 letter, string = string.split(" ", 1)
             if letter == "c":
                 # Relative curve
