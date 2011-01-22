@@ -103,8 +103,8 @@ class Surface(object):
     # Cairo developers say that there is no way to inherit from cairo.*Surface
     def __init__(self, tree):
         """Create the surface from ``tree``."""
-        width = size(tree.get("width", 0))
-        height = size(tree.get("height", 0))
+        width = size(tree.get("width"))
+        height = size(tree.get("height"))
 
         self.bytesio = io.BytesIO()
         if "svg" in tuple(child.tag for child in tree.children):
@@ -114,24 +114,21 @@ class Surface(object):
         else:
             self.cairo = cairo.PDFSurface(self.bytesio, width, height)
             self.context = cairo.Context(self.cairo)
-            self._set_page_size(width, height, tree.get("viewBox"))
+            self._set_context_size(width, height, tree.get("viewBox"))
+            self.cairo.set_size(width, height)
             self.context.move_to(0, 0)
 
         self.draw(tree)
         self.cairo.finish()
 
-    def _set_page_size(self, width, height, viewbox):
-        """Set the active page size."""
+    def _set_context_size(self, width, height, viewbox):
+        """Set the context size."""
         if viewbox:
-            x1, y1, x2, y2 = tuple(size(pos) for pos in viewbox.split())
-            width = width or (x2 - x1)
-            height = height or (y2 - y1)
-
-        self.cairo.set_size(width, height)
-
-        if viewbox:
-            self.context.scale(width/(x2 - x1), height/(y2 - y1))
-            self.context.translate(-x1, -y1)
+            x, y, x_size, y_size = tuple(size(pos) for pos in viewbox.split())
+            width = width or x_size
+            height = height or y_size
+            self.context.scale(width/x_size, height/y_size)
+            self.context.translate(-x, -y)
 
     def read(self):
         """Read the PDF surface content."""
@@ -198,15 +195,16 @@ class Surface(object):
     def svg(self, node):
         """Draw a svg ``node``."""
         if not node.root:
-            width = size(node.get("width", 0))
-            height = size(node.get("height", 0))
+            width = size(node.get("width"))
+            height = size(node.get("height"))
             if hasattr(self, "cairo"):
                 self.cairo.show_page()
             else:
                 self.cairo = cairo.PDFSurface(self.bytesio, width, height)
                 self.context = cairo.Context(self.cairo)
             self.context.save()
-            self._set_page_size(width, height, node.get("viewBox"))
+            self._set_context_size(width, height, node.get("viewBox"))
+            self.cairo.set_size(width, height)
             node.root = True
 
     def circle(self, node):
@@ -360,9 +358,13 @@ class Surface(object):
     def use(self, node):
         """Draw the content of another SVG file."""
         self.context.translate(size(node.get("x")), size(node.get("y")))
+        node["x"] = node["y"] = "0"
         href = node.get("{http://www.w3.org/1999/xlink}href")
         href = os.path.join("/home/lize/Boulot/Kozea/Facturation", href)
         tree = Tree(href, node)
+        self._set_context_size(
+            size(tree.get("width")), size(tree.get("height")),
+            tree.get("viewBox"))
         self.draw(tree)
 
 # pylint: enable=C0103
