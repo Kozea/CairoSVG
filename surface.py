@@ -145,7 +145,7 @@ class Surface(object):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
-                        transformation = normalize(transformation) + " "
+                        transformation = normalize(transformation).strip() + " "
                         values = []
                         while transformation:
                             value, transformation = transformation.split(" ", 1)
@@ -154,7 +154,12 @@ class Surface(object):
                             matrix = cairo.Matrix(*values)
                             self.context.set_matrix(matrix)
                         else:
-                            getattr(self.context, ttype)(*values)
+                            if len(values) == 1:
+                                values = 2 * values
+                            try:
+                                getattr(self.context, ttype)(*values)
+                            except:
+                                raise transformations
 
         # Set drawing informations of the node if the ``node.tag`` method exists
         if hasattr(self, node.tag):
@@ -309,7 +314,7 @@ class Surface(object):
 
         # TODO: manage font family, slaint and weight
         self.context.select_font_face(
-            "Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+            "Fontin", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         self.context.set_font_size(size(node.get("font-size", "12pt")))
 
         # TODO: manage y_bearing and *_advance
