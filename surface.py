@@ -28,6 +28,7 @@ import io
 import os
 from math import pi
 
+from .parser import Tree
 from .colors import COLORS
 
 # TODO: find a real way to determine DPI
@@ -350,5 +351,13 @@ class Surface(object):
         self.context.move_to(x, y)
         self.context.text_path(node.text)
         node["fill"] = "#00000000"
+
+    def use(self, node):
+        """Draw the content of another SVG file."""
+        self.context.translate(size(node.get("x")), size(node.get("y")))
+        href = node.get("{http://www.w3.org/1999/xlink}href")
+        href = os.path.join("/home/lize/Boulot/Kozea/Facturation", href)
+        tree = Tree(href, node)
+        self.draw(tree)
 
 # pylint: enable=C0103

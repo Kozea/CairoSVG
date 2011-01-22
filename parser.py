@@ -20,6 +20,7 @@ SVG Parser
 
 """
 
+import os
 from xml.etree import ElementTree
 
 
@@ -37,6 +38,7 @@ class Node(dict):
                 if attribute in items:
                     del items[attribute]
             self.update(items)
+            self.filename = parent.filename
 
         self.root = False
         self.tag = node.tag.split("}", 1)[1] if "}" in node.tag else node.tag
@@ -47,8 +49,26 @@ class Node(dict):
 
 class Tree(Node):
     """SVG tree."""
-    def __init__(self, text):
+    def __init__(self, text_or_url, parent=None):
         """Create the Tree from SVG ``text``."""
-        tree = ElementTree.fromstring(text)
-        super(Tree, self).__init__(tree)
+        try:
+            tree = ElementTree.fromstring(text_or_url)
+            self.filename = None
+        except:
+            if '#' in text_or_url:
+                filename, element_id = text_or_url.split('#')
+            else:
+                filename, element_id = text_or_url, None
+            if parent and parent.filename:
+                filename = os.path.join(
+                    os.path.dirname(parent.filename), filename)
+            with open(filename) as file_descriptor:
+                tree = ElementTree.fromstring(file_descriptor.read())
+            if element_id:
+                for element in tree:
+                    if element.get("id") == element_id:
+                        tree = element
+                        break
+            self.filename = filename
+        super(Tree, self).__init__(tree, parent)
         self.root = True
