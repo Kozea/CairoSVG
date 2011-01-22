@@ -153,7 +153,7 @@ class Surface(object):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
-                        transformation = normalize(transformation) + " "
+                        transformation = normalize(transformation).strip() + " "
                         values = []
                         while transformation:
                             value, transformation = transformation.split(" ", 1)
@@ -162,7 +162,12 @@ class Surface(object):
                             matrix = cairo.Matrix(*values)
                             self.context.set_matrix(matrix)
                         else:
-                            getattr(self.context, ttype)(*values)
+                            if len(values) == 1:
+                                values = 2 * values
+                            try:
+                                getattr(self.context, ttype)(*values)
+                            except:
+                                raise transformations
 
         # Set drawing informations of the node if the ``node.tag`` method exists
         if hasattr(self, node.tag):
