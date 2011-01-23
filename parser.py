@@ -31,12 +31,20 @@ class Node(dict):
         super(Node, self).__init__()
 
         # Inherits from parent properties
-        # TODO: use inheritence for some properties only
         if parent:
             items = parent.copy()
             for attribute in ("transform", ):
                 if attribute in items:
                     del items[attribute]
+
+            # Don't inherit x and y attributes if node is a tspan
+            # TODO: drop other attributes that should not be inherited
+            if node.tag == "tspan":
+                if "x" in items:
+                    del items["x"]
+                if "y" in items:
+                    del items["y"]
+
             self.update(items)
             self.filename = parent.filename
 
@@ -55,8 +63,8 @@ class Tree(Node):
             tree = ElementTree.fromstring(text_or_url)
             self.filename = None
         except:
-            if '#' in text_or_url:
-                filename, element_id = text_or_url.split('#')
+            if "#" in text_or_url:
+                filename, element_id = text_or_url.split("#")
             else:
                 filename, element_id = text_or_url, None
             if parent and parent.filename:

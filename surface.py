@@ -316,12 +316,24 @@ class Surface(object):
         self.context.move_to(x1, y1)
         self.context.line_to(x2, y2)
 
+    def tspan(self, node):
+        x, y = self.cursor_position
+        if "x" in node:
+            x = size(node["x"])
+        if "y" in node:
+            y = size(node["y"])
+        node["x"] = str(x + size(node.get("dx")))
+        node["y"] = str(y + size(node.get("dy")))
+        self.text(node)
+
     def text(self, node):
         """Draw a text ``node``."""
-        # TODO: manage tspan nodes
         # Set black as default text color
         if not node.get("fill"):
             node["fill"] = "#000000"
+
+        # TODO: find a better way to do this
+        node.text = node.text.strip("\n\r")
 
         # TODO: manage font variant
         font_size = size(node.get("font-size", "12pt"))
@@ -355,10 +367,16 @@ class Surface(object):
         self.context.text_path(node.text)
         node["fill"] = "#00000000"
 
+        # Remember the cursor position
+        self.cursor_position = self.context.get_current_point()
+
     def use(self, node):
         """Draw the content of another SVG file."""
         self.context.translate(size(node.get("x")), size(node.get("y")))
-        node["x"] = node["y"] = "0"
+        if "x" in node:
+            del node["x"]
+        if "y" in node:
+            del node["y"]
         href = node.get("{http://www.w3.org/1999/xlink}href")
         href = os.path.join("/home/lize/Boulot/Kozea/Facturation", href)
         tree = Tree(href, node)
