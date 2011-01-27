@@ -20,9 +20,9 @@ CairoSVG: A simple SVG reader for Cairo
 
 """
 
-from . import parser, surface
+from . import parser, surface_type
 
 
 def svg2pdf(svg):
     """Return a PDF string corresponding to the ``svg`` string."""
-    return surface.Surface(parser.Tree(svg)).read()
+    return surface_type.PDFSurface(parser.Tree(svg)).read()

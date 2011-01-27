@@ -23,6 +23,7 @@ Cairo surface creator
 # Ignore small variable names here
 # pylint: disable=C0103
 
+import abc
 import cairo
 import io
 import os
@@ -99,27 +100,30 @@ def point(string=None):
 
 
 class Surface(object):
-    """Cairo PDF surface."""
+    """Cairo abstract surface."""
     # Cairo developers say that there is no way to inherit from cairo.*Surface
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, tree):
         """Create the surface from ``tree``."""
         width = size(tree.get("width"))
         height = size(tree.get("height"))
 
         self.bytesio = io.BytesIO()
-        if "svg" in tuple(child.tag for child in tree.children):
-            # Real svg pages are in this root svg tag, create a fake surface
-            self.context = cairo.Context(
-                cairo.PDFSurface(os.devnull, width, height))
-        else:
-            self.cairo = cairo.PDFSurface(self.bytesio, width, height)
-            self.context = cairo.Context(self.cairo)
-            self._set_context_size(width, height, tree.get("viewBox"))
-            self.cairo.set_size(width, height)
-            self.context.move_to(0, 0)
+        self._create_surface(tree, width, height)
 
         self.draw(tree)
         self.cairo.finish()
+
+    @abc.abstractmethod
+    def _create_surface(self, tree, width, height):
+        """Create a cairo surface.
+
+        A method overriding this one must create ``self.cairo`` and
+        ``self.context``.
+
+        """
+        raise NotImplementedError
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -191,21 +195,6 @@ class Surface(object):
             # Restoring context is useless if we are in the root tag, it may
             # raise an exception if we have multiple svg tags
             self.context.restore()
-
-    def svg(self, node):
-        """Draw a svg ``node``."""
-        if not node.root:
-            width = size(node.get("width"))
-            height = size(node.get("height"))
-            if hasattr(self, "cairo"):
-                self.cairo.show_page()
-            else:
-                self.context.restore()
-                self.cairo = cairo.PDFSurface(self.bytesio, width, height)
-                self.context = cairo.Context(self.cairo)
-                self.context.save()
-            self._set_context_size(width, height, node.get("viewBox"))
-            self.cairo.set_size(width, height)
 
     def circle(self, node):
         """Draw a circle ``node``."""
