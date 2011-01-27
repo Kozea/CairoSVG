@@ -187,7 +187,10 @@ class Surface(object):
         for child in node.children:
             self.draw(child)
 
-        self.context.restore()
+        if not node.root:
+            # Restoring context is useless if we are in the root tag, it may
+            # raise an exception if we have multiple svg tags
+            self.context.restore()
 
     def svg(self, node):
         """Draw a svg ``node``."""
@@ -197,12 +200,12 @@ class Surface(object):
             if hasattr(self, "cairo"):
                 self.cairo.show_page()
             else:
+                self.context.restore()
                 self.cairo = cairo.PDFSurface(self.bytesio, width, height)
                 self.context = cairo.Context(self.cairo)
-            self.context.save()
+                self.context.save()
             self._set_context_size(width, height, node.get("viewBox"))
             self.cairo.set_size(width, height)
-            node.root = True
 
     def circle(self, node):
         """Draw a circle ``node``."""
