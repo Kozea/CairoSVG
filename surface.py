@@ -161,10 +161,7 @@ class Surface(object):
                         else:
                             if len(values) == 1:
                                 values = 2 * values
-                            try:
-                                getattr(self.context, ttype)(*values)
-                            except:
-                                raise transformations
+                            getattr(self.context, ttype)(*values)
 
         # Set drawing informations of the node if the ``node.tag`` method exists
         if hasattr(self, node.tag):
