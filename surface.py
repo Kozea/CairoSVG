@@ -333,7 +333,7 @@ class Surface(object):
             node["fill"] = "#000000"
 
         # TODO: find a better way to do this
-        node.text = node.text.strip("\n\r")
+        node.text = node.text.strip("\n\r") if node.text else ""
 
         # TODO: manage font variant
         font_size = size(node.get("font-size", "12pt"))
