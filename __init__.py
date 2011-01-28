@@ -26,3 +26,11 @@ from . import parser, surface_type
 def svg2pdf(svg):
     """Return a PDF string corresponding to the ``svg`` string."""
     return surface_type.PDFSurface(parser.Tree(svg)).read()
+
+def svg2ps(svg):
+    """Return a PostScript string corresponding to the ``svg`` string."""
+    return surface_type.PSSurface(parser.Tree(svg)).read()
+
+def svg2png(svg):
+    """Return a PNG string corresponding to the ``svg`` string."""
+    return surface_type.PNGSurface(parser.Tree(svg)).read()

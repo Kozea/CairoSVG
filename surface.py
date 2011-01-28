@@ -113,7 +113,6 @@ class Surface(object):
         self._create_surface(tree, width, height)
 
         self.draw(tree)
-        self.cairo.finish()
 
     @abc.abstractmethod
     def _create_surface(self, tree, width, height):
@@ -135,7 +134,8 @@ class Surface(object):
             self.context.translate(-x, -y)
 
     def read(self):
-        """Read the PDF surface content."""
+        """Read the surface content."""
+        self.cairo.finish()
         value = self.bytesio.getvalue()
         self.bytesio.close()
         return value

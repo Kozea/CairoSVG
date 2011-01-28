@@ -20,22 +20,29 @@ Cairo surface types
 
 """
 
-import os
+import abc
 import cairo
+import os
 
 from . import surface
 
 
-class PDFSurface(surface.Surface):
-    """Cairo PDF surface."""
+class MultipageSurface(surface.Surface):
+    """Cairo abstract surface managing multi-page outputs.
+
+    Classes overriding :class:`MultipageSurface` must have a ``surface_class``
+    class attribute corresponding to the cairo surface class.
+
+    """
+    __metaclass__ = abc.ABCMeta
+
     def _create_surface(self, tree, width, height):
-        """Create the surface from ``tree``."""
         if "svg" in tuple(child.tag for child in tree.children):
             # Real svg pages are in this root svg tag, create a fake surface
             self.context = cairo.Context(
-                cairo.PDFSurface(os.devnull, width, height))
+                self.surface_class(os.devnull, width, height))
         else:
-            self.cairo = cairo.PDFSurface(self.bytesio, width, height)
+            self.cairo = self.surface_class(self.bytesio, width, height)
             self.context = cairo.Context(self.cairo)
             self._set_context_size(width, height, tree.get("viewBox"))
             self.cairo.set_size(width, height)
@@ -55,3 +62,28 @@ class PDFSurface(surface.Surface):
                 self.context.save()
             self._set_context_size(width, height, node.get("viewBox"))
             self.cairo.set_size(width, height)
+
+
+class PDFSurface(MultipageSurface):
+    """Cairo PDF surface."""
+    surface_class = cairo.PDFSurface
+
+
+class PSSurface(MultipageSurface):
+    """Cairo PostScript surface."""
+    surface_class = cairo.PSSurface
+
+
+class PNGSurface(surface.Surface):
+    """Cairo PNG surface."""
+    def _create_surface(self, tree, width, height):
+        self.cairo = cairo.ImageSurface(
+            cairo.FORMAT_ARGB32, int(width), int(height))
+        self.context = cairo.Context(self.cairo)
+        self._set_context_size(width, height, tree.get("viewBox"))
+        self.context.move_to(0, 0)
+
+    def read(self):
+        """Read the PNG surface content."""
+        self.cairo.write_to_png(self.bytesio)
+        return super(PNGSurface, self).read()
