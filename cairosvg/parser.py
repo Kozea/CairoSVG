@@ -29,7 +29,6 @@ class Node(dict):
     def __init__(self, node, parent=None):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
         super(Node, self).__init__()
-        self.filename = None
 
         # Inherits from parent properties
         if parent:
@@ -62,6 +61,7 @@ class Tree(Node):
         """Create the Tree from SVG ``text``."""
         try:
             tree = ElementTree.fromstring(text_or_url)
+            self.filename = None
         except:
             if "#" in text_or_url:
                 filename, element_id = text_or_url.split("#")

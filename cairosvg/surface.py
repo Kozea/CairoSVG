@@ -367,7 +367,6 @@ class Surface(object):
         if "y" in node:
             del node["y"]
         href = node.get("{http://www.w3.org/1999/xlink}href")
-        href = os.path.join("/home/lize/Boulot/Kozea/Facturation", href)
         tree = Tree(href, node)
         self._set_context_size(
             size(tree.get("width")), size(tree.get("height")),
