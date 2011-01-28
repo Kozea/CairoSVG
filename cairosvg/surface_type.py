@@ -16,7 +16,7 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Cairo surface types
+Cairo surface types.
 
 """
 

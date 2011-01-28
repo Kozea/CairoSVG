@@ -16,7 +16,7 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-SVG Parser
+SVG Parser.
 
 """
 

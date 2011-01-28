@@ -16,12 +16,14 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-CairoSVG: A simple SVG reader for Cairo
+CairoSVG - A simple SVG reader for Cairo.
 
 """
 
 from . import parser, surface_type
 
+
+VERSION = "git"
 
 def svg2pdf(svg):
     """Return a PDF string corresponding to the ``svg`` string."""

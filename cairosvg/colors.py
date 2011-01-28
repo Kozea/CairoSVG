@@ -2,7 +2,7 @@
 # Public domain
 
 """
-SVG colors
+SVG colors.
 
 """
 
