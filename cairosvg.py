@@ -29,18 +29,18 @@ import cairosvg
 
 
 # Get command-line options
-parser = optparse.OptionParser()
+parser = optparse.OptionParser("usage: %prog filename [options]")
 parser.add_option(
     "-v", "--version", action="store_true",
     default=False,
     help="show version and exit")
 parser.add_option(
     "-f", "--format",
-    help="output format ")
+    help="output format")
 parser.add_option(
     "-o", "--output",
     default="",
-    help="output file ")
+    help="output filename")
 options, args = parser.parse_args()
 
 # Print version and exit if the option is given
