@@ -31,7 +31,7 @@ class Node(dict):
         super(Node, self).__init__()
 
         # Inherits from parent properties
-        if parent:
+        if parent is not None:
             items = parent.copy()
             for attribute in ("transform", ):
                 if attribute in items:

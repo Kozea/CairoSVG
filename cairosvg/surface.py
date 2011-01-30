@@ -99,6 +99,18 @@ def point(string=None):
     return size(x), size(y), string
 
 
+def node_format(node):
+    """Return ``(width, height, viewbox)`` of ``node``"""
+    width = size(node.get("width"))
+    height = size(node.get("height"))
+    viewbox = node.get("viewBox")
+    if viewbox:
+        viewbox = tuple(size(pos) for pos in viewbox.split())
+        width = width or viewbox[2]
+        height = height or viewbox[3]
+    return width, height, viewbox
+
+
 class Surface(object):
     """Cairo abstract surface."""
     # Cairo developers say that there is no way to inherit from cairo.*Surface
@@ -106,16 +118,12 @@ class Surface(object):
 
     def __init__(self, tree):
         """Create the surface from ``tree``."""
-        width = size(tree.get("width"))
-        height = size(tree.get("height"))
-
         self.bytesio = io.BytesIO()
-        self._create_surface(tree, width, height)
-
+        self._create_surface(tree)
         self.draw(tree)
 
     @abc.abstractmethod
-    def _create_surface(self, tree, width, height):
+    def _create_surface(self, tree):
         """Create a cairo surface.
 
         A method overriding this one must create ``self.cairo`` and
@@ -127,9 +135,7 @@ class Surface(object):
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
         if viewbox:
-            x, y, x_size, y_size = tuple(size(pos) for pos in viewbox.split())
-            width = width or x_size
-            height = height or y_size
+            x, y, x_size, y_size = viewbox
             self.context.scale(width/x_size, height/y_size)
             self.context.translate(-x, -y)
 
@@ -368,9 +374,7 @@ class Surface(object):
             del node["y"]
         href = node.get("{http://www.w3.org/1999/xlink}href")
         tree = Tree(href, node)
-        self._set_context_size(
-            size(tree.get("width")), size(tree.get("height")),
-            tree.get("viewBox"))
+        self._set_context_size(*node_format(tree))
         self.draw(tree)
 
 # pylint: enable=C0103

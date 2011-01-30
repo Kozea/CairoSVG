@@ -36,7 +36,8 @@ class MultipageSurface(surface.Surface):
     """
     __metaclass__ = abc.ABCMeta
 
-    def _create_surface(self, tree, width, height):
+    def _create_surface(self, tree):
+        width, height, viewbox = surface.node_format(tree)
         if "svg" in tuple(child.tag for child in tree.children):
             # Real svg pages are in this root svg tag, create a fake surface
             self.context = cairo.Context(
@@ -44,15 +45,14 @@ class MultipageSurface(surface.Surface):
         else:
             self.cairo = self.surface_class(self.bytesio, width, height)
             self.context = cairo.Context(self.cairo)
-            self._set_context_size(width, height, tree.get("viewBox"))
+            self._set_context_size(width, height, viewbox)
             self.cairo.set_size(width, height)
             self.context.move_to(0, 0)
 
     def svg(self, node):
         """Draw a svg ``node`` with multi-page support."""
         if not node.root:
-            width = surface.size(node.get("width"))
-            height = surface.size(node.get("height"))
+            width, height, viewbox = surface.node_format(node)
             if hasattr(self, "cairo"):
                 self.cairo.show_page()
             else:
@@ -60,7 +60,7 @@ class MultipageSurface(surface.Surface):
                 self.cairo = cairo.PDFSurface(self.bytesio, width, height)
                 self.context = cairo.Context(self.cairo)
                 self.context.save()
-            self._set_context_size(width, height, node.get("viewBox"))
+            self._set_context_size(width, height, viewbox)
             self.cairo.set_size(width, height)
 
 
@@ -76,11 +76,12 @@ class PSSurface(MultipageSurface):
 
 class PNGSurface(surface.Surface):
     """Cairo PNG surface."""
-    def _create_surface(self, tree, width, height):
+    def _create_surface(self, tree):
+        width, height, viewbox = surface.node_format(tree)
         self.cairo = cairo.ImageSurface(
             cairo.FORMAT_ARGB32, int(width), int(height))
         self.context = cairo.Context(self.cairo)
-        self._set_context_size(width, height, tree.get("viewBox"))
+        self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
 
     def read(self):
