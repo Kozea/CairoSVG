@@ -62,7 +62,7 @@ class Tree(Node):
         try:
             tree = ElementTree.fromstring(text_or_url)
             self.filename = None
-        except:
+        except ElementTree.ParseError:
             if "#" in text_or_url:
                 filename, element_id = text_or_url.split("#")
             else:

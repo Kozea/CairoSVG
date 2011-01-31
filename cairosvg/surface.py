@@ -26,7 +26,6 @@ Cairo surface creator.
 import abc
 import cairo
 import io
-import os
 from math import pi
 
 from .parser import Tree
@@ -118,6 +117,9 @@ class Surface(object):
 
     def __init__(self, tree):
         """Create the surface from ``tree``."""
+        self.cairo = None
+        self.context = None
+        self.cursor_position = 0, 0
         self.bytesio = io.BytesIO()
         self._create_surface(tree)
         self.draw(tree)
@@ -312,6 +314,7 @@ class Surface(object):
         self.context.line_to(x2, y2)
 
     def tspan(self, node):
+        """Draw a tspan ``node``."""
         x, y = self.cursor_position
         if "x" in node:
             x = size(node["x"])
@@ -327,7 +330,7 @@ class Surface(object):
         if not node.get("fill"):
             node["fill"] = "#000000"
 
-        # TODO: find a better way to do this
+        # TODO: find a better way to manage empty text nodes
         node.text = node.text.strip("\n\r") if node.text else ""
 
         # TODO: manage font variant
@@ -367,6 +370,7 @@ class Surface(object):
 
     def use(self, node):
         """Draw the content of another SVG file."""
+        self.context.save()
         self.context.translate(size(node.get("x")), size(node.get("y")))
         if "x" in node:
             del node["x"]
@@ -376,5 +380,6 @@ class Surface(object):
         tree = Tree(href, node)
         self._set_context_size(*node_format(tree))
         self.draw(tree)
+        self.context.restore()
 
 # pylint: enable=C0103

@@ -35,6 +35,7 @@ class MultipageSurface(surface.Surface):
 
     """
     __metaclass__ = abc.ABCMeta
+    surface_class = NotImplementedError
 
     def _create_surface(self, tree):
         width, height, viewbox = surface.node_format(tree)
@@ -53,7 +54,7 @@ class MultipageSurface(surface.Surface):
         """Draw a svg ``node`` with multi-page support."""
         if not node.root:
             width, height, viewbox = surface.node_format(node)
-            if hasattr(self, "cairo"):
+            if self.cairo:
                 self.cairo.show_page()
             else:
                 self.context.restore()
