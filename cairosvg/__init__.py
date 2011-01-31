@@ -16,7 +16,7 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-CairoSVG - A simple SVG reader for Cairo.
+CairoSVG - A simple SVG converter for Cairo.
 
 """
 

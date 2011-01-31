@@ -4,10 +4,10 @@
 # Public Domain
 
 """
-CairoSVG - A Simple SVG Reader for Cairo
-========================================
+CairoSVG - A Simple SVG Converter for Cairo
+===========================================
 
-CairoSVG is a SVG reader based on Cairo. It can export SVG files to PDF,
+CairoSVG is a SVG converter based on Cairo. It can export SVG files to PDF,
 PostScript and PNG files.
 
 For further information, please visit the `CairoSVG Website
@@ -41,7 +41,7 @@ class BuildScripts(build_scripts):
 setup(
     name="CairoSVG",
     version=cairosvg.VERSION,
-    description="A Simple SVG Reader for Cairo",
+    description="A Simple SVG Converter for Cairo",
     long_description=__doc__,
     author="Kozea",
     author_email="guillaume.ayoub@kozea.fr",
