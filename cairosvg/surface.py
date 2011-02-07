@@ -248,7 +248,7 @@ class Surface(object):
                 x, string = string.split(" ", 1)
                 self.context.rel_line_to(size(x), 0)
             elif letter == "H":
-                # Vertical line
+                # Horizontal line
                 x, string = string.split(" ", 1)
                 self.context.line_to(size(x), 0)
             elif letter == "l":
