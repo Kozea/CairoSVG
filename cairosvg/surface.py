@@ -250,7 +250,8 @@ class Surface(object):
             elif letter == "H":
                 # Horizontal line
                 x, string = string.split(" ", 1)
-                self.context.line_to(size(x), 0)
+                self.context.line_to(
+                    size(x), self.context.get_current_point()[1])
             elif letter == "l":
                 # Relative straight line
                 x, y, string = point(string)
@@ -291,7 +292,8 @@ class Surface(object):
             elif letter == "V":
                 # Vertical line
                 y, string = string.split(" ", 1)
-                self.context.line_to(0, size(y))
+                self.context.line_to(
+                    self.context.get_current_point()[0], size(y))
             elif letter == "X":
                 # Sentinel: stop
                 string = ""
