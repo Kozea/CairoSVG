@@ -211,6 +211,7 @@ class Surface(object):
 
     def circle(self, node):
         """Draw a circle ``node``."""
+        self.context.new_sub_path()
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
             size(node.get("y")) + size(node.get("cy")),
