@@ -329,6 +329,11 @@ class Surface(object):
                 x, y = size(points.pop()), size(points.pop())
                 self.context.line_to(y, x)
 
+    def polygon(self, node):
+        """Draw a polygon ``node``."""
+        self.polyline(node)
+        self.context.close_path()
+
     def rect(self, node):
         """Draw a rect ``node``."""
         x, y = size(node.get("x")), size(node.get("y"))
