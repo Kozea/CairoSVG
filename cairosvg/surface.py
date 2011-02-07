@@ -233,7 +233,7 @@ class Surface(object):
     def path(self, node):
         """Draw a path ``node``."""
         # Add sentinel
-        string = node.get("d", "").strip() + " X X"
+        string = node.get("d", "")
 
         for letter in PATH_LETTERS:
             string = string.replace(letter, " %s " % letter)
@@ -244,7 +244,7 @@ class Surface(object):
             
         while string:
             string = string.strip()
-            if string.split(" ", 1)[0] in PATH_LETTERS + "X":
+            if string.split(" ", 1)[0] in PATH_LETTERS:
                 letter, string = string.split(" ", 1)
             if letter == "c":
                 # Relative curve
@@ -309,9 +309,6 @@ class Surface(object):
                 y, string = string.split(" ", 1)
                 self.context.line_to(
                     self.context.get_current_point()[0], size(y))
-            elif letter == "X":
-                # Sentinel: stop
-                string = ""
             elif letter.lower() == "z":
                 # End of path
                 self.context.close_path()
