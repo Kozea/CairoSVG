@@ -219,6 +219,17 @@ class Surface(object):
             size(node.get("y")) + size(node.get("cy")),
             size(node.get("r")), 0, 2*pi)
 
+    def ellipse(self, node):
+        """Draw an ellipse ``node``."""
+        self.context.new_sub_path()
+        self.context.save()
+        self.context.scale(1, size(node.get("ry")) / size(node.get("rx")))
+        self.context.arc(
+            size(node.get("x")) + size(node.get("cx")),
+            size(node.get("y")) + size(node.get("cy")),
+            size(node.get("rx")), 0, 2*pi)
+        self.context.restore()
+
     def path(self, node):
         """Draw a path ``node``."""
         # Add sentinel
