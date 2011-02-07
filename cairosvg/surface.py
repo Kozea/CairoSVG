@@ -44,7 +44,7 @@ UNITS = {
     "ex": NotImplemented,
     "%": NotImplemented}
 PATH_LETTERS = "achlmqstvzACHLMQSTVZ"
-
+PATH_TAGS = ("circle", "line", "path", "rect")
 
 def normalize(string=None):
     """Normalize a string corresponding to an array of various vaues."""
@@ -175,6 +175,11 @@ class Surface(object):
                                 values = 2 * values
                             getattr(self.context, ttype)(*values)
 
+        if node.tag in PATH_TAGS:
+            # Set 1 as default stroke-width
+            if not node.get("stroke-width"):
+                node["stroke-width"] = "1"
+
         # Set drawing informations of the node if the ``node.tag`` method exists
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
@@ -206,10 +211,6 @@ class Surface(object):
 
     def circle(self, node):
         """Draw a circle ``node``."""
-        # Set 1 as default stroke-width
-        if not node.get("stroke-width"):
-            node["stroke-width"] = "1"
-
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
             size(node.get("y")) + size(node.get("cy")),
@@ -217,10 +218,6 @@ class Surface(object):
 
     def path(self, node):
         """Draw a path ``node``."""
-        # Set 1 as default stroke-width
-        if not node.get("stroke-width"):
-            node["stroke-width"] = "1"
-
         # Add sentinel
         string = node.get("d", "").strip() + " X X"
 
@@ -314,10 +311,6 @@ class Surface(object):
 
     def line(self, node):
         """Draw a line ``node``."""
-        # Set 1 as default stroke-width
-        if not node.get("stroke-width"):
-            node["stroke-width"] = "1"
-
         x1, y1, x2, y2 = tuple(size(position) for position in (
                 node.get("x1"), node.get("y1"), node.get("x2"), node.get("y2")))
         self.context.move_to(x1, y1)
@@ -325,10 +318,6 @@ class Surface(object):
 
     def rect(self, node):
         """Draw a rect ``node``."""
-        # Set 1 as default stroke-width
-        if not node.get("stroke-width"):
-            node["stroke-width"] = "1"
-
         x, y = size(node.get("x")), size(node.get("y"))
         width, height = size(node.get("width")), size(node.get("height"))
         self.context.rectangle(x, y, width, height)
