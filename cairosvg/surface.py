@@ -94,7 +94,7 @@ def point(string=None):
     if not string:
         return (0, 0, "")
 
-    x, y, string = string.split(" ", 2)
+    x, y, string = (string.strip() + " ").split(" ", 2)
     return size(x), size(y), string
 
 
@@ -332,13 +332,13 @@ class Surface(object):
 
     def polyline(self, node):
         """Draw a polyline ``node``."""
-        points = normalize(node.get("points")).split()
+        points = normalize(node.get("points"))
         if points:
-            x, y = size(points.pop()), size(points.pop())
-            self.context.move_to(y, x)
+            x, y, points = point(points)
+            self.context.move_to(x, y)
             while points:
-                x, y = size(points.pop()), size(points.pop())
-                self.context.line_to(y, x)
+                x, y, points = point(points)
+                self.context.line_to(x, y)
 
     def polygon(self, node):
         """Draw a polygon ``node``."""
