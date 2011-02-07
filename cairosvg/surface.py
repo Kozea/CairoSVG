@@ -158,7 +158,7 @@ class Surface(object):
             # TODO: check if multiple-depth transformations work correctly
             transformations = node["transform"].split(")")
             for transformation in transformations:
-                for ttype in ("scale", "translate", "matrix"):
+                for ttype in ("scale", "translate", "matrix", "rotate"):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
@@ -170,6 +170,8 @@ class Surface(object):
                         if ttype == "matrix":
                             matrix = cairo.Matrix(*values)
                             self.context.set_matrix(matrix)
+                        elif ttype == "rotate":
+                            self.context.rotate(float(values[0]) / 180 * pi)
                         else:
                             if len(values) == 1:
                                 values = 2 * values
