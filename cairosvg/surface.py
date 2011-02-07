@@ -383,5 +383,7 @@ class Surface(object):
         self._set_context_size(*node_format(tree))
         self.draw(tree)
         self.context.restore()
+        # Restore twice, because draw does not restore at the end of svg tags
+        self.context.restore()
 
 # pylint: enable=C0103
