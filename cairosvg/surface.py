@@ -43,7 +43,7 @@ UNITS = {
     "em": NotImplemented,
     "ex": NotImplemented,
     "%": NotImplemented}
-ASCII_LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+PATH_LETTERS = "achlmqstvzACHLMQSTVZ"
 
 
 def normalize(string=None):
@@ -218,9 +218,9 @@ class Surface(object):
             node["stroke-width"] = "1"
 
         # Add sentinel
-        string = node.get("d", "").strip() + "XX"
+        string = node.get("d", "").strip() + " X X"
 
-        for letter in ASCII_LETTERS:
+        for letter in PATH_LETTERS:
             string = string.replace(letter, " %s " % letter)
 
         last_letter = None
@@ -229,7 +229,7 @@ class Surface(object):
             
         while string:
             string = string.strip()
-            if string.split(" ", 1)[0] in ASCII_LETTERS:
+            if string.split(" ", 1)[0] in PATH_LETTERS + "X":
                 letter, string = string.split(" ", 1)
             if letter == "c":
                 # Relative curve
