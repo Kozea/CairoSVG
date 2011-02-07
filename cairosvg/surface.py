@@ -184,16 +184,16 @@ class Surface(object):
         stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
-        # Stroke
-        self.context.set_line_width(size(node.get("stroke-width")))
-        self.context.set_source_rgba(*color(node.get("stroke"), stroke_opacity))
-        self.context.stroke_preserve()
-
         # Fill
         if node.get("fill-rule") == "evenodd":
             self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
         self.context.set_source_rgba(*color(node.get("fill"), fill_opacity))
-        self.context.fill()
+        self.context.fill_preserve()
+
+        # Stroke
+        self.context.set_line_width(size(node.get("stroke-width")))
+        self.context.set_source_rgba(*color(node.get("stroke"), stroke_opacity))
+        self.context.stroke()
 
         # Draw children
         for child in node.children:
@@ -206,6 +206,10 @@ class Surface(object):
 
     def circle(self, node):
         """Draw a circle ``node``."""
+        # Set 1 as default stroke-width
+        if not node.get("stroke-width"):
+            node["stroke-width"] = "1"
+
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
             size(node.get("y")) + size(node.get("cy")),
@@ -310,10 +314,24 @@ class Surface(object):
 
     def line(self, node):
         """Draw a line ``node``."""
+        # Set 1 as default stroke-width
+        if not node.get("stroke-width"):
+            node["stroke-width"] = "1"
+
         x1, y1, x2, y2 = tuple(size(position) for position in (
                 node.get("x1"), node.get("y1"), node.get("x2"), node.get("y2")))
         self.context.move_to(x1, y1)
         self.context.line_to(x2, y2)
+
+    def rect(self, node):
+        """Draw a rect ``node``."""
+        # Set 1 as default stroke-width
+        if not node.get("stroke-width"):
+            node["stroke-width"] = "1"
+
+        x, y = size(node.get("x")), size(node.get("y"))
+        width, height = size(node.get("width")), size(node.get("height"))
+        self.context.rectangle(x, y, width, height)
 
     def tspan(self, node):
         """Draw a tspan ``node``."""
