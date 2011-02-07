@@ -319,6 +319,16 @@ class Surface(object):
         self.context.move_to(x1, y1)
         self.context.line_to(x2, y2)
 
+    def polyline(self, node):
+        """Draw a polyline ``node``."""
+        points = normalize(node.get("points")).split()
+        if points:
+            x, y = size(points.pop()), size(points.pop())
+            self.context.move_to(y, x)
+            while points:
+                x, y = size(points.pop()), size(points.pop())
+                self.context.line_to(y, x)
+
     def rect(self, node):
         """Draw a rect ``node``."""
         x, y = size(node.get("x")), size(node.get("y"))
