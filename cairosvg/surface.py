@@ -247,7 +247,7 @@ class Surface(object):
                 # Relative horizontal line
                 x, string = string.split(" ", 1)
                 self.context.rel_line_to(size(x), 0)
-            elif letter == "V":
+            elif letter == "H":
                 # Vertical line
                 x, string = string.split(" ", 1)
                 self.context.line_to(size(x), 0)
