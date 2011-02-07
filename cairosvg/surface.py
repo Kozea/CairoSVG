@@ -44,7 +44,7 @@ UNITS = {
     "ex": NotImplemented,
     "%": NotImplemented}
 PATH_LETTERS = "achlmqstvzACHLMQSTVZ"
-PATH_TAGS = ("circle", "line", "path", "rect")
+PATH_TAGS = ("circle", "line", "path", "polyline", "polygon", "rect")
 
 def normalize(string=None):
     """Normalize a string corresponding to an array of various vaues."""
