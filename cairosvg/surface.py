@@ -341,7 +341,7 @@ class Surface(object):
             node["fill"] = node.get("color") or "#000000"
 
         # TODO: find a better way to manage empty text nodes
-        node.text = node.text.strip("\n\r") if node.text else ""
+        node.text = node.text.strip() if node.text else ""
 
         # TODO: manage font variant
         font_size = size(node.get("font-size", "12pt"))
