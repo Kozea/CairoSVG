@@ -158,6 +158,10 @@ class Surface(object):
 
     def draw(self, node):
         """Draw ``node`` and its children."""
+        # Ignore defs
+        if node.tag == "defs":
+            return
+
         self.context.save()
         self.context.move_to(size(node.get("x")), size(node.get("y")))
 
