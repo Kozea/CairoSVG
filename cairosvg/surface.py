@@ -233,12 +233,13 @@ class Surface(object):
 
     def ellipse(self, node):
         """Draw an ellipse ``node``."""
+        y_scale_ratio = size(node.get("ry")) / size(node.get("rx"))
         self.context.new_sub_path()
         self.context.save()
-        self.context.scale(1, size(node.get("ry")) / size(node.get("rx")))
+        self.context.scale(1, y_scale_ratio)
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
-            size(node.get("y")) + size(node.get("cy")),
+            size(node.get("y")) + size(node.get("cy")) / y_scale_ratio,
             size(node.get("rx")), 0, 2*pi)
         self.context.restore()
 
