@@ -68,12 +68,15 @@ class Tree(Node):
             else:
                 filename, element_id = text_or_url, None
             if parent and parent.filename:
-                filename = os.path.join(
-                    os.path.dirname(parent.filename), filename)
+                if filename:
+                    filename = os.path.join(
+                        os.path.dirname(parent.filename), filename)
+                else:
+                    filename = parent.filename
             with open(filename) as file_descriptor:
                 tree = ElementTree.fromstring(file_descriptor.read())
             if element_id:
-                for element in tree:
+                for element in tree.iter():
                     if element.get("id") == element_id:
                         tree = element
                         break
