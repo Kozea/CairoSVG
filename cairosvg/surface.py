@@ -239,7 +239,7 @@ class Surface(object):
         self.context.scale(1, y_scale_ratio)
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
-            size(node.get("y")) + size(node.get("cy")) / y_scale_ratio,
+            (size(node.get("y")) + size(node.get("cy"))) / y_scale_ratio,
             size(node.get("rx")), 0, 2*pi)
         self.context.restore()
 
