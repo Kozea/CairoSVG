@@ -258,7 +258,53 @@ class Surface(object):
             string = string.strip()
             if string.split(" ", 1)[0] in PATH_LETTERS:
                 letter, string = (string + " ").split(" ", 1)
-            if letter == "c":
+            if letter == "a":
+                # Relative elliptic curve
+                x1, y1 = 0, 0
+                rx, ry, string = point(string)
+                rotation, large, sweep, string = string.split(" ", 3)
+                rotation = float(rotation)
+                large, sweep = bool(large), bool(sweep)
+                x3, y3, string = point(string)
+
+                flag = (-1 if large ^ sweep else 1)
+                if (x3 - x1) * (y3 - y1) * flag > 0:
+                    cx = x1 + x3 * flag
+                    cy = y1
+                else:
+                    cx = x1
+                    cy = y1 + y3 * flag
+
+                if large:
+                    x2, y2 = cx - rx, cy - ry
+                else:
+                    x2, y2 = cx + rx, cy + ry
+
+                self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+            elif letter == "A":
+                # Elliptic curve
+                x1, y1 = self.context.get_current_point()
+                rx, ry, string = point(string)
+                rotation, large, sweep, string = string.split(" ", 3)
+                rotation = float(rotation)
+                large, sweep = bool(large), bool(sweep)
+                x3, y3, string = point(string)
+
+                flag = (-1 if large ^ sweep else 1)
+                if (x3 - x1) * (y3 - y1) * flag > 0:
+                    cx = x1 + x3 * flag
+                    cy = y1
+                else:
+                    cx = x1
+                    cy = y1 + y3 * flag
+
+                if large:
+                    x2, y2 = cx - rx, cy - ry
+                else:
+                    x2, y2 = cx + rx, cy + ry
+
+                self.context.curve_to(x1, y1, x2, y2, x3, y3)
+            elif letter == "c":
                 # Relative curve
                 x1, y1, string = point(string)
                 x2, y2, string = point(string)
