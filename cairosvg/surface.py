@@ -109,6 +109,14 @@ def node_format(node):
         height = height or viewbox[3]
     return width, height, viewbox
 
+def quadratic_points(x1, y1, x2, y2, x3, y3):
+    """Return the quadratic points to create quadratic curves."""
+    xq1 = x2 * 2 / 3 + x1 / 3
+    yq1 = y2 * 2 / 3 + y1 / 3
+    xq2 = x2 * 2 / 3 + x3 / 3
+    yq2 = y2 * 2 / 3 + y3 / 3
+    return xq1, yq1, xq2, yq2, x3, y3
+
 
 class Surface(object):
     """Cairo abstract surface."""
@@ -283,6 +291,38 @@ class Surface(object):
                 # Current point move
                 x, y, string = point(string)
                 self.context.move_to(x, y)
+            elif letter == "q":
+                # Relative quadratic curve
+                # TODO: manage next letter "T"
+                string, next_string = string.split("t", 1)
+                x1, y1 = 0, 0
+                while string:
+                    x2, y2, string = point(string)
+                    x3, y3, string = point(string)
+                    xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
+                        x1, y1, x2, y2, x3, y3)
+                    self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+                string = "t" + next_string
+            elif letter == "Q":
+                # Quadratic curve
+                # TODO: manage next letter "t"
+                string, next_string = string.split("T", 1)
+                x1, y1 = self.context.get_current_point()
+                while string:
+                    x2, y2, string = point(string)
+                    x3, y3, string = point(string)
+                    xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
+                        x1, y1, x2, y2, x3, y3)
+                    self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+                string = "T" + next_string
+            elif letter == "s":
+                # Relative smooth curve
+                # TODO: manage last_letter in "CS"
+                x1 = x3 - x2 if last_letter in "cs" else 0
+                y1 = y3 - y2 if last_letter in "cs" else 0
+                x2, y2, string = point(string)
+                x3, y3, string = point(string)
+                self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "S":
                 # Smooth curve
                 # TODO: manage last_letter in "cs"
@@ -292,14 +332,24 @@ class Surface(object):
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
-            elif letter == "s":
-                # Relative smooth curve
-                # TODO: manage last_letter in "CS"
-                x1 = x3 - x2 if last_letter in "cs" else 0
-                y1 = y3 - y2 if last_letter in "cs" else 0
-                x2, y2, string = point(string)
+            elif letter == "t":
+                # Relative quadratic curve end
+                x1, y1 = 0, 0
+                x2 = 2 * x1 - x2
+                y2 = 2 * y1 - y2
                 x3, y3, string = point(string)
-                self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+                xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
+                    x1, y1, x2, y2, x3, y3)
+                self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+            elif letter == "T":
+                # Quadratic curve end
+                x1, y1 = self.context.get_current_point()
+                x2 = 2 * x1 - x2
+                y2 = 2 * y1 - y2
+                x3, y3, string = point(string)
+                xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
+                    x1, y1, x2, y2, x3, y3)
+                self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             elif letter == "v":
                 # Relative vertical line
                 y, string = string.split(" ", 1)
