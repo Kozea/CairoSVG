@@ -26,7 +26,7 @@ Cairo surface creator.
 import abc
 import cairo
 import io
-from math import pi
+from math import pi, cos, sin
 
 from .parser import Tree
 from .colors import COLORS
@@ -253,7 +253,7 @@ class Surface(object):
         while string:
             string = string.strip()
             if string.split(" ", 1)[0] in PATH_LETTERS:
-                letter, string = string.split(" ", 1)
+                letter, string = (string + " ").split(" ", 1)
             if letter == "c":
                 # Relative curve
                 x1, y1, string = point(string)
