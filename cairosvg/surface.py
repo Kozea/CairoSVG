@@ -511,6 +511,8 @@ class Surface(object):
             del node["x"]
         if "y" in node:
             del node["y"]
+        if "viewBox" in node:
+            del node["viewBox"]
         href = node.get("{http://www.w3.org/1999/xlink}href")
         tree = Tree(href, node)
         self._set_context_size(*node_format(tree))

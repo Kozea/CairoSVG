@@ -38,12 +38,13 @@ class Node(dict):
                     del items[attribute]
 
             # Don't inherit x and y attributes if node is a tspan
-            # TODO: drop other attributes that should not be inherited
             if node.tag == "tspan":
                 if "x" in items:
                     del items["x"]
                 if "y" in items:
                     del items["y"]
+
+            # TODO: drop other attributes that should not be inherited
 
             self.update(items)
             self.filename = parent.filename
