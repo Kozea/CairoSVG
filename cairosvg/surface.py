@@ -245,7 +245,6 @@ class Surface(object):
 
     def path(self, node):
         """Draw a path ``node``."""
-        # Add sentinel
         string = node.get("d", "")
 
         for letter in PATH_LETTERS:
