@@ -26,7 +26,7 @@ Cairo surface creator.
 import abc
 import cairo
 import io
-from math import pi, atan, radians
+from math import pi, cos, sin, atan, radians
 
 from .parser import Tree
 from .colors import COLORS
@@ -259,35 +259,40 @@ class Surface(object):
             if string.split(" ", 1)[0] in PATH_LETTERS:
                 letter, string = (string + " ").split(" ", 1)
             if letter in "aA":
-                # Relative elliptic curve
+                # Elliptic curve
                 x1, y1 = self.context.get_current_point()
                 rx, ry, string = point(string)
                 rotation, large, sweep, string = string.split(" ", 3)
-                rotation = float(rotation)
+                rotation = radians(float(rotation))
                 large, sweep = bool(int(large)), bool(int(sweep))
                 x3, y3, string = point(string)
-                y_scale_ratio = ry / rx
 
-                if letter == "a":
-                    x3 += x1
-                    y3 += y1
+                if letter == "A":
+                    # Absolute x3 and y3, convert to relative
+                    x3 -= x1
+                    y3 -= y1
 
-                if (large ^ sweep) ^ ((x1 > x3) ^ (y1 > y3)):
-                    cx = x1
-                    cy = y3
+                x3 = x3 * cos(-rotation) + y3 * sin(-rotation)
+                y3 = y3 * cos(-rotation) - x3 * sin(-rotation)
+                y3 = y3 * rx / ry
+
+                if (large ^ sweep) ^ ((x3 < 0) ^ (y3 < 0)):
+                    cx, cy = 0, rx
                 else:
-                    cx = x3
-                    cy = y1
+                    cx, cy = rx, 0
 
-                dx1 = (x1 - cx)**-1 if x1 != cx else float("inf")
+                arc = self.context.arc if sweep else self.context.arc_negative
+
+                dx1 = -cx**-1 if cx else float("inf")
                 dx3 = (x3 - cx)**-1 if x3 != cx else float("inf")
-                angle1 = pi if cx > x1 else 0 + atan((y1 - cy) * dx1 / rx)
-                angle2 = pi if cx > x3 else 0 + atan((y3 - cy) * dx3 / ry)
+                angle1 = pi if cx > 0 else 0 + atan(-cy * dx1 / rx)
+                angle2 = pi if cx > x3 else 0 + atan((y3 - cy) * dx3 / rx)
 
                 self.context.save()
-                self.context.scale(1, y_scale_ratio)
-                arc = self.context.arc if sweep else self.context.arc_negative
-                arc(cx, cy / y_scale_ratio, rx, angle1, angle2)
+                self.context.translate(x1, y1)
+                self.context.rotate(rotation)
+                self.context.scale(1, ry / rx)
+                arc(cx, cy, rx, angle1, angle2)
                 self.context.restore()
             elif letter == "c":
                 # Relative curve
