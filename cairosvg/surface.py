@@ -273,7 +273,7 @@ class Surface(object):
                     y3 -= y1
 
                 xe = x3 * cos(-rotation) + y3 * sin(-rotation)
-                ye = y3 * cos(-rotation) - x3 * sin(-rotation) * rx / ry
+                ye = (y3 * cos(-rotation) - x3 * sin(-rotation)) * rx / ry
 
                 if (large ^ sweep) ^ ((xe < 0) ^ (ye < 0)):
                     cx, cy = 0, rx
