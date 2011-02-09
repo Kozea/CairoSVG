@@ -272,11 +272,10 @@ class Surface(object):
                     x3 -= x1
                     y3 -= y1
 
-                x3 = x3 * cos(-rotation) + y3 * sin(-rotation)
-                y3 = y3 * cos(-rotation) - x3 * sin(-rotation)
-                y3 = y3 * rx / ry
+                xe = x3 * cos(-rotation) + y3 * sin(-rotation)
+                ye = y3 * cos(-rotation) - x3 * sin(-rotation) * rx / ry
 
-                if (large ^ sweep) ^ ((x3 < 0) ^ (y3 < 0)):
+                if (large ^ sweep) ^ ((xe < 0) ^ (ye < 0)):
                     cx, cy = 0, rx
                 else:
                     cx, cy = rx, 0
@@ -284,9 +283,9 @@ class Surface(object):
                 arc = self.context.arc if sweep else self.context.arc_negative
 
                 dx1 = -cx**-1 if cx else float("inf")
-                dx3 = (x3 - cx)**-1 if x3 != cx else float("inf")
+                dx3 = (xe - cx)**-1 if xe != cx else float("inf")
                 angle1 = pi if cx > 0 else 0 + atan(-cy * dx1 / rx)
-                angle2 = pi if cx > x3 else 0 + atan((y3 - cy) * dx3 / rx)
+                angle2 = pi if cx > xe else 0 + atan((ye - cy) * dx3 / rx)
 
                 self.context.save()
                 self.context.translate(x1, y1)
