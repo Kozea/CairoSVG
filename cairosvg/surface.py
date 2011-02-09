@@ -26,7 +26,7 @@ Cairo surface creator.
 import abc
 import cairo
 import io
-from math import pi, cos, sin
+from math import pi, atan, radians
 
 from .parser import Tree
 from .colors import COLORS
@@ -183,7 +183,7 @@ class Surface(object):
                             matrix = cairo.Matrix(*values)
                             self.context.set_matrix(matrix)
                         elif ttype == "rotate":
-                            self.context.rotate(float(values[0]) / 180 * pi)
+                            self.context.rotate(radians(float(values[0])))
                         else:
                             if len(values) == 1:
                                 values = 2 * values
@@ -229,7 +229,7 @@ class Surface(object):
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
             size(node.get("y")) + size(node.get("cy")),
-            size(node.get("r")), 0, 2*pi)
+            size(node.get("r")), 0, 2 * pi)
 
     def ellipse(self, node):
         """Draw an ellipse ``node``."""
@@ -240,7 +240,7 @@ class Surface(object):
         self.context.arc(
             size(node.get("x")) + size(node.get("cx")),
             (size(node.get("y")) + size(node.get("cy"))) / y_scale_ratio,
-            size(node.get("rx")), 0, 2*pi)
+            size(node.get("rx")), 0, 2 * pi)
         self.context.restore()
 
     def path(self, node):
@@ -259,52 +259,37 @@ class Surface(object):
             string = string.strip()
             if string.split(" ", 1)[0] in PATH_LETTERS:
                 letter, string = (string + " ").split(" ", 1)
-            if letter == "a":
+            if letter in "aA":
                 # Relative elliptic curve
-                x1, y1 = 0, 0
-                rx, ry, string = point(string)
-                rotation, large, sweep, string = string.split(" ", 3)
-                rotation = float(rotation)
-                large, sweep = bool(large), bool(sweep)
-                x3, y3, string = point(string)
-
-                flag = (-1 if large ^ sweep else 1)
-                if (x3 - x1) * (y3 - y1) * flag > 0:
-                    cx = x1 + x3 * flag
-                    cy = y1
-                else:
-                    cx = x1
-                    cy = y1 + y3 * flag
-
-                if large:
-                    x2, y2 = cx - rx, cy - ry
-                else:
-                    x2, y2 = cx + rx, cy + ry
-
-                self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
-            elif letter == "A":
-                # Elliptic curve
                 x1, y1 = self.context.get_current_point()
                 rx, ry, string = point(string)
                 rotation, large, sweep, string = string.split(" ", 3)
                 rotation = float(rotation)
-                large, sweep = bool(large), bool(sweep)
+                large, sweep = bool(int(large)), bool(int(sweep))
                 x3, y3, string = point(string)
+                y_scale_ratio = ry / rx
 
-                flag = (-1 if large ^ sweep else 1)
-                if (x3 - x1) * (y3 - y1) * flag > 0:
-                    cx = x1 + x3 * flag
-                    cy = y1
-                else:
+                if letter == "a":
+                    x3 += x1
+                    y3 += y1
+
+                if (large ^ sweep) ^ ((x1 > x3) ^ (y1 > y3)):
                     cx = x1
-                    cy = y1 + y3 * flag
-
-                if large:
-                    x2, y2 = cx - rx, cy - ry
+                    cy = y3
                 else:
-                    x2, y2 = cx + rx, cy + ry
+                    cx = x3
+                    cy = y1
 
-                self.context.curve_to(x1, y1, x2, y2, x3, y3)
+                dx1 = (x1 - cx)**-1 if x1 != cx else float("inf")
+                dx3 = (x3 - cx)**-1 if x3 != cx else float("inf")
+                angle1 = pi if cx > x1 else 0 + atan((y1 - cy) * dx1 / rx)
+                angle2 = pi if cx > x3 else 0 + atan((y3 - cy) * dx3 / ry)
+
+                self.context.save()
+                self.context.scale(1, y_scale_ratio)
+                arc = self.context.arc if sweep else self.context.arc_negative
+                arc(cx, cy / y_scale_ratio, rx, angle1, angle2)
+                self.context.restore()
             elif letter == "c":
                 # Relative curve
                 x1, y1, string = point(string)
@@ -410,7 +395,7 @@ class Surface(object):
                 y, string = string.split(" ", 1)
                 self.context.line_to(
                     self.context.get_current_point()[0], size(y))
-            elif letter.lower() == "z":
+            elif letter in "zZ":
                 # End of path
                 self.context.close_path()
             else:
