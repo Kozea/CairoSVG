@@ -99,7 +99,7 @@ def point(string=None):
 
 
 def node_format(node):
-    """Return ``(width, height, viewbox)`` of ``node``"""
+    """Return ``(width, height, viewbox)`` of ``node``."""
     width = size(node.get("width"))
     height = size(node.get("height"))
     viewbox = node.get("viewBox")
@@ -109,6 +109,7 @@ def node_format(node):
         height = height or viewbox[3]
     return width, height, viewbox
 
+
 def quadratic_points(x1, y1, x2, y2, x3, y3):
     """Return the quadratic points to create quadratic curves."""
     xq1 = x2 * 2 / 3 + x1 / 3
@@ -116,6 +117,19 @@ def quadratic_points(x1, y1, x2, y2, x3, y3):
     xq2 = x2 * 2 / 3 + x3 / 3
     yq2 = y2 * 2 / 3 + y3 / 3
     return xq1, yq1, xq2, yq2, x3, y3
+
+
+def point_angle(cx, cy, px, py):
+    """Return angle between x axis and point knowing given center."""
+    angle = pi if cx > px else 0
+    angle *= -1 if cy > py else 1
+    angle += atan((cy - py) * (1 / (cx - px)) if (cx - px) else float("inf"))
+    return angle
+
+
+def rotate(x, y, angle):
+    """Rotate a point of an angle around the origin point."""
+    return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
 class Surface(object):
@@ -262,6 +276,7 @@ class Surface(object):
                 # Elliptic curve
                 x1, y1 = self.context.get_current_point()
                 rx, ry, string = point(string)
+                radii_ratio = ry / rx
                 rotation, large, sweep, string = string.split(" ", 3)
                 rotation = radians(float(rotation))
                 large, sweep = bool(int(large)), bool(int(sweep))
@@ -272,26 +287,45 @@ class Surface(object):
                     x3 -= x1
                     y3 -= y1
 
-                xe = x3 * cos(-rotation) + y3 * sin(-rotation)
-                ye = (y3 * cos(-rotation) - x3 * sin(-rotation)) * rx / ry
+                # Cancel the rotation of the second point
+                xe, ye = rotate(x3, y3, -rotation)
+                ye /= radii_ratio
 
-                if (large ^ sweep) ^ ((xe < 0) ^ (ye < 0)):
-                    cx, cy = 0, rx
-                else:
-                    cx, cy = rx, 0
+                # Find the angle between the second point and the x axis
+                angle = point_angle(0, 0, xe, ye)
 
+                # Put the second point onto the x axis
+                xe = (xe**2 + ye**2)**.5
+                ye = 0
+
+                # Update the x radius if it is too small
+                rx = max(rx, xe / 2)
+
+                # Find one circle centre
+                xc = xe / 2
+                yc = (rx**2 - xc**2)**.5
+
+                # Choose between the two circles according to flags
+                if not (large ^ sweep):
+                    yc = -yc
+
+                # Define the arc sweep
                 arc = self.context.arc if sweep else self.context.arc_negative
 
-                dx1 = -cx**-1 if cx else float("inf")
-                dx3 = (xe - cx)**-1 if xe != cx else float("inf")
-                angle1 = pi if cx > 0 else 0 + atan(-cy * dx1 / rx)
-                angle2 = pi if cx > xe else 0 + atan((ye - cy) * dx3 / rx)
+                # Put the second point and the center back to their positions
+                xe, ye = rotate(xe, 0, angle)
+                xc, yc = rotate(xc, yc, angle)
 
+                # Find the drawing angles
+                angle1 = point_angle(xc, yc, 0, 0)
+                angle2 = point_angle(xc, yc, xe, ye)
+
+                # Draw the arc
                 self.context.save()
                 self.context.translate(x1, y1)
                 self.context.rotate(rotation)
-                self.context.scale(1, ry / rx)
-                arc(cx, cy, rx, angle1, angle2)
+                self.context.scale(1, radii_ratio)
+                arc(xc, yc, rx, angle1, angle2)
                 self.context.restore()
             elif letter == "c":
                 # Relative curve
