@@ -17,8 +17,9 @@ Want to say something? Join our Jabber room: cairosvg@room.jabber.kozea.fr.
 As a Simple User
 ================
 
-Found a bug? Want a new feature? Report a new issue on the `Radicale bug-tracker
-<http://redmine.kozea.fr/projects/cairosvg>`_ (registration needed).
+Found a bug? Want a new feature? Report a new issue on the `CairoSVG
+bug-tracker <http://redmine.kozea.fr/projects/cairosvg>`_ (registration
+needed).
 
 
 As a Hacker
