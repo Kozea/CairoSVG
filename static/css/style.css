@@ -1,0 +1,43 @@
+html {
+background-image: url(img/cairosvg_back.png);
+background-position: 130% 115%;
+background-repeat: no-repeat;
+}
+
+h1 a {
+background-image: url(img/cairosvg.png) !important;
+background-position: 0 0;
+background-repeat: no-repeat !important;
+border-radius: 60px;
+color: #383a40;
+display: inline-block;
+float: left;
+font-size: 40px;
+line-height: 120px;
+margin-bottom: 1em;
+padding-left: 125px;
+}
+
+h2 {
+clear: both;
+}
+
+a {
+color: #5c7172;
+}
+
+nav ul {
+background: #383a40;
+display: inline-block;
+float: right;
+}
+
+nav ul li {
+display: block;
+text-align: right;
+}
+
+#rss {
+background-color: #5c7172;
+clear: right;
+}
