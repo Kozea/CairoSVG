@@ -58,7 +58,7 @@ class MultipageSurface(surface.Surface):
                 self.cairo.show_page()
             else:
                 self.context.restore()
-                self.cairo = surface_class(self.bytesio, width, height)
+                self.cairo = self.surface_class(self.bytesio, width, height)
                 self.context = cairo.Context(self.cairo)
                 self.context.save()
             self._set_context_size(width, height, viewbox)
