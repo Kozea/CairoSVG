@@ -23,9 +23,9 @@ known to work on Python 2.6 and 2.7.
 Linux users certainly have Python already installed. For Windows and MacOS
 users, please install Python [#]_ thanks to the adequate installer.
 
-.. [#] `Python download page <http://python.org/download/>`_.
-
 .. [#] `Pycairo website <http://cairographics.org/pycairo/>`_.
+
+.. [#] `Python download page <http://python.org/download/>`_.
 
 CairoSVG
 --------
