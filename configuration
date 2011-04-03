@@ -1,4 +1,5 @@
 {
+  "name": "CairoSVG",
   "title": "CairoSVG",
   "menu": [
     {"name": "News", "link": "/news"},
