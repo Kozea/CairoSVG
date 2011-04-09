@@ -1,6 +1,6 @@
 {
   "name": "CairoSVG",
-  "title": "CairoSVG",
+  "description": "Convert SVG to PNG or PDF",
   "menu": [
     {"name": "News", "link": "/news"},
     {"name": "Documentation", "link": "/documentation"},
