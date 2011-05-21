@@ -476,6 +476,10 @@ class Surface(object):
         width, height = size(node.get("width")), size(node.get("height"))
         self.context.rectangle(x, y, width, height)
 
+    def tref(self, node):
+        """Draw a tref ``node``."""
+        self.use(node)
+
     def tspan(self, node):
         """Draw a tspan ``node``."""
         x, y = self.cursor_position
