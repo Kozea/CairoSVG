@@ -52,8 +52,9 @@ if options.dpi:
     cairosvg.surface.DPI = float(options.dpi)
 
 # Parse the SVG
-format = options.format or os.path.splitext(options.output)[1].lstrip(".") or "pdf"
-launcher = getattr(cairosvg, "svg2%s" % format)
+output_format = \
+    options.format or os.path.splitext(options.output)[1].lstrip(".") or "pdf"
+launcher = getattr(cairosvg, "svg2%s" % output_format)
 
 # Print help if no argument is given
 if not args:
