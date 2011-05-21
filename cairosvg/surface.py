@@ -38,7 +38,7 @@ UNITS = {
     "in": 1,
     "pt": 1 / 72.,
     "pc": 1 / 6.,
-    "px": 1,
+    "px": None,
     "em": NotImplemented,
     "ex": NotImplemented,
     "%": NotImplemented}
@@ -65,10 +65,10 @@ def size(string=None):
     if string.replace(".", "", 1).lstrip(" -").isdigit():
         return float(string)
 
-    for unit, value in UNITS.items():
+    for unit, coefficient in UNITS.items():
         if unit in string:
             number = float(string.strip(" " + unit))
-            return number * value * (1 if unit == "px" else DPI)
+            return number * (DPI * coefficient if coefficient else 1)
 
 
 def color(string=None, opacity=1):
