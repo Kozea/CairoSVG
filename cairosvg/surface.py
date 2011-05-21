@@ -79,9 +79,11 @@ def color(string=None, opacity=1):
     string = string.strip().lower()
 
     if string.startswith("rgba"):
-        return tuple(float(i) for i in string.strip(" rgba()").split(","))
+        r, g, b, a = tuple(float(i) for i in string.strip(" rgba()").split(","))
+        return r, g, b, a * opacity
     elif string.startswith("rgb"):
-        return tuple(float(i) for i in string.strip(" rgb()").split(",")) + (1,)
+        r, g, b = tuple(float(i) for i in string.strip(" rgb()").split(","))
+        return r, g, b, opacity
 
     if string in COLORS:
         string = COLORS[string]
