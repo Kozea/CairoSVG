@@ -31,20 +31,20 @@ from math import pi, cos, sin, atan, radians
 from .parser import Tree
 from .colors import COLORS
 
-# TODO: find a real way to determine DPI
 DPI = 72.
 UNITS = {
-    "mm": DPI / 25.4,
-    "cm": DPI / 2.54,
-    "in": DPI,
-    "pt": DPI / 72.,
-    "pc": DPI / 6.,
-    "px": 1.,
+    "mm": 1 / 25.4,
+    "cm": 1 / 2.54,
+    "in": 1,
+    "pt": 1 / 72.,
+    "pc": 1 / 6.,
+    "px": 1,
     "em": NotImplemented,
     "ex": NotImplemented,
     "%": NotImplemented}
 PATH_LETTERS = "achlmqstvzACHLMQSTVZ"
 PATH_TAGS = ("circle", "line", "path", "polyline", "polygon", "rect")
+
 
 def normalize(string=None):
     """Normalize a string corresponding to an array of various vaues."""
@@ -67,7 +67,8 @@ def size(string=None):
 
     for unit, value in UNITS.items():
         if unit in string:
-            return float(string.strip(" " + unit)) * value
+            number = float(string.strip(" " + unit))
+            return number * value * (1 if unit == "px" else DPI)
 
 
 def color(string=None, opacity=1):

@@ -36,6 +36,8 @@ parser.add_option(
 parser.add_option(
     "-f", "--format", help="output format")
 parser.add_option(
+    "-d", "--dpi", help="svg resolution")
+parser.add_option(
     "-o", "--output",
     default="", help="output filename")
 options, args = parser.parse_args()
@@ -44,6 +46,10 @@ options, args = parser.parse_args()
 if options.version:
     print(cairosvg.VERSION)
     sys.exit()
+
+# Set the resolution
+if options.dpi:
+    cairosvg.surface.DPI = float(options.dpi)
 
 # Parse the SVG
 format = options.format or os.path.splitext(options.output)[1].lstrip(".") or "pdf"
