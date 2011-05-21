@@ -48,6 +48,12 @@ if options.version:
 # Parse the SVG
 format = options.format or os.path.splitext(options.output)[1].lstrip(".") or "pdf"
 launcher = getattr(cairosvg, "svg2%s" % format)
+
+# Print help if no argument is given
+if not args:
+    parser.print_help()
+    sys.exit()
+
 content = launcher(args[0])
 if options.output:
     open(options.output, "w").write(content)
