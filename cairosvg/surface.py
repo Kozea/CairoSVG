@@ -75,16 +75,12 @@ def color(string=None, opacity=1):
     if not string or string == "none":
         return (0, 0, 0, 0)
 
-    if string.startswith("rgba"):
-        return tuple(
-            float(i) for i
-            in string.replace(" ", "").strip("rgba()").split(","))
-    elif string.startswith("rgb"):
-        return tuple(
-            float(i) for i
-            in string.replace(" ", "").strip("rgb()").split(",")) + (1,)
-
     string = string.strip().lower()
+
+    if string.startswith("rgba"):
+        return tuple(float(i) for i in string.strip(" rgba()").split(","))
+    elif string.startswith("rgb"):
+        return tuple(float(i) for i in string.strip(" rgb()").split(",")) + (1,)
 
     if string in COLORS:
         string = COLORS[string]
