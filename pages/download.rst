@@ -31,4 +31,4 @@ Linux Distribution Packages
 *Not packaged yet.*
 
 If you are interested in creating packages for Linux distributions, read the
-`"Contribute" page </contribute>`_.
+`"Contribute" page </contribute/>`_.
