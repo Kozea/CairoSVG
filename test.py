@@ -25,7 +25,7 @@ This test suite compares the CairoSVG output with the reference output.
 
 import os
 import cairosvg
-import traceback
+import nose
 from PIL import Image
 
 
@@ -39,6 +39,10 @@ PIXEL_TOLERANCE = 15 * 255
 SIZE_TOLERANCE = 1
 
 
+if not os.path.exists(OUTPUT_FOLDER):
+    os.mkdir(OUTPUT_FOLDER)
+
+
 def same(tuple1, tuple2, tolerence=0):
     """Return if the tuples values are quite the same."""
     for value1, value2 in zip(tuple1, tuple2):
@@ -47,49 +51,43 @@ def same(tuple1, tuple2, tolerence=0):
     return True
 
 
-if not os.path.exists(OUTPUT_FOLDER):
-    os.mkdir(OUTPUT_FOLDER)
-
-for png, svg in FILES:
-    print("Testing %s" % svg)
-    image1 = Image.open(png)
-    with open(os.path.join(OUTPUT_FOLDER, os.path.basename(png)), "w") as temp:
-        filename = temp.name
-        # Catch all exceptions, as we want the tests to continue
-        # pylint: disable=W0702
-        try:
+def generate_function(description):
+    """Return a testing function with the given ``description``."""
+    def check_image(png, svg):
+        """Check that the pixels match between ``svg`` and ``png``."""
+        image1 = Image.open(png)
+        png_filename = os.path.join(OUTPUT_FOLDER, os.path.basename(png))
+        with open(png_filename, "w") as temp:
+            filename = temp.name
             content = cairosvg.svg2png(svg)
-        except:
-            print("Error with this file")
-            traceback.print_exc()
-            os.remove(filename)
-            continue
-        else:
             temp.write(content)
-        # pylint: enable=W0702
-    image2 = Image.open(filename)
+        image2 = Image.open(filename)
 
-    # Test size
-    if not same(image1.size, image2.size, SIZE_TOLERANCE):
-        print("Bad size (%s != %s)" % (image1.size, image2.size))
+        # Test size
+        assert same(image1.size, image2.size, SIZE_TOLERANCE), \
+            "Bad size (%s != %s)" % (image1.size, image2.size)
 
-    # Test pixels
-    width = min(image1.size[0], image2.size[0])
-    height = min(image1.size[1], image2.size[1])
-    for x in range(width):
-        for y in range(height):
-            pixel1, pixel2 = \
-                image1.getpixel((x, y)), image2.getpixel((x, y))
-            alpha1, alpha2 = (
-                pixel1[3] if len(pixel1) == 4 else 1,
-                pixel2[3] if len(pixel2) == 4 else 1)
-            alpha_pixel1 = [alpha1 * value for value in pixel1[:3]]
-            alpha_pixel2 = [alpha2 * value for value in pixel2[:3]]
-            if not same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE):
-                print("Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2))
-                break
-        else:
-            continue
-        break
-    else:
-        print("OK")
+        # Test pixels
+        width = min(image1.size[0], image2.size[0])
+        height = min(image1.size[1], image2.size[1])
+        for x in range(width):
+            for y in range(height):
+                pixel1, pixel2 = \
+                    image1.getpixel((x, y)), image2.getpixel((x, y))
+                alpha1, alpha2 = (
+                    pixel1[3] if len(pixel1) == 4 else 1,
+                    pixel2[3] if len(pixel2) == 4 else 1)
+                alpha_pixel1 = [alpha1 * value for value in pixel1[:3]]
+                alpha_pixel2 = [alpha2 * value for value in pixel2[:3]]
+                assert same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE), \
+                    "Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2)
+
+    check_image.description = description
+    return check_image
+
+
+def test_images():
+    """Yield the functions testing an image."""
+    for png, svg in FILES:
+        image_name = os.path.splitext(os.path.basename(png))[0]
+        yield generate_function("Test the %s image" % image_name), png, svg
