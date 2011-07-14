@@ -35,6 +35,7 @@ ALL_FILES = sorted(
     os.path.join(REFERENCE_FOLDER, filename)
     for filename in os.listdir(REFERENCE_FOLDER))
 FILES = (ALL_FILES[2*i:2*i+2] for i in range(len(ALL_FILES) / 2))
+ALPHA_TOLERANCE_RATIO = 0.2 * 255
 PIXEL_TOLERANCE = 15 * 255
 SIZE_TOLERANCE = 1
 
@@ -78,7 +79,9 @@ def generate_function(description):
                     pixel1[3] if len(pixel1) == 4 else 1,
                     pixel2[3] if len(pixel2) == 4 else 1)
                 alpha_pixel1 = [alpha1 * value for value in pixel1[:3]]
+                alpha_pixel1 += [alpha1 * ALPHA_TOLERANCE_RATIO]
                 alpha_pixel2 = [alpha2 * value for value in pixel2[:3]]
+                alpha_pixel2 += [alpha2 * ALPHA_TOLERANCE_RATIO]
                 assert same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE), \
                     "Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2)
 
