@@ -36,7 +36,7 @@ ALL_FILES = sorted(
     for filename in os.listdir(REFERENCE_FOLDER))
 FILES = (ALL_FILES[2*i:2*i+2] for i in range(len(ALL_FILES) / 2))
 ALPHA_TOLERANCE_RATIO = 0.2 * 255
-PIXEL_TOLERANCE = 15 * 255
+PIXEL_TOLERANCE = 25 * 255
 SIZE_TOLERANCE = 1
 
 
