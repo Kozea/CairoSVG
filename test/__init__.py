@@ -31,12 +31,12 @@ from PIL import Image
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "reference")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
-ALL_FILES = sorted(
-    os.path.join(REFERENCE_FOLDER, filename)
-    for filename in os.listdir(REFERENCE_FOLDER))
+ALL_FILES = sorted((
+        os.path.join(REFERENCE_FOLDER, filename)
+        for filename in os.listdir(REFERENCE_FOLDER)),
+                   key=lambda x: x.lower())
 FILES = (ALL_FILES[2*i:2*i+2] for i in range(len(ALL_FILES) / 2))
-ALPHA_TOLERANCE_RATIO = 0.2 * 255
-PIXEL_TOLERANCE = 25 * 255
+PIXEL_TOLERANCE = 70 * 255
 SIZE_TOLERANCE = 1
 
 
@@ -79,9 +79,9 @@ def generate_function(description):
                     pixel1[3] if len(pixel1) == 4 else 1,
                     pixel2[3] if len(pixel2) == 4 else 1)
                 alpha_pixel1 = [alpha1 * value for value in pixel1[:3]]
-                alpha_pixel1 += [alpha1 * ALPHA_TOLERANCE_RATIO]
+                alpha_pixel1 += [alpha1 * 255]
                 alpha_pixel2 = [alpha2 * value for value in pixel2[:3]]
-                alpha_pixel2 += [alpha2 * ALPHA_TOLERANCE_RATIO]
+                alpha_pixel2 += [alpha2 * 255]
                 assert same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE), \
                     "Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2)
 
