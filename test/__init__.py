@@ -25,16 +25,14 @@ This test suite compares the CairoSVG output with the reference output.
 
 import os
 import cairosvg
-import nose
 from PIL import Image
-
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "reference")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
 ALL_FILES = sorted((
         os.path.join(REFERENCE_FOLDER, filename)
         for filename in os.listdir(REFERENCE_FOLDER)),
-                   key=lambda x: x.lower())
+                   key=lambda name: name.lower())
 FILES = (ALL_FILES[2*i:2*i+2] for i in range(len(ALL_FILES) / 2))
 PIXEL_TOLERANCE = 70 * 255
 SIZE_TOLERANCE = 1
@@ -71,6 +69,8 @@ def generate_function(description):
         # Test pixels
         width = min(image1.size[0], image2.size[0])
         height = min(image1.size[1], image2.size[1])
+        # x and y are good variable names here
+        # pylint: disable=C0103
         for x in range(width):
             for y in range(height):
                 pixel1, pixel2 = \
@@ -84,6 +84,7 @@ def generate_function(description):
                 alpha_pixel2 += [alpha2 * 255]
                 assert same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE), \
                     "Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2)
+        # pylint: enable=C0103
 
     check_image.description = description
     return check_image

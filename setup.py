@@ -46,7 +46,7 @@ setup(
     author="Kozea",
     author_email="guillaume.ayoub@kozea.fr",
     url="http://www.cairosvg.org/",
-    download_url= "http://www.cairosvg.org/src/cairosvg/CairoSVG-%s.tar.gz" % \
+    download_url="http://www.cairosvg.org/src/cairosvg/CairoSVG-%s.tar.gz" % \
         cairosvg.VERSION,
     license="GNU GPL v3",
     platforms="Any",
