@@ -79,7 +79,8 @@ def color(string=None, opacity=1):
     string = string.strip().lower()
 
     if string.startswith("rgba"):
-        r, g, b, a = tuple(float(i) for i in string.strip(" rgba()").split(","))
+        r, g, b, a = tuple(
+            float(i) for i in string.strip(" rgba()").split(","))
         return r, g, b, a * opacity
     elif string.startswith("rgb"):
         r, g, b = tuple(float(i) for i in string.strip(" rgb()").split(","))
@@ -91,8 +92,9 @@ def color(string=None, opacity=1):
     if len(string) in (4, 5):
         string = "#" + "".join(2 * char for char in string[1:])
     if len(string) == 9:
-        opacity *= int(string[7:9], 16)/255
-    plain_color = tuple(int(value, 16)/255. for value in (
+        opacity *= int(string[7:9], 16) / 255
+    plain_color = tuple(
+        int(value, 16) / 255. for value in (
             string[1:3], string[3:5], string[5:7]))
     return plain_color + (opacity,)
 
@@ -206,10 +208,12 @@ class Surface(object):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
-                        transformation = normalize(transformation).strip() + " "
+                        transformation = normalize(transformation).strip()
+                        transformation += " "
                         values = []
                         while transformation:
-                            value, transformation = transformation.split(" ", 1)
+                            value, transformation = \
+                                transformation.split(" ", 1)
                             values.append(size(value))
                         if ttype == "matrix":
                             matrix = cairo.Matrix(*values)
@@ -226,7 +230,7 @@ class Surface(object):
             if not node.get("stroke-width"):
                 node["stroke-width"] = "1"
 
-        # Set drawing informations of the node if the ``node.tag`` method exists
+        # Set node's drawing informations if the ``node.tag`` method exists
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
@@ -243,7 +247,8 @@ class Surface(object):
 
         # Stroke
         self.context.set_line_width(size(node.get("stroke-width")))
-        self.context.set_source_rgba(*color(node.get("stroke"), stroke_opacity))
+        self.context.set_source_rgba(
+            *color(node.get("stroke"), stroke_opacity))
         self.context.stroke()
 
         # Draw children
@@ -313,7 +318,7 @@ class Surface(object):
                 angle = point_angle(0, 0, xe, ye)
 
                 # Put the second point onto the x axis
-                xe = (xe**2 + ye**2)**.5
+                xe = (xe ** 2 + ye ** 2) ** .5
                 ye = 0
 
                 # Update the x radius if it is too small
@@ -321,7 +326,7 @@ class Surface(object):
 
                 # Find one circle centre
                 xc = xe / 2
-                yc = (rx**2 - xc**2)**.5
+                yc = (rx ** 2 - xc ** 2) ** .5
 
                 # Choose between the two circles according to flags
                 if not (large ^ sweep):
@@ -463,8 +468,8 @@ class Surface(object):
 
     def line(self, node):
         """Draw a line ``node``."""
-        x1, y1, x2, y2 = tuple(size(position) for position in (
-                node.get("x1"), node.get("y1"), node.get("x2"), node.get("y2")))
+        x1, y1, x2, y2 = tuple(
+            size(node.get(position)) for position in ("x1", "y1", "x2", "y2"))
         self.context.move_to(x1, y1)
         self.context.line_to(x2, y2)
 
@@ -485,42 +490,21 @@ class Surface(object):
 
     def rect(self, node):
         """Draw a rect ``node``."""
-        x, y= size(node.get("x")), size(node.get("y"))
+        x, y = size(node.get("x")), size(node.get("y"))
         width, height = size(node.get("width")), size(node.get("height"))
         if size(node.get("rx")) == 0:
             self.context.rectangle(x, y, width, height)
         else:
-            radius = size(node.get("rx"))
-#            ARC_TO_BEZIER = 0.55228475
-#            if radius_x > width - radius_x:
-#                radius_x = width / 2
-
-#            #approximate (quite close) the arc using a bezier curve
-#            c1 = ARC_TO_BEZIER * radius_x
-
-#            self.context.new_path();
-#            self.context.move_to ( x + radius_x, y)
-#            self.context.rel_line_to ( width - 2 * radius_x, 0.0)
-#            self.context.rel_curve_to ( c1, 0.0, radius_x, c1, radius_x, radius_x)
-#            self.context.rel_line_to ( 0, height - 2 * radius_x)
-#            self.context.rel_curve_to ( 0.0, c1, c1 - radius_x, radius_x, -radius_x, radius_x)
-#            self.context.rel_line_to ( -width + 2 * radius_x, 0)
-#            self.context.rel_curve_to ( -c1, 0, -radius_x, -c1, -radius_x, -radius_x)
-#            self.context.rel_line_to (0, -height + 2 * radius_x)
-#            self.context.rel_curve_to (0.0, -c1, radius_x - c1, -radius_x, radius_x, -radius_x)
-#            self.context.close_path ()
-
-#        a,b,c,d=area
-            a, b, c, d = (x, width+x, y, height+y)
-            if radius > width - radius:
-                radius = width/2
-            self.context.arc(a + radius, c + radius, radius, 2*(pi/2), 3*(pi/2))
-            self.context.arc(b - radius, c + radius, radius, 3*(pi/2), 0*(pi/2))
-            self.context.arc(b - radius, d - radius, radius, 0*(pi/2), 1*(pi/2))
-            self.context.arc(a + radius, d - radius, radius, 1*(pi/2), 2*(pi/2))
+            r = size(node.get("rx"))
+            a, b, c, d = x, width + x, y, height + y
+            if r > width - r:
+                r = width / 2
+            self.context.move_to(x, y + height / 2)
+            self.context.arc(a + r, c + r, r, 2 * pi / 2, 3 * pi / 2)
+            self.context.arc(b - r, c + r, r, 3 * pi / 2, 0 * pi / 2)
+            self.context.arc(b - r, d - r, r, 0 * pi / 2, 1 * pi / 2)
+            self.context.arc(a + r, d - r, r, 1 * pi / 2, 2 * pi / 2)
             self.context.close_path()
-            if size(node.get("stroke-width")):
-                self.context.stroke
 
     def tref(self, node):
         """Draw a tref ``node``."""
@@ -564,7 +548,7 @@ class Surface(object):
         x, y = size(node.get("x")), size(node.get("y"))
         text_anchor = node.get("text-anchor")
         if text_anchor == "middle":
-            x -= width/2. + x_bearing
+            x -= width / 2. + x_bearing
         elif text_anchor == "end":
             x -= width + x_bearing
 
