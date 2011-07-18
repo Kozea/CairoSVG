@@ -485,10 +485,42 @@ class Surface(object):
 
     def rect(self, node):
         """Draw a rect ``node``."""
-        x, y = size(node.get("x")), size(node.get("y"))
+        x, y= size(node.get("x")), size(node.get("y"))
         width, height = size(node.get("width")), size(node.get("height"))
-        self.context.rectangle(x, y, width, height)
+        if size(node.get("rx")) == 0:
+            self.context.rectangle(x, y, width, height)
+        else:
+            radius = size(node.get("rx"))
+#            ARC_TO_BEZIER = 0.55228475
+#            if radius_x > width - radius_x:
+#                radius_x = width / 2
 
+#            #approximate (quite close) the arc using a bezier curve
+#            c1 = ARC_TO_BEZIER * radius_x
+
+#            self.context.new_path();
+#            self.context.move_to ( x + radius_x, y)
+#            self.context.rel_line_to ( width - 2 * radius_x, 0.0)
+#            self.context.rel_curve_to ( c1, 0.0, radius_x, c1, radius_x, radius_x)
+#            self.context.rel_line_to ( 0, height - 2 * radius_x)
+#            self.context.rel_curve_to ( 0.0, c1, c1 - radius_x, radius_x, -radius_x, radius_x)
+#            self.context.rel_line_to ( -width + 2 * radius_x, 0)
+#            self.context.rel_curve_to ( -c1, 0, -radius_x, -c1, -radius_x, -radius_x)
+#            self.context.rel_line_to (0, -height + 2 * radius_x)
+#            self.context.rel_curve_to (0.0, -c1, radius_x - c1, -radius_x, radius_x, -radius_x)
+#            self.context.close_path ()
+
+#        a,b,c,d=area
+            a, b, c, d = (x, width+x, y, height+y)
+            if radius > width - radius:
+                radius = width/2
+            self.context.arc(a + radius, c + radius, radius, 2*(pi/2), 3*(pi/2))
+            self.context.arc(b - radius, c + radius, radius, 3*(pi/2), 0*(pi/2))
+            self.context.arc(b - radius, d - radius, radius, 0*(pi/2), 1*(pi/2))
+            self.context.arc(a + radius, d - radius, radius, 1*(pi/2), 2*(pi/2))
+            self.context.close_path()
+            if size(node.get("stroke-width")):
+                self.context.stroke
 
     def tref(self, node):
         """Draw a tref ``node``."""
