@@ -201,7 +201,6 @@ class Surface(object):
 
         # Transform the context according to the ``transform`` attribute
         if node.get("transform"):
-            # TODO: check if multiple-depth transformations work correctly
             transformations = node["transform"].split(")")
             for transformation in transformations:
                 for ttype in ("scale", "translate", "matrix", "rotate"):
