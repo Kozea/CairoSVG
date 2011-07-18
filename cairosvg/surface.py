@@ -168,8 +168,18 @@ class Surface(object):
         """Set the context size."""
         if viewbox:
             x, y, x_size, y_size = viewbox
-            self.context.scale(width/x_size, height/y_size)
-            self.context.translate(-x, -y)
+            x_ratio, y_ratio = width / x_size, height / y_size
+            if x_ratio > y_ratio:
+                self.context.translate((width - x_size * y_ratio) / 2, 0)
+                self.context.scale(y_ratio, y_ratio)
+                self.context.translate(-x, -y / y_ratio * x_ratio)
+            elif x_ratio < y_ratio:
+                self.context.translate(0, (height - y_size * x_ratio) / 2)
+                self.context.scale(x_ratio, x_ratio)
+                self.context.translate(-x / x_ratio * y_ratio, -y)
+            else:
+                self.context.scale(x_ratio, y_ratio)
+                self.context.translate(-x, -y)
 
     def read(self):
         """Read the surface content."""
