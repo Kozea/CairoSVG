@@ -275,7 +275,7 @@ class Surface(object):
         last_letter = None
 
         string = normalize(string)
-            
+
         while string:
             string = string.strip()
             if string.split(" ", 1)[0] in PATH_LETTERS:
@@ -479,6 +479,7 @@ class Surface(object):
         width, height = size(node.get("width")), size(node.get("height"))
         self.context.rectangle(x, y, width, height)
 
+
     def tref(self, node):
         """Draw a tref ``node``."""
         self.use(node)
@@ -524,7 +525,7 @@ class Surface(object):
             x -= width/2. + x_bearing
         elif text_anchor == "end":
             x -= width + x_bearing
-        
+
         # Get global text opacity
         opacity = float(node.get("opacity", 1))
 
