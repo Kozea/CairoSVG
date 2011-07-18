@@ -52,7 +52,16 @@ class Node(dict):
         self.root = False
         self.tag = node.tag.split("}", 1)[1] if "}" in node.tag else node.tag
         self.text = node.text
-        self.update(node.attrib.items())
+
+        # TODO: manage other attributes that should be multiplicated
+        properties = dict(node.attrib.items())
+        for key in properties:
+            if "opacity" in key:
+                if parent is not None:
+                    properties[key] = str(
+                        float(parent.get(key, 1.0)) * float(properties[key]))
+        self.update(properties)
+
         self.children = tuple(Node(child, self) for child in node)
 
 
