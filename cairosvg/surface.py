@@ -230,6 +230,12 @@ class Surface(object):
                 node["stroke-width"] = "1"
 
         # Set node's drawing informations if the ``node.tag`` method exists
+        line_cap = node.get("stroke-linecap")
+        if line_cap == "square":
+            self.context.set_line_cap(cairo.LINE_CAP_SQUARE)
+        if line_cap == "round":
+            self.context.set_line_cap(cairo.LINE_CAP_ROUND)
+
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
@@ -287,7 +293,6 @@ class Surface(object):
             string = string.replace(letter, " %s " % letter)
 
         last_letter = None
-
         string = normalize(string)
 
         while string:
