@@ -236,6 +236,12 @@ class Surface(object):
         if line_cap == "round":
             self.context.set_line_cap(cairo.LINE_CAP_ROUND)
 
+        join_cap = node.get("stroke-linejoin")
+        if join_cap == "round":
+            self.context.set_line_join(cairo.LINE_JOIN_ROUND)
+        if join_cap == "bevel":
+            self.context.set_line_join(cairo.LINE_JOIN_BEVEL)
+
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
