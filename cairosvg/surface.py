@@ -99,6 +99,15 @@ def color(string=None, opacity=1):
     return plain_color + (opacity,)
 
 
+def urls(string):
+    """Parse a comma-separated list of url() strings."""
+    for link in string.split(","):
+        link = link.strip()
+        if link.startswith("url"):
+            link = link[3:]
+        yield link.strip("() ")
+
+
 def point(string=None):
     """Return ``(x, y, trailing_text)`` from ``string``."""
     if not string:
@@ -152,6 +161,8 @@ class Surface(object):
         self.cairo = None
         self.context = None
         self.cursor_position = 0, 0
+        self.markers = {}
+        self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
         self._create_surface(tree)
         self.draw(tree)
@@ -165,6 +176,13 @@ class Surface(object):
 
         """
         raise NotImplementedError
+
+    def _parse_defs(self, node):
+        """Parse the SVG definitions."""
+        # Draw children
+        for child in node.children:
+            if child.tag == "marker":
+                self.markers[child["id"]] = child
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -194,7 +212,58 @@ class Surface(object):
         """Draw ``node`` and its children."""
         # Ignore defs
         if node.tag == "defs":
+            self._parse_defs(node)
             return
+
+        if node.tag == "marker":
+            temp_path = self.context.copy_path()
+            current_x, current_y = self.context.get_current_point()
+
+            if node.get("markerUnits") == "userSpaceOnUse":
+                base_scale = 1
+            else:
+                base_scale = size(self.parent_node.get("stroke-width"))
+            scale_x = size(node.get("markerWidth", "3"))
+            scale_y = size(node.get("markerHeight", "3"))
+
+            translate_x = -size(node.get("refX"))
+            translate_y = -size(node.get("refY"))
+
+            if node.get("preserveAspectRatio", "xMidYMid"):
+                # TODO: Manage other values
+                if node.get("meetOrSlice") == "slice":
+                    scale_value = max(scale_x, scale_y)
+                else:
+                    scale_value = min(scale_x, scale_y)
+
+                # TODO: should we do this?
+                #translate_x += (scale_x - scale_value) / 2.
+                #translate_y += (scale_y - scale_value) / 2.
+
+                scale_x = scale_y = scale_value
+                print(translate_x)
+
+            viewbox = node_format(node)[-1]
+            viewbox_width = viewbox[2] - viewbox[0]
+            viewbox_height = viewbox[3] - viewbox[1]
+
+            self.context.new_path()
+            for child in node.children:
+                self.context.save()
+                self.context.translate(current_x, current_y)
+                # TODO: manage rotation
+                #self.context.rotate(pi / 4)
+                self.context.scale(
+                    base_scale / viewbox_width * scale_x,
+                    base_scale / viewbox_height * scale_y)
+                self.context.translate(translate_x, translate_y)
+                self.draw(child)
+                self.context.restore()
+            self.context.append_path(temp_path)
+            return
+
+        self._old_parent_node = self.parent_node
+        self.parent_node = node
 
         self.context.save()
         self.context.move_to(size(node.get("x")), size(node.get("y")))
@@ -241,7 +310,8 @@ class Surface(object):
         # Fill
         if node.get("fill-rule") == "evenodd":
             self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-        self.context.set_source_rgba(*color(node.get("fill"), fill_opacity))
+        self.context.set_source_rgba(
+            *color(node.get("fill", "black"), fill_opacity))
         self.context.fill_preserve()
 
         # Stroke
@@ -258,6 +328,8 @@ class Surface(object):
             # Restoring context is useless if we are in the root tag, it may
             # raise an exception if we have multiple svg tags
             self.context.restore()
+
+        self.parent_node = self._old_parent_node
 
     def circle(self, node):
         """Draw a circle ``node``."""
@@ -279,9 +351,29 @@ class Surface(object):
             size(node.get("rx")), 0, 2 * pi)
         self.context.restore()
 
+    def _marker(self, node, position="mid"):
+        """Draw a marker ``node``."""
+        # TODO: manage markers for other tags than path
+        if position == "start":
+            node.markers = {
+                "start": list(urls(node.get("marker-start", ""))),
+                "mid": list(urls(node.get("marker-mid", ""))),
+                "end": list(urls(node.get("marker-end", "")))}
+            all_markers = list(urls(node.get("marker", "")))
+            for markers_list in node.markers.values():
+                markers_list.extend(all_markers)
+
+        for marker in node.markers[position]:
+            if marker.startswith("#"):
+                marker = marker[1:]
+                if marker in self.markers:
+                    marker_node = self.markers[marker]
+                    self.draw(marker_node)
+
     def path(self, node):
         """Draw a path ``node``."""
         string = node.get("d", "")
+        self._marker(node, "start")
 
         for letter in PATH_LETTERS:
             string = string.replace(letter, " %s " % letter)
@@ -464,6 +556,10 @@ class Surface(object):
             last_letter = letter
 
             string = string.strip()
+            if string:
+                self._marker(node, "mid")
+
+        self._marker(node, "end")
 
     def line(self, node):
         """Draw a line ``node``."""
