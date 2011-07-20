@@ -215,52 +215,8 @@ class Surface(object):
             self._parse_defs(node)
             return
 
-        if node.tag == "marker":
-            temp_path = self.context.copy_path()
-            current_x, current_y = self.context.get_current_point()
-
-            if node.get("markerUnits") == "userSpaceOnUse":
-                base_scale = 1
-            else:
-                base_scale = size(self.parent_node.get("stroke-width"))
-            scale_x = size(node.get("markerWidth", "3"))
-            scale_y = size(node.get("markerHeight", "3"))
-
-            translate_x = -size(node.get("refX"))
-            translate_y = -size(node.get("refY"))
-
-            if node.get("preserveAspectRatio", "xMidYMid"):
-                # TODO: Manage other values
-                if node.get("meetOrSlice") == "slice":
-                    scale_value = max(scale_x, scale_y)
-                else:
-                    scale_value = min(scale_x, scale_y)
-
-                # TODO: should we do this?
-                #translate_x += (scale_x - scale_value) / 2.
-                #translate_y += (scale_y - scale_value) / 2.
-
-                scale_x = scale_y = scale_value
-                print(translate_x)
-
-            viewbox = node_format(node)[-1]
-            viewbox_width = viewbox[2] - viewbox[0]
-            viewbox_height = viewbox[3] - viewbox[1]
-
-            self.context.new_path()
-            for child in node.children:
-                self.context.save()
-                self.context.translate(current_x, current_y)
-                # TODO: manage rotation
-                #self.context.rotate(pi / 4)
-                self.context.scale(
-                    base_scale / viewbox_width * scale_x,
-                    base_scale / viewbox_height * scale_y)
-                self.context.translate(translate_x, translate_y)
-                self.draw(child)
-                self.context.restore()
-            self.context.append_path(temp_path)
-            return
+        node._tangents = [None]
+        node._pending_markers = []
 
         self._old_parent_node = self.parent_node
         self.parent_node = node
@@ -352,7 +308,7 @@ class Surface(object):
         self.context.restore()
 
     def _marker(self, node, position="mid"):
-        """Draw a marker ``node``."""
+        """Draw a marker."""
         # TODO: manage markers for other tags than path
         if position == "start":
             node.markers = {
@@ -363,12 +319,81 @@ class Surface(object):
             for markers_list in node.markers.values():
                 markers_list.extend(all_markers)
 
-        for marker in node.markers[position]:
-            if marker.startswith("#"):
+        pending_marker = (
+            self.context.get_current_point(), node.markers[position])
+
+        if position == "start":
+            node._pending_markers.append(pending_marker)
+            return
+        elif position == "end":
+            node._pending_markers.append(pending_marker)
+
+        while node._pending_markers:
+            point, markers = node._pending_markers.pop(0)
+
+            angle1 = node._tangents.pop(0)
+            angle2 = node._tangents.pop(0)
+
+            for marker in markers:
+                if not marker.startswith("#"):
+                    continue
                 marker = marker[1:]
                 if marker in self.markers:
                     marker_node = self.markers[marker]
-                    self.draw(marker_node)
+
+                    angle = marker_node.get("orient", "0")
+                    if angle == "auto":
+                        if angle1 is None:
+                            angle1 = angle2
+                        angle = float(angle1 + angle2) / 2
+                    else:
+                        angle = radians(float(angle))
+
+                    temp_path = self.context.copy_path()
+                    current_x, current_y = point
+
+                    if marker_node.get("markerUnits") == "userSpaceOnUse":
+                        base_scale = 1
+                    else:
+                        base_scale = size(self.parent_node.get("stroke-width"))
+                    scale_x = size(marker_node.get("markerWidth", "3"))
+                    scale_y = size(marker_node.get("markerHeight", "3"))
+
+                    translate_x = -size(marker_node.get("refX"))
+                    translate_y = -size(marker_node.get("refY"))
+
+                    if marker_node.get("preserveAspectRatio", "xMidYMid"):
+                        # TODO: Manage other values
+                        if marker_node.get("meetOrSlice") == "slice":
+                            scale_value = max(scale_x, scale_y)
+                        else:
+                            scale_value = min(scale_x, scale_y)
+
+                        # TODO: should we do this?
+                        #translate_x += (scale_x - scale_value) / 2.
+                        #translate_y += (scale_y - scale_value) / 2.
+
+                        scale_x = scale_y = scale_value
+
+                    viewbox = node_format(marker_node)[-1]
+                    viewbox_width = viewbox[2] - viewbox[0]
+                    viewbox_height = viewbox[3] - viewbox[1]
+
+                    self.context.new_path()
+                    for child in marker_node.children:
+                        self.context.save()
+                        self.context.translate(current_x, current_y)
+                        self.context.rotate(angle)
+                        self.context.scale(
+                            base_scale / viewbox_width * scale_x,
+                            base_scale / viewbox_height * scale_y)
+                        self.context.translate(translate_x, translate_y)
+                        self.draw(child)
+                        self.context.restore()
+                    self.context.append_path(temp_path)
+
+        if position == "mid":
+            node._pending_markers.append(pending_marker)
 
     def path(self, node):
         """Draw a path ``node``."""
@@ -434,6 +459,9 @@ class Surface(object):
                 angle1 = point_angle(xc, yc, 0, 0)
                 angle2 = point_angle(xc, yc, xe, ye)
 
+                # Store the tangent angles
+                node._tangents.extend((-angle1, -angle2))
+
                 # Draw the arc
                 self.context.save()
                 self.context.translate(x1, y1)
@@ -446,29 +474,42 @@ class Surface(object):
                 x1, y1, string = point(string)
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
+                node._tangents.extend((
+                    point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "C":
                 # Curve
                 x1, y1, string = point(string)
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
+                node._tangents.extend((
+                    point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "h":
                 # Relative horizontal line
                 x, string = string.split(" ", 1)
+                angle = 0 if x > 0 else pi
+                node._tangents.extend((-angle, angle))
                 self.context.rel_line_to(size(x), 0)
             elif letter == "H":
                 # Horizontal line
                 x, string = string.split(" ", 1)
-                self.context.line_to(
-                    size(x), self.context.get_current_point()[1])
+                old_x = self.context.get_current_point()[1]
+                angle = 0 if x > old_x else pi
+                node._tangents.extend((-angle, angle))
+                self.context.line_to(size(x), old_x)
             elif letter == "l":
                 # Relative straight line
                 x, y, string = point(string)
+                angle = point_angle(0, 0, x, y)
+                node._tangents.extend((-angle, angle))
                 self.context.rel_line_to(x, y)
             elif letter == "L":
                 # Straight line
                 x, y, string = point(string)
+                old_x, old_y = self.context.get_current_point()
+                angle = point_angle(old_x, old_y, x, y)
+                node._tangents.extend((-angle, angle))
                 self.context.line_to(x, y)
             elif letter == "m":
                 # Current point relative move
@@ -481,6 +522,7 @@ class Surface(object):
             elif letter == "q":
                 # Relative quadratic curve
                 # TODO: manage next letter "T"
+                # TODO: manage tangents
                 string, next_string = string.split("t", 1)
                 x1, y1 = 0, 0
                 while string:
@@ -489,10 +531,12 @@ class Surface(object):
                     xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                         x1, y1, x2, y2, x3, y3)
                     self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+                node._tangents.extend((0, 0))
                 string = "t" + next_string
             elif letter == "Q":
                 # Quadratic curve
                 # TODO: manage next letter "t"
+                # TODO: manage tangents
                 string, next_string = string.split("T", 1)
                 x1, y1 = self.context.get_current_point()
                 while string:
@@ -501,64 +545,83 @@ class Surface(object):
                     xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                         x1, y1, x2, y2, x3, y3)
                     self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+                node._tangents.extend((0, 0))
                 string = "T" + next_string
             elif letter == "s":
                 # Relative smooth curve
                 # TODO: manage last_letter in "CS"
+                # TODO: manage tangents
                 x1 = x3 - x2 if last_letter in "cs" else 0
                 y1 = y3 - y2 if last_letter in "cs" else 0
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
+                node._tangents.extend((
+                    point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "S":
                 # Smooth curve
                 # TODO: manage last_letter in "cs"
+                # TODO: manage tangents
                 x, y = self.context.get_current_point()
                 x1 = x3 - x2 if last_letter in "CS" else x
                 y1 = y3 - y2 if last_letter in "CS" else y
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
+                node._tangents.extend((
+                    point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "t":
                 # Relative quadratic curve end
+                # TODO: manage tangents
                 x1, y1 = 0, 0
                 x2 = 2 * x1 - x2
                 y2 = 2 * y1 - y2
                 x3, y3, string = point(string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
+                node._tangents.extend((0, 0))
                 self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             elif letter == "T":
                 # Quadratic curve end
+                # TODO: manage tangents
                 x1, y1 = self.context.get_current_point()
                 x2 = 2 * x1 - x2
                 y2 = 2 * y1 - y2
                 x3, y3, string = point(string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
+                node._tangents.extend((0, 0))
                 self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             elif letter == "v":
                 # Relative vertical line
                 y, string = string.split(" ", 1)
+                angle = pi / 2 if y > 0 else -pi / 2
+                node._tangents.extend((-angle, angle))
                 self.context.rel_line_to(0, size(y))
             elif letter == "V":
                 # Vertical line
                 y, string = string.split(" ", 1)
-                self.context.line_to(
-                    self.context.get_current_point()[0], size(y))
+                old_y = self.context.get_current_point()[0]
+                angle = pi / 2 if y > 0 else -pi / 2
+                node._tangents.extend((-angle, angle))
+                self.context.line_to(old_y, size(y))
             elif letter in "zZ":
                 # End of path
+                # TODO: manage tangents
+                node._tangents.extend((0, 0))
                 self.context.close_path()
             else:
                 # TODO: manage other letters
                 raise NotImplementedError
 
-            last_letter = letter
-
             string = string.strip()
-            if string:
+
+            if string and letter not in "mM":
                 self._marker(node, "mid")
 
+            last_letter = letter
+
+        node._tangents.append(node._tangents[-1])
         self._marker(node, "end")
 
     def line(self, node):
