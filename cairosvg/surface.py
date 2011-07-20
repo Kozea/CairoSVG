@@ -215,8 +215,8 @@ class Surface(object):
             self._parse_defs(node)
             return
 
-        node._tangents = [None]
-        node._pending_markers = []
+        node.tangents = [None]
+        node.pending_markers = []
 
         self._old_parent_node = self.parent_node
         self.parent_node = node
@@ -323,16 +323,16 @@ class Surface(object):
             self.context.get_current_point(), node.markers[position])
 
         if position == "start":
-            node._pending_markers.append(pending_marker)
+            node.pending_markers.append(pending_marker)
             return
         elif position == "end":
-            node._pending_markers.append(pending_marker)
+            node.pending_markers.append(pending_marker)
 
-        while node._pending_markers:
-            point, markers = node._pending_markers.pop(0)
+        while node.pending_markers:
+            point, markers = node.pending_markers.pop(0)
 
-            angle1 = node._tangents.pop(0)
-            angle2 = node._tangents.pop(0)
+            angle1 = node.tangents.pop(0)
+            angle2 = node.tangents.pop(0)
 
             for marker in markers:
                 if not marker.startswith("#"):
@@ -393,7 +393,7 @@ class Surface(object):
                     self.context.append_path(temp_path)
 
         if position == "mid":
-            node._pending_markers.append(pending_marker)
+            node.pending_markers.append(pending_marker)
 
     def path(self, node):
         """Draw a path ``node``."""
@@ -460,7 +460,7 @@ class Surface(object):
                 angle2 = point_angle(xc, yc, xe, ye)
 
                 # Store the tangent angles
-                node._tangents.extend((-angle1, -angle2))
+                node.tangents.extend((-angle1, -angle2))
 
                 # Draw the arc
                 self.context.save()
@@ -474,7 +474,7 @@ class Surface(object):
                 x1, y1, string = point(string)
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
-                node._tangents.extend((
+                node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "C":
@@ -482,34 +482,34 @@ class Surface(object):
                 x1, y1, string = point(string)
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
-                node._tangents.extend((
+                node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "h":
                 # Relative horizontal line
                 x, string = string.split(" ", 1)
                 angle = 0 if x > 0 else pi
-                node._tangents.extend((-angle, angle))
+                node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(size(x), 0)
             elif letter == "H":
                 # Horizontal line
                 x, string = string.split(" ", 1)
                 old_x = self.context.get_current_point()[1]
                 angle = 0 if x > old_x else pi
-                node._tangents.extend((-angle, angle))
+                node.tangents.extend((-angle, angle))
                 self.context.line_to(size(x), old_x)
             elif letter == "l":
                 # Relative straight line
                 x, y, string = point(string)
                 angle = point_angle(0, 0, x, y)
-                node._tangents.extend((-angle, angle))
+                node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(x, y)
             elif letter == "L":
                 # Straight line
                 x, y, string = point(string)
                 old_x, old_y = self.context.get_current_point()
                 angle = point_angle(old_x, old_y, x, y)
-                node._tangents.extend((-angle, angle))
+                node.tangents.extend((-angle, angle))
                 self.context.line_to(x, y)
             elif letter == "m":
                 # Current point relative move
@@ -531,7 +531,7 @@ class Surface(object):
                     xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                         x1, y1, x2, y2, x3, y3)
                     self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
-                node._tangents.extend((0, 0))
+                node.tangents.extend((0, 0))
                 string = "t" + next_string
             elif letter == "Q":
                 # Quadratic curve
@@ -545,7 +545,7 @@ class Surface(object):
                     xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                         x1, y1, x2, y2, x3, y3)
                     self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
-                node._tangents.extend((0, 0))
+                node.tangents.extend((0, 0))
                 string = "T" + next_string
             elif letter == "s":
                 # Relative smooth curve
@@ -555,7 +555,7 @@ class Surface(object):
                 y1 = y3 - y2 if last_letter in "cs" else 0
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
-                node._tangents.extend((
+                node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "S":
@@ -567,7 +567,7 @@ class Surface(object):
                 y1 = y3 - y2 if last_letter in "CS" else y
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
-                node._tangents.extend((
+                node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "t":
@@ -579,7 +579,7 @@ class Surface(object):
                 x3, y3, string = point(string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
-                node._tangents.extend((0, 0))
+                node.tangents.extend((0, 0))
                 self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             elif letter == "T":
                 # Quadratic curve end
@@ -590,25 +590,25 @@ class Surface(object):
                 x3, y3, string = point(string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
-                node._tangents.extend((0, 0))
+                node.tangents.extend((0, 0))
                 self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             elif letter == "v":
                 # Relative vertical line
                 y, string = string.split(" ", 1)
                 angle = pi / 2 if y > 0 else -pi / 2
-                node._tangents.extend((-angle, angle))
+                node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(0, size(y))
             elif letter == "V":
                 # Vertical line
                 y, string = string.split(" ", 1)
                 old_y = self.context.get_current_point()[0]
                 angle = pi / 2 if y > 0 else -pi / 2
-                node._tangents.extend((-angle, angle))
+                node.tangents.extend((-angle, angle))
                 self.context.line_to(old_y, size(y))
             elif letter in "zZ":
                 # End of path
                 # TODO: manage tangents
-                node._tangents.extend((0, 0))
+                node.tangents.extend((0, 0))
                 self.context.close_path()
             else:
                 # TODO: manage other letters
@@ -621,7 +621,7 @@ class Surface(object):
 
             last_letter = letter
 
-        node._tangents.append(node._tangents[-1])
+        node.tangents.append(node.tangents[-1])
         self._marker(node, "end")
 
     def line(self, node):
