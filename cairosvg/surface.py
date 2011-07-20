@@ -433,10 +433,11 @@ class Surface(object):
                 # Smooth curve
                 # TODO: manage last_letter in "cs"
                 x, y = self.context.get_current_point()
-                x1 = x3 - x2 if last_letter in "CS" else x
-                y1 = y3 - y2 if last_letter in "CS" else y
+                x1 = x3 if last_letter in "CS" else x
+                y1 = y3 + y2 if last_letter in "CS" else y
                 x2, y2, string = point(string)
                 x3, y3, string = point(string)
+#                self.context.rel_line_to(x3, y3)
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "t":
                 # Relative quadratic curve end
@@ -557,7 +558,8 @@ class Surface(object):
             self.context.text_extents(node.text)
         x, y = size(node.get("x")), size(node.get("y"))
         text_anchor = node.get("text-anchor")
-        if text_anchor == "middle":
+        style = node.get("style")
+        if (text_anchor == "middle") or (style == "text-anchor:middle"):
             x -= width / 2. + x_bearing
         elif text_anchor == "end":
             x -= width + x_bearing
