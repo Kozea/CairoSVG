@@ -7,7 +7,7 @@ User documentation
 
 This document describes how to install and use CairoSVG.
 
-- `User documentation <user_documentation>`_
+- `User documentation </user_documentation>`_
 
 Project description
 ===================
