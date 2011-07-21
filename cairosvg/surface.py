@@ -93,6 +93,7 @@ def color(string=None, opacity=1):
         string = "#" + "".join(2 * char for char in string[1:])
     if len(string) == 9:
         opacity *= int(string[7:9], 16) / 255
+
     plain_color = tuple(
         int(value, 16) / 255. for value in (
             string[1:3], string[3:5], string[5:7]))
@@ -433,11 +434,10 @@ class Surface(object):
                 # Smooth curve
                 # TODO: manage last_letter in "cs"
                 x, y = self.context.get_current_point()
-                x1 = x3 if last_letter in "CS" else x
-                y1 = y3 + y2 if last_letter in "CS" else y
                 x2, y2, string = point(string)
+                x1 = x3 if last_letter in "CS" else x
+                y1 = y2 if last_letter in "CS" else y
                 x3, y3, string = point(string)
-#                self.context.rel_line_to(x3, y3)
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
             elif letter == "t":
                 # Relative quadratic curve end
@@ -526,10 +526,15 @@ class Surface(object):
         x, y = self.cursor_position
         if "x" in node:
             x = size(node["x"])
+            print x
         if "y" in node:
             y = size(node["y"])
+            print y
         node["x"] = str(x + size(node.get("dx")))
         node["y"] = str(y + size(node.get("dy")))
+        print node.get("textLength")
+#        node["x"] = str(400)
+#        node["y"] = str(150)
         self.text(node)
 
     def text(self, node):
@@ -552,6 +557,7 @@ class Surface(object):
             cairo.FONT_WEIGHT_NORMAL)
         self.context.select_font_face(font_family, font_style, font_weight)
         self.context.set_font_size(font_size)
+
 
         # TODO: manage y_bearing and *_advance
         x_bearing, y_bearing, width, height, x_advance, y_advance = \
@@ -576,6 +582,7 @@ class Surface(object):
 
         # Remember the cursor position
         self.cursor_position = self.context.get_current_point()
+
 
     def use(self, node):
         """Draw the content of another SVG file."""
