@@ -281,7 +281,7 @@ class Surface(object):
 
         # Fill
 #        if node.get("fill") == "url(#MyGradient)":
-        if "url" in node.get("fill", ""):
+        if "url(" in node.get("fill", "").replace(" ", ""):
             self._gradient(node)
 
         else :
@@ -343,15 +343,32 @@ class Surface(object):
 
             x = float(node.get("x"))
             y = float(node.get("y"))
-            print repr(x)
             width = float(node.get("width"))
-            linpat = cairo.LinearGradient(x, y, x+width, y)
-            for child in gradient_node.children:
-                offset = child.get("offset")
-                stop_color = color(child.get("stop-color"))
-                linpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
-            self.context.set_source(linpat)
-            self.context.fill_preserve()
+
+            if gradient_node.tag == "linearGradient":
+                linpat = cairo.LinearGradient(x, y, x+width, y)
+                for child in gradient_node.children:
+                    offset = child.get("offset")
+                    stop_color = color(child.get("stop-color"))
+                    linpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
+                self.context.set_source(linpat)
+                self.context.fill_preserve()
+
+            elif gradient_node.tag == "radialGradient":
+            # TODO: manage percentages for default values
+                r = float(gradient_node.get("r"))
+                cx = float(gradient_node.get("cx"))
+                cy = float(gradient_node.get("cy"))
+                fx = float(gradient_node.get("fx"))
+                fy = float(gradient_node.get("fy"))
+                radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
+                for child in gradient_node.children:
+                    offset = child.get("offset")
+                    stop_color = color(child.get("stop-color"))
+                    radpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
+                self.context.set_source(radpat)
+                self.context.fill_preserve()
+
 
 
     def _marker(self, node, position="mid"):
