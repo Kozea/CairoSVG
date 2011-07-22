@@ -163,6 +163,7 @@ class Surface(object):
         self.context = None
         self.cursor_position = 0, 0
         self.markers = {}
+        self.gradients = {}
         self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
         self._create_surface(tree)
@@ -184,6 +185,8 @@ class Surface(object):
         for child in node.children:
             if child.tag == "marker":
                 self.markers[child["id"]] = child
+            if "gradient" in child.tag.lower():
+                self.gradients[child["id"]] = child
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -277,11 +280,18 @@ class Surface(object):
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
         # Fill
-        if node.get("fill-rule") == "evenodd":
-            self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-        self.context.set_source_rgba(
-            *color(node.get("fill", "black"), fill_opacity))
-        self.context.fill_preserve()
+#        if node.get("fill") == "url(#MyGradient)":
+        if "url" in node.get("fill", ""):
+            self._gradient(node)
+
+        else :
+            if node.get("fill-rule") == "evenodd":
+                self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
+            self.context.set_source_rgba(
+                *color(node.get("fill", "black"), fill_opacity))
+            self.context.fill_preserve()
+
+
 
         # Stroke
         self.context.set_line_width(size(node.get("stroke-width")))
@@ -320,6 +330,30 @@ class Surface(object):
             size(node.get("rx")), 0, 2 * pi)
         self.context.restore()
 
+    def _gradient(self, node):
+        """Gradients colors."""
+        gradient = list(urls(node.get("fill")))[0]
+
+        if "url" in node.get("fill"):
+            if not gradient.startswith("#"):
+                return
+            gradient = gradient[1:]
+            if gradient in self.gradients:
+                gradient_node = self.gradients[gradient]
+
+            x = float(node.get("x"))
+            y = float(node.get("y"))
+            print repr(x)
+            width = float(node.get("width"))
+            linpat = cairo.LinearGradient(x, y, x+width, y)
+            for child in gradient_node.children:
+                offset = child.get("offset")
+                stop_color = color(child.get("stop-color"))
+                linpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
+            self.context.set_source(linpat)
+            self.context.fill_preserve()
+
+
     def _marker(self, node, position="mid"):
         """Draw a marker."""
         # TODO: manage markers for other tags than path
@@ -331,7 +365,6 @@ class Surface(object):
             all_markers = list(urls(node.get("marker", "")))
             for markers_list in node.markers.values():
                 markers_list.extend(all_markers)
-
         pending_marker = (
             self.context.get_current_point(), node.markers[position])
 
@@ -685,13 +718,10 @@ class Surface(object):
         x, y = self.cursor_position
         if "x" in node:
             x = size(node["x"])
-            print x
         if "y" in node:
             y = size(node["y"])
-            print y
         node["x"] = str(x + size(node.get("dx")))
         node["y"] = str(y + size(node.get("dy")))
-        print node.get("textLength")
 #        node["x"] = str(400)
 #        node["y"] = str(150)
         self.text(node)
