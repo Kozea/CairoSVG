@@ -291,8 +291,6 @@ class Surface(object):
                 *color(node.get("fill", "black"), fill_opacity))
             self.context.fill_preserve()
 
-
-
         # Stroke
         self.context.set_line_width(size(node.get("stroke-width")))
         self.context.set_source_rgba(
@@ -368,8 +366,6 @@ class Surface(object):
                     radpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
                 self.context.set_source(radpat)
                 self.context.fill_preserve()
-
-
 
     def _marker(self, node, position="mid"):
         """Draw a marker."""
@@ -739,9 +735,6 @@ class Surface(object):
             y = size(node["y"])
         node["x"] = str(x + size(node.get("dx")))
         node["y"] = str(y + size(node.get("dy")))
-#        node["x"] = str(400)
-#        node["y"] = str(150)
-        self.text(node)
 
     def text(self, node):
         """Draw a text ``node``."""
@@ -788,6 +781,7 @@ class Surface(object):
 
         # Remember the cursor position
         self.cursor_position = self.context.get_current_point()
+
 
 
     def use(self, node):
