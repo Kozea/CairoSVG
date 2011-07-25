@@ -26,7 +26,7 @@ Cairo surface creator.
 import abc
 import cairo
 import io
-from math import pi, cos, sin, atan, radians
+from math import pi, cos, sin, atan, tan, radians
 
 from .parser import Tree
 from .colors import COLORS
@@ -232,7 +232,8 @@ class Surface(object):
         if node.get("transform"):
             transformations = node["transform"].split(")")
             for transformation in transformations:
-                for ttype in ("scale", "translate", "matrix", "rotate"):
+                for ttype in ("scale", "translate", "matrix", "rotate",
+                                "skewX", "skewY"):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
@@ -248,6 +249,19 @@ class Surface(object):
                             self.context.set_matrix(matrix)
                         elif ttype == "rotate":
                             self.context.rotate(radians(float(values[0])))
+                        elif ttype == "skewX":
+                            matrix = self.context.get_matrix()
+                            degree = radians(float(values[0]))
+                            mtrx = cairo.Matrix(matrix[0], matrix[1],
+                                    matrix[2]+degree, matrix[3], matrix[4],
+                                    matrix[5])
+                            self.context.set_matrix(mtrx)
+                        elif ttype == "skewY":
+                            matrix = self.context.get_matrix()
+                            degree = radians(float(values[0]))
+                            mtrx = cairo.Matrix(matrix[0], matrix[1]+degree,
+                                    matrix[2], matrix[3], matrix[4], matrix[5])
+                            self.context.set_matrix(mtrx)
                         else:
                             if len(values) == 1:
                                 values = 2 * values
@@ -280,10 +294,9 @@ class Surface(object):
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
         # Fill
-#        if node.get("fill") == "url(#MyGradient)":
-        if "url(" in node.get("fill", "").replace(" ", ""):
+#        if "url(" in node.get("fill", "").replace(" ", ""):
+        if "Gradient" in node.get("fill", ""):
             self._gradient(node)
-
         else :
             if node.get("fill-rule") == "evenodd":
                 self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
@@ -348,7 +361,8 @@ class Surface(object):
                 for child in gradient_node.children:
                     offset = child.get("offset")
                     stop_color = color(child.get("stop-color"))
-                    linpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
+                    linpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
+                            *stop_color)
                 self.context.set_source(linpat)
                 self.context.fill_preserve()
 
@@ -363,7 +377,8 @@ class Surface(object):
                 for child in gradient_node.children:
                     offset = child.get("offset")
                     stop_color = color(child.get("stop-color"))
-                    radpat.add_color_stop_rgba(float(offset.strip("%")) / 100, *stop_color)
+                    radpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
+                            *stop_color)
                 self.context.set_source(radpat)
                 self.context.fill_preserve()
 
@@ -453,6 +468,7 @@ class Surface(object):
 
         if position == "mid":
             node.pending_markers.append(pending_marker)
+
 
     def path(self, node):
         """Draw a path ``node``."""
