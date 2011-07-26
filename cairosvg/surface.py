@@ -23,10 +23,13 @@ Cairo surface creator.
 # Ignore small variable names here
 # pylint: disable=C0103
 
+import os
 import abc
 import cairo
 import io
-from math import pi, cos, sin, atan, tan, radians
+import array
+
+from math import pi, cos, sin, atan, radians
 
 from .parser import Tree
 from .colors import COLORS
@@ -164,6 +167,7 @@ class Surface(object):
         self.cursor_position = 0, 0
         self.markers = {}
         self.gradients = {}
+        self.patterns = {}
         self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
         self._create_surface(tree)
@@ -187,6 +191,8 @@ class Surface(object):
                 self.markers[child["id"]] = child
             if "gradient" in child.tag.lower():
                 self.gradients[child["id"]] = child
+            if "pattern" in child.tag.lower():
+                self.patterns[child["id"]] = child
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -297,6 +303,9 @@ class Surface(object):
 #        if "url(" in node.get("fill", "").replace(" ", ""):
         if "Gradient" in node.get("fill", ""):
             self._gradient(node)
+        elif "Pattern" in node.get("fill", ""):
+            self._pattern(node)
+
         else :
             if node.get("fill-rule") == "evenodd":
                 self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
@@ -469,6 +478,31 @@ class Surface(object):
         if position == "mid":
             node.pending_markers.append(pending_marker)
 
+    def _pattern(self, node):
+        pattern = list(urls(node.get("fill")))[0]
+
+        if "url" in node.get("fill"):
+            if not pattern.startswith("#"):
+                return
+            pattern = pattern[1:]
+            if pattern in self.patterns:
+                pattern_node = self.patterns[pattern]
+
+            if pattern_node.tag == "pattern":
+                image_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
+#                path = os.path.join(os.path.dirname(__file__), '..', 'test')
+#                path = os.path.join(path, 'reference', 'pattern01.png')
+#                image = image_surface.create_from_png(path)
+
+                image = image_surface.create_for_data (image_surface.get_data(), cairo.FORMAT_ARGB32,100, 100)
+
+                patt = cairo.SurfacePattern(image)
+                patt.set_extend(cairo.EXTEND_REPEAT)
+                self.context.set_source(patt)
+                self.context.fill_preserve()
+
+#            for child in pattern_node.children:
+#                print child.tag
 
     def path(self, node):
         """Draw a path ``node``."""
