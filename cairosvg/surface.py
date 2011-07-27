@@ -263,6 +263,7 @@ class Surface(object):
                             matrix = cairo.Matrix(*values)
                             self.context.set_matrix(matrix)
                         elif ttype == "rotate":
+                            matrix = self.context.get_matrix()
                             self.context.rotate(radians(float(values[0])))
                         elif ttype == "skewX":
                             matrix = self.context.get_matrix()
@@ -486,21 +487,12 @@ class Surface(object):
         pattern = filter_fill_content(self, node)
         if pattern in self.patterns:
             pattern_node = self.patterns[pattern]
-
-        if pattern_node.tag == "pattern":
-            image_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
-            path = os.path.join(os.path.dirname(__file__), '..', 'test')
-            path = os.path.join(path, 'reference', 'pattern01.png')
-            image = image_surface.create_from_png(path)
-
-#            for child in pattern_node.children:
-#                im_sur = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
-#                image = image_surface.create_for_data (self.path(child), cairo.FORMAT_ARGB32,100, 100)
-
-            patt = cairo.SurfacePattern(image)
-            patt.set_extend(cairo.EXTEND_REPEAT)
-            self.context.set_source(patt)
-            self.context.fill_preserve()
+            if pattern_node.tag == "pattern":
+                surface = DummySurface(pattern_node)
+                pattern = cairo.SurfacePattern(surface.cairo)
+                pattern.set_extend(cairo.EXTEND_REPEAT)
+                self.context.set_source(pattern)
+                self.context.fill_preserve()
 
     def path(self, node):
         """Draw a path ``node``."""
@@ -849,5 +841,16 @@ class Surface(object):
         self.context.restore()
         # Restore twice, because draw does not restore at the end of svg tags
         self.context.restore()
+
+
+class DummySurface(Surface):
+    """ Dummy surface used as source for the pattern's images."""
+    def _create_surface(self, tree):
+        width, height, viewbox = node_format(tree)
+        self.cairo = cairo.SVGSurface(os.devnull, width, height)
+        self.context = cairo.Context(self.cairo)
+        self._set_context_size(width, height, viewbox)
+        self.context.move_to(0, 0)
+
 
 # pylint: enable=C0103
