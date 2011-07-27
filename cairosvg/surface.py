@@ -23,11 +23,9 @@ Cairo surface creator.
 # Ignore small variable names here
 # pylint: disable=C0103
 
-import os
 import abc
 import cairo
 import io
-import array
 
 from math import pi, cos, sin, atan, radians
 
@@ -847,7 +845,7 @@ class DummySurface(Surface):
     """ Dummy surface used as source for the pattern's images."""
     def _create_surface(self, tree):
         width, height, viewbox = node_format(tree)
-        self.cairo = cairo.SVGSurface(os.devnull, width, height)
+        self.cairo = cairo.SVGSurface(None, width, height)
         self.context = cairo.Context(self.cairo)
         self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
