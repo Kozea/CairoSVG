@@ -74,6 +74,15 @@ def size(string=None):
             return number * (DPI * coefficient if coefficient else 1)
 
 
+def filter_fill_content(self, node):
+    content = list(urls(node.get("fill")))[0]
+    if "url" in node.get("fill"):
+        if not content.startswith("#"):
+            return
+        content = content[1:]
+    return content
+
+
 def color(string=None, opacity=1):
     """Replace ``string`` representing a color by a RGBA tuple."""
     if not string or string == "none":
@@ -189,9 +198,9 @@ class Surface(object):
         for child in node.children:
             if child.tag == "marker":
                 self.markers[child["id"]] = child
-            if "gradient" in child.tag.lower():
+            elif "gradient" in child.tag.lower():
                 self.gradients[child["id"]] = child
-            if "pattern" in child.tag.lower():
+            elif "pattern" in child.tag.lower():
                 self.patterns[child["id"]] = child
 
     def _set_context_size(self, width, height, viewbox):
@@ -352,48 +361,43 @@ class Surface(object):
 
     def _gradient(self, node):
         """Gradients colors."""
-        gradient = list(urls(node.get("fill")))[0]
+        gradient = filter_fill_content(self, node)
+        if gradient in self.gradients:
+            gradient_node = self.gradients[gradient]
 
-        if "url" in node.get("fill"):
-            if not gradient.startswith("#"):
-                return
-            gradient = gradient[1:]
-            if gradient in self.gradients:
-                gradient_node = self.gradients[gradient]
+        x = float(node.get("x"))
+        y = float(node.get("y"))
+        width = float(node.get("width"))
 
-            x = float(node.get("x"))
-            y = float(node.get("y"))
-            width = float(node.get("width"))
+        if gradient_node.tag == "linearGradient":
+            linpat = cairo.LinearGradient(x, y, x+width, y)
+            for child in gradient_node.children:
+                offset = child.get("offset")
+                stop_color = color(child.get("stop-color"))
+                linpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
+                        *stop_color)
+            self.context.set_source(linpat)
+            self.context.fill_preserve()
+        elif gradient_node.tag == "radialGradient":
+        # TODO: manage percentages for default values
+            r = float(gradient_node.get("r"))
+            cx = float(gradient_node.get("cx"))
+            cy = float(gradient_node.get("cy"))
+            fx = float(gradient_node.get("fx"))
+            fy = float(gradient_node.get("fy"))
+            radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
-            if gradient_node.tag == "linearGradient":
-                linpat = cairo.LinearGradient(x, y, x+width, y)
-                for child in gradient_node.children:
-                    offset = child.get("offset")
-                    stop_color = color(child.get("stop-color"))
-                    linpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
-                            *stop_color)
-                self.context.set_source(linpat)
-                self.context.fill_preserve()
-
-            elif gradient_node.tag == "radialGradient":
-            # TODO: manage percentages for default values
-                r = float(gradient_node.get("r"))
-                cx = float(gradient_node.get("cx"))
-                cy = float(gradient_node.get("cy"))
-                fx = float(gradient_node.get("fx"))
-                fy = float(gradient_node.get("fy"))
-                radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
-                for child in gradient_node.children:
-                    offset = child.get("offset")
-                    stop_color = color(child.get("stop-color"))
-                    radpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
-                            *stop_color)
-                self.context.set_source(radpat)
-                self.context.fill_preserve()
+            for child in gradient_node.children:
+                offset = child.get("offset")
+                stop_color = color(child.get("stop-color"))
+                radpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
+                        *stop_color)
+            self.context.set_source(radpat)
+            self.context.fill_preserve()
 
     def _marker(self, node, position="mid"):
         """Draw a marker."""
-        # TODO: manage markers for other tags than path
+         # TODO: manage markers for other tags than path
         if position == "start":
             node.markers = {
                 "start": list(urls(node.get("marker-start", ""))),
@@ -418,7 +422,7 @@ class Surface(object):
             angle2 = node.tangents.pop(0)
 
             for marker in markers:
-                if not marker.startswith("#"):
+                if not marker.startswith(""):
                     continue
                 marker = marker[1:]
                 if marker in self.markers:
@@ -446,15 +450,15 @@ class Surface(object):
                     translate_y = -size(marker_node.get("refY"))
 
                     if marker_node.get("preserveAspectRatio", "xMidYMid"):
-                        # TODO: Manage other values
+                         # TODO: Manage other values
                         if marker_node.get("meetOrSlice") == "slice":
                             scale_value = max(scale_x, scale_y)
                         else:
                             scale_value = min(scale_x, scale_y)
 
-                        # TODO: should we do this?
-                        #translate_x += (scale_x - scale_value) / 2.
-                        #translate_y += (scale_y - scale_value) / 2.
+                         # TODO: should we do this?
+#                        translate_x += (scale_x - scale_value) / 2.
+#                        translate_y += (scale_y - scale_value) / 2.
 
                         scale_x = scale_y = scale_value
 
@@ -479,30 +483,24 @@ class Surface(object):
             node.pending_markers.append(pending_marker)
 
     def _pattern(self, node):
-        pattern = list(urls(node.get("fill")))[0]
+        pattern = filter_fill_content(self, node)
+        if pattern in self.patterns:
+            pattern_node = self.patterns[pattern]
 
-        if "url" in node.get("fill"):
-            if not pattern.startswith("#"):
-                return
-            pattern = pattern[1:]
-            if pattern in self.patterns:
-                pattern_node = self.patterns[pattern]
-
-            if pattern_node.tag == "pattern":
-                image_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
-#                path = os.path.join(os.path.dirname(__file__), '..', 'test')
-#                path = os.path.join(path, 'reference', 'pattern01.png')
-#                image = image_surface.create_from_png(path)
-
-                image = image_surface.create_for_data (image_surface.get_data(), cairo.FORMAT_ARGB32,100, 100)
-
-                patt = cairo.SurfacePattern(image)
-                patt.set_extend(cairo.EXTEND_REPEAT)
-                self.context.set_source(patt)
-                self.context.fill_preserve()
+        if pattern_node.tag == "pattern":
+            image_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
+            path = os.path.join(os.path.dirname(__file__), '..', 'test')
+            path = os.path.join(path, 'reference', 'pattern01.png')
+            image = image_surface.create_from_png(path)
 
 #            for child in pattern_node.children:
-#                print child.tag
+#                im_sur = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
+#                image = image_surface.create_for_data (self.path(child), cairo.FORMAT_ARGB32,100, 100)
+
+            patt = cairo.SurfacePattern(image)
+            patt.set_extend(cairo.EXTEND_REPEAT)
+            self.context.set_source(patt)
+            self.context.fill_preserve()
 
     def path(self, node):
         """Draw a path ``node``."""
