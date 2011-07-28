@@ -23,35 +23,38 @@ SVG Parser.
 import os
 from xml.etree import ElementTree
 
+def filter_tag(node):
+    if "}" in node.tag:
+        return node.tag.split("}", 1)[1]
+    else:
+        return node.tag
+
 
 class Node(dict):
     """SVG node with dict-like properties and children."""
     def __init__(self, node, parent=None):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
         super(Node, self).__init__()
+        self.children = ()
+
+        self.root = False
+        self.tag = filter_tag(node)
+        self.text = node.text
 
         # Inherits from parent properties
         if parent is not None:
             items = parent.copy()
-            for attribute in ("transform", ):
+            not_inherited = ("transform", )
+            if self.tag == 'tspan':
+                not_inherited += ('x', 'y')
+            for attribute in not_inherited:
                 if attribute in items:
                     del items[attribute]
-
-            # Don't inherit x and y attributes if node is a tspan
-            if node.tag == "tspan":
-                if "x" in items:
-                    del items["x"]
-                if "y" in items:
-                    del items["y"]
 
             # TODO: drop other attributes that should not be inherited
 
             self.update(items)
             self.filename = parent.filename
-
-        self.root = False
-        self.tag = node.tag.split("}", 1)[1] if "}" in node.tag else node.tag
-        self.text = node.text
 
         # TODO: manage other attributes that should be multiplicated
         properties = dict(node.attrib.items())
@@ -62,8 +65,26 @@ class Node(dict):
                         float(parent.get(key, 1.0)) * float(properties[key]))
         self.update(properties)
 
-        self.children = tuple(Node(child, self) for child in node)
+        # manage text by creating children
+        if self.tag == "text":
+            self.children = self.text_children(node)
 
+        if not self.children:
+            self.children = tuple(Node(child, self) for child in node)
+
+
+    def text_children(self, node):
+        """Create children and return them."""
+        children = []
+
+        for child in (node):
+            children.append(Node(child, parent=self))
+            if child.tail:
+                anonymous = ElementTree.Element('tspan')
+                anonymous.text = child.tail
+                children.append(Node(anonymous, parent=self))
+
+        return list(children)
 
 class Tree(Node):
     """SVG tree."""

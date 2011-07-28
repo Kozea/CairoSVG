@@ -26,6 +26,7 @@ Cairo surface creator.
 import abc
 import cairo
 import io
+import itertools
 
 from math import pi, cos, sin, atan, radians
 
@@ -71,8 +72,12 @@ def size(string=None):
             number = float(string.strip(" " + unit))
             return number * (DPI * coefficient if coefficient else 1)
 
+    # Unknown size or multiple sizes
+    return 0
+
 
 def filter_fill_content(self, node):
+    """extract the content of fill and remove unnecessary characters."""
     content = list(urls(node.get("fill")))[0]
     if "url" in node.get("fill"):
         if not content.startswith("#"):
@@ -308,12 +313,10 @@ class Surface(object):
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
         # Fill
-#        if "url(" in node.get("fill", "").replace(" ", ""):
         if "Gradient" in node.get("fill", ""):
             self._gradient(node)
         elif "Pattern" in node.get("fill", ""):
             self._pattern(node)
-
         else :
             if node.get("fill-rule") == "evenodd":
                 self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
@@ -482,6 +485,7 @@ class Surface(object):
             node.pending_markers.append(pending_marker)
 
     def _pattern(self, node):
+        """Draw a pattern image."""
         pattern = filter_fill_content(self, node)
         if pattern in self.patterns:
             pattern_node = self.patterns[pattern]
@@ -766,13 +770,31 @@ class Surface(object):
 
     def tspan(self, node):
         """Draw a tspan ``node``."""
-        x, y = self.cursor_position
+        x, y = [[i] for i in self.cursor_position]
         if "x" in node:
-            x = size(node["x"])
+            x = [size(i) for i in normalize(node["x"]).strip().split(" ")]
         if "y" in node:
-            y = size(node["y"])
-        node["x"] = str(x + size(node.get("dx")))
-        node["y"] = str(y + size(node.get("dy")))
+            y = [size(i) for i in normalize(node["y"]).strip().split(" ")]
+
+        text = node.text.strip()
+        if not text:
+            return
+        fill = node.get("fill")
+        positions = list(itertools.izip_longest(x, y))
+        letters_positions = zip(positions, text)
+        letters_positions = letters_positions[:-1] + [
+            (letters_positions[-1][0], text[len(letters_positions) - 1:])]
+
+        for (x, y), letters in letters_positions:
+            if x == None:
+                x = self.cursor_position[0]
+            if y == None:
+                y = self.cursor_position[1]
+            node["x"] = str(x + size(node.get("dx")))
+            node["y"] = str(y + size(node.get("dy")))
+            node["fill"] = fill
+            node.text = letters
+            self.text(node)
 
     def text(self, node):
         """Draw a text ``node``."""
@@ -780,8 +802,12 @@ class Surface(object):
         if not node.get("fill"):
             node["fill"] = node.get("color") or "#000000"
 
-        # TODO: find a better way to manage empty text nodes
-        node.text = node.text.strip() if node.text else ""
+
+        # TODO: find a better way to manage white spaces in text nodes
+        node.text = (node.text or "").lstrip()
+        # if node.text.rstrip() != node.text:
+        node.text = node.text.rstrip() + " "
+
 
         # TODO: manage font variant
         font_size = size(node.get("font-size", "12pt"))
