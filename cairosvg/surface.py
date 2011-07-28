@@ -367,6 +367,10 @@ class Surface(object):
         if gradient in self.gradients:
             gradient_node = self.gradients[gradient]
 
+        if "x" not in node:
+            return
+        if "y" not in node:
+            return
         x = float(node.get("x"))
         y = float(node.get("y"))
         width = float(node.get("width"))
