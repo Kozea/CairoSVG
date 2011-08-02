@@ -180,6 +180,7 @@ class Surface(object):
         self.markers = {}
         self.gradients = {}
         self.patterns = {}
+#        self.filters = {}
         self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
         self._create_surface(tree)
@@ -201,10 +202,14 @@ class Surface(object):
         for child in node.children:
             if child.tag == "marker":
                 self.markers[child["id"]] = child
-            elif "gradient" in child.tag.lower():
+            if "gradient" in child.tag.lower():
                 self.gradients[child["id"]] = child
-            elif "pattern" in child.tag.lower():
+            if "pattern" in child.tag.lower():
                 self.patterns[child["id"]] = child
+
+            #TODO: Manage filters
+#            if "filter" in child.tag.lower():
+#                self.filters[child["id"]] = child
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -307,6 +312,7 @@ class Surface(object):
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
+
         # Get stroke and fill opacity
         opacity = float(node.get("opacity", 1))
         stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
@@ -361,27 +367,62 @@ class Surface(object):
             size(node.get("rx")), 0, 2 * pi)
         self.context.restore()
 
+#    def _filter(self, node):
+#        """Filter from text."""
+#        filter_content = list(urls(node.get("filter")))[0]
+#        if "url" in node.get("filter"):
+#            if not filter_content.startswith("#"):
+#                return
+#            filter_content = filter_content[1:]
+#            if filter_content in self.filters:
+#                filter_node = self.filters[filter_content]
+#                if filter_node.tag == "filter":
+#                    # Don't work!!
+##                    surface = DummySurface(filter_node)
+##                    pattern = cairo.SurfacePattern(surface.cairo)
+##                    pattern.set_filter(cairo.FILTER_BEST)
+#                    for child in filter_node.children:
+#                        child_type = child.get("type")
+#                        child_operator = child.get("operator")
+#                        radius = child.get("radius")
+#
+#                        if child_operator == "erode":
+#                            matrix = self.context.get_matrix()
+##                        if child_type == "matrix":
+##                            matrix = self.context.get_matrix()
+##                            self.context.set_matrix(matrix)
+##                        if child_type == "saturate":
+##                            return
+##                        if child_type == "hueRotate":
+##                            return
+##                        if child_type == "luminanceToAlpha":
+##                            return
+
     def _gradient(self, node):
         """Gradients colors."""
         gradient = filter_fill_content(self, node)
         if gradient in self.gradients:
             gradient_node = self.gradients[gradient]
 
-        if "x" not in node:
+        if "x" not in node or "y" not in node:
             return
-        if "y" not in node:
-            return
-        x = float(node.get("x"))
-        y = float(node.get("y"))
-        width = float(node.get("width"))
+        x = float(size(node.get("x")))
+        y = float(size(node.get("y")))
+        width = float(size(node.get("width")))
+        x1 = float(gradient_node.get("x1", x))
+        x2 = float(gradient_node.get("x2", x+width))
+        y1 = float(gradient_node.get("y1", y))
+        y2 = float(gradient_node.get("y2", y))
 
         if gradient_node.tag == "linearGradient":
-            linpat = cairo.LinearGradient(x, y, x+width, y)
+            linpat = cairo.LinearGradient(x1, y1, x2, y2)
             for child in gradient_node.children:
                 offset = child.get("offset")
                 stop_color = color(child.get("stop-color"))
-                linpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
-                        *stop_color)
+                offset = child.get("offset")
+                if "%" in offset:
+                    offset = float(offset.strip("%")) /100
+                linpat.add_color_stop_rgba(float(offset), *stop_color)
             self.context.set_source(linpat)
             self.context.fill_preserve()
         elif gradient_node.tag == "radialGradient":
@@ -424,11 +465,13 @@ class Surface(object):
         while node.pending_markers:
             point, markers = node.pending_markers.pop(0)
 
-            angle1 = node.tangents.pop(0)
-            angle2 = node.tangents.pop(0)
+            if node.tangents != []:
+                angle1 = node.tangents.pop(0)
+            if node.tangents != []:
+                angle2 = node.tangents.pop(0)
 
             for marker in markers:
-                if not marker.startswith(""):
+                if not marker.startswith("#"):
                     continue
                 marker = marker[1:]
                 if marker in self.markers:
@@ -445,32 +488,18 @@ class Surface(object):
                     temp_path = self.context.copy_path()
                     current_x, current_y = point
 
-                    if marker_node.get("markerUnits") == "userSpaceOnUse":
+                    if node.get("markerUnits") == "userSpaceOnUse":
                         base_scale = 1
                     else:
                         base_scale = size(self.parent_node.get("stroke-width"))
-                    scale_x = size(marker_node.get("markerWidth", "3"))
-                    scale_y = size(marker_node.get("markerHeight", "3"))
 
-                    translate_x = -size(marker_node.get("refX"))
-                    translate_y = -size(marker_node.get("refY"))
-
-                    if marker_node.get("preserveAspectRatio", "xMidYMid"):
-                         # TODO: Manage other values
-                        if marker_node.get("meetOrSlice") == "slice":
-                            scale_value = max(scale_x, scale_y)
-                        else:
-                            scale_value = min(scale_x, scale_y)
-
-                         # TODO: should we do this?
-#                        translate_x += (scale_x - scale_value) / 2.
-#                        translate_y += (scale_y - scale_value) / 2.
-
-                        scale_x = scale_y = scale_value
+                    # Returns 4 values
+                    scale_x, scale_y, translate_x, translate_y = self._preserve_ratio(marker_node)
 
                     viewbox = node_format(marker_node)[-1]
                     viewbox_width = viewbox[2] - viewbox[0]
                     viewbox_height = viewbox[3] - viewbox[1]
+
 
                     self.context.new_path()
                     for child in marker_node.children:
@@ -478,8 +507,8 @@ class Surface(object):
                         self.context.translate(current_x, current_y)
                         self.context.rotate(angle)
                         self.context.scale(
-                            base_scale / viewbox_width * scale_x,
-                            base_scale / viewbox_height * scale_y)
+                            base_scale / viewbox_width * float(scale_x),
+                            base_scale / viewbox_height * float(scale_y))
                         self.context.translate(translate_x, translate_y)
                         self.draw(child)
                         self.context.restore()
@@ -487,6 +516,55 @@ class Surface(object):
 
         if position == "mid":
             node.pending_markers.append(pending_marker)
+
+
+    def _preserve_ratio(self, node):
+        if node.tag == "marker":
+            scale_x = size(node.get("markerWidth", "3"))
+            scale_y = size(node.get("markerHeight", "3"))
+            translate_x = -size(node.get("refX"))
+            translate_y = -size(node.get("refY"))
+        elif node.tag == "svg":
+            width, height, viewbox = node_format(node)
+            viewbox_width = viewbox[2] - viewbox[0]
+            viewbox_height = viewbox[3] - viewbox[1]
+            scale_x = width / viewbox_width
+            scale_y = height / viewbox_height
+
+            align = node.get("preserveAspectRatio", "xMidYMid").split(" ")[0]
+            mos_properties = node.get("preserveAspectRatio", "").split(' ')
+            if mos_properties:
+                meet_or_slice = mos_properties[1]
+            if align != "none":
+                if meet_or_slice == "slice":
+                    scale_value = max(scale_x, scale_y)
+                else:
+                    scale_value = min(scale_x, scale_y)
+                scale_x = scale_y = scale_value
+
+            x_position = align[1:4].lower()
+            y_position = align[5:].lower()
+
+            if x_position == "min":
+                translate_x = 0
+
+            if y_position == "min":
+                translate_y = 0
+
+            if x_position == "mid":
+                translate_x = (width / scale_x - viewbox_width) / 2.
+
+            if y_position == "mid":
+                translate_y = (height / scale_y - viewbox_height) / 2.
+
+            if x_position == "max":
+                translate_x = width / scale_x - viewbox_width
+
+            if y_position == "max":
+                translate_y = height / scale_y - viewbox_height
+
+        return scale_x, scale_y, translate_x, translate_y
+
 
     def _pattern(self, node):
         """Draw a pattern image."""
@@ -768,6 +846,16 @@ class Surface(object):
             self.context.arc(a + r, d - r, r, 1 * pi / 2, 2 * pi / 2)
             self.context.close_path()
 
+    def svg(self, node):
+        """Draw a svg ``node``."""
+        if node.get("preserveAspectRatio"):
+            scale_x, scale_y, translate_x, translate_y = self._preserve_ratio(node)
+            self.context.translate(*self.context.get_current_point())
+            self.context.scale(scale_x, scale_y)
+            self.context.translate(translate_x, translate_y)
+        else:
+            return
+
     def tref(self, node):
         """Draw a tref ``node``."""
         self.use(node)
@@ -806,10 +894,12 @@ class Surface(object):
         if not node.get("fill"):
             node["fill"] = node.get("color") or "#000000"
 
+#        # Manage filters
+#        if node.get("filter"):
+#            self._filter(node)
 
         # TODO: find a better way to manage white spaces in text nodes
         node.text = (node.text or "").lstrip()
-        # if node.text.rstrip() != node.text:
         node.text = node.text.rstrip() + " "
 
 
@@ -841,7 +931,10 @@ class Surface(object):
         opacity = float(node.get("opacity", 1))
 
         self.context.move_to(x, y)
-        self.context.set_source_rgba(*color(node.get("fill"), opacity))
+        if "url(#" not in node.get("fill"):
+            self.context.set_source_rgba(*color(node.get("fill"), opacity))
+        else:
+            self._gradient(node)
         self.context.show_text(node.text)
         self.context.move_to(x, y)
         self.context.text_path(node.text)

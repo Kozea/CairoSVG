@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"
 [ <!ENTITY Smile "
 <rect x='.5' y='.5' width='29' height='39' fill='black' stroke='red'/>
@@ -79,6 +79,6 @@ fill='none' stroke='blue'/>">
       <g transform="translate(140,0)"><text y="-10">*YMax</text>&Viewport1;
         <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40"
              width="50" height="30">&Smile;</svg></g>
-    </g>   
+    </g>
   </g>
 </svg>
