@@ -7,7 +7,7 @@
 <circle cx='15' cy='15' r='10' fill='yellow'/>
 <circle cx='12' cy='12' r='1.5' fill='black'/>
 <circle cx='17' cy='12' r='1.5' fill='black'/>
-<path d='M 10 19 A 8 8 0 0 0 20 19' stroke='yellow' stroke-width='2'/>
+<path d='M 10 19 A 8 8 0 0 0 20 19' stroke='black' stroke-width='2'/>
 </g>
 ">
 <!ENTITY Viewport1 "<rect x='.5' y='.5' width='49' height='29'
@@ -17,7 +17,7 @@ fill='none' stroke='blue'/>">
 ]>
 
 <svg width="450px" height="300px" version="1.1"
-     xmlns="http://www.w3.org/2000/svg">
+     xmlns="http://www.w3.org/2000/svg" font-family="Verdana">
   <desc>Example PreserveAspectRatio - illustrates preserveAspectRatio attribute</desc>
   <rect x="1" y="1" width="448" height="298"
         fill="none" stroke="blue"/>
