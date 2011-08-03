@@ -532,10 +532,13 @@ class Surface(object):
             scale_y = height / viewbox_height
 
             align = node.get("preserveAspectRatio", "xMidYMid").split(" ")[0]
-            mos_properties = node.get("preserveAspectRatio", "").split(' ')
-            if mos_properties:
-                meet_or_slice = mos_properties[1]
+#            mos_properties = node.get("preserveAspectRatio", "").split(' ')
+#            if mos_properties:
+#                meet_or_slice = mos_properties[1]
             if align != "none":
+                mos_properties = node.get("preserveAspectRatio", "").split(' ')
+                if mos_properties:
+                    meet_or_slice = mos_properties[1]
                 if meet_or_slice == "slice":
                     scale_value = max(scale_x, scale_y)
                 else:
@@ -565,6 +568,9 @@ class Surface(object):
 
                 self.context.rectangle(0, 0, width, height)
                 self.context.clip()
+
+            else:
+                return
 
         return scale_x, scale_y, translate_x, translate_y
 
@@ -852,10 +858,11 @@ class Surface(object):
     def svg(self, node):
         """Draw a svg ``node``."""
         if node.get("preserveAspectRatio"):
-            scale_x, scale_y, translate_x, translate_y = self._preserve_ratio(node)
-            self.context.translate(*self.context.get_current_point())
-            self.context.scale(scale_x, scale_y)
-            self.context.translate(translate_x, translate_y)
+            if node.get("preserveAspectRatio") != "none":
+                scale_x, scale_y, translate_x, translate_y = self._preserve_ratio(node)
+                self.context.translate(*self.context.get_current_point())
+                self.context.scale(scale_x, scale_y)
+                self.context.translate(translate_x, translate_y)
         else:
             return
 
