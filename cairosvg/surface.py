@@ -542,26 +542,29 @@ class Surface(object):
                     scale_value = min(scale_x, scale_y)
                 scale_x = scale_y = scale_value
 
-            x_position = align[1:4].lower()
-            y_position = align[5:].lower()
+                x_position = align[1:4].lower()
+                y_position = align[5:].lower()
 
-            if x_position == "min":
-                translate_x = 0
+                if x_position == "min":
+                    translate_x = 0
 
-            if y_position == "min":
-                translate_y = 0
+                if y_position == "min":
+                    translate_y = 0
 
-            if x_position == "mid":
-                translate_x = (width / scale_x - viewbox_width) / 2.
+                if x_position == "mid":
+                    translate_x = (width / scale_x - viewbox_width) / 2.
 
-            if y_position == "mid":
-                translate_y = (height / scale_y - viewbox_height) / 2.
+                if y_position == "mid":
+                    translate_y = (height / scale_y - viewbox_height) / 2.
 
-            if x_position == "max":
-                translate_x = width / scale_x - viewbox_width
+                if x_position == "max":
+                    translate_x = width / scale_x - viewbox_width
 
-            if y_position == "max":
-                translate_y = height / scale_y - viewbox_height
+                if y_position == "max":
+                    translate_y = height / scale_y - viewbox_height
+
+                self.context.rectangle(0, 0, width, height)
+                self.context.clip()
 
         return scale_x, scale_y, translate_x, translate_y
 
