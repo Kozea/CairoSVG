@@ -27,8 +27,8 @@ import abc
 import cairo
 import io
 import itertools
-
-from math import pi, cos, sin, atan, radians
+import pdb
+from math import pi, cos, tan, sin, atan, radians
 
 from .parser import Tree
 from .colors import COLORS
@@ -167,6 +167,13 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
+def path_distance(path, width):
+
+    angle = radians(320)
+    x = 100 + width * cos(angle)
+    y = 200 + width * sin(angle)
+    return x, y
+
 class Surface(object):
     """Cairo abstract surface."""
     # Cairo developers say that there is no way to inherit from cairo.*Surface
@@ -181,6 +188,7 @@ class Surface(object):
         self.gradients = {}
         self.patterns = {}
 #        self.filters = {}
+        self.paths = {}
         self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
         self._create_surface(tree)
@@ -206,6 +214,8 @@ class Surface(object):
                 self.gradients[child["id"]] = child
             if "pattern" in child.tag.lower():
                 self.patterns[child["id"]] = child
+            if "path" in child.tag:
+                self.paths[child["id"]] = child
 
             #TODO: Manage filters
 #            if "filter" in child.tag.lower():
@@ -532,9 +542,6 @@ class Surface(object):
             scale_y = height / viewbox_height
 
             align = node.get("preserveAspectRatio", "xMidYMid").split(" ")[0]
-#            mos_properties = node.get("preserveAspectRatio", "").split(' ')
-#            if mos_properties:
-#                meet_or_slice = mos_properties[1]
             if align != "none":
                 mos_properties = node.get("preserveAspectRatio", "").split(' ')
                 if mos_properties:
@@ -814,6 +821,9 @@ class Surface(object):
 
         node.tangents.append(node.tangents[-1])
         self._marker(node, "end")
+        p_path = self.context.copy_path()
+        print p_path
+        1/0
 
     def line(self, node):
         """Draw a line ``node``."""
@@ -859,7 +869,8 @@ class Surface(object):
         """Draw a svg ``node``."""
         if node.get("preserveAspectRatio"):
             if node.get("preserveAspectRatio") != "none":
-                scale_x, scale_y, translate_x, translate_y = self._preserve_ratio(node)
+                scale_x, scale_y, translate_x, translate_y = \
+                    self._preserve_ratio(node)
                 self.context.translate(*self.context.get_current_point())
                 self.context.scale(scale_x, scale_y)
                 self.context.translate(translate_x, translate_y)
@@ -908,6 +919,7 @@ class Surface(object):
 #        if node.get("filter"):
 #            self._filter(node)
 
+
         # TODO: find a better way to manage white spaces in text nodes
         node.text = (node.text or "").lstrip()
         node.text = node.text.rstrip() + " "
@@ -947,12 +959,46 @@ class Surface(object):
             self._gradient(node)
         self.context.show_text(node.text)
         self.context.move_to(x, y)
-        self.context.text_path(node.text)
         node["fill"] = "#00000000"
 
         # Remember the cursor position
         self.cursor_position = self.context.get_current_point()
 
+    def textPath(self, node):
+        """Draw text on a path."""
+        self.context.save()
+        opacity = float(node.get("opacity", 1))
+        if "url(#" not in node.get("fill"):
+                self.context.set_source_rgba(*color(node.get("fill"), opacity))
+
+#        id_path = node.get("{http://www.w3.org/1999/xlink}href")
+#        if not id_path.startswith("#"):
+#            return
+#        id_path = id_path[1:]
+
+#        if id_path in self.paths:
+#            path_node = self.paths[id_path]
+#            path = path_node.get("d")
+
+        path = self.context.copy_path()
+
+        x, y = path_distance(path, 0)
+        width_tot = 0
+        text = node.text.strip(" \n")
+        for letter in text:
+            x_bearing, y_bearing, width, height, x_advance, y_advance = \
+                self.context.text_extents(letter)
+            cairo_path = self.context.copy_path()
+            x2, y2 = path_distance(path, x_advance + width_tot)
+            angle = point_angle(x, y, x2, y2)
+            self.context.save()
+            self.context.move_to(x, y)
+            self.context.rotate(angle)
+            self.context.show_text(letter)
+            self.context.restore()
+            x, y = x2, y2
+            width_tot += width
+        self.context.restore()
 
 
     def use(self, node):
