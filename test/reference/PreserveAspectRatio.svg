@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"
 [ <!ENTITY Smile "
 <rect x='.5' y='.5' width='29' height='39' fill='black' stroke='red'/>
@@ -7,7 +7,7 @@
 <circle cx='15' cy='15' r='10' fill='yellow'/>
 <circle cx='12' cy='12' r='1.5' fill='black'/>
 <circle cx='17' cy='12' r='1.5' fill='black'/>
-<path d='M 10 19 A 8 8 0 0 0 20 19' stroke='black' stroke-width='2'/>
+<path d='M 10 19 A 8 8 0 0 0 20 19' stroke='yellow' stroke-width='2'/>
 </g>
 ">
 <!ENTITY Viewport1 "<rect x='.5' y='.5' width='49' height='29'
@@ -17,7 +17,7 @@ fill='none' stroke='blue'/>">
 ]>
 
 <svg width="450px" height="300px" version="1.1"
-     xmlns="http://www.w3.org/2000/svg" font-family="Verdana">
+     xmlns="http://www.w3.org/2000/svg">
   <desc>Example PreserveAspectRatio - illustrates preserveAspectRatio attribute</desc>
   <rect x="1" y="1" width="448" height="298"
         fill="none" stroke="blue"/>
@@ -79,6 +79,6 @@ fill='none' stroke='blue'/>">
       <g transform="translate(140,0)"><text y="-10">*YMax</text>&Viewport1;
         <svg preserveAspectRatio="xMaxYMax slice" viewBox="0 0 30 40"
              width="50" height="30">&Smile;</svg></g>
-    </g>
+    </g>   
   </g>
 </svg>

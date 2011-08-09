@@ -28,7 +28,7 @@ import cairo
 import io
 import itertools
 import pdb
-from math import pi, cos, tan, sin, atan, radians
+from math import pi, cos, tan, sin, atan, radians, sqrt
 
 from .parser import Tree
 from .colors import COLORS
@@ -167,12 +167,27 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
-def path_distance(path, width):
+def point_length (x1, y1, x2, y2):
+    return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
 
-    angle = radians(320)
-    x = 100 + width * cos(angle)
-    y = 200 + width * sin(angle)
-    return x, y
+def path_distance(path, width):
+    total_length = 0
+    for item in path:
+        if item[0] == cairo.PATH_MOVE_TO:
+            old_point = item[1]
+        elif item[0] == cairo.PATH_LINE_TO:
+            point = item[1]
+            length = point_length(old_point[0], old_point[1], point[0], point[1])
+            total_length += length
+            if total_length < width:
+                old_point = point
+                continue
+            else:
+                length -= total_length - width
+                angle = point_angle(old_point[0], old_point[1], point[0], point[1])
+                x = cos(angle) * length + old_point[0]
+                y = sin(angle) * length + old_point[1]
+                return x, y
 
 class Surface(object):
     """Cairo abstract surface."""
@@ -184,6 +199,7 @@ class Surface(object):
         self.cairo = None
         self.context = None
         self.cursor_position = 0, 0
+        self.width_tot = 0
         self.markers = {}
         self.gradients = {}
         self.patterns = {}
@@ -245,7 +261,7 @@ class Surface(object):
         self.bytesio.close()
         return value
 
-    def draw(self, node):
+    def draw(self, node, stroke_and_fill=True):
         """Draw ``node`` and its children."""
         # Ignore defs
         if node.tag == "defs":
@@ -328,27 +344,28 @@ class Surface(object):
         stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
-        # Fill
-        if "Gradient" in node.get("fill", ""):
-            self._gradient(node)
-        elif "Pattern" in node.get("fill", ""):
-            self._pattern(node)
-        else :
-            if node.get("fill-rule") == "evenodd":
-                self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-            self.context.set_source_rgba(
-                *color(node.get("fill", "black"), fill_opacity))
-            self.context.fill_preserve()
+        if stroke_and_fill:
+            # Fill
+            if "Gradient" in node.get("fill", ""):
+                self._gradient(node)
+            elif "Pattern" in node.get("fill", ""):
+                self._pattern(node)
+            else :
+                if node.get("fill-rule") == "evenodd":
+                    self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
+                self.context.set_source_rgba(
+                    *color(node.get("fill", "black"), fill_opacity))
+                self.context.fill_preserve()
 
-        # Stroke
-        self.context.set_line_width(size(node.get("stroke-width")))
-        self.context.set_source_rgba(
-            *color(node.get("stroke"), stroke_opacity))
-        self.context.stroke()
+            # Stroke
+            self.context.set_line_width(size(node.get("stroke-width")))
+            self.context.set_source_rgba(
+                *color(node.get("stroke"), stroke_opacity))
+            self.context.stroke()
 
         # Draw children
         for child in node.children:
-            self.draw(child)
+            self.draw(child, stroke_and_fill)
 
         if not node.root:
             # Restoring context is useless if we are in the root tag, it may
@@ -819,11 +836,12 @@ class Surface(object):
 
             last_letter = letter
 
+#        path = self.context.copy_path()
+
+
         node.tangents.append(node.tangents[-1])
         self._marker(node, "end")
-        p_path = self.context.copy_path()
-        print p_path
-        1/0
+
 
     def line(self, node):
         """Draw a line ``node``."""
@@ -907,7 +925,15 @@ class Surface(object):
             node["y"] = str(y + size(node.get("dy")))
             node["fill"] = fill
             node.text = letters
-            self.text(node)
+            if node.parent.tag == "text":
+                self.text(node)
+            else:
+                node["x"] = str(x + size(node.get("dx")))
+                node["y"] = str(y + size(node.get("dy")))
+                self.textPath(node)
+                if node.parent.children[-1] == node:
+                    self.width_tot = 0
+
 
     def text(self, node):
         """Draw a text ``node``."""
@@ -961,7 +987,7 @@ class Surface(object):
         self.context.move_to(x, y)
         node["fill"] = "#00000000"
 
-        # Remember the cursor position
+        # Remember the absolute cursor position
         self.cursor_position = self.context.get_current_point()
 
     def textPath(self, node):
@@ -971,34 +997,40 @@ class Surface(object):
         if "url(#" not in node.get("fill"):
                 self.context.set_source_rgba(*color(node.get("fill"), opacity))
 
-#        id_path = node.get("{http://www.w3.org/1999/xlink}href")
-#        if not id_path.startswith("#"):
-#            return
-#        id_path = id_path[1:]
+        id_path = node.get("{http://www.w3.org/1999/xlink}href")
+        if not id_path.startswith("#"):
+            return
+        id_path = id_path[1:]
 
-#        if id_path in self.paths:
-#            path_node = self.paths[id_path]
-#            path = path_node.get("d")
+        if id_path in self.paths:
+            path = self.paths.get(id_path)
+        else:
+            return
 
-        path = self.context.copy_path()
+        self.draw(path, False)
+        cairo_path = self.context.copy_path_flat()
+        self.context.new_path()
 
-        x, y = path_distance(path, 0)
-        width_tot = 0
+        x, y = path_distance(cairo_path, self.width_tot)
         text = node.text.strip(" \n")
+
         for letter in text:
             x_bearing, y_bearing, width, height, x_advance, y_advance = \
                 self.context.text_extents(letter)
-            cairo_path = self.context.copy_path()
-            x2, y2 = path_distance(path, x_advance + width_tot)
+            self.width_tot += x_advance
+            x2, y2 = path_distance(cairo_path, self.width_tot)
             angle = point_angle(x, y, x2, y2)
             self.context.save()
-            self.context.move_to(x, y)
+            self.context.translate(x, y)
             self.context.rotate(angle)
+            self.context.translate(0, size(node.get("y")))
             self.context.show_text(letter)
             self.context.restore()
             x, y = x2, y2
-            width_tot += width
         self.context.restore()
+
+        # Remember the relative cursor position
+        self.cursor_position = size(node.get("x")), size(node.get("y"))
 
 
     def use(self, node):
