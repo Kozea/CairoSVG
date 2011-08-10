@@ -55,6 +55,7 @@ class Node(dict):
 
             self.update(items)
             self.filename = parent.filename
+            self.parent = parent
 
         # TODO: manage other attributes that should be multiplicated
         properties = dict(node.attrib.items())
@@ -66,7 +67,7 @@ class Node(dict):
         self.update(properties)
 
         # manage text by creating children
-        if self.tag == "text":
+        if self.tag == "text" or self.tag == "textPath":
             self.children = self.text_children(node)
 
         if not self.children:
