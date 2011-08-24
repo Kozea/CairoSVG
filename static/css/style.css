@@ -44,8 +44,8 @@ transition-property: background-color, color;
 transition-duration: 0.25s;
 }
 
-a:hover,
-a:focus {
+a[href]:hover,
+a[href]:focus {
 background: #eeeeec;
 }
 
