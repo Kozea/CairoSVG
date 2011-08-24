@@ -212,11 +212,16 @@ border-radius: 1em;
 color: #eeeeec;
 margin: -.25em -.5em;
 padding: .25em .5em;
+text-shadow: 0 0 1px white;
+}
+
+nav li a[href] {
+color: #ccc;
 text-shadow: none;
 }
 
-nav li a:hover,
-nav li a:focus {
+nav li a[href]:hover,
+nav li a[href]:focus {
 background: white;
 color: #2e3436;
 text-decoration: none;
