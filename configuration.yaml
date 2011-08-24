@@ -1,0 +1,22 @@
+name: CairoSVG
+description: Convert SVG to PNG or PDF
+license: GPLv3
+public: true
+url: http://www.cairosvg.org/
+
+menu:
+   - News:
+       link: /news/
+   - Documentation:
+       link: /documentation/
+   - Contribute:
+       link: /contribute/
+   - Download:
+       link: /download/
+  
+vcs (git):
+  url: git://github.com/Kozea/CairoSVG.git
+  path: /var/db/git/cairosvg.git
+
+code browser (github):
+  project name: Kozea/CairoSVG

@@ -25,6 +25,5 @@ needed).
 As a Hacker
 ===========
 
-Interested in hacking? Feel free to clone the `git repository on Gitorious
-<http://www.gitorious.org/cairosvg/cairosvg>`_ if you want to add new features,
-fix bugs or update documentation.
+Interested in hacking? Feel free to clone the :codelink:`git repository on
+GitHub` if you want to add new features, fix bugs or update documentation.
