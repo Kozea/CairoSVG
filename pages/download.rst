@@ -10,15 +10,13 @@ PyPI
 Git Repository
 ==============
 
-If you want the development version of CairoSVG, take a look at the `git
-repository on Gitorious <http://www.gitorious.org/cairosvg/cairosvg>`_, or
-clone it thanks to::
+If you want the development version of CairoSVG, take a look at the
+:codelink:`git repository on GitHub`, or clone it thanks to::
 
-  git clone git://gitorious.org/cairosvg/cairosvg.git
+  git clone git://github.com/Kozea/CairoSVG.git
 
-You can also download the CairoSVG package of the git repository:
-
-- `CairoSVG-git.tar.gz <http://gitorious.org/cairosvg/cairosvg/archive-tarball/master>`_
+You can also download `the CairoSVG package of the git repository
+<https://github.com/Kozea/CairoSVG/tarball/master>`_.
 
 Source Packages
 ===============
