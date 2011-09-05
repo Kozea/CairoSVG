@@ -984,7 +984,6 @@ class Surface(object):
         else:
             self._gradient(node)
         self.context.show_text(node.text)
-        self.context.move_to(x, y)
         node["fill"] = "#00000000"
 
         # Remember the absolute cursor position
