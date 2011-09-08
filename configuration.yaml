@@ -5,14 +5,14 @@ public: true
 url: http://www.cairosvg.org/
 
 menu:
-   - News:
-       link: /news/
-   - Documentation:
-       link: /documentation/
-   - Contribute:
-       link: /contribute/
-   - Download:
-       link: /download/
+  - News:
+      link: /news/
+  - Documentation:
+      link: /documentation/
+  - Contribute:
+      link: /contribute/
+  - Download:
+      link: /download/
   
 vcs (git):
   url: git://github.com/Kozea/CairoSVG.git
@@ -20,3 +20,11 @@ vcs (git):
 
 code browser (github):
   project name: Kozea/CairoSVG
+
+bug tracker (redmine):
+  base url: http://redmine.kozea.fr/
+  project name: cairosvg
+
+continuous integration (jenkins):
+  base url: http://jenkins.kozea.org/
+  project name: CairoSVG
