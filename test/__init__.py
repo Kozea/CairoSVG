@@ -31,7 +31,8 @@ REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "reference")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
 ALL_FILES = sorted((
         os.path.join(REFERENCE_FOLDER, filename)
-        for filename in os.listdir(REFERENCE_FOLDER)),
+        for filename in os.listdir(REFERENCE_FOLDER)
+        if os.path.isfile(os.path.join(REFERENCE_FOLDER, filename))),
                    key=lambda name: name.lower())
 FILES = (ALL_FILES[2*i:2*i+2] for i in range(len(ALL_FILES) / 2))
 PIXEL_TOLERANCE = 70 * 255
