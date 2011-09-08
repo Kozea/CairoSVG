@@ -27,8 +27,7 @@ import abc
 import cairo
 import io
 import itertools
-import pdb
-from math import pi, cos, tan, sin, atan, radians, sqrt
+from math import pi, cos, sin, atan, radians
 
 from .parser import Tree
 from .colors import COLORS
@@ -76,8 +75,8 @@ def size(string=None):
     return 0
 
 
-def filter_fill_content(self, node):
-    """extract the content of fill and remove unnecessary characters."""
+def filter_fill_content(node):
+    """Extract the content of fill and remove unnecessary characters."""
     content = list(urls(node.get("fill")))[0]
     if "url" in node.get("fill"):
         if not content.startswith("#"):
@@ -167,27 +166,32 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
-def point_length (x1, y1, x2, y2):
-    return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
+def distance(x1, y1, x2, y2):
+    """Get the distance between two points."""
+    return ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) ** 0.5
+
 
 def path_distance(path, width):
+    """Get the point at ``width`` distance on ``path``."""
     total_length = 0
     for item in path:
         if item[0] == cairo.PATH_MOVE_TO:
             old_point = item[1]
         elif item[0] == cairo.PATH_LINE_TO:
-            point = item[1]
-            length = point_length(old_point[0], old_point[1], point[0], point[1])
+            new_point = item[1]
+            length = distance(
+                old_point[0], old_point[1], new_point[0], new_point[1])
             total_length += length
             if total_length < width:
-                old_point = point
-                continue
+                old_point = new_point
             else:
                 length -= total_length - width
-                angle = point_angle(old_point[0], old_point[1], point[0], point[1])
+                angle = point_angle(
+                    old_point[0], old_point[1], new_point[0], new_point[1])
                 x = cos(angle) * length + old_point[0]
                 y = sin(angle) * length + old_point[1]
                 return x, y
+
 
 class Surface(object):
     """Cairo abstract surface."""
@@ -203,7 +207,6 @@ class Surface(object):
         self.markers = {}
         self.gradients = {}
         self.patterns = {}
-#        self.filters = {}
         self.paths = {}
         self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
@@ -232,10 +235,6 @@ class Surface(object):
                 self.patterns[child["id"]] = child
             if "path" in child.tag:
                 self.paths[child["id"]] = child
-
-            #TODO: Manage filters
-#            if "filter" in child.tag.lower():
-#                self.filters[child["id"]] = child
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -281,8 +280,9 @@ class Surface(object):
         if node.get("transform"):
             transformations = node["transform"].split(")")
             for transformation in transformations:
-                for ttype in ("scale", "translate", "matrix", "rotate",
-                                "skewX", "skewY"):
+                for ttype in (
+                        "scale", "translate", "matrix", "rotate", "skewX",
+                        "skewY"):
                     if ttype in transformation:
                         transformation = transformation.replace(ttype, "")
                         transformation = transformation.replace("(", "")
@@ -302,15 +302,16 @@ class Surface(object):
                         elif ttype == "skewX":
                             matrix = self.context.get_matrix()
                             degree = radians(float(values[0]))
-                            mtrx = cairo.Matrix(matrix[0], matrix[1],
-                                    matrix[2]+degree, matrix[3], matrix[4],
-                                    matrix[5])
+                            mtrx = cairo.Matrix(
+                                matrix[0], matrix[1], matrix[2] + degree,
+                                matrix[3], matrix[4], matrix[5])
                             self.context.set_matrix(mtrx)
                         elif ttype == "skewY":
                             matrix = self.context.get_matrix()
                             degree = radians(float(values[0]))
-                            mtrx = cairo.Matrix(matrix[0], matrix[1]+degree,
-                                    matrix[2], matrix[3], matrix[4], matrix[5])
+                            mtrx = cairo.Matrix(
+                                matrix[0], matrix[1] + degree, matrix[2],
+                                matrix[3], matrix[4], matrix[5])
                             self.context.set_matrix(mtrx)
                         else:
                             if len(values) == 1:
@@ -338,7 +339,6 @@ class Surface(object):
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
-
         # Get stroke and fill opacity
         opacity = float(node.get("opacity", 1))
         stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
@@ -350,7 +350,7 @@ class Surface(object):
                 self._gradient(node)
             elif "Pattern" in node.get("fill", ""):
                 self._pattern(node)
-            else :
+            else:
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(
@@ -394,40 +394,9 @@ class Surface(object):
             size(node.get("rx")), 0, 2 * pi)
         self.context.restore()
 
-#    def _filter(self, node):
-#        """Filter from text."""
-#        filter_content = list(urls(node.get("filter")))[0]
-#        if "url" in node.get("filter"):
-#            if not filter_content.startswith("#"):
-#                return
-#            filter_content = filter_content[1:]
-#            if filter_content in self.filters:
-#                filter_node = self.filters[filter_content]
-#                if filter_node.tag == "filter":
-#                    # Don't work!!
-##                    surface = DummySurface(filter_node)
-##                    pattern = cairo.SurfacePattern(surface.cairo)
-##                    pattern.set_filter(cairo.FILTER_BEST)
-#                    for child in filter_node.children:
-#                        child_type = child.get("type")
-#                        child_operator = child.get("operator")
-#                        radius = child.get("radius")
-#
-#                        if child_operator == "erode":
-#                            matrix = self.context.get_matrix()
-##                        if child_type == "matrix":
-##                            matrix = self.context.get_matrix()
-##                            self.context.set_matrix(matrix)
-##                        if child_type == "saturate":
-##                            return
-##                        if child_type == "hueRotate":
-##                            return
-##                        if child_type == "luminanceToAlpha":
-##                            return
-
     def _gradient(self, node):
         """Gradients colors."""
-        gradient = filter_fill_content(self, node)
+        gradient = filter_fill_content(node)
         if gradient in self.gradients:
             gradient_node = self.gradients[gradient]
 
@@ -435,11 +404,12 @@ class Surface(object):
             return
         x = float(size(node.get("x")))
         y = float(size(node.get("y")))
+        height = float(size(node.get("height")))
         width = float(size(node.get("width")))
         x1 = float(gradient_node.get("x1", x))
-        x2 = float(gradient_node.get("x2", x+width))
+        x2 = float(gradient_node.get("x2", x + width))
         y1 = float(gradient_node.get("y1", y))
-        y2 = float(gradient_node.get("y2", y))
+        y2 = float(gradient_node.get("y2", y + height))
 
         if gradient_node.tag == "linearGradient":
             linpat = cairo.LinearGradient(x1, y1, x2, y2)
@@ -448,7 +418,7 @@ class Surface(object):
                 stop_color = color(child.get("stop-color"))
                 offset = child.get("offset")
                 if "%" in offset:
-                    offset = float(offset.strip("%")) /100
+                    offset = float(offset.strip("%")) / 100
                 linpat.add_color_stop_rgba(float(offset), *stop_color)
             self.context.set_source(linpat)
             self.context.fill_preserve()
@@ -464,14 +434,14 @@ class Surface(object):
             for child in gradient_node.children:
                 offset = child.get("offset")
                 stop_color = color(child.get("stop-color"))
-                radpat.add_color_stop_rgba(float(offset.strip("%")) / 100,
-                        *stop_color)
+                radpat.add_color_stop_rgba(
+                    float(offset.strip("%")) / 100, *stop_color)
             self.context.set_source(radpat)
             self.context.fill_preserve()
 
     def _marker(self, node, position="mid"):
         """Draw a marker."""
-         # TODO: manage markers for other tags than path
+        # TODO: manage markers for other tags than path
         if position == "start":
             node.markers = {
                 "start": list(urls(node.get("marker-start", ""))),
@@ -490,7 +460,7 @@ class Surface(object):
             node.pending_markers.append(pending_marker)
 
         while node.pending_markers:
-            point, markers = node.pending_markers.pop(0)
+            next_point, markers = node.pending_markers.pop(0)
 
             if node.tangents != []:
                 angle1 = node.tangents.pop(0)
@@ -513,7 +483,7 @@ class Surface(object):
                         angle = radians(float(angle))
 
                     temp_path = self.context.copy_path()
-                    current_x, current_y = point
+                    current_x, current_y = next_point
 
                     if node.get("markerUnits") == "userSpaceOnUse":
                         base_scale = 1
@@ -521,12 +491,12 @@ class Surface(object):
                         base_scale = size(self.parent_node.get("stroke-width"))
 
                     # Returns 4 values
-                    scale_x, scale_y, translate_x, translate_y = self._preserve_ratio(marker_node)
+                    scale_x, scale_y, translate_x, translate_y = \
+                        self._preserve_ratio(marker_node)
 
                     viewbox = node_format(marker_node)[-1]
                     viewbox_width = viewbox[2] - viewbox[0]
                     viewbox_height = viewbox[3] - viewbox[1]
-
 
                     self.context.new_path()
                     for child in marker_node.children:
@@ -544,8 +514,8 @@ class Surface(object):
         if position == "mid":
             node.pending_markers.append(pending_marker)
 
-
     def _preserve_ratio(self, node):
+        """Manage the ratio preservation."""
         if node.tag == "marker":
             scale_x = size(node.get("markerWidth", "3"))
             scale_y = size(node.get("markerHeight", "3"))
@@ -592,16 +562,14 @@ class Surface(object):
 
                 self.context.rectangle(0, 0, width, height)
                 self.context.clip()
-
             else:
                 return
 
         return scale_x, scale_y, translate_x, translate_y
 
-
     def _pattern(self, node):
         """Draw a pattern image."""
-        pattern = filter_fill_content(self, node)
+        pattern = filter_fill_content(node)
         if pattern in self.patterns:
             pattern_node = self.patterns[pattern]
             if pattern_node.tag == "pattern":
@@ -626,6 +594,7 @@ class Surface(object):
             string = string.strip()
             if string.split(" ", 1)[0] in PATH_LETTERS:
                 letter, string = (string + " ").split(" ", 1)
+
             if letter in "aA":
                 # Elliptic curve
                 x1, y1 = self.context.get_current_point()
@@ -684,6 +653,7 @@ class Surface(object):
                 self.context.scale(1, radii_ratio)
                 arc(xc, yc, rx, angle1, angle2)
                 self.context.restore()
+
             elif letter == "c":
                 # Relative curve
                 x1, y1, string = point(string)
@@ -692,6 +662,7 @@ class Surface(object):
                 node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+
             elif letter == "C":
                 # Curve
                 x1, y1, string = point(string)
@@ -700,12 +671,14 @@ class Surface(object):
                 node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
+
             elif letter == "h":
                 # Relative horizontal line
                 x, string = string.split(" ", 1)
                 angle = 0 if x > 0 else pi
                 node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(size(x), 0)
+
             elif letter == "H":
                 # Horizontal line
                 x, string = string.split(" ", 1)
@@ -713,12 +686,14 @@ class Surface(object):
                 angle = 0 if x > old_x else pi
                 node.tangents.extend((-angle, angle))
                 self.context.line_to(size(x), old_x)
+
             elif letter == "l":
                 # Relative straight line
                 x, y, string = point(string)
                 angle = point_angle(0, 0, x, y)
                 node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(x, y)
+
             elif letter == "L":
                 # Straight line
                 x, y, string = point(string)
@@ -726,14 +701,17 @@ class Surface(object):
                 angle = point_angle(old_x, old_y, x, y)
                 node.tangents.extend((-angle, angle))
                 self.context.line_to(x, y)
+
             elif letter == "m":
                 # Current point relative move
                 x, y, string = point(string)
                 self.context.rel_move_to(x, y)
+
             elif letter == "M":
                 # Current point move
                 x, y, string = point(string)
                 self.context.move_to(x, y)
+
             elif letter == "q":
                 # Relative quadratic curve
                 # TODO: manage next letter "T"
@@ -748,6 +726,7 @@ class Surface(object):
                     self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
                 node.tangents.extend((0, 0))
                 string = "t" + next_string
+
             elif letter == "Q":
                 # Quadratic curve
                 # TODO: manage next letter "t"
@@ -762,6 +741,7 @@ class Surface(object):
                     self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
                 node.tangents.extend((0, 0))
                 string = "T" + next_string
+
             elif letter == "s":
                 # Relative smooth curve
                 # TODO: manage last_letter in "CS"
@@ -773,6 +753,7 @@ class Surface(object):
                 node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+
             elif letter == "S":
                 # Smooth curve
                 # TODO: manage last_letter in "cs"
@@ -785,6 +766,7 @@ class Surface(object):
                 node.tangents.extend((
                     point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
                 self.context.curve_to(x1, y1, x2, y2, x3, y3)
+
             elif letter == "t":
                 # Relative quadratic curve end
                 # TODO: manage tangents
@@ -796,6 +778,7 @@ class Surface(object):
                     x1, y1, x2, y2, x3, y3)
                 node.tangents.extend((0, 0))
                 self.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+
             elif letter == "T":
                 # Quadratic curve end
                 # TODO: manage tangents
@@ -807,12 +790,14 @@ class Surface(object):
                     x1, y1, x2, y2, x3, y3)
                 node.tangents.extend((0, 0))
                 self.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+
             elif letter == "v":
                 # Relative vertical line
                 y, string = string.split(" ", 1)
                 angle = pi / 2 if y > 0 else -pi / 2
                 node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(0, size(y))
+
             elif letter == "V":
                 # Vertical line
                 y, string = string.split(" ", 1)
@@ -820,11 +805,13 @@ class Surface(object):
                 angle = pi / 2 if y > 0 else -pi / 2
                 node.tangents.extend((-angle, angle))
                 self.context.line_to(old_y, size(y))
+
             elif letter in "zZ":
                 # End of path
                 # TODO: manage tangents
                 node.tangents.extend((0, 0))
                 self.context.close_path()
+
             else:
                 # TODO: manage other letters
                 raise NotImplementedError
@@ -836,12 +823,8 @@ class Surface(object):
 
             last_letter = letter
 
-#        path = self.context.copy_path()
-
-
         node.tangents.append(node.tangents[-1])
         self._marker(node, "end")
-
 
     def line(self, node):
         """Draw a line ``node``."""
@@ -934,22 +917,15 @@ class Surface(object):
                 if node.parent.children[-1] == node:
                     self.width_tot = 0
 
-
     def text(self, node):
         """Draw a text ``node``."""
         # Set black as default text color
         if not node.get("fill"):
             node["fill"] = node.get("color") or "#000000"
 
-#        # Manage filters
-#        if node.get("filter"):
-#            self._filter(node)
-
-
         # TODO: find a better way to manage white spaces in text nodes
         node.text = (node.text or "").lstrip()
         node.text = node.text.rstrip() + " "
-
 
         # TODO: manage font variant
         font_size = size(node.get("font-size", "12pt"))
@@ -963,10 +939,9 @@ class Surface(object):
         self.context.select_font_face(font_family, font_style, font_weight)
         self.context.set_font_size(font_size)
 
-
-        # TODO: manage y_bearing and *_advance
-        x_bearing, y_bearing, width, height, x_advance, y_advance = \
-            self.context.text_extents(node.text)
+        text_extents = self.context.text_extents(node.text)
+        x_bearing = text_extents[0]
+        width = text_extents[2]
         x, y = size(node.get("x")), size(node.get("y"))
         text_anchor = node.get("text-anchor")
         style = node.get("style")
@@ -994,7 +969,7 @@ class Surface(object):
         self.context.save()
         opacity = float(node.get("opacity", 1))
         if "url(#" not in node.get("fill"):
-                self.context.set_source_rgba(*color(node.get("fill"), opacity))
+            self.context.set_source_rgba(*color(node.get("fill"), opacity))
 
         id_path = node.get("{http://www.w3.org/1999/xlink}href")
         if not id_path.startswith("#"):
@@ -1014,8 +989,7 @@ class Surface(object):
         text = node.text.strip(" \n")
 
         for letter in text:
-            x_bearing, y_bearing, width, height, x_advance, y_advance = \
-                self.context.text_extents(letter)
+            x_advance = self.context.text_extents(letter)[4]
             self.width_tot += x_advance
             x2, y2 = path_distance(cairo_path, self.width_tot)
             angle = point_angle(x, y, x2, y2)
@@ -1030,7 +1004,6 @@ class Surface(object):
 
         # Remember the relative cursor position
         self.cursor_position = size(node.get("x")), size(node.get("y"))
-
 
     def use(self, node):
         """Draw the content of another SVG file."""

@@ -23,12 +23,6 @@ SVG Parser.
 import os
 from xml.etree import ElementTree
 
-def filter_tag(node):
-    if "}" in node.tag:
-        return node.tag.split("}", 1)[1]
-    else:
-        return node.tag
-
 
 class Node(dict):
     """SVG node with dict-like properties and children."""
@@ -38,7 +32,7 @@ class Node(dict):
         self.children = ()
 
         self.root = False
-        self.tag = filter_tag(node)
+        self.tag = node.tag.split("}", 1)[-1]
         self.text = node.text
 
         # Inherits from parent properties
