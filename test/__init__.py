@@ -34,7 +34,7 @@ ALL_FILES = sorted((
         for filename in os.listdir(REFERENCE_FOLDER)
         if os.path.isfile(os.path.join(REFERENCE_FOLDER, filename))),
                    key=lambda name: name.lower())
-FILES = (ALL_FILES[2*i:2*i+2] for i in range(len(ALL_FILES) / 2))
+FILES = (ALL_FILES[2 * i:2 * i + 2] for i in range(len(ALL_FILES) / 2))
 PIXEL_TOLERANCE = 70 * 255
 SIZE_TOLERANCE = 1
 
