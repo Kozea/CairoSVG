@@ -15,25 +15,9 @@ For further information, please visit the `CairoSVG Website
 
 """
 
-import os
 from distutils.core import setup
-from distutils.command.build_scripts import build_scripts
 
 import cairosvg
-
-
-# build_scripts is known to have a lot of public methods
-# pylint: disable=R0904
-class BuildScripts(build_scripts):
-    """Build the package."""
-    def run(self):
-        """Run building."""
-        # These lines remove the .py extension from the cairosvg executable
-        self.mkpath(self.build_dir)
-        for script in self.scripts:
-            root, _ = os.path.splitext(script)
-            self.copy_file(script, os.path.join(self.build_dir, root))
-# pylint: enable=R0904
 
 
 # When the version is updated, ``cairosvg.VERSION`` must be modified.
@@ -52,8 +36,11 @@ setup(
     platforms="Any",
     packages=["cairosvg"],
     provides=["cairosvg"],
-    scripts=["cairosvg.py"],
-    cmdclass={"build_scripts": BuildScripts},
+    entry_points={
+        'console_scripts': [
+            'cairosvg = cairosvg:main',
+        ],
+    },
     requires={"pycairo": ["pycairo>=1.8"]},
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[

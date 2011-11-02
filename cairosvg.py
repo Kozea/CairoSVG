@@ -21,48 +21,5 @@ CairoSVG entry point.
 
 """
 
-import os
-import sys
-import optparse
-
 import cairosvg
-
-
-# Get command-line options
-parser = optparse.OptionParser("usage: %prog filename [options]")
-parser.add_option(
-    "-v", "--version", action="store_true",
-    default=False, help="show version and exit")
-parser.add_option(
-    "-f", "--format", help="output format")
-parser.add_option(
-    "-d", "--dpi", help="svg resolution")
-parser.add_option(
-    "-o", "--output",
-    default="", help="output filename")
-options, args = parser.parse_args()
-
-# Print version and exit if the option is given
-if options.version:
-    print(cairosvg.VERSION)
-    sys.exit()
-
-# Set the resolution
-if options.dpi:
-    cairosvg.surface.DPI = float(options.dpi)
-
-# Parse the SVG
-output_format = \
-    options.format or os.path.splitext(options.output)[1].lstrip(".") or "pdf"
-launcher = getattr(cairosvg, "svg2%s" % output_format)
-
-# Print help if no argument is given
-if not args:
-    parser.print_help()
-    sys.exit()
-
-content = launcher(args[0])
-if options.output:
-    open(options.output, "w").write(content)
-else:
-    print(content)
+cairosvg.main()
