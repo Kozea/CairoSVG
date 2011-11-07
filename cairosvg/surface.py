@@ -223,18 +223,16 @@ class Surface(object):
         """
         raise NotImplementedError
 
-    def _parse_defs(self, node):
+    def _parse_def(self, node):
         """Parse the SVG definitions."""
-        # Draw children
-        for child in node.children:
-            if child.tag == "marker":
-                self.markers[child["id"]] = child
-            if "gradient" in child.tag.lower():
-                self.gradients[child["id"]] = child
-            if "pattern" in child.tag.lower():
-                self.patterns[child["id"]] = child
-            if "path" in child.tag:
-                self.paths[child["id"]] = child
+        if node.tag == "marker":
+            self.markers[node["id"]] = node
+        if "gradient" in node.tag.lower():
+            self.gradients[node["id"]] = node
+        if "pattern" in node.tag.lower():
+            self.patterns[node["id"]] = node
+        if "path" in node.tag:
+            self.paths[node["id"]] = node
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -264,7 +262,8 @@ class Surface(object):
         """Draw ``node`` and its children."""
         # Ignore defs
         if node.tag == "defs":
-            self._parse_defs(node)
+            for child in node.children:
+                self._parse_def(child)
             return
 
         node.tangents = [None]
@@ -404,8 +403,6 @@ class Surface(object):
         gradient = filter_fill_content(node)
         gradient_node = self.gradients[gradient]
 
-        if "x" not in node or "y" not in node:
-            return
         x = float(size(node.get("x")))
         y = float(size(node.get("y")))
         height = float(size(node.get("height")))
@@ -415,6 +412,7 @@ class Surface(object):
         y1 = float(gradient_node.get("y1", y))
         y2 = float(gradient_node.get("y2", y + height))
 
+        # TODO: manage percentages for default values
         if gradient_node.tag == "linearGradient":
             linpat = cairo.LinearGradient(x1, y1, x2, y2)
             for child in gradient_node.children:
@@ -427,19 +425,19 @@ class Surface(object):
             self.context.set_source(linpat)
             self.context.fill_preserve()
         elif gradient_node.tag == "radialGradient":
-        # TODO: manage percentages for default values
             r = float(gradient_node.get("r"))
             cx = float(gradient_node.get("cx"))
             cy = float(gradient_node.get("cy"))
-            fx = float(gradient_node.get("fx"))
-            fy = float(gradient_node.get("fy"))
+            fx = float(gradient_node.get("fx", cx))
+            fy = float(gradient_node.get("fy", cy))
             radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
             for child in gradient_node.children:
                 offset = child.get("offset")
+                if "%" in offset:
+                    offset = float(offset.strip("%")) / 100
                 stop_color = color(child.get("stop-color"))
-                radpat.add_color_stop_rgba(
-                    float(offset.strip("%")) / 100, *stop_color)
+                radpat.add_color_stop_rgba(float(offset), *stop_color)
             self.context.set_source(radpat)
             self.context.fill_preserve()
 
@@ -581,6 +579,18 @@ class Surface(object):
             pattern.set_extend(cairo.EXTEND_REPEAT)
             self.context.set_source(pattern)
             self.context.fill_preserve()
+
+    def linearGradient(self, node):
+        """Store a linear gradient definition."""
+        self._parse_def(node)
+
+    def radialGradient(self, node):
+        """Store a radial gradient definition."""
+        self._parse_def(node)
+
+    def marker(self, node):
+        """Store a marker definition."""
+        self._parse_def(node)
 
     def path(self, node):
         """Draw a path ``node``."""
