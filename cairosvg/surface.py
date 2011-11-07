@@ -346,10 +346,8 @@ class Surface(object):
 
         if stroke_and_fill:
             # Fill
-            if "Gradient" in node.get("fill", ""):
-                self._gradient(node)
-            elif "Pattern" in node.get("fill", ""):
-                self._pattern(node)
+            if "url(#" in node.get("fill", ""):
+                self._gradient_or_pattern(node)
             else:
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
@@ -394,11 +392,17 @@ class Surface(object):
             size(node.get("rx")), 0, 2 * pi)
         self.context.restore()
 
+    def _gradient_or_pattern(self, node):
+        name = filter_fill_content(node)
+        if name in self.gradients:
+            return self._gradient(node)
+        elif name in self.patterns:
+            return self._pattern(node)
+
     def _gradient(self, node):
         """Gradients colors."""
         gradient = filter_fill_content(node)
-        if gradient in self.gradients:
-            gradient_node = self.gradients[gradient]
+        gradient_node = self.gradients[gradient]
 
         if "x" not in node or "y" not in node:
             return
@@ -570,14 +574,13 @@ class Surface(object):
     def _pattern(self, node):
         """Draw a pattern image."""
         pattern = filter_fill_content(node)
-        if pattern in self.patterns:
-            pattern_node = self.patterns[pattern]
-            if pattern_node.tag == "pattern":
-                surface = DummySurface(pattern_node)
-                pattern = cairo.SurfacePattern(surface.cairo)
-                pattern.set_extend(cairo.EXTEND_REPEAT)
-                self.context.set_source(pattern)
-                self.context.fill_preserve()
+        pattern_node = self.patterns[pattern]
+        if pattern_node.tag == "pattern":
+            surface = DummySurface(pattern_node)
+            pattern = cairo.SurfacePattern(surface.cairo)
+            pattern.set_extend(cairo.EXTEND_REPEAT)
+            self.context.set_source(pattern)
+            self.context.fill_preserve()
 
     def path(self, node):
         """Draw a path ``node``."""
@@ -954,10 +957,10 @@ class Surface(object):
         opacity = float(node.get("opacity", 1))
 
         self.context.move_to(x, y)
-        if "url(#" not in node.get("fill"):
-            self.context.set_source_rgba(*color(node.get("fill"), opacity))
+        if "url(#" in node.get("fill"):
+            self._gradient_or_pattern(node)
         else:
-            self._gradient(node)
+            self.context.set_source_rgba(*color(node.get("fill"), opacity))
         self.context.show_text(node.text)
         node["fill"] = "#00000000"
 
