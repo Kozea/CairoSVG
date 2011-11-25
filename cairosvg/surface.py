@@ -903,7 +903,7 @@ class Surface(object):
         if "y" in node:
             y = [size(i) for i in normalize(node["y"]).strip().split(" ")]
 
-        text = node.text.strip()
+        text = (node.text or '').strip()
         if not text:
             return
         fill = node.get("fill")
