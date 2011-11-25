@@ -64,7 +64,7 @@ def main():
 
     # Set the resolution
     if options.dpi:
-        cairosvg.surface.DPI = float(options.dpi)
+        surface.DPI = float(options.dpi)
 
     # Parse the SVG
     output_format = (
