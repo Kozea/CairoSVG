@@ -14,6 +14,10 @@ menu:
   - Download:
       link: /download/
   
+project (git):
+  url: git://github.com/Kozea/CairoSVG.git
+  path: cairosvg
+
 vcs (git):
   url: git://github.com/Kozea/CairoSVG.git
   path: /var/db/git/cairosvg.git
