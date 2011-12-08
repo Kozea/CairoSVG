@@ -1,1 +1,1 @@
-include COPYING NEWS.rst TODO.rst README.rst
+include COPYING NEWS.rst TODO.rst README.rst cairosvg.py

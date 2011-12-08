@@ -36,11 +36,7 @@ setup(
     platforms="Any",
     packages=["cairosvg"],
     provides=["cairosvg"],
-    entry_points={
-        'console_scripts': [
-            'cairosvg = cairosvg:main',
-        ],
-    },
+    scripts=["bin/cairosvg"],
     requires={"pycairo": ["pycairo>=1.8"]},
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[
