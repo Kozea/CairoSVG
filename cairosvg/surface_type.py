@@ -75,17 +75,41 @@ class PSSurface(MultipageSurface):
     surface_class = cairo.PSSurface
 
 
-class PNGSurface(surface.Surface):
+class OnepageSurface(surface.Surface):
+    """Cairo abstract surface managing one page outputs.
+
+    Classes overriding :class:`OnepageSurface` must have a ``self._width`` and
+    a ``self._height`` set in ``self._create_surface``.
+
+    """
+    @property
+    def width(self):
+        """Surface width."""
+        return self._width
+
+    @property
+    def height(self):
+        """Surface height."""
+        return self._height
+
+
+class PNGSurface(surface.OnepageSurface):
     """Cairo PNG surface."""
     def _create_surface(self, tree):
-        width, height, viewbox = surface.node_format(tree)
+        self._width, self._height, viewbox = surface.node_format(tree)
+        self._width = int(self._width)
+        self._height = int(self._height)
         self.cairo = cairo.ImageSurface(
-            cairo.FORMAT_ARGB32, int(width), int(height))
+            cairo.FORMAT_ARGB32, self._width, self._height)
         self.context = cairo.Context(self.cairo)
-        self._set_context_size(width, height, viewbox)
+        self._set_context_size(self._width, self._height, viewbox)
         self.context.move_to(0, 0)
 
     def read(self):
         """Read the PNG surface content."""
         self.cairo.write_to_png(self.bytesio)
         return super(PNGSurface, self).read()
+
+
+class DummySurface(surface.DummySurface, OnepageSurface):
+    """Cairo surface with no formatted output."""

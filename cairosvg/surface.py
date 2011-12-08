@@ -1038,12 +1038,12 @@ class Surface(object):
 
 
 class DummySurface(Surface):
-    """ Dummy surface used as source for the pattern's images."""
+    """Dummy surface used as source for the pattern's images."""
     def _create_surface(self, tree):
-        width, height, viewbox = node_format(tree)
-        self.cairo = cairo.SVGSurface(None, width, height)
+        self._width, self._height, viewbox = node_format(tree)
+        self.cairo = cairo.SVGSurface(None, self._width, self._height)
         self.context = cairo.Context(self.cairo)
-        self._set_context_size(width, height, viewbox)
+        self._set_context_size(self._width, self._height, viewbox)
         self.context.move_to(0, 0)
 
 

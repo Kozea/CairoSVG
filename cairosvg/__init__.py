@@ -24,22 +24,30 @@ import os
 import sys
 import optparse
 
-from . import parser, surface_type
+from . import parser, surface_type, surface
 
 
 VERSION = "git"
 
+
+def svg2surface(svg, surface):
+    """Return a ``surface`` corresponding to the ``svg`` string."""
+    return surface(parser.Tree(svg))
+
+
 def svg2pdf(svg):
     """Return a PDF string corresponding to the ``svg`` string."""
-    return surface_type.PDFSurface(parser.Tree(svg)).read()
+    return svg2surface(svg, surface_type.PDFSurface).read()
+
 
 def svg2ps(svg):
     """Return a PostScript string corresponding to the ``svg`` string."""
-    return surface_type.PSSurface(parser.Tree(svg)).read()
+    return svg2surface(svg, surface_type.PSSurface).read()
+
 
 def svg2png(svg):
     """Return a PNG string corresponding to the ``svg`` string."""
-    return surface_type.PNGSurface(parser.Tree(svg)).read()
+    return svg2surface(svg, surface_type.PNGSurface).read()
 
 
 def main():
@@ -59,7 +67,7 @@ def main():
 
     # Print version and exit if the option is given
     if options.version:
-        print(cairosvg.VERSION)
+        print(VERSION)
         sys.exit()
 
     # Set the resolution
