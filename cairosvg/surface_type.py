@@ -93,7 +93,7 @@ class OnepageSurface(surface.Surface):
         return self._height
 
 
-class PNGSurface(surface.OnepageSurface):
+class PNGSurface(OnepageSurface):
     """Cairo PNG surface."""
     def _create_surface(self, tree):
         self._width, self._height, viewbox = surface.node_format(tree)
