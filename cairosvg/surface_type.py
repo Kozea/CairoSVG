@@ -96,13 +96,16 @@ class OnepageSurface(surface.Surface):
 class PNGSurface(OnepageSurface):
     """Cairo PNG surface."""
     def _create_surface(self, tree):
-        self._width, self._height, viewbox = surface.node_format(tree)
-        self._width = int(self._width)
-        self._height = int(self._height)
+        width, height, viewbox = surface.node_format(tree)
+
+        # The image size has integer width and height
+        self._width, self._height = int(width), int(height)
         self.cairo = cairo.ImageSurface(
             cairo.FORMAT_ARGB32, self._width, self._height)
+
+        # The context size has floating width and height
         self.context = cairo.Context(self.cairo)
-        self._set_context_size(self._width, self._height, viewbox)
+        self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
 
     def read(self):
