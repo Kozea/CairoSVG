@@ -22,6 +22,6 @@ SVG 1.1 support
 ===============
 
 This document gives a list of supported and unsupported features of the `SVG
-1.1 working draft <http://www.w3.org/TR/SVG11/>`_.
+1.1 recommandation <http://www.w3.org/TR/SVG11/>`_.
 
-- *Coming soon*
+- `SVG Support </svg_support>`_
