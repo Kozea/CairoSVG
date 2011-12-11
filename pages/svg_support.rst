@@ -12,7 +12,8 @@
 .. contents::
 
 Here is the support status of the different elements of SVG 1.1 (2\ :sup:`nd`
-edition). The different sections correspond to those from the specification.
+edition). The different sections correspond to those from `the specification
+<http://www.w3.org/TR/SVG11/>`_.
 
 
 Introduction
@@ -102,7 +103,7 @@ Options for using SVG in Web pages
 ----------------------------------
 
 CairoSVG can generate standard Cairo surfaces that can be used in Cairo-based
-web clients such as `WeasyPrint <http://weasyprint.org/>`_
+web clients such as `WeasyPrint <http://weasyprint.org/>`_.
 
 
 
@@ -110,6 +111,74 @@ web clients such as `WeasyPrint <http://weasyprint.org/>`_
 Rendering Model
 ===============
 
+Introduction
+------------
+
+CairoSVG generally follows the rendering model described by the specification.
+
+
+The painters model
+------------------
+
+The painter model of Cairo, used by CairoSVG, is the same as the one from the
+specification. This includes alpha blending.
+
+
+Rendering Order
+---------------
+
+The elements are rendered in the order of the SVG document.
+
+
+How groups are rendered
+-----------------------
+
+Opacity values of groups are applied to the elements
+of the group. Filter effects and masks are not supported.
+
+
+How elements are rendered
+-------------------------
+
+Opacity values of elements are applied. Filter effects and masks are not
+supported.
+
+
+Types of graphics elements
+--------------------------
+
+1 Painting shapes and text
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Elements are filled and stoked. Filling supports plain colors, simple gradients
+and simple patterns. Stoking only supports plain colors. Transparency is
+supported for both filling and stoking.
+
+2 Painting raster images
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Included raster images are not supported.
+
+
+Filtering painted regions
+-------------------------
+
+Filter effects are not supported.
+
+
+Clipping, masking and object opacity
+------------------------------------
+
+Clipping and masking are not supported.
+
+Transparency, with simple alpha blending, is supported for semi-transparent
+colors and opacity values.
+
+Parent Compositing
+------------------
+
+Transparency for the parent document are supported as long as the output format
+supports it. Semi-transparent PNGs can be generated.
 
 
 Basic Data Types and Interfaces
