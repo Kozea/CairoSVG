@@ -28,5 +28,5 @@
   <text font-size="22" font-family="Verdana" x="25"
         y="70">M100,200 C100,100 250,100 250,200</text>
   <text font-size="22" font-family="Verdana" x="325" y="350"
-        style="text-anchor:middle">S400,300 400,200</text>
+        text-anchor="middle">S400,300 400,200</text>
 </svg>

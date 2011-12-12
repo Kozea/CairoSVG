@@ -957,8 +957,7 @@ class Surface(object):
         width = text_extents[2]
         x, y = size(node.get("x")), size(node.get("y"))
         text_anchor = node.get("text-anchor")
-        style = node.get("style")
-        if (text_anchor == "middle") or (style == "text-anchor:middle"):
+        if text_anchor == "middle":
             x -= width / 2. + x_bearing
         elif text_anchor == "end":
             x -= width + x_bearing
