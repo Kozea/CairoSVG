@@ -198,7 +198,7 @@ Basic data types
 Angles are only supported when given in degrees, without explicit unit.
 
 Colors are supported with ``rgb()``, ``rgba()``, ``#RGB``, and ``#RRGGBB``
-forms. The not standard ``#RGBA`` and ``#RRGGBBAA`` forms are also
+forms. The non standard ``#RGBA`` and ``#RRGGBBAA`` forms are also
 supported. Color keyword names are supported.
 
 Frequencies are not supported.
@@ -235,8 +235,82 @@ Basic DOM interfaces
 CairoSVG uses ElementTree internally, and has no real DOM interface.
 
 
+
+
 Document Structure
 ==================
+
+Defining an SVG document fragment: the ‘svg’ element
+----------------------------------------------------
+
+The ``svg`` tag is supported. In CairoSVG, ``svg`` tags that are direct
+children of the root ``svg`` tag are considered as pages in multi-pages output
+formats (PDF and PS).
+
+
+Grouping: the ‘g’ element
+-------------------------
+
+The ``g`` tag is supported.
+
+
+Defining content for reuse, and the ‘defs’ element
+--------------------------------------------------
+
+The ``defs`` tag is supported for markers, gradients, patterns and paths reused
+in the document.
+
+
+The ‘desc’ and ‘title’ elements
+-------------------------------
+
+The ``desc`` and ``title`` tag are not supported.
+
+
+The ‘symbol’ element
+--------------------
+
+The ``symbol`` tag is not supported.
+
+
+The ‘use’ element
+-----------------
+
+The ``use`` tag supports local external SVG files (no HTTP support, for
+example).
+
+
+The ‘image’ element
+-------------------
+
+The ``image`` tag is not supported.
+
+
+Conditional processing
+----------------------
+
+Conditional processing is not supported.
+
+
+Specifying whether external resources are required for proper rendering
+-----------------------------------------------------------------------
+
+The ``externalResourcesRequired`` attribute is not supported.
+
+
+Common attributes
+-----------------
+
+The ``id`` attribute is supported.
+
+The ``xml:base`` attribute is not supported.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
+
 
 
 
