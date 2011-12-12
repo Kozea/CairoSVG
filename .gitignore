@@ -1,3 +1,5 @@
 *.pyc
 *.egg-info
-test/output
+/test/output
+/dist
+/MANIFEST
