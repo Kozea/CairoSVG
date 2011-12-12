@@ -181,9 +181,58 @@ Transparency for the parent document are supported as long as the output format
 supports it. Semi-transparent PNGs can be generated.
 
 
+
+
 Basic Data Types and Interfaces
 ===============================
 
+Syntax
+------
+
+Thank you EBNF.
+
+
+Basic data types
+----------------
+
+Angles are only supported when given in degrees, without explicit unit.
+
+Colors are supported with ``rgb()``, ``rgba()``, ``#RGB``, and ``#RRGGBB``
+forms. The not standard ``#RGBA`` and ``#RRGGBBAA`` forms are also
+supported. Color keyword names are supported.
+
+Frequencies are not supported.
+
+Standard URI and IRI forms are supported, including fragment identifiers.
+
+Numbers are supported, including integers and floats with the negative
+values. Exponents are not supported.
+
+Lengths are supported, with ``mm``, ``cm``, ``in``, ``pt`` and ``pc`` units.
+
+Lists of various values are supported.
+
+Percentages are not supported.
+
+Times are not supported.
+
+
+Real number precision
+---------------------
+
+The real number precision is the same as the one of Python.
+
+
+Recognized color keyword names
+------------------------------
+
+Color keyword names are supported.
+
+
+Basic DOM interfaces
+--------------------
+
+CairoSVG uses ElementTree internally, and has no real DOM interface.
 
 
 Document Structure
