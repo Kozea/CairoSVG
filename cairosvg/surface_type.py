@@ -82,6 +82,9 @@ class OnepageSurface(surface.Surface):
     a ``self._height`` set in ``self._create_surface``.
 
     """
+    _width = NotImplementedError
+    _height = NotImplementedError
+
     @property
     def width(self):
         """Surface width."""

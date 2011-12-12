@@ -26,8 +26,16 @@ Cairo surface creator.
 import abc
 import cairo
 import io
-import itertools
 from math import pi, cos, sin, atan, radians
+
+# Python 2/3 management
+# pylint: disable=E0611
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+# pylint: enable=E0611
+
 
 from .parser import Tree
 from .colors import COLORS
@@ -392,6 +400,7 @@ class Surface(object):
         self.context.restore()
 
     def _gradient_or_pattern(self, node):
+        """Gradient or pattern color."""
         name = filter_fill_content(node)
         if name in self.gradients:
             return self._gradient(node)
@@ -688,7 +697,7 @@ class Surface(object):
             elif letter == "h":
                 # Relative horizontal line
                 x, string = string.split(" ", 1)
-                angle = 0 if x > 0 else pi
+                angle = 0 if size(x) > 0 else pi
                 node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(size(x), 0)
 
@@ -696,7 +705,7 @@ class Surface(object):
                 # Horizontal line
                 x, string = string.split(" ", 1)
                 old_x = self.context.get_current_point()[1]
-                angle = 0 if x > old_x else pi
+                angle = 0 if size(x) > old_x else pi
                 node.tangents.extend((-angle, angle))
                 self.context.line_to(size(x), old_x)
 
@@ -807,7 +816,7 @@ class Surface(object):
             elif letter == "v":
                 # Relative vertical line
                 y, string = string.split(" ", 1)
-                angle = pi / 2 if y > 0 else -pi / 2
+                angle = pi / 2 if size(y) > 0 else -pi / 2
                 node.tangents.extend((-angle, angle))
                 self.context.rel_line_to(0, size(y))
 
@@ -815,7 +824,7 @@ class Surface(object):
                 # Vertical line
                 y, string = string.split(" ", 1)
                 old_y = self.context.get_current_point()[0]
-                angle = pi / 2 if y > 0 else -pi / 2
+                angle = pi / 2 if size(y) > 0 else -pi / 2
                 node.tangents.extend((-angle, angle))
                 self.context.line_to(old_y, size(y))
 
@@ -907,8 +916,8 @@ class Surface(object):
         if not text:
             return
         fill = node.get("fill")
-        positions = list(itertools.izip_longest(x, y))
-        letters_positions = zip(positions, text)
+        positions = list(zip_longest(x, y))
+        letters_positions = list(zip(positions, text))
         letters_positions = letters_positions[:-1] + [
             (letters_positions[-1][0], text[len(letters_positions) - 1:])]
 
