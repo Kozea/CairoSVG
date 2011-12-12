@@ -317,6 +317,98 @@ The DOM interfaces are not supported.
 Styling
 =======
 
+Styling cannot be done with CSS or XSL.
+
+Here are some properties that can be used as XML attributes:
+
+Font properties:
+
+- font: not supported
+- font-family: basically supported
+- font-size: basically supported
+- font-size-adjust: not supported
+- font-stretch: not supported
+- font-style: basically supported
+- font-variant: not supported
+- font-weight: basically supported
+
+Text properties:
+
+- direction: not supported
+- letter-spacing: not supported
+- text-decoration: not supported
+- unicode-bidi: not supported
+- word-spacing: not supported
+
+Other properties for visual media:
+
+- clip: not supported
+- cursor: not supported
+- display: not supported
+- overflow: not supported
+- visibility: not supported
+
+Clipping, Masking and Compositing properties:
+
+- clip-path: not supported
+- clip-rule: not supported
+- mask: not supported
+- opacity: supported
+
+Filter Effects properties:
+
+- enable-background: not supported
+- filter: not supported
+- flood-color: not supported
+- flood-opacity: not supported
+- lighting-color: not supported
+
+Gradient properties:
+
+- stop-color: supported
+- stop-opacity: not supported
+
+Interactivity properties:
+
+- pointer-events: not supported
+
+Color and Painting properties:
+
+- color-interpolation: not supported
+- color-interpolation-filters: not supported
+- color-profile: not supported
+- color-rendering: not supported
+- fill: supported
+- fill-opacity: not supported
+- fill-rule: supported
+- image-rendering: not supported
+- marker: basically supported
+- marker-end: basically supported
+- marker-mid: basically supported
+- marker-start: basically supported
+- shape-rendering: not supported
+- stroke: supported
+- stroke-dasharray: not supported
+- stroke-dashoffset: not supported
+- stroke-linecap: supported
+- stroke-linejoin: supported
+- stroke-miterlimit: not supported
+- stroke-opacity: supported
+- stroke-width: supported
+- text-rendering: not supported
+
+Text properties:
+
+- alignment-baseline: not supported
+- baseline-shift: not supported
+- dominant-baseline: not supported
+- glyph-orientation-horizontal: not supported
+- glyph-orientation-vertical: not supported
+- kerning: not supported
+- text-anchor: supported
+- writing-mode: not supported
+
+
 
 
 Coordinate Systems, Transformations and Units
