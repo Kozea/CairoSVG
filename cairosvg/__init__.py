@@ -27,7 +27,7 @@ import optparse
 from . import parser, surface_type, surface
 
 
-VERSION = "git"
+VERSION = "0.1"
 
 
 def svg2surface(svg, surface):
