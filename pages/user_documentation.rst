@@ -18,9 +18,9 @@ Dependencies
 ------------
 
 CairoSVG is written in pure python and only depends on Pycairo [#]_. It is
-known to work on Python 2.6 and 2.7.
+known to work with Python 2.6, 2.7, 3.1 and 3.2.
 
-Linux users certainly have Python already installed. For Windows and MacOS
+Linux and MacOS users certainly have Python already installed. For Windows
 users, please install Python [#]_ thanks to the adequate installer.
 
 .. [#] `Pycairo website <http://cairographics.org/pycairo/>`_.
@@ -43,13 +43,14 @@ Description
 
 Here is the simple CairoSVG usage::
 
-  Usage: cairosvg filename [options]
+  Usage: cairosvg.py filename [options]
 
   Options:
     -h, --help            show this help message and exit
     -v, --version         show version and exit
     -f FORMAT, --format=FORMAT
                           output format
+    -d DPI, --dpi=DPI     svg resolution
     -o OUTPUT, --output=OUTPUT
                           output filename
 
