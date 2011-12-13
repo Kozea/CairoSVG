@@ -212,7 +212,8 @@ Lengths are supported, with ``mm``, ``cm``, ``in``, ``pt`` and ``pc`` units.
 
 Lists of various values are supported.
 
-Percentages are not supported.
+Percentages are only supported for gradients and ``startOffset`` attributes in
+paths.
 
 Times are not supported.
 
@@ -379,7 +380,7 @@ Color and Painting properties:
 - color-profile: not supported
 - color-rendering: not supported
 - fill: supported
-- fill-opacity: not supported
+- fill-opacity: supported
 - fill-rule: supported
 - image-rendering: not supported
 - marker: basically supported
