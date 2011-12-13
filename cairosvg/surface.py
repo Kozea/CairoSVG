@@ -179,7 +179,7 @@ def distance(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
-def path_distance(path, width):
+def point_following_path(path, width):
     """Get the point at ``width`` distance on ``path``."""
     total_length = 0
     for item in path:
@@ -226,7 +226,7 @@ class Surface(object):
         self.cairo = None
         self.context = None
         self.cursor_position = 0, 0
-        self.width_tot = 0
+        self.total_width = 0
         self.markers = {}
         self.gradients = {}
         self.patterns = {}
@@ -952,7 +952,7 @@ class Surface(object):
                 node["y"] = str(y + size(node.get("dy")))
                 self.textPath(node)
                 if node.parent.children[-1] == node:
-                    self.width_tot = 0
+                    self.total_width = 0
 
     def text(self, node):
         """Draw a text ``node``."""
@@ -1029,18 +1029,18 @@ class Surface(object):
                     float(start_offset.rstrip(" %")) / 100)
             else:
                 start_offset = size(start_offset)
-        self.width_tot += start_offset
+        self.total_width += start_offset
 
-        x, y = path_distance(cairo_path, self.width_tot)
+        x, y = point_following_path(cairo_path, self.total_width)
         text = node.text.strip(" \n")
         letter_spacing = size(node.get("letter-spacing"))
 
         for letter in text:
-            self.width_tot += (
+            self.total_width += (
                 self.context.text_extents(letter)[4] + letter_spacing)
-            distance = path_distance(cairo_path, self.width_tot)
-            if distance:
-                x2, y2 = distance
+            point = point_following_path(cairo_path, self.total_width)
+            if point:
+                x2, y2 = point
             else:
                 continue
             angle = point_angle(x, y, x2, y2)
