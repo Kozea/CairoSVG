@@ -82,6 +82,7 @@ class OnepageSurface(surface.Surface):
     a ``self._height`` set in ``self._create_surface``.
 
     """
+    __metaclass__ = abc.ABCMeta
     _width = NotImplementedError
     _height = NotImplementedError
 

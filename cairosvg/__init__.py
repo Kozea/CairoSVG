@@ -30,9 +30,9 @@ from . import parser, surface_type, surface
 VERSION = "0.1"
 
 
-def svg2surface(svg, surface):
+def svg2surface(svg, export_surface_type):
     """Return a ``surface`` corresponding to the ``svg`` string."""
-    return surface(parser.Tree(svg))
+    return export_surface_type(parser.Tree(svg))
 
 
 def svg2pdf(svg):
@@ -51,19 +51,20 @@ def svg2png(svg):
 
 
 def main():
+    """Entry-point of the executable."""
     # Get command-line options
-    parser = optparse.OptionParser("usage: %prog filename [options]")
-    parser.add_option(
+    option_parser = optparse.OptionParser("usage: %prog filename [options]")
+    option_parser.add_option(
         "-v", "--version", action="store_true",
         default=False, help="show version and exit")
-    parser.add_option(
+    option_parser.add_option(
         "-f", "--format", help="output format")
-    parser.add_option(
+    option_parser.add_option(
         "-d", "--dpi", help="svg resolution")
-    parser.add_option(
+    option_parser.add_option(
         "-o", "--output",
         default="", help="output filename")
-    options, args = parser.parse_args()
+    options, args = option_parser.parse_args()
 
     # Print version and exit if the option is given
     if options.version:
@@ -83,7 +84,7 @@ def main():
 
     # Print help if no argument is given
     if not args:
-        parser.print_help()
+        option_parser.print_help()
         sys.exit()
 
     content = launcher(args[0])

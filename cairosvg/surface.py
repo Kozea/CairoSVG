@@ -1038,9 +1038,9 @@ class Surface(object):
         for letter in text:
             self.total_width += (
                 self.context.text_extents(letter)[4] + letter_spacing)
-            point = point_following_path(cairo_path, self.total_width)
-            if point:
-                x2, y2 = point
+            point_on_path = point_following_path(cairo_path, self.total_width)
+            if point_on_path:
+                x2, y2 = point_on_path
             else:
                 continue
             angle = point_angle(x, y, x2, y2)
