@@ -22,6 +22,9 @@ SVG Parser.
 
 import os
 from xml.etree import ElementTree
+from xml.parsers import expat
+
+ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
 
 
 class Node(dict):
@@ -88,7 +91,7 @@ class Tree(Node):
         try:
             tree = ElementTree.fromstring(text_or_url)
             self.filename = None
-        except ElementTree.ParseError:
+        except ParseError:
             if "#" in text_or_url:
                 filename, element_id = text_or_url.split("#")
             else:
@@ -102,7 +105,9 @@ class Tree(Node):
             with open(filename) as file_descriptor:
                 tree = ElementTree.fromstring(file_descriptor.read())
             if element_id:
-                for element in tree.iter():
+                iterator = (tree.iter() if hasattr(tree, 'iter')
+                            else tree.getiterator())
+                for element in iterator:
                     if element.get("id") == element_id:
                         tree = element
                         break
