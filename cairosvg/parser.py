@@ -70,7 +70,6 @@ class Node(dict):
         if not self.children:
             self.children = tuple(Node(child, self) for child in node)
 
-
     def text_children(self, node):
         """Create children and return them."""
         children = []
@@ -84,33 +83,35 @@ class Node(dict):
 
         return list(children)
 
+
 class Tree(Node):
     """SVG tree."""
-    def __init__(self, text_or_url, parent=None):
+    def __init__(self, file_or_url, parent=None):
         """Create the Tree from SVG ``text``."""
-        try:
-            tree = ElementTree.fromstring(text_or_url)
-            self.filename = None
-        except ParseError:
-            if "#" in text_or_url:
-                filename, element_id = text_or_url.split("#")
+        if hasattr(file_or_url, "read"):
+            # file_or_url is a file
+            tree = ElementTree.parse(file_or_url).getroot()
+            self.filename = getattr(file_or_url, "name", None)
+        else:
+            # file_or_url is an URL
+            if "#" in file_or_url:
+                url, element_id = file_or_url.split("#")
             else:
-                filename, element_id = text_or_url, None
+                url, element_id = file_or_url, None
             if parent and parent.filename:
-                if filename:
-                    filename = os.path.join(
-                        os.path.dirname(parent.filename), filename)
-                else:
-                    filename = parent.filename
-            with open(filename) as file_descriptor:
-                tree = ElementTree.fromstring(file_descriptor.read())
+                if url:
+                    url = os.path.join(os.path.dirname(parent.filename), url)
+                elif element_id:
+                    url = parent.filename
+            self.filename = url
+            tree = ElementTree.parse(url).getroot()
             if element_id:
-                iterator = (tree.iter() if hasattr(tree, 'iter')
-                            else tree.getiterator())
+                iterator = (
+                    tree.iter() if hasattr(tree, 'iter')
+                    else tree.getiterator())
                 for element in iterator:
                     if element.get("id") == element_id:
                         tree = element
                         break
-            self.filename = filename
         super(Tree, self).__init__(tree, parent)
         self.root = True

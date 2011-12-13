@@ -87,7 +87,12 @@ def main():
         option_parser.print_help()
         sys.exit()
 
-    content = launcher(args[0])
+    input_string = args[0]
+    if input_string == "-":
+        content = launcher(sys.stdin)
+    else:
+        content = launcher(input_string)
+
     if options.output:
         open(options.output, "w").write(content)
     else:
