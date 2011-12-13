@@ -176,7 +176,7 @@ def rotate(x, y, angle):
 
 def distance(x1, y1, x2, y2):
     """Get the distance between two points."""
-    return ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) ** 0.5
+    return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
 def path_distance(path, width):
@@ -199,6 +199,21 @@ def path_distance(path, width):
                 x = cos(angle) * length + old_point[0]
                 y = sin(angle) * length + old_point[1]
                 return x, y
+
+
+def path_length(path):
+    """Get the length of ``path``."""
+    total_length = 0
+    for item in path:
+        if item[0] == cairo.PATH_MOVE_TO:
+            old_point = item[1]
+        elif item[0] == cairo.PATH_LINE_TO:
+            new_point = item[1]
+            length = distance(
+                old_point[0], old_point[1], new_point[0], new_point[1])
+            total_length += length
+            old_point = new_point
+    return total_length
 
 
 class Surface(object):
@@ -1006,18 +1021,34 @@ class Surface(object):
         cairo_path = self.context.copy_path_flat()
         self.context.new_path()
 
+        start_offset = node.get("startOffset", 0)
+        if start_offset:
+            if "%" in start_offset:
+                start_offset = (
+                    path_length(cairo_path) *
+                    float(start_offset.rstrip(" %")) / 100)
+            else:
+                start_offset = size(start_offset)
+        self.width_tot += start_offset
+
         x, y = path_distance(cairo_path, self.width_tot)
         text = node.text.strip(" \n")
+        letter_spacing = size(node.get("letter-spacing"))
 
         for letter in text:
-            x_advance = self.context.text_extents(letter)[4]
-            self.width_tot += x_advance
-            x2, y2 = path_distance(cairo_path, self.width_tot)
+            self.width_tot += (
+                self.context.text_extents(letter)[4] + letter_spacing)
+            distance = path_distance(cairo_path, self.width_tot)
+            if distance:
+                x2, y2 = distance
+            else:
+                continue
             angle = point_angle(x, y, x2, y2)
             self.context.save()
             self.context.translate(x, y)
             self.context.rotate(angle)
             self.context.translate(0, size(node.get("y")))
+            self.context.move_to(0, 0)
             self.context.show_text(letter)
             self.context.restore()
             x, y = x2, y2
