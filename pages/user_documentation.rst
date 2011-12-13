@@ -58,7 +58,8 @@ Supported output formats are ``pdf``, ``ps`` and ``png`` (default is
 ``pdf``). The default output is the standard output. If an output filename is
 given, the format is automatically chosen according to the extension.
 
-Moreover, you can directly use an SVG string instead of ``filename``.
+Moreover, if ``-`` is used as filename, CairoSVG reads the SVG string from the
+standard input.
 
 Examples
 --------
@@ -75,4 +76,4 @@ Here are some usage examples::
   cairosvg test.svg -o test.ps
 
   # Convert an SVG string to pdf, write to standard output
-  cairosvg "<svg height='30' width='30'><text y='10'>123</text></svg>"
+  echo "<svg height='30' width='30'><text y='10'>123</text></svg>" | cairosvg -
