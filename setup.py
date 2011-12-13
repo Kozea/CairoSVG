@@ -37,7 +37,6 @@ setup(
     packages=["cairosvg"],
     provides=["cairosvg"],
     scripts=["bin/cairosvg"],
-    requires={"pycairo": ["pycairo>=1.8"]},
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[
         "Development Status :: 3 - Alpha",
