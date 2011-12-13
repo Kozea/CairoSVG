@@ -147,15 +147,15 @@ supported.
 Types of graphics elements
 --------------------------
 
-1 Painting shapes and text
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Painting shapes and text
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Elements are filled and stoked. Filling supports plain colors, simple gradients
 and simple patterns. Stoking only supports plain colors. Transparency is
 supported for both filling and stoking.
 
-2 Painting raster images
-~~~~~~~~~~~~~~~~~~~~~~~~
+Painting raster images
+~~~~~~~~~~~~~~~~~~~~~~
 
 Included raster images are not supported.
 
