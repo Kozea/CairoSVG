@@ -55,6 +55,10 @@ PATH_LETTERS = "achlmqstvzACHLMQSTVZ"
 PATH_TAGS = ("circle", "line", "path", "polyline", "polygon", "rect")
 
 
+class NotImplementedUnitError(ValueError, NotImplementedError):
+    """Exception raised when an unit is not implemented."""
+
+
 def normalize(string=None):
     """Normalize a string corresponding to an array of various vaues."""
     string = string.replace("-", " -")
@@ -77,7 +81,10 @@ def size(string=None):
     for unit, coefficient in UNITS.items():
         if unit in string:
             number = float(string.strip(" " + unit))
-            return number * (DPI * coefficient if coefficient else 1)
+            if coefficient == NotImplemented:
+                raise NotImplementedUnitError
+            else:
+                return number * (DPI * coefficient if coefficient else 1)
 
     # Unknown size or multiple sizes
     return 0
