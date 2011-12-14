@@ -345,9 +345,9 @@ Other properties for visual media:
 
 - clip: not supported
 - cursor: not supported
-- display: not supported
+- display: supported
 - overflow: not supported
-- visibility: not supported
+- visibility: supported
 
 Clipping, Masking and Compositing properties:
 
