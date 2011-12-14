@@ -451,7 +451,8 @@ class Surface(object):
             linpat = cairo.LinearGradient(x1, y1, x2, y2)
             for child in gradient_node.children:
                 offset = child.get("offset")
-                stop_color = color(child.get("stop-color"))
+                stop_color = color(
+                    child.get("stop-color"), child.get("stop-opacity", 1))
                 offset = child.get("offset")
                 if "%" in offset:
                     offset = float(offset.strip("%")) / 100
@@ -470,7 +471,8 @@ class Surface(object):
                 offset = child.get("offset")
                 if "%" in offset:
                     offset = float(offset.strip("%")) / 100
-                stop_color = color(child.get("stop-color"))
+                stop_color = color(
+                    child.get("stop-color"), child.get("stop-opacity", 1))
                 radpat.add_color_stop_rgba(float(offset), *stop_color)
             self.context.set_source(radpat)
             self.context.fill_preserve()
