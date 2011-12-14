@@ -367,7 +367,7 @@ Filter Effects properties:
 Gradient properties:
 
 - stop-color: supported
-- stop-opacity: not supported
+- stop-opacity: supported
 
 Interactivity properties:
 
