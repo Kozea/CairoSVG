@@ -376,7 +376,7 @@ class Surface(object):
         stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
-        if stroke_and_fill:
+        if stroke_and_fill and node.get("visibility", "visible") != "hidden":
             # Fill
             if "url(#" in node.get("fill", ""):
                 self._gradient_or_pattern(node)
