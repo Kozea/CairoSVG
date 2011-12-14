@@ -376,7 +376,11 @@ class Surface(object):
         stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
         fill_opacity = opacity * float(node.get("fill-opacity", 1))
 
-        if stroke_and_fill and node.get("visibility", "visible") != "hidden":
+        # Manage dispaly and visibility
+        display = node.get("display", "inline") != "none"
+        visible = display and (node.get("visibility", "visible") != "hidden")
+
+        if stroke_and_fill and visible:
             # Fill
             if "url(#" in node.get("fill", ""):
                 self._gradient_or_pattern(node)
@@ -394,8 +398,9 @@ class Surface(object):
             self.context.stroke()
 
         # Draw children
-        for child in node.children:
-            self.draw(child, stroke_and_fill)
+        if display:
+            for child in node.children:
+                self.draw(child, stroke_and_fill)
 
         if not node.root:
             # Restoring context is useless if we are in the root tag, it may
