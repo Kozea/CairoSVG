@@ -393,7 +393,7 @@ Color and Painting properties:
 - stroke-dashoffset: not supported
 - stroke-linecap: supported
 - stroke-linejoin: supported
-- stroke-miterlimit: not supported
+- stroke-miterlimit: supported
 - stroke-opacity: supported
 - stroke-width: supported
 - text-rendering: not supported
