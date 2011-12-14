@@ -95,7 +95,7 @@ class Tree(Node):
         else:
             # file_or_url is an URL
             if "#" in file_or_url:
-                url, element_id = file_or_url.split("#")
+                url, element_id = file_or_url.split("#", 1)
             else:
                 url, element_id = file_or_url, None
             if parent and parent.filename:
