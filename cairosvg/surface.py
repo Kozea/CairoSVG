@@ -365,6 +365,9 @@ class Surface(object):
         if join_cap == "bevel":
             self.context.set_line_join(cairo.LINE_JOIN_BEVEL)
 
+        miter_limit = size(node.get("stroke-miterlimit", 4))
+        self.context.set_miter_limit(miter_limit)
+
         if hasattr(self, node.tag):
             getattr(self, node.tag)(node)
 
