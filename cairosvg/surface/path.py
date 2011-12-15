@@ -22,8 +22,8 @@ Paths manager.
 
 from math import pi, radians
 
+from .defs import draw_marker
 from .helpers import normalize, point, point_angle, quadratic_points, rotate
-from .markers import draw_marker
 from .units import size
 
 
