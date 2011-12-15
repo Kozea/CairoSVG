@@ -81,11 +81,13 @@ def generate_function(description):
             for y in range(height):
                 pixel_slice = slice(4 * x, 4 * (x + 1))
                 pixel1 = list(pixels1[y][pixel_slice])
-                alpha_pixel1 = \
-                    [pixel1[3] * value for value in pixel1[:3]] + [pixel1[3]]
+                alpha_pixel1 = (
+                    [pixel1[3] * value for value in pixel1[:3]] +
+                    [255 * pixel1[3]])
                 pixel2 = list(pixels2[y][pixel_slice])
-                alpha_pixel2 = \
-                    [pixel2[3] * value for value in pixel2[:3]] + [pixel2[3]]
+                alpha_pixel2 = (
+                    [pixel2[3] * value for value in pixel2[:3]] +
+                    [255 * pixel2[3]])
                 assert same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE), \
                     "Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2)
         # pylint: enable=C0103
