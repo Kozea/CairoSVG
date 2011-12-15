@@ -29,25 +29,10 @@ from . import parser, surface
 
 VERSION = "0.1.2"
 
-
-def svg2surface(svg, export_surface_type):
-    """Return a ``surface`` corresponding to the ``svg`` string."""
-    return export_surface_type(parser.Tree(svg))
-
-
-def svg2pdf(svg):
-    """Return a PDF string corresponding to the ``svg`` string."""
-    return svg2surface(svg, surface.PDFSurface).read()
-
-
-def svg2ps(svg):
-    """Return a PostScript string corresponding to the ``svg`` string."""
-    return svg2surface(svg, surface.PSSurface).read()
-
-
-def svg2png(svg):
-    """Return a PNG string corresponding to the ``svg`` string."""
-    return svg2surface(svg, surface.PNGSurface).read()
+SURFACES = {
+    'png': surface.PNGSurface,
+    'pdf': surface.PDFSurface,
+    'ps': surface.PSSurface}
 
 
 def main():
@@ -80,20 +65,25 @@ def main():
         options.format or
         os.path.splitext(options.output)[1].lstrip(".") or
         "pdf")
-    launcher = dict(pdf=svg2pdf, ps=svg2ps, png=svg2png)[output_format]
 
     # Print help if no argument is given
     if not args:
         option_parser.print_help()
         sys.exit()
 
-    input_string = args[0]
-    if input_string == "-":
-        content = launcher(sys.stdin)
-    else:
-        content = launcher(input_string)
+    input_ = args[0]
+    if input_ == "-":
+        try:
+            input_ = sys.stdin.buffer  # Binary stream in Python 3
+        except AttributeError:
+            input_ = sys.stdin
 
-    if options.output:
-        open(options.output, "w").write(content)
+    if not options.output or options.output == '-':
+        try:
+            output = sys.stdout.buffer  # Binary stream in Python 3
+        except AttributeError:
+            output = sys.stdout
     else:
-        print(content)
+        output = options.output
+
+    content = SURFACES[output_format](input_, output).finish()

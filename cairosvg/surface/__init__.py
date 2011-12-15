@@ -26,6 +26,7 @@ import io
 import math
 import os
 
+from ..parser import Tree
 from .colors import color
 from .defs import gradient_or_pattern, parse_def
 from .helpers import node_format, normalize
@@ -41,8 +42,10 @@ class Surface(object):
     capabilities.
 
     """
-    def __init__(self, tree):
-        """Create the surface from ``tree``."""
+    def __init__(self, file_or_url=None, output=None, tree=None):
+        """Create the surface from a filename or a file-like object."""
+        if tree is None:
+            tree = Tree(file_or_url)
         self.cairo = None
         self.context = None
         self.cursor_position = 0, 0
@@ -52,7 +55,11 @@ class Surface(object):
         self.patterns = {}
         self.paths = {}
         self._old_parent_node = self.parent_node = None
-        self.bytesio = io.BytesIO()
+        self.return_bytes = output is bytes
+        if self.return_bytes:
+            self.output = io.BytesIO()
+        else:
+            self.output = output
         self._width = None
         self._height = None
         self._create_surface(tree)
@@ -66,7 +73,7 @@ class Surface(object):
 
         """
         self._width, self._height, viewbox = node_format(tree)
-        self.cairo = cairo.SVGSurface(None, self._width, self._height)
+        self.cairo = cairo.SVGSurface(self.output, self._width, self._height)
         self.context = cairo.Context(self.cairo)
         self._set_context_size(self._width, self._height, viewbox)
         self.context.move_to(0, 0)
@@ -88,12 +95,13 @@ class Surface(object):
                 self.context.scale(x_ratio, y_ratio)
                 self.context.translate(-x, -y)
 
-    def read(self):
+    def finish(self):
         """Read the surface content."""
         self.cairo.finish()
-        value = self.bytesio.getvalue()
-        self.bytesio.close()
-        return value
+        if self.return_bytes:
+            content = self.output.getvalue()
+            self.output.close()
+            return content
 
     def draw(self, node, stroke_and_fill=True):
         """Draw ``node`` and its children."""
@@ -234,7 +242,7 @@ class MultipageSurface(Surface):
             self.context = cairo.Context(
                 self.surface_class(os.devnull, width, height))
         else:
-            self.cairo = self.surface_class(self.bytesio, width, height)
+            self.cairo = self.surface_class(self.output, width, height)
             self.context = cairo.Context(self.cairo)
             self._set_context_size(width, height, viewbox)
             self.cairo.set_size(width, height)
@@ -242,13 +250,14 @@ class MultipageSurface(Surface):
 
     def svg(self, node):
         """Draw a svg ``node`` with multi-page support."""
+        1/0  # XXX this is broken since the 2011-12-15 refactoring
         if not node.root:
             width, height, viewbox = node_format(node)
             if self.cairo:
                 self.cairo.show_page()
             else:
                 self.context.restore()
-                self.cairo = self.surface_class(self.bytesio, width, height)
+                self.cairo = self.surface_class(self.output, width, height)
                 self.context = cairo.Context(self.cairo)
                 self.context.save()
             self._set_context_size(width, height, viewbox)
@@ -302,7 +311,7 @@ class PNGSurface(OnepageSurface):
         self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
 
-    def read(self):
+    def finish(self):
         """Read the PNG surface content."""
-        self.cairo.write_to_png(self.bytesio)
-        return super(PNGSurface, self).read()
+        self.cairo.write_to_png(self.output)
+        return super(PNGSurface, self).finish()

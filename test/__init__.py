@@ -24,7 +24,7 @@ This test suite compares the CairoSVG output with the reference output.
 """
 
 import os
-import cairosvg
+import cairosvg.surface
 import png
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "reference")
@@ -59,11 +59,8 @@ def generate_function(description):
         size1 = (width1, height1)
         png_filename = os.path.join(
             OUTPUT_FOLDER, os.path.basename(png_filename))
-        with open(png_filename, "wb") as temp:
-            filename = temp.name
-            content = cairosvg.svg2png(svg_filename)
-            temp.write(content)
-        width2, height2, pixels2, _ = png.Reader(filename).asRGBA()
+        cairosvg.surface.PNGSurface(svg_filename, png_filename).finish()
+        width2, height2, pixels2, _ = png.Reader(png_filename).asRGBA()
         size2 = (width2, height2)
 
         # Test size
