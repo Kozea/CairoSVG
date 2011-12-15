@@ -25,6 +25,7 @@ import sys
 import optparse
 
 from . import parser, surface
+from .surface import units
 
 
 VERSION = "0.1.2"
@@ -58,7 +59,7 @@ def main():
 
     # Set the resolution
     if options.dpi:
-        surface.DPI = float(options.dpi)
+        units.DPI = float(options.dpi)
 
     # Parse the SVG
     output_format = (
