@@ -87,4 +87,4 @@ def main():
     else:
         output = options.output
 
-    content = SURFACES[output_format](input_, output).finish()
+    SURFACES[output_format](input_, output).finish()

@@ -111,11 +111,13 @@ def pattern(surface, node):
     """Draw a pattern image."""
     pattern_node = surface.patterns[filter_fill_content(node)]
     if pattern_node.tag == "pattern":
-        pattern_surface = type(surface)(tree=pattern_node)
-        pattern_surface = cairo.SurfacePattern(pattern_surface.cairo)
-        pattern_surface.set_extend(cairo.EXTEND_REPEAT)
-        surface.context.set_source(pattern_surface)
+        from . import SVGSurface  # circular import
+        pattern_surface = SVGSurface(tree=pattern_node, output=None)
+        pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
+        pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
+        surface.context.set_source(pattern_pattern)
         surface.context.fill_preserve()
+        pattern_surface.finish()
 
 
 def draw_marker(surface, node, position="mid"):

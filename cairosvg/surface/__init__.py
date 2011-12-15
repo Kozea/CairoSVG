@@ -36,14 +36,21 @@ from .units import size
 
 
 class Surface(object):
-    """Cairo dummy surface.
+    """Abstract base class for CairoSVG surfaces."""
 
-    This class may be overriden to create surfaces with real output
-    capabilities.
+    # Subclasses must either define this or override _create_surface()
+    surface_class = None
 
-    """
-    def __init__(self, file_or_url=None, output=None, tree=None):
-        """Create the surface from a filename or a file-like object."""
+    def __init__(self, file_or_url=None, output=bytes, tree=None):
+        """Create the surface from a filename or a file-like object.
+
+        The rendered content is written to ``output`` which can be a filename,
+        a file-like object, ``None`` (render in memory but do not write
+        anything) or the builting ``bytes`` as a marker.
+
+        If ``output`` is ``bytes``, the ``finish()`` method will return
+        the content as a bytes object.
+        """
         if tree is None:
             tree = Tree(file_or_url)
         self.cairo = None
@@ -60,23 +67,20 @@ class Surface(object):
             self.output = io.BytesIO()
         else:
             self.output = output
-        self._width = None
-        self._height = None
-        self._create_surface(tree)
-        self.draw(tree)
-
-    def _create_surface(self, tree):
-        """Create a cairo surface.
-
-        A method overriding this one must create ``self.cairo`` and
-        ``self.context``.
-
-        """
-        self._width, self._height, viewbox = node_format(tree)
-        self.cairo = cairo.SVGSurface(self.output, self._width, self._height)
+        width, height, viewbox = node_format(tree)
+        # Actual surface dimensions: may be rounded on raster surfaces types
+        self.cairo, self.width, self.height = self._create_surface(
+            width, height)
         self.context = cairo.Context(self.cairo)
-        self._set_context_size(self._width, self._height, viewbox)
+        # Initial, non-rounded dimensions
+        self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
+        self.draw_root(tree)
+
+    def _create_surface(self, width, height):
+        """Create and return ``(cairo_surface, width, height)``."""
+        cairo_surface = self.surface_class(self.output, width, height)
+        return cairo_surface, width, height
 
     def _set_context_size(self, width, height, viewbox):
         """Set the context size."""
@@ -102,6 +106,9 @@ class Surface(object):
             content = self.output.getvalue()
             self.output.close()
             return content
+
+    def draw_root(self, node):
+        self.draw(node)
 
     def draw(self, node, stroke_and_fill=True):
         """Draw ``node`` and its children."""
@@ -226,92 +233,58 @@ class Surface(object):
 
 
 class MultipageSurface(Surface):
-    """Cairo abstract surface managing multi-page outputs.
-
-    Classes overriding :class:`MultipageSurface` must have a ``surface_class``
-    class attribute corresponding to the cairo surface class.
-
-    """
-    __metaclass__ = abc.ABCMeta
-    surface_class = NotImplementedError
-
-    def _create_surface(self, tree):
-        width, height, viewbox = node_format(tree)
-        if "svg" in tuple(child.tag for child in tree.children):
-            # Real svg pages are in this root svg tag, create a fake surface
-            self.context = cairo.Context(
-                self.surface_class(os.devnull, width, height))
-        else:
-            self.cairo = self.surface_class(self.output, width, height)
-            self.context = cairo.Context(self.cairo)
-            self._set_context_size(width, height, viewbox)
-            self.cairo.set_size(width, height)
-            self.context.move_to(0, 0)
-
-    def svg(self, node):
-        """Draw a svg ``node`` with multi-page support."""
-        1/0  # XXX this is broken since the 2011-12-15 refactoring
-        if not node.root:
-            width, height, viewbox = node_format(node)
-            if self.cairo:
-                self.cairo.show_page()
-            else:
-                self.context.restore()
-                self.cairo = self.surface_class(self.output, width, height)
-                self.context = cairo.Context(self.cairo)
+    """Abstract base class for surfaces that can handle multiple pages."""
+    def draw_root(self, node):
+        self.width = None
+        self.height = None
+        self.page_sizes = []
+        svg_children = [child for child in node.children if child.tag == 'svg']
+        if svg_children:
+            # Multi-page
+            for page in svg_children:
+                width, height, viewbox = node_format(page)
+                self.page_sizes.append((width, height))
+                self.cairo.set_size(width, height)
                 self.context.save()
-            self._set_context_size(width, height, viewbox)
-            self.cairo.set_size(width, height)
+                self._set_context_size(width, height, viewbox)
+                self.draw(page)
+                self.context.restore()
+                self.cairo.show_page()
+        else:
+            self.draw(node)
 
 
 class PDFSurface(MultipageSurface):
-    """Cairo PDF surface."""
+    """A surface that writes in PDF format."""
     surface_class = cairo.PDFSurface
 
 
 class PSSurface(MultipageSurface):
-    """Cairo PostScript surface."""
+    """A surface that writes in PostScript format."""
     surface_class = cairo.PSSurface
 
 
-class OnepageSurface(Surface):
-    """Cairo abstract surface managing one page outputs.
-
-    Classes overriding :class:`OnepageSurface` must have a ``self._width`` and
-    a ``self._height`` set in ``self._create_surface``.
-
-    """
-    __metaclass__ = abc.ABCMeta
-    _width = NotImplementedError
-    _height = NotImplementedError
-
-    @property
-    def width(self):
-        """Surface width."""
-        return self._width
-
-    @property
-    def height(self):
-        """Surface height."""
-        return self._height
-
-
-class PNGSurface(OnepageSurface):
-    """Cairo PNG surface."""
-    def _create_surface(self, tree):
-        width, height, viewbox = node_format(tree)
-
-        # The image size has integer width and height
-        self._width, self._height = int(width), int(height)
-        self.cairo = cairo.ImageSurface(
-            cairo.FORMAT_ARGB32, self._width, self._height)
-
-        # The context size has floating width and height
-        self.context = cairo.Context(self.cairo)
-        self._set_context_size(width, height, viewbox)
-        self.context.move_to(0, 0)
+class PNGSurface(Surface):
+    """A surface that writes in PNG format."""
+    def _create_surface(self, width, height):
+        """Create and return ``(cairo_surface, width, height)``."""
+        width = int(width)
+        height = int(height)
+        cairo_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        return cairo_surface, width, height
 
     def finish(self):
         """Read the PNG surface content."""
-        self.cairo.write_to_png(self.output)
+        if self.output is not None:
+            self.cairo.write_to_png(self.output)
         return super(PNGSurface, self).finish()
+
+
+class SVGSurface(Surface):
+    """A surface that writes in SVG format.
+
+    It may seem pointless to render SVG to SVG, but this can be used
+    with ``output=None`` to get a vector-based single page cairo surface.
+
+    """
+    surface_class = cairo.SVGSurface
