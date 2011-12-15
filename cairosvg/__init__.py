@@ -28,7 +28,7 @@ from . import surface
 from .surface import units
 
 
-VERSION = "0.1.2"
+VERSION = "0.2"
 
 SURFACES = {
     'png': surface.PNGSurface,

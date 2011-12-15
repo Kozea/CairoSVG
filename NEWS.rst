@@ -2,6 +2,16 @@
  News
 ======
 
+Version 0.2, released on 2011-12-XX
+===================================
+
+* **Break the Python API again**. Use
+  ``cairosvg.surface.PDFSurface(input, output).finish()``.
+* Add support for ``display``, ``visibility``, ``stop-opacity`` and
+  ``stroke-miterlimit``
+* Internal refactoring
+
+
 Version 0.1.2, released on 2011-12-14
 =====================================
 
