@@ -24,7 +24,7 @@ import os
 import sys
 import optparse
 
-from . import parser, surface_type, surface
+from . import parser, surface
 
 
 VERSION = "0.1.2"
@@ -37,17 +37,17 @@ def svg2surface(svg, export_surface_type):
 
 def svg2pdf(svg):
     """Return a PDF string corresponding to the ``svg`` string."""
-    return svg2surface(svg, surface_type.PDFSurface).read()
+    return svg2surface(svg, surface.PDFSurface).read()
 
 
 def svg2ps(svg):
     """Return a PostScript string corresponding to the ``svg`` string."""
-    return svg2surface(svg, surface_type.PSSurface).read()
+    return svg2surface(svg, surface.PSSurface).read()
 
 
 def svg2png(svg):
     """Return a PNG string corresponding to the ``svg`` string."""
-    return svg2surface(svg, surface_type.PNGSurface).read()
+    return svg2surface(svg, surface.PNGSurface).read()
 
 
 def main():

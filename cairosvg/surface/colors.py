@@ -1,12 +1,27 @@
-# Taken from Inkscape
-# Public domain
+# -*- coding: utf-8 -*-
+# This file is part of CairoSVG
+# Copyright © 2010-2011 Kozea
+#
+# This library is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 SVG colors.
 
 """
 
-COLORS = {
+
+COLORS = {  # Taken from Inkscape
     "black": "#000000",
     "dimgray": "#696969",
     "gray": "#808080",
@@ -145,3 +160,32 @@ COLORS = {
     "crimson": "#DC143C",
     "pink": "#FFC0CB",
     "lightpink": "#FFB6C1"}
+
+
+def color(string=None, opacity=1):
+    """Replace ``string`` representing a color by a RGBA tuple."""
+    if not string or string == "none":
+        return (0, 0, 0, 0)
+
+    string = string.strip().lower()
+
+    if string.startswith("rgba"):
+        r, g, b, a = tuple(
+            float(i) for i in string.strip(" rgba()").split(","))
+        return r, g, b, a * opacity
+    elif string.startswith("rgb"):
+        r, g, b = tuple(float(i) for i in string.strip(" rgb()").split(","))
+        return r, g, b, opacity
+
+    if string in COLORS:
+        string = COLORS[string]
+
+    if len(string) in (4, 5):
+        string = "#" + "".join(2 * char for char in string[1:])
+    if len(string) == 9:
+        opacity *= int(string[7:9], 16) / 255
+
+    plain_color = tuple(
+        int(value, 16) / 255. for value in (
+            string[1:3], string[3:5], string[5:7]))
+    return plain_color + (opacity,)
