@@ -20,11 +20,9 @@ Cairo surface creators.
 
 """
 
-import abc
 import cairo
 import io
 import math
-import os
 
 from ..parser import Tree
 from .colors import color
@@ -61,6 +59,7 @@ class Surface(object):
         self.gradients = {}
         self.patterns = {}
         self.paths = {}
+        self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.return_bytes = output is bytes
         if self.return_bytes:
@@ -71,6 +70,7 @@ class Surface(object):
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
             width, height)
+        self.page_sizes.append((self.width, self.height))
         self.context = cairo.Context(self.cairo)
         # Initial, non-rounded dimensions
         self._set_context_size(width, height, viewbox)
@@ -79,7 +79,10 @@ class Surface(object):
 
     def _create_surface(self, width, height):
         """Create and return ``(cairo_surface, width, height)``."""
+        # self.surface_class should not be None when called here
+        # pylint: disable=E1102
         cairo_surface = self.surface_class(self.output, width, height)
+        # pylint: enable=E1102
         return cairo_surface, width, height
 
     def _set_context_size(self, width, height, viewbox):
@@ -108,6 +111,7 @@ class Surface(object):
             return content
 
     def draw_root(self, node):
+        """Draw the root ``node``."""
         self.draw(node)
 
     def draw(self, node, stroke_and_fill=True):
@@ -237,7 +241,6 @@ class MultipageSurface(Surface):
     def draw_root(self, node):
         self.width = None
         self.height = None
-        self.page_sizes = []
         svg_children = [child for child in node.children if child.tag == 'svg']
         if svg_children:
             # Multi-page

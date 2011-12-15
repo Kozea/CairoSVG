@@ -33,7 +33,7 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=I0011
+disable=I0011,W0142
 
 
 [REPORTS]
@@ -73,7 +73,7 @@ ignore-mixin-members=no
 
 # List of classes names for which member attributes should not be checked
 # (useful for classes with attributes dynamically set).
-ignored-classes=
+ignored-classes=file
 
 # When zope mode is activated, add a predefined set of Zope acquired attributes
 # to generated-members.

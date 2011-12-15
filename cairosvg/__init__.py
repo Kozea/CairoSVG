@@ -24,7 +24,7 @@ import os
 import sys
 import optparse
 
-from . import parser, surface
+from . import surface
 from .surface import units
 
 
