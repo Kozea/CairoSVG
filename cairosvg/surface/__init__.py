@@ -53,6 +53,8 @@ class Surface(object):
         self.paths = {}
         self._old_parent_node = self.parent_node = None
         self.bytesio = io.BytesIO()
+        self._width = None
+        self._height = None
         self._create_surface(tree)
         self.draw(tree)
 

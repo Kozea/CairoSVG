@@ -24,7 +24,10 @@ import os
 from xml.etree import ElementTree
 from xml.parsers import expat
 
+# ElementTree's API changed between 2.6 and 2.7
+# pylint: disable=C0103
 ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
+# pylint: enable=C0103
 
 
 class Node(dict):

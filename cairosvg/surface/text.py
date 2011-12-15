@@ -153,10 +153,10 @@ def text_path(surface, node):
     surface.total_width += start_offset
 
     x, y = point_following_path(cairo_path, surface.total_width)
-    text = node.text.strip(" \n")
+    string = node.text.strip(" \n")
     letter_spacing = size(node.get("letter-spacing"))
 
-    for letter in text:
+    for letter in string:
         surface.total_width += (
             surface.context.text_extents(letter)[4] + letter_spacing)
         point_on_path = point_following_path(cairo_path, surface.total_width)

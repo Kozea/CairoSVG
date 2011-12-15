@@ -23,9 +23,10 @@ This module handles gradients and patterns.
 """
 
 import cairo
+from math import radians
 
 from .colors import color
-from .helpers import filter_fill_content, node_format
+from .helpers import filter_fill_content, node_format, preserve_ratio, urls
 from .units import size
 from ..parser import Tree
 
@@ -53,8 +54,7 @@ def gradient_or_pattern(surface, node):
 
 def gradient(surface, node):
     """Gradients colors."""
-    gradient = filter_fill_content(node)
-    gradient_node = surface.gradients[gradient]
+    gradient_node = surface.gradients[filter_fill_content(node)]
 
     x = float(size(node.get("x")))
     y = float(size(node.get("y")))
@@ -97,26 +97,106 @@ def gradient(surface, node):
         surface.context.fill_preserve()
 
 
-def linearGradient(surface, node):
+def linear_gradient(surface, node):
     """Store a linear gradient definition."""
     parse_def(surface, node)
 
 
-def radialGradient(surface, node):
+def radial_gradient(surface, node):
     """Store a radial gradient definition."""
     parse_def(surface, node)
 
 
 def pattern(surface, node):
     """Draw a pattern image."""
-    pattern = filter_fill_content(node)
-    pattern_node = surface.patterns[pattern]
+    pattern_node = surface.patterns[filter_fill_content(node)]
     if pattern_node.tag == "pattern":
         pattern_surface = type(surface)(pattern_node)
-        pattern = cairo.SurfacePattern(pattern_surface.cairo)
-        pattern.set_extend(cairo.EXTEND_REPEAT)
-        surface.context.set_source(pattern)
+        pattern_surface = cairo.SurfacePattern(pattern_surface.cairo)
+        pattern_surface.set_extend(cairo.EXTEND_REPEAT)
+        surface.context.set_source(pattern_surface)
         surface.context.fill_preserve()
+
+
+def draw_marker(surface, node, position="mid"):
+    """Draw a marker."""
+    # TODO: manage markers for other tags than path
+    if position == "start":
+        node.markers = {
+            "start": list(urls(node.get("marker-start", ""))),
+            "mid": list(urls(node.get("marker-mid", ""))),
+            "end": list(urls(node.get("marker-end", "")))}
+        all_markers = list(urls(node.get("marker", "")))
+        for markers_list in node.markers.values():
+            markers_list.extend(all_markers)
+    pending_marker = (
+        surface.context.get_current_point(), node.markers[position])
+
+    if position == "start":
+        node.pending_markers.append(pending_marker)
+        return
+    elif position == "end":
+        node.pending_markers.append(pending_marker)
+
+    while node.pending_markers:
+        next_point, markers = node.pending_markers.pop(0)
+
+        if node.tangents != []:
+            angle1 = node.tangents.pop(0)
+        if node.tangents != []:
+            angle2 = node.tangents.pop(0)
+
+        for active_marker in markers:
+            if not active_marker.startswith("#"):
+                continue
+            active_marker = active_marker[1:]
+            if active_marker in surface.markers:
+                marker_node = surface.markers[active_marker]
+
+                angle = marker_node.get("orient", "0")
+                if angle == "auto":
+                    if angle1 is None:
+                        angle1 = angle2
+                    angle = float(angle1 + angle2) / 2
+                else:
+                    angle = radians(float(angle))
+
+                temp_path = surface.context.copy_path()
+                current_x, current_y = next_point
+
+                if node.get("markerUnits") == "userSpaceOnUse":
+                    base_scale = 1
+                else:
+                    base_scale = size(surface.parent_node.get("stroke-width"))
+
+                # Returns 4 values
+                scale_x, scale_y, translate_x, translate_y = \
+                    preserve_ratio(surface, marker_node)
+
+                viewbox = node_format(marker_node)[-1]
+                viewbox_width = viewbox[2] - viewbox[0]
+                viewbox_height = viewbox[3] - viewbox[1]
+
+                surface.context.new_path()
+                for child in marker_node.children:
+                    surface.context.save()
+                    surface.context.translate(current_x, current_y)
+                    surface.context.rotate(angle)
+                    surface.context.scale(
+                        base_scale / viewbox_width * float(scale_x),
+                        base_scale / viewbox_height * float(scale_y))
+                    surface.context.translate(translate_x, translate_y)
+                    surface.draw(child)
+                    surface.context.restore()
+                surface.context.append_path(temp_path)
+
+    if position == "mid":
+        node.pending_markers.append(pending_marker)
+
+
+def marker(surface, node):
+    """Store a marker definition."""
+    parse_def(surface, node)
 
 
 def use(surface, node):
