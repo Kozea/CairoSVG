@@ -34,7 +34,7 @@ setup(
         cairosvg.VERSION,
     license="GNU GPL v3",
     platforms="Any",
-    packages=["cairosvg"],
+    packages=["cairosvg", "cairosvg.surface"],
     provides=["cairosvg"],
     scripts=["bin/cairosvg"],
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
