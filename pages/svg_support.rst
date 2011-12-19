@@ -415,6 +415,115 @@ Text properties:
 Coordinate Systems, Transformations and Units
 =============================================
 
+Introduction
+------------
+
+CairoSVG renders its output on finite rectangular regions called viewport in
+the W3 recommendation, and Cairo surfaces in the application. For multi-pages
+formats, multiple surfaces can be used by the ``svg`` tags that are the direct
+children of the root ``svg`` element. These pages can have different sizes.
+
+The viewport size must be given in the tag, as no negotiation process can be
+realized with the parent surface.
+
+``em``, ``ex`` and percentages units are not supported for the sizes.
+
+The coordinates transformations are correctly handled by CairoSVG, including
+nested transformations. Most of the transformations applied to external
+elements, including the ones in ``defs`` tags, are not supported.
+
+
+The initial viewport
+--------------------
+
+As the pages are not embedded, no negotiation process is possible when trying
+to determine the pages sizes.
+
+
+The initial coordinate system
+-----------------------------
+
+CairoSVG follows the recommendation about the initial coordinate system.
+
+
+Coordinate system transformations
+---------------------------------
+
+The coordinate system transformation given by the ``viewBox`` is correctly
+managed by CairoSVG. Rotations, translations and skews are correctly managed.
+
+
+Nested transformations
+----------------------
+
+Transformations can be nested in CairoSVG.
+
+
+The ‘transform’ attribute
+-------------------------
+
+The ``transform`` attribute parses and applies the ``matrix``, ``translate``,
+``scale``, ``rotate``, ``skewX`` and ``skewY`` operations.
+
+
+The ‘viewBox’ attribute
+-----------------------
+
+The ``viewBox`` attribute is supported.
+
+
+The ‘preserveAspectRatio’ attribute
+-----------------------------------
+
+The ``preserveAspectRatio`` attribute is supported for ``svg`` elements, and
+not supported the other elements.
+
+
+Establishing a new viewport
+---------------------------
+
+Only the ``svg`` element establishes a new viewport in CairoSVG.
+
+
+Units
+-----
+
+``mm``, ``cm``, ``in``, ``pt`` and ``pc`` units are supported. ``em``, ``ex``
+and percentages units are not supported.
+
+
+Object bounding box units
+-------------------------
+
+The ``objectBoundingBox`` attribute is not supported.
+
+
+Intrinsic sizing properties of the viewport of SVG content
+----------------------------------------------------------
+
+When the ``viewBox`` attribute is set to ``none``, and no ``width`` or
+``height`` is given, the intrinsic sizing properties of the viewport is not
+set, and the behaviour of CairoSVG is undetermined.
+
+
+Geographic coordinate systems
+-----------------------------
+
+No geographic coordinate system is managed in CairoSVG.
+
+
+The ‘svg:transform’ attribute
+-----------------------------
+
+The ``transform`` attribute is correctly handled by CairoSVG.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
+
+
 
 
 Paths
