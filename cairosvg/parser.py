@@ -89,18 +89,27 @@ class Node(dict):
 
 class Tree(Node):
     """SVG tree."""
-    def __init__(self, file_or_url, parent=None):
+    def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
-        if hasattr(file_or_url, "read"):
-            # file_or_url is a file
-            tree = ElementTree.parse(file_or_url).getroot()
-            self.filename = getattr(file_or_url, "name", None)
+        # Make the parameters keyword-only:
+        source = kwargs.pop('source', None)
+        file_obj = kwargs.pop('file_obj', None)
+        url = kwargs.pop('url', None)
+        parent = kwargs.pop('parent', None)
+        if kwargs:
+            raise TypeError('Unexpected arguments', kwargs.keys())
+
+        if source is not None:
+            tree = ElementTree.fromstring(source)
+            self.filename = None
+        elif file_obj is not None:
+            tree = ElementTree.parse(file_obj).getroot()
+            self.filename = getattr(file_obj, 'name', None)
         else:
-            # file_or_url is an URL
-            if "#" in file_or_url:
-                url, element_id = file_or_url.split("#", 1)
+            if "#" in url:
+                url, element_id = url.split("#", 1)
             else:
-                url, element_id = file_or_url, None
+                element_id = None
             if parent and parent.filename:
                 if url:
                     url = os.path.join(os.path.dirname(parent.filename), url)

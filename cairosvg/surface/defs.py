@@ -212,7 +212,7 @@ def use(surface, node):
     if "viewBox" in node:
         del node["viewBox"]
     href = node.get("{http://www.w3.org/1999/xlink}href")
-    tree = Tree(href, node)
+    tree = Tree(url=href, parent=node)
     surface._set_context_size(*node_format(tree))
     surface.draw(tree)
     surface.context.restore()

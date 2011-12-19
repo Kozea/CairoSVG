@@ -5,8 +5,9 @@
 Version 0.2, released on 2011-12-XX
 ===================================
 
-* **Break the Python API again**. Use
-  ``cairosvg.surface.PDFSurface(input, output).finish()``.
+* **Change the Python API again** to be compatible with 0.1.1 and before:
+  ``svg2pdf(source_as_bytes) -> bytes`` but still support filenames or
+  file objects with keyword-only parameters. See the docstrings.
 * Add support for ``display``, ``visibility``, ``stop-opacity`` and
   ``stroke-miterlimit``
 * Internal refactoring

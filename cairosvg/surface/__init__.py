@@ -39,18 +39,46 @@ class Surface(object):
     # Subclasses must either define this or override _create_surface()
     surface_class = None
 
-    def __init__(self, file_or_url=None, output=bytes, tree=None):
+    @classmethod
+    def convert(cls, source=None, **kwargs):
+        """
+        Convert a SVG document to the format for this class.
+
+        Specify the input by passing one of these:
+
+        :param source: The SVG source as a byte-string.
+        :param file_obj: A file-like object.
+        :param url: A filename.
+
+        And the output with:
+
+        :param write_to: The filename of file-like object where to write the
+                         output. If None or not provided, return a byte string.
+
+        Only ``source`` can be passed as a positional argument, other
+        parameters are keyword-only.
+        """
+        write_to = kwargs.pop('write_to', None)
+        kwargs['source'] = source
+        tree = Tree(**kwargs)
+        if write_to is None:
+            output = io.BytesIO()
+        else:
+            output = write_to
+        cls(tree, output).finish()
+        if write_to is None:
+            return output.getvalue()
+
+    def __init__(self, tree, output):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
         a file-like object, ``None`` (render in memory but do not write
         anything) or the builting ``bytes`` as a marker.
 
-        If ``output`` is ``bytes``, the ``finish()`` method will return
-        the content as a bytes object.
+        Call the ``.finish()`` method to make sure that the output is
+        actually written.
         """
-        if tree is None:
-            tree = Tree(file_or_url)
         self.cairo = None
         self.context = None
         self.cursor_position = 0, 0
@@ -61,11 +89,7 @@ class Surface(object):
         self.paths = {}
         self.page_sizes = []
         self._old_parent_node = self.parent_node = None
-        self.return_bytes = output is bytes
-        if self.return_bytes:
-            self.output = io.BytesIO()
-        else:
-            self.output = output
+        self.output = output
         width, height, viewbox = node_format(tree)
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
@@ -105,10 +129,6 @@ class Surface(object):
     def finish(self):
         """Read the surface content."""
         self.cairo.finish()
-        if self.return_bytes:
-            content = self.output.getvalue()
-            self.output.close()
-            return content
 
     def draw_root(self, node):
         """Draw the root ``node``."""

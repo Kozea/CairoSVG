@@ -30,10 +30,29 @@ from .surface import units
 
 VERSION = "0.2"
 
-SURFACES = {
-    'png': surface.PNGSurface,
-    'pdf': surface.PDFSurface,
-    'ps': surface.PSSurface}
+
+def svg2svg(*args, **kwargs):
+    return surface.SVGSurface.convert(*args, **kwargs)
+
+def svg2png(*args, **kwargs):
+    return surface.PNGSurface.convert(*args, **kwargs)
+
+def svg2pdf(*args, **kwargs):
+    return surface.PDFSurface.convert(*args, **kwargs)
+
+def svg2ps(*args, **kwargs):
+    return surface.PSSurface.convert(*args, **kwargs)
+
+
+CONVERTERS = {
+    'SVG': svg2svg,  # Tell us if you actually use this one!
+    'PNG': svg2png,
+    'PDF': svg2pdf,
+    'PS': svg2ps}
+
+for format, function in CONVERTERS.items():
+    function.__doc__ = surface.Surface.convert.__doc__.replace(
+        'the format for this class', format)
 
 
 def main():
@@ -87,4 +106,4 @@ def main():
     else:
         output = options.output
 
-    SURFACES[output_format](input_, output).finish()
+    CONVERTERS[output_format.upper()](file_obj=input_, write_to=output)
