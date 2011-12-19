@@ -115,10 +115,9 @@ MAGIC_NUMBERS = {
     'SVG': '<?xml',
     'PNG': '\211PNG\r\n\032\n',
     'PDF': '%PDF',
-    'PS': '%!',
-}
-
+    'PS': '%!'}
 SAMPLE_SVG = os.path.join(REFERENCE_FOLDER, 'arcs01.svg')
+
 
 def test_formats():
     """Convert to a given format and test that output looks right."""
@@ -127,7 +126,7 @@ def test_formats():
         # Use a default parameter value to bind to the current value,
         # not to the variabl as a closure would do.
         def test(format=format):
-            content = cairosvg.CONVERTERS[format](url=svg_filename)
+            content = cairosvg.SURFACES[format].convert(url=svg_filename)
             assert content.startswith(MAGIC_NUMBERS[format])
         test.description = 'Test that the output from svg2%s looks like %s' % (
             format.lower(), format)
