@@ -24,8 +24,17 @@ This test suite compares the CairoSVG output with the reference output.
 """
 
 import os
-import cairosvg
+import io
+import tempfile
+import shutil
+import subprocess
+
 import png
+import cairo
+
+import cairosvg.parser
+import cairosvg.surface
+
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "reference")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
@@ -34,7 +43,7 @@ ALL_FILES = sorted((
         for filename in os.listdir(REFERENCE_FOLDER)
         if os.path.isfile(os.path.join(REFERENCE_FOLDER, filename))),
                    key=lambda name: name.lower())
-FILES = (ALL_FILES[2 * i:2 * i + 2] for i in range(int(len(ALL_FILES) / 2)))
+FILES = zip(ALL_FILES[::2], ALL_FILES[1::2])
 PIXEL_TOLERANCE = 65 * 255
 SIZE_TOLERANCE = 1
 
@@ -100,3 +109,140 @@ def test_images():
         yield (
             generate_function("Test the %s image" % image_name),
             png_filename, svg_filename)
+
+
+MAGIC_NUMBERS = {
+    'SVG': '<?xml',
+    'PNG': '\211PNG\r\n\032\n',
+    'PDF': '%PDF',
+    'PS': '%!',
+}
+
+SAMPLE_SVG = os.path.join(REFERENCE_FOLDER, 'arcs01.svg')
+
+def test_formats():
+    """Convert to a given format and test that output looks right."""
+    _png_filename, svg_filename = FILES[0]
+    for format in MAGIC_NUMBERS:
+        # Use a default parameter value to bind to the current value,
+        # not to the variabl as a closure would do.
+        def test(format=format):
+            content = cairosvg.CONVERTERS[format](url=svg_filename)
+            assert content.startswith(MAGIC_NUMBERS[format])
+        test.description = 'Test that the output from svg2%s looks like %s' % (
+            format.lower(), format)
+        yield test
+
+
+def read_file(filename):
+    """Shortcut to return the whole content of a file as a byte string."""
+    with open(filename, 'rb') as file_object:
+        return file_object.read()
+
+
+def test_api():
+    """Test the Python API with various parameters."""
+    _png_filename, svg_filename = FILES[0]
+    expected_content = cairosvg.svg2png(url=svg_filename)
+    # Already tested above: just a sanity check:
+    assert expected_content.startswith(MAGIC_NUMBERS['PNG'])
+
+    svg_content = read_file(svg_filename)
+    # Read from a byte string
+    assert cairosvg.svg2png(svg_content) == expected_content
+    assert cairosvg.svg2png(source=svg_content) == expected_content
+
+    with open(svg_filename, 'rb') as file_object:
+        # Read from a real file object
+        assert cairosvg.svg2png(file_obj=file_object) == expected_content
+
+    file_like = io.BytesIO(svg_content)
+    # Read from a file-like object
+    assert cairosvg.svg2png(file_obj=file_like) == expected_content
+
+    file_like = io.BytesIO()
+    # Write to a file-like object
+    cairosvg.svg2png(svg_content, write_to=file_like)
+    assert file_like.getvalue() == expected_content
+
+    temp = tempfile.mkdtemp()
+    try:
+        temp_1 = os.path.join(temp, 'result_1.png')
+        with open(temp_1, 'wb') as file_object:
+            # Write to a real file object
+            cairosvg.svg2png(svg_content, write_to=file_object)
+        assert read_file(temp_1) == expected_content
+
+        temp_2 = os.path.join(temp, 'result_2.png')
+        # Write to a filename
+        cairosvg.svg2png(svg_content, write_to=temp_2)
+        assert read_file(temp_2) == expected_content
+
+    finally:
+        shutil.rmtree(temp)
+
+
+def test_low_level_api():
+    """Test the low-level Python API with various parameters."""
+    _png_filename, svg_filename = FILES[0]
+    expected_content = cairosvg.svg2png(url=svg_filename)
+
+    # Same as above, longer version
+    tree = cairosvg.parser.Tree(url=svg_filename)
+    file_like = io.BytesIO()
+    surface = cairosvg.surface.PNGSurface(tree, file_like)
+    surface.finish()
+    assert file_like.getvalue() == expected_content
+
+    png_result = png.Reader(bytes=expected_content).read()
+    expected_width, expected_height, _, _ = png_result
+
+    # Abstract surface
+    surface = cairosvg.surface.PNGSurface(tree, output=None)
+    assert surface.width == expected_width
+    assert surface.height == expected_height
+    assert cairo.SurfacePattern(surface.cairo).get_surface() is surface.cairo
+
+    try:
+        cairo.SurfacePattern('Not a cario.Surface object.')
+    except TypeError:
+        pass
+    else:
+        assert False, 'expected TypeError'
+
+
+def test_script():
+    script = os.path.join(os.path.dirname(__file__), '..', 'cairosvg.py')
+    _png_filename, svg_filename = FILES[0]
+    expected_png = cairosvg.svg2png(url=svg_filename)
+    expected_pdf = cairosvg.svg2pdf(url=svg_filename)
+
+    def run(*script_args, **kwargs):
+        return subprocess.check_output([script] + list(script_args), **kwargs)
+
+    assert run().startswith('Usage: ')
+    assert run('--help').startswith('Usage: ')
+    assert run('--version').strip() == cairosvg.VERSION
+    assert run(svg_filename) == expected_pdf  # default to PDF
+    assert run(svg_filename, '-f', 'Pdf') == expected_pdf
+    assert run(svg_filename, '-f', 'png') == expected_png
+    with open(svg_filename, 'rb') as file_object:
+        assert run('-', stdin=file_object) == expected_pdf
+
+    # TODO: test --dpi
+
+    temp = tempfile.mkdtemp()
+    try:
+        temp_1 = os.path.join(temp, 'result_1')
+        run(svg_filename, '-o', temp_1)  # default to PDF
+        assert read_file(temp_1) == expected_pdf
+
+        temp_2 = os.path.join(temp, 'result_2.png')
+        run(svg_filename, '-o', temp_2)  # Guess from the file extension
+        assert read_file(temp_2) == expected_png
+
+        temp_3 = os.path.join(temp, 'result_3.png')
+        run(svg_filename, '-o', temp_3, '-f', 'pdf')  # Explicit -f wins
+        assert read_file(temp_3) == expected_pdf
+    finally:
+        shutil.rmtree(temp)
