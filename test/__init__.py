@@ -150,7 +150,7 @@ def test_api():
     svg_content = read_file(svg_filename)
     # Read from a byte string
     assert cairosvg.svg2png(svg_content) == expected_content
-    assert cairosvg.svg2png(source=svg_content) == expected_content
+    assert cairosvg.svg2png(bytes=svg_content) == expected_content
 
     with open(svg_filename, 'rb') as file_object:
         # Read from a real file object
@@ -180,6 +180,15 @@ def test_api():
 
     finally:
         shutil.rmtree(temp)
+
+    file_like = io.BytesIO()
+    try:
+        # Missing input
+        cairosvg.svg2png(write_to=file_like)
+    except TypeError:
+        pass
+    else:
+        assert False, 'expected TypeError'
 
 
 def test_low_level_api():

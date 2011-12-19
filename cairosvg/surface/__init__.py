@@ -40,13 +40,13 @@ class Surface(object):
     surface_class = None
 
     @classmethod
-    def convert(cls, source=None, **kwargs):
+    def convert(cls, bytes=None, **kwargs):
         """
         Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
 
-        :param source: The SVG source as a byte-string.
+        :param bytes: The SVG source as a byte-string.
         :param file_obj: A file-like object.
         :param url: A filename.
 
@@ -59,7 +59,7 @@ class Surface(object):
         parameters are keyword-only.
         """
         write_to = kwargs.pop('write_to', None)
-        kwargs['source'] = source
+        kwargs['bytes'] = bytes
         tree = Tree(**kwargs)
         if write_to is None:
             output = io.BytesIO()
