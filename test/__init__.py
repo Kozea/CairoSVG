@@ -43,7 +43,7 @@ ALL_FILES = sorted((
         for filename in os.listdir(REFERENCE_FOLDER)
         if os.path.isfile(os.path.join(REFERENCE_FOLDER, filename))),
                    key=lambda name: name.lower())
-FILES = zip(ALL_FILES[::2], ALL_FILES[1::2])
+FILES = list(zip(ALL_FILES[::2], ALL_FILES[1::2]))
 PIXEL_TOLERANCE = 65 * 255
 SIZE_TOLERANCE = 1
 
@@ -112,10 +112,10 @@ def test_images():
 
 
 MAGIC_NUMBERS = {
-    'SVG': '<?xml',
-    'PNG': '\211PNG\r\n\032\n',
-    'PDF': '%PDF',
-    'PS': '%!'}
+    'SVG': b'<?xml',
+    'PNG': b'\211PNG\r\n\032\n',
+    'PDF': b'%PDF',
+    'PS': b'%!'}
 SAMPLE_SVG = os.path.join(REFERENCE_FOLDER, 'arcs01.svg')
 
 
@@ -226,11 +226,17 @@ def test_script():
     expected_pdf = cairosvg.svg2pdf(url=svg_filename)
 
     def run(*script_args, **kwargs):
-        return subprocess.check_output([script] + list(script_args), **kwargs)
+        # Same as subprocess.check_output() which is new in 2.7
+        process = subprocess.Popen(
+            [script] + list(script_args), stdout=subprocess.PIPE, **kwargs)
+        output, unused_err = process.communicate()
+        return_code = process.poll()
+        assert return_code == 0
+        return output
 
-    assert run().startswith('Usage: ')
-    assert run('--help').startswith('Usage: ')
-    assert run('--version').strip() == cairosvg.VERSION
+    assert run().startswith(b'Usage: ')
+    assert run('--help').startswith(b'Usage: ')
+    assert run('--version').strip() == cairosvg.VERSION.encode('ascii')
     assert run(svg_filename) == expected_pdf  # default to PDF
     assert run(svg_filename, '-f', 'Pdf') == expected_pdf
     assert run(svg_filename, '-f', 'png') == expected_png
@@ -242,15 +248,18 @@ def test_script():
     temp = tempfile.mkdtemp()
     try:
         temp_1 = os.path.join(temp, 'result_1')
-        run(svg_filename, '-o', temp_1)  # default to PDF
+        # default to PDF
+        assert run(svg_filename, '-o', temp_1) == b''
         assert read_file(temp_1) == expected_pdf
 
         temp_2 = os.path.join(temp, 'result_2.png')
-        run(svg_filename, '-o', temp_2)  # Guess from the file extension
+        # Guess from the file extension
+        assert run(svg_filename, '-o', temp_2) == b''
         assert read_file(temp_2) == expected_png
 
         temp_3 = os.path.join(temp, 'result_3.png')
-        run(svg_filename, '-o', temp_3, '-f', 'pdf')  # Explicit -f wins
+        # Explicit -f wins
+        assert run(svg_filename, '-o', temp_3, '-f', 'pdf') == b''
         assert read_file(temp_3) == expected_pdf
     finally:
         shutil.rmtree(temp)
