@@ -28,6 +28,7 @@ import io
 import tempfile
 import shutil
 import subprocess
+from nose.tools import assert_raises  # pylint: disable=E0611
 
 import png
 import cairo
@@ -122,14 +123,15 @@ SAMPLE_SVG = os.path.join(REFERENCE_FOLDER, 'arcs01.svg')
 def test_formats():
     """Convert to a given format and test that output looks right."""
     _png_filename, svg_filename = FILES[0]
-    for format in MAGIC_NUMBERS:
+    for format_name in MAGIC_NUMBERS:
         # Use a default parameter value to bind to the current value,
         # not to the variabl as a closure would do.
-        def test(format=format):
-            content = cairosvg.SURFACES[format].convert(url=svg_filename)
-            assert content.startswith(MAGIC_NUMBERS[format])
+        def test(format_name=format_name):
+            """Test the generation of ``format_name`` images."""
+            content = cairosvg.SURFACES[format_name].convert(url=svg_filename)
+            assert content.startswith(MAGIC_NUMBERS[format_name])
         test.description = 'Test that the output from svg2%s looks like %s' % (
-            format.lower(), format)
+            format_name.lower(), format_name)
         yield test
 
 
@@ -149,7 +151,7 @@ def test_api():
     svg_content = read_file(svg_filename)
     # Read from a byte string
     assert cairosvg.svg2png(svg_content) == expected_content
-    assert cairosvg.svg2png(bytes=svg_content) == expected_content
+    assert cairosvg.svg2png(bytestring=svg_content) == expected_content
 
     with open(svg_filename, 'rb') as file_object:
         # Read from a real file object
@@ -181,13 +183,7 @@ def test_api():
         shutil.rmtree(temp)
 
     file_like = io.BytesIO()
-    try:
-        # Missing input
-        cairosvg.svg2png(write_to=file_like)
-    except TypeError:
-        pass
-    else:
-        assert False, 'expected TypeError'
+    assert_raises(TypeError, cairosvg.svg2png, write_to=file_like)
 
 
 def test_low_level_api():
@@ -210,26 +206,21 @@ def test_low_level_api():
     assert surface.width == expected_width
     assert surface.height == expected_height
     assert cairo.SurfacePattern(surface.cairo).get_surface() is surface.cairo
-
-    try:
-        cairo.SurfacePattern('Not a cario.Surface object.')
-    except TypeError:
-        pass
-    else:
-        assert False, 'expected TypeError'
+    assert_raises(TypeError, cairo.SurfacePattern, 'Not a cairo.Surface.')
 
 
 def test_script():
+    """Test the ``cairosvg`` script."""
     script = os.path.join(os.path.dirname(__file__), '..', 'cairosvg.py')
     _png_filename, svg_filename = FILES[0]
     expected_png = cairosvg.svg2png(url=svg_filename)
     expected_pdf = cairosvg.svg2pdf(url=svg_filename)
 
     def run(*script_args, **kwargs):
-        # Same as subprocess.check_output() which is new in 2.7
+        """Same as ``subprocess.check_output`` which is new in 2.7."""
         process = subprocess.Popen(
             [script] + list(script_args), stdout=subprocess.PIPE, **kwargs)
-        output, unused_err = process.communicate()
+        output = process.communicate()[0]
         return_code = process.poll()
         assert return_code == 0
         return output

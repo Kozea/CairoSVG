@@ -92,15 +92,15 @@ class Tree(Node):
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
         # Make the parameters keyword-only:
-        bytes = kwargs.pop('bytes', None)
+        bytestring = kwargs.pop('bytestring', None)
         file_obj = kwargs.pop('file_obj', None)
         url = kwargs.pop('url', None)
         parent = kwargs.pop('parent', None)
         if kwargs:
             raise TypeError('Unexpected arguments', kwargs.keys())
 
-        if bytes is not None:
-            tree = ElementTree.fromstring(bytes)
+        if bytestring is not None:
+            tree = ElementTree.fromstring(bytestring)
             self.filename = None
         elif file_obj is not None:
             tree = ElementTree.parse(file_obj).getroot()
@@ -126,6 +126,6 @@ class Tree(Node):
                         tree = element
                         break
         else:
-            raise TypeError('No input. Use one of bytes, file_obj or url.')
+            raise TypeError('No input. Use one of bytestring, file_obj or url.')
         super(Tree, self).__init__(tree, parent)
         self.root = True
