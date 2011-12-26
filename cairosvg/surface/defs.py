@@ -65,7 +65,6 @@ def gradient(surface, node):
     y1 = float(gradient_node.get("y1", y))
     y2 = float(gradient_node.get("y2", y + height))
 
-    # TODO: manage percentages for default values
     if gradient_node.tag == "linearGradient":
         linpat = cairo.LinearGradient(x1, y1, x2, y2)
         for child in gradient_node.children:

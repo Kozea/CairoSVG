@@ -126,6 +126,7 @@ class Tree(Node):
                         tree = element
                         break
         else:
-            raise TypeError('No input. Use one of bytestring, file_obj or url.')
+            raise TypeError(
+                'No input. Use one of bytestring, file_obj or url.')
         super(Tree, self).__init__(tree, parent)
         self.root = True
