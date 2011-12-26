@@ -52,10 +52,8 @@ for _output_format, _surface_type in SURFACES.items():
 def main():
     """Entry-point of the executable."""
     # Get command-line options
-    option_parser = optparse.OptionParser("usage: %prog filename [options]")
-    option_parser.add_option(
-        "-v", "--version", action="store_true",
-        default=False, help="show version and exit")
+    option_parser = optparse.OptionParser(
+        usage="usage: %prog filename [options]", version=VERSION)
     option_parser.add_option(
         "-f", "--format", help="output format")
     option_parser.add_option(
@@ -64,11 +62,6 @@ def main():
         "-o", "--output",
         default="", help="output filename")
     options, args = option_parser.parse_args()
-
-    # Print version and exit if the option is given
-    if options.version:
-        print(VERSION)
-        sys.exit()
 
     # Set the resolution
     if options.dpi:
@@ -87,16 +80,12 @@ def main():
 
     input_ = args[0]
     if input_ == "-":
-        try:
-            input_ = sys.stdin.buffer  # Binary stream in Python 3
-        except AttributeError:
-            input_ = sys.stdin
+        # Python 2/3 hack
+        input_ = getattr(sys.stdin, "buffer", sys.stdin)
 
     if not options.output or options.output == '-':
-        try:
-            output = sys.stdout.buffer  # Binary stream in Python 3
-        except AttributeError:
-            output = sys.stdout
+        # Python 2/3 hack
+        output = getattr(sys.stdout, "buffer", sys.stdout)
     else:
         output = options.output
 

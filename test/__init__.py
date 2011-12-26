@@ -24,15 +24,16 @@ This test suite compares the CairoSVG output with the reference output.
 """
 
 import os
+import sys
 import io
 import tempfile
 import shutil
-import subprocess
-from nose.tools import assert_raises  # pylint: disable=E0611
+from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
 import png
 import cairo
 
+from cairosvg import main
 import cairosvg.parser
 import cairosvg.surface
 
@@ -51,6 +52,77 @@ SIZE_TOLERANCE = 1
 
 if not os.path.exists(OUTPUT_FOLDER):
     os.mkdir(OUTPUT_FOLDER)
+
+
+def test_script():
+    """Test the ``cairosvg`` script."""
+    _png_filename, svg_filename = FILES[0]
+    expected_png = cairosvg.svg2png(url=svg_filename)
+    expected_pdf = cairosvg.svg2pdf(url=svg_filename)
+
+    def test_main(args, exit=False, input_=None):
+        """Test main called with given ``args``.
+
+        If ``exit`` is ``True``, check that ``SystemExit`` is raised.
+
+        If ``input_`` is given, use this stream as input stream.
+
+        """
+        old_stdout, sys.stdout = sys.stdout, io.BytesIO()
+        old_stdin, sys.stdin = sys.stdin, input_ or sys.stdin
+        sys.argv = args
+
+        try:
+            if exit:
+                try:
+                    assert_raises(main(), SystemExit)
+                except SystemExit:
+                    pass
+            else:
+                main()
+        finally:
+            output = sys.stdout.getvalue()
+            sys.stdin, sys.stdout = old_stdin, old_stdout
+
+        return output
+
+    assert test_main(['cairosvg'], exit=True).startswith('Usage: ')
+    assert test_main(['cairosvg', '--help'], exit=True).startswith('Usage: ')
+    assert test_main(['cairosvg', '--version'], exit=True).strip() == \
+         cairosvg.VERSION
+    assert test_main(['cairosvg', svg_filename]) == expected_pdf
+    assert test_main(['cairosvg', svg_filename, '-f', 'Pdf']) == expected_pdf
+    assert test_main(['cairosvg', svg_filename, '-f', 'png']) == expected_png
+    assert test_main(
+        ['cairosvg', '-'], input_=open(svg_filename, 'rb')) == expected_pdf
+
+    # Test DPI
+    default_dpi = cairosvg.units.DPI
+    output = test_main(['cairosvg', svg_filename, '-d', '10', '-f', 'png'])
+    width, height, _, _ = png.Reader(bytes=output).asRGBA()
+    eq_(width, 47)
+    eq_(height, 20)
+    cairosvg.units.DPI = default_dpi
+
+    temp = tempfile.mkdtemp()
+    try:
+        temp_1 = os.path.join(temp, 'result_1')
+        # default to PDF
+        assert test_main(['cairosvg', svg_filename, '-o', temp_1]) == b''
+        assert read_file(temp_1) == expected_pdf
+
+        temp_2 = os.path.join(temp, 'result_2.png')
+        # Guess from the file extension
+        assert test_main(['cairosvg', svg_filename, '-o', temp_2]) == b''
+        assert read_file(temp_2) == expected_png
+
+        temp_3 = os.path.join(temp, 'result_3.png')
+        # Explicit -f wins
+        assert test_main(
+            ['cairosvg', svg_filename, '-o', temp_3, '-f', 'pdf']) == b''
+        assert read_file(temp_3) == expected_pdf
+    finally:
+        shutil.rmtree(temp)
 
 
 def same(tuple1, tuple2, tolerence=0):
@@ -207,50 +279,3 @@ def test_low_level_api():
     assert surface.height == expected_height
     assert cairo.SurfacePattern(surface.cairo).get_surface() is surface.cairo
     assert_raises(TypeError, cairo.SurfacePattern, 'Not a cairo.Surface.')
-
-
-def test_script():
-    """Test the ``cairosvg`` script."""
-    script = os.path.join(os.path.dirname(__file__), '..', 'cairosvg.py')
-    _png_filename, svg_filename = FILES[0]
-    expected_png = cairosvg.svg2png(url=svg_filename)
-    expected_pdf = cairosvg.svg2pdf(url=svg_filename)
-
-    def run(*script_args, **kwargs):
-        """Same as ``subprocess.check_output`` which is new in 2.7."""
-        process = subprocess.Popen(
-            [script] + list(script_args), stdout=subprocess.PIPE, **kwargs)
-        output = process.communicate()[0]
-        return_code = process.poll()
-        assert return_code == 0
-        return output
-
-    assert run().startswith(b'Usage: ')
-    assert run('--help').startswith(b'Usage: ')
-    assert run('--version').strip() == cairosvg.VERSION.encode('ascii')
-    assert run(svg_filename) == expected_pdf  # default to PDF
-    assert run(svg_filename, '-f', 'Pdf') == expected_pdf
-    assert run(svg_filename, '-f', 'png') == expected_png
-    with open(svg_filename, 'rb') as file_object:
-        assert run('-', stdin=file_object) == expected_pdf
-
-    # TODO: test --dpi
-
-    temp = tempfile.mkdtemp()
-    try:
-        temp_1 = os.path.join(temp, 'result_1')
-        # default to PDF
-        assert run(svg_filename, '-o', temp_1) == b''
-        assert read_file(temp_1) == expected_pdf
-
-        temp_2 = os.path.join(temp, 'result_2.png')
-        # Guess from the file extension
-        assert run(svg_filename, '-o', temp_2) == b''
-        assert read_file(temp_2) == expected_png
-
-        temp_3 = os.path.join(temp, 'result_3.png')
-        # Explicit -f wins
-        assert run(svg_filename, '-o', temp_3, '-f', 'pdf') == b''
-        assert read_file(temp_3) == expected_pdf
-    finally:
-        shutil.rmtree(temp)
