@@ -75,6 +75,9 @@ def test_script():
         try:
             if exit:
                 try:
+                    # Python 2/3 hack
+                    if hasattr(sys.stdout, "getbuffer"):
+                        sys.stdout = io.StringIO()
                     assert_raises(main(), SystemExit)
                 except SystemExit:
                     pass
@@ -99,7 +102,7 @@ def test_script():
     # Test DPI
     default_dpi = cairosvg.units.DPI
     output = test_main(['cairosvg', svg_filename, '-d', '10', '-f', 'png'])
-    width, height, _, _ = png.Reader(bytes=output).asRGBA()
+    width, height = png.Reader(bytes=output).asRGBA()[:2]
     eq_(width, 47)
     eq_(height, 20)
     cairosvg.units.DPI = default_dpi
@@ -107,19 +110,19 @@ def test_script():
     temp = tempfile.mkdtemp()
     try:
         temp_1 = os.path.join(temp, 'result_1')
-        # default to PDF
-        assert test_main(['cairosvg', svg_filename, '-o', temp_1]) == b''
+        # Default to PDF
+        assert not test_main(['cairosvg', svg_filename, '-o', temp_1])
         assert read_file(temp_1) == expected_pdf
 
         temp_2 = os.path.join(temp, 'result_2.png')
         # Guess from the file extension
-        assert test_main(['cairosvg', svg_filename, '-o', temp_2]) == b''
+        assert not test_main(['cairosvg', svg_filename, '-o', temp_2])
         assert read_file(temp_2) == expected_png
 
         temp_3 = os.path.join(temp, 'result_3.png')
         # Explicit -f wins
-        assert test_main(
-            ['cairosvg', svg_filename, '-o', temp_3, '-f', 'pdf']) == b''
+        assert not test_main(
+            ['cairosvg', svg_filename, '-o', temp_3, '-f', 'pdf'])
         assert read_file(temp_3) == expected_pdf
     finally:
         shutil.rmtree(temp)
