@@ -32,7 +32,7 @@ setup(
     url="http://www.cairosvg.org/",
     download_url="http://www.cairosvg.org/src/cairosvg/CairoSVG-%s.tar.gz" % \
         cairosvg.VERSION,
-    license="GNU GPL v3",
+    license="GNU LGPL v3",
     platforms="Any",
     packages=["cairosvg", "cairosvg.surface"],
     provides=["cairosvg"],
@@ -42,7 +42,8 @@ setup(
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "License :: OSI Approved :: "
+        "GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
