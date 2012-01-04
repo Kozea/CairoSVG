@@ -1,6 +1,6 @@
 name: CairoSVG
 description: Convert SVG to PNG or PDF
-license: GPLv3
+license: LGPLv3
 public: true
 url: http://www.cairosvg.org/
 
