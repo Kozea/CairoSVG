@@ -5,7 +5,10 @@
 PyPI
 ====
 
-*Not released yet.*
+CairoSVG is `available on PyPI <http://pypi.python.org/pypi/CairoSVG/>`_. To
+install, just type as superuser::
+
+  pip install cairosvg
 
 Git Repository
 ==============
@@ -21,7 +24,20 @@ You can also download `the CairoSVG package of the git repository
 Source Packages
 ===============
 
-*Not packaged yet.*
+You can download the CairoSVG package for each release:
+
+- `CairoSVG-0.2.tar.gz
+  <http://pypi.python.org/packages/source/C/CairoSVG/CairoSVG-0.2.tar.gz>`_
+  (17 KiB)
+- `CairoSVG-0.1.2.tar.gz
+  <http://pypi.python.org/packages/source/C/CairoSVG/CairoSVG-0.1.2.tar.gz>`_
+  (25 KiB)
+- `CairoSVG-0.1.1.tar.gz
+  <http://pypi.python.org/packages/source/C/CairoSVG/CairoSVG-0.1.1.tar.gz>`_
+  (25 KiB)
+- `CairoSVG-0.1.tar.gz
+  <http://pypi.python.org/packages/source/C/CairoSVG/CairoSVG-0.1.tar.gz>`_
+  (25 KiB)
 
 Linux Distribution Packages
 ===========================
