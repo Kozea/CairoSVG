@@ -89,6 +89,6 @@ def main():
         # Python 2/3 hack
         input_ = getattr(sys.stdin, "buffer", sys.stdin)
         SURFACES[output_format.upper()].convert(
-            file_obj=input_,write_to=output)
+            file_obj=input_, write_to=output)
     else:
         SURFACES[output_format.upper()].convert(url=url, write_to=output)

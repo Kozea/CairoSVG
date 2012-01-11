@@ -20,7 +20,6 @@ SVG Parser.
 
 """
 
-import os
 import urllib
 import urlparse
 from xml.etree import ElementTree
