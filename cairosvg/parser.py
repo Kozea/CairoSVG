@@ -21,6 +21,8 @@ SVG Parser.
 """
 
 import os
+import urllib
+import urlparse
 from xml.etree import ElementTree
 from xml.parsers import expat
 
@@ -54,7 +56,7 @@ class Node(dict):
             # TODO: drop other attributes that should not be inherited
 
             self.update(items)
-            self.filename = parent.filename
+            self.url = parent.url
             self.parent = parent
 
         # TODO: manage other attributes that should be multiplicated
@@ -101,22 +103,19 @@ class Tree(Node):
 
         if bytestring is not None:
             tree = ElementTree.fromstring(bytestring)
-            self.filename = None
-        elif file_obj is not None:
-            tree = ElementTree.parse(file_obj).getroot()
-            self.filename = getattr(file_obj, 'name', None)
+            self.url = None
         elif url is not None:
             if "#" in url:
                 url, element_id = url.split("#", 1)
             else:
                 element_id = None
-            if parent and parent.filename:
+            if parent and parent.url:
                 if url:
-                    url = os.path.join(os.path.dirname(parent.filename), url)
+                    url = urlparse.urljoin(parent.url, url)
                 elif element_id:
-                    url = parent.filename
-            self.filename = url
-            tree = ElementTree.parse(url).getroot()
+                    url = parent.url
+            self.url = url
+            tree = ElementTree.parse(urllib.urlopen(url)).getroot()
             if element_id:
                 iterator = (
                     tree.iter() if hasattr(tree, 'iter')
@@ -125,6 +124,9 @@ class Tree(Node):
                     if element.get("id") == element_id:
                         tree = element
                         break
+        elif file_obj is not None:
+            tree = ElementTree.parse(file_obj).getroot()
+            self.url = getattr(file_obj, 'name', url)
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')

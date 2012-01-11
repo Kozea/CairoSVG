@@ -78,15 +78,16 @@ def main():
         option_parser.print_help()
         sys.exit()
 
-    input_ = args[0]
-    if input_ == "-":
-        # Python 2/3 hack
-        input_ = getattr(sys.stdin, "buffer", sys.stdin)
-
     if not options.output or options.output == '-':
         # Python 2/3 hack
         output = getattr(sys.stdout, "buffer", sys.stdout)
     else:
         output = options.output
 
-    SURFACES[output_format.upper()].convert(file_obj=input_, write_to=output)
+    url = args[0]
+    if url == "-":
+        # Python 2/3 hack
+        input_ = getattr(sys.stdin, "buffer", sys.stdin)
+        SURFACES[output_format.upper()].convert(input_=input_, write_to=output)
+    else:
+        SURFACES[output_format.upper()].convert(url=url, write_to=output)
