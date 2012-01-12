@@ -31,10 +31,17 @@ from .helpers import node_format, normalize
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
+from . import units
 
 
 class Surface(object):
-    """Abstract base class for CairoSVG surfaces."""
+    """Abstract base class for CairoSVG surfaces.
+
+    The ``width`` and ``height`` attributes are in pixels. The size of the
+    surface in physical units, for surfaces whose units are physical, are
+    calculated from the DPI coefficient.
+
+    """
 
     # Subclasses must either define this or override _create_surface()
     surface_class = None
@@ -106,7 +113,9 @@ class Surface(object):
         """Create and return ``(cairo_surface, width, height)``."""
         # self.surface_class should not be None when called here
         # pylint: disable=E1102
-        cairo_surface = self.surface_class(self.output, width, height)
+        coefficient = 1 / (units.DPI * units.UNITS["pt"])
+        cairo_surface = self.surface_class(
+            self.output, width * coefficient, height * coefficient)
         # pylint: enable=E1102
         return cairo_surface, width, height
 
