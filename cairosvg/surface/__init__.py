@@ -37,9 +37,8 @@ from . import units
 class Surface(object):
     """Abstract base class for CairoSVG surfaces.
 
-    The ``width`` and ``height`` attributes are in pixels. The size of the
-    surface in physical units, for surfaces whose units are physical, are
-    calculated from the DPI coefficient.
+    The ``width`` and ``height`` attributes are in device units (pixels for
+    PNG, else points).
 
     """
 
@@ -98,26 +97,41 @@ class Surface(object):
         self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.output = output
-        self.points_per_pixel = 1 / (units.DPI * units.UNITS["pt"])
         width, height, viewbox = node_format(tree)
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
-            width, height)
+            width * self.device_units_per_user_units,
+            height * self.device_units_per_user_units)
         self.page_sizes.append((self.width, self.height))
         self.context = cairo.Context(self.cairo)
+        # We must scale the context as the surface size is using physical units
+        self.context.scale(
+            self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        self.context.scale(self.points_per_pixel, self.points_per_pixel)
         self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
         self.draw_root(tree)
+
+    @property
+    def points_per_pixel(self):
+        """Surface resolution."""
+        return 1 / (units.DPI * units.UNITS["pt"])
+
+    @property
+    def device_units_per_user_units(self):
+        """Ratio between Cairo device units and user units.
+
+        Device units are points for everything but PNG, and pixels for
+        PNG. User units are pixels.
+
+        """
+        return self.points_per_pixel
 
     def _create_surface(self, width, height):
         """Create and return ``(cairo_surface, width, height)``."""
         # self.surface_class should not be None when called here
         # pylint: disable=E1102
-        cairo_surface = self.surface_class(
-            self.output, width * self.points_per_pixel,
-            height * self.points_per_pixel)
+        cairo_surface = self.surface_class(self.output, width, height)
         # pylint: enable=E1102
         return cairo_surface, width, height
 
@@ -301,6 +315,8 @@ class PSSurface(MultipageSurface):
 
 class PNGSurface(Surface):
     """A surface that writes in PNG format."""
+    device_units_per_user_units = 1
+
     def _create_surface(self, width, height):
         """Create and return ``(cairo_surface, width, height)``."""
         width = int(width)
