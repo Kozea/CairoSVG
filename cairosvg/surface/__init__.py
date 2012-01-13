@@ -98,6 +98,7 @@ class Surface(object):
         self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.output = output
+        self.dots_per_pixel = 1 / (units.DPI * units.UNITS["pt"])
         width, height, viewbox = node_format(tree)
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
@@ -105,6 +106,7 @@ class Surface(object):
         self.page_sizes.append((self.width, self.height))
         self.context = cairo.Context(self.cairo)
         # Initial, non-rounded dimensions
+        self.context.scale(self.dots_per_pixel, self.dots_per_pixel)
         self._set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
         self.draw_root(tree)
@@ -113,9 +115,9 @@ class Surface(object):
         """Create and return ``(cairo_surface, width, height)``."""
         # self.surface_class should not be None when called here
         # pylint: disable=E1102
-        coefficient = 1 / (units.DPI * units.UNITS["pt"])
         cairo_surface = self.surface_class(
-            self.output, width * coefficient, height * coefficient)
+            self.output, width * self.dots_per_pixel,
+            height * self.dots_per_pixel)
         # pylint: enable=E1102
         return cairo_surface, width, height
 
