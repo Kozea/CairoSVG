@@ -21,6 +21,7 @@ Units functions.
 """
 
 
+SCALE = 1  # Private API for now
 DPI = 72.
 UNITS = {
     "mm": 1 / 25.4,
@@ -44,7 +45,7 @@ def size(string=None):
         return 0
 
     if string.replace(".", "", 1).lstrip(" -").isdigit():
-        return float(string)
+        return float(string) * SCALE
 
     for unit, coefficient in UNITS.items():
         if unit in string:
@@ -52,7 +53,8 @@ def size(string=None):
             if coefficient == NotImplemented:
                 raise NotImplementedUnitError
             else:
-                return number * (DPI * coefficient if coefficient else 1)
+                return number * SCALE * (
+                    DPI * coefficient if coefficient else 1)
 
     # Unknown size or multiple sizes
     return 0
