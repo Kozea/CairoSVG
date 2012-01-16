@@ -45,7 +45,7 @@ def size(string=None):
         return 0
 
     if string.replace(".", "", 1).lstrip(" -").isdigit():
-        return float(string) * SCALE
+        return float(string)
 
     for unit, coefficient in UNITS.items():
         if unit in string:
@@ -53,8 +53,7 @@ def size(string=None):
             if coefficient == NotImplemented:
                 raise NotImplementedUnitError
             else:
-                return number * SCALE * (
-                    DPI * coefficient if coefficient else 1)
+                return number * (DPI * coefficient if coefficient else 1)
 
     # Unknown size or multiple sizes
     return 0

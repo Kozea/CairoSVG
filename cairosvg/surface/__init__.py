@@ -125,7 +125,7 @@ class Surface(object):
         PNG. User units are pixels.
 
         """
-        return self.points_per_pixel
+        return self.points_per_pixel * units.SCALE
 
     def _create_surface(self, width, height):
         """Create and return ``(cairo_surface, width, height)``."""
@@ -292,6 +292,9 @@ class MultipageSurface(Surface):
             # Multi-page
             for page in svg_children:
                 width, height, viewbox = node_format(page)
+                # TODO: test this
+                width *= self.device_units_per_user_units
+                height *= self.device_units_per_user_units
                 self.page_sizes.append((width, height))
                 self.cairo.set_size(width, height)
                 self.context.save()
