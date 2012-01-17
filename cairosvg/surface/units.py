@@ -21,7 +21,6 @@ Units functions.
 """
 
 
-SCALE = 1  # Private API for now
 DPI = 72.
 UNITS = {
     "mm": 1 / 25.4,

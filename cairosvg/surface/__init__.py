@@ -125,7 +125,7 @@ class Surface(object):
         PNG. User units are pixels.
 
         """
-        return self.points_per_pixel * units.SCALE
+        return self.points_per_pixel
 
     def _create_surface(self, width, height):
         """Create and return ``(cairo_surface, width, height)``."""
