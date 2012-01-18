@@ -108,7 +108,7 @@ class Surface(object):
         self.context.scale(
             self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        self._set_context_size(width, height, viewbox)
+        self.set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
         self.draw_root(tree)
 
@@ -135,7 +135,7 @@ class Surface(object):
         # pylint: enable=E1102
         return cairo_surface, width, height
 
-    def _set_context_size(self, width, height, viewbox):
+    def set_context_size(self, width, height, viewbox):
         """Set the context size."""
         if viewbox:
             x, y, x_size, y_size = viewbox
@@ -295,7 +295,7 @@ class MultipageSurface(Surface):
                 self.page_sizes.append((width, height))
                 self.cairo.set_size(width, height)
                 self.context.save()
-                self._set_context_size(width, height, viewbox)
+                self.set_context_size(width, height, viewbox)
                 self.draw(page)
                 self.context.restore()
                 self.cairo.show_page()
