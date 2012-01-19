@@ -40,13 +40,13 @@ def filter_fill_content(node):
     return content
 
 
-def node_format(node):
+def node_format(surface, node):
     """Return ``(width, height, viewbox)`` of ``node``."""
-    width = size(node.get("width"))
-    height = size(node.get("height"))
+    width = size(surface, node.get("width"))
+    height = size(surface, node.get("height"))
     viewbox = node.get("viewBox")
     if viewbox:
-        viewbox = tuple(size(pos) for pos in viewbox.split())
+        viewbox = tuple(size(surface, pos) for pos in viewbox.split())
         width = width or viewbox[2]
         height = height or viewbox[3]
     return width, height, viewbox
@@ -63,13 +63,13 @@ def normalize(string=None):
     return string
 
 
-def point(string=None):
+def point(surface, string=None):
     """Return ``(x, y, trailing_text)`` from ``string``."""
     if not string:
         return (0, 0, "")
 
     x, y, string = (string.strip() + " ").split(" ", 2)
-    return size(x), size(y), string
+    return size(surface, x), size(surface, y), string
 
 
 def point_angle(cx, cy, px, py):
@@ -83,12 +83,12 @@ def point_angle(cx, cy, px, py):
 def preserve_ratio(surface, node):
     """Manage the ratio preservation."""
     if node.tag == "marker":
-        scale_x = size(node.get("markerWidth", "3"))
-        scale_y = size(node.get("markerHeight", "3"))
-        translate_x = -size(node.get("refX"))
-        translate_y = -size(node.get("refY"))
+        scale_x = size(surface, node.get("markerWidth", "3"))
+        scale_y = size(surface, node.get("markerHeight", "3"))
+        translate_x = -size(surface, node.get("refX"))
+        translate_y = -size(surface, node.get("refY"))
     elif node.tag == "svg":
-        width, height, viewbox = node_format(node)
+        width, height, viewbox = node_format(surface, node)
         viewbox_width = viewbox[2] - viewbox[0]
         viewbox_height = viewbox[3] - viewbox[1]
         scale_x = width / viewbox_width

@@ -56,10 +56,10 @@ def gradient(surface, node):
     """Gradients colors."""
     gradient_node = surface.gradients[filter_fill_content(node)]
 
-    x = float(size(node.get("x")))
-    y = float(size(node.get("y")))
-    height = float(size(node.get("height")))
-    width = float(size(node.get("width")))
+    x = float(size(surface, node.get("x")))
+    y = float(size(surface, node.get("y")))
+    height = float(size(surface, node.get("height")))
+    width = float(size(surface, node.get("width")))
     x1 = float(gradient_node.get("x1", x))
     x2 = float(gradient_node.get("x2", x + width))
     y1 = float(gradient_node.get("y1", y))
@@ -111,7 +111,8 @@ def pattern(surface, node):
     pattern_node = surface.patterns[filter_fill_content(node)]
     if pattern_node.tag == "pattern":
         from . import SVGSurface  # circular import
-        pattern_surface = SVGSurface(tree=pattern_node, output=None)
+        pattern_surface = SVGSurface(
+            tree=pattern_node, output=None, dpi=surface.dpi)
         pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
         pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
         surface.context.set_source(pattern_pattern)
@@ -168,13 +169,14 @@ def draw_marker(surface, node, position="mid"):
                 if node.get("markerUnits") == "userSpaceOnUse":
                     base_scale = 1
                 else:
-                    base_scale = size(surface.parent_node.get("stroke-width"))
+                    base_scale = size(
+                        surface, surface.parent_node.get("stroke-width"))
 
                 # Returns 4 values
                 scale_x, scale_y, translate_x, translate_y = \
                     preserve_ratio(surface, marker_node)
 
-                viewbox = node_format(marker_node)[-1]
+                viewbox = node_format(surface, marker_node)[-1]
                 viewbox_width = viewbox[2] - viewbox[0]
                 viewbox_height = viewbox[3] - viewbox[1]
 
@@ -203,7 +205,8 @@ def marker(surface, node):
 def use(surface, node):
     """Draw the content of another SVG file."""
     surface.context.save()
-    surface.context.translate(size(node.get("x")), size(node.get("y")))
+    surface.context.translate(
+        size(surface, node.get("x")), size(surface, node.get("y")))
     if "x" in node:
         del node["x"]
     if "y" in node:
@@ -212,7 +215,7 @@ def use(surface, node):
         del node["viewBox"]
     href = node.get("{http://www.w3.org/1999/xlink}href")
     tree = Tree(url=href, parent=node)
-    surface.set_context_size(*node_format(tree))
+    surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
     surface.context.restore()
     # Restore twice, because draw does not restore at the end of svg tags

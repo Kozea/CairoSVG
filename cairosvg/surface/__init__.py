@@ -64,6 +64,7 @@ class Surface(object):
         parameters are keyword-only.
 
         """
+        dpi = kwargs.pop('dpi', 96)
         write_to = kwargs.pop('write_to', None)
         kwargs['bytestring'] = bytestring
         tree = Tree(**kwargs)
@@ -71,11 +72,11 @@ class Surface(object):
             output = io.BytesIO()
         else:
             output = write_to
-        cls(tree, output).finish()
+        cls(tree, output, dpi).finish()
         if write_to is None:
             return output.getvalue()
 
-    def __init__(self, tree, output):
+    def __init__(self, tree, output, dpi):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -97,7 +98,8 @@ class Surface(object):
         self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.output = output
-        width, height, viewbox = node_format(tree)
+        self.dpi = dpi
+        width, height, viewbox = node_format(self, tree)
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
             width * self.device_units_per_user_units,
@@ -115,7 +117,7 @@ class Surface(object):
     @property
     def points_per_pixel(self):
         """Surface resolution."""
-        return 1 / (units.DPI * units.UNITS["pt"])
+        return 1 / (self.dpi * units.UNITS["pt"])
 
     @property
     def device_units_per_user_units(self):
@@ -175,7 +177,8 @@ class Surface(object):
         self.parent_node = node
 
         self.context.save()
-        self.context.move_to(size(node.get("x")), size(node.get("y")))
+        self.context.move_to(
+            size(self, node.get("x")), size(self, node.get("y")))
 
         # Transform the context according to the ``transform`` attribute
         if node.get("transform"):
@@ -193,7 +196,7 @@ class Surface(object):
                         while transformation:
                             value, transformation = \
                                 transformation.split(" ", 1)
-                            values.append(size(value))
+                            values.append(size(self, value))
                         if ttype == "matrix":
                             matrix = cairo.Matrix(*values)
                             self.context.set_matrix(matrix)
@@ -264,7 +267,7 @@ class Surface(object):
                 self.context.fill_preserve()
 
             # Stroke
-            self.context.set_line_width(size(node.get("stroke-width")))
+            self.context.set_line_width(size(self, node.get("stroke-width")))
             self.context.set_source_rgba(
                 *color(node.get("stroke"), stroke_opacity))
             self.context.stroke()
@@ -291,7 +294,7 @@ class MultipageSurface(Surface):
         if svg_children:
             # Multi-page
             for page in svg_children:
-                width, height, viewbox = node_format(page)
+                width, height, viewbox = node_format(self, page)
                 # TODO: test this
                 width *= self.device_units_per_user_units
                 height *= self.device_units_per_user_units

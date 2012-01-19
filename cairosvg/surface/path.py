@@ -50,12 +50,12 @@ def path(surface, node):
         if letter in "aA":
             # Elliptic curve
             x1, y1 = surface.context.get_current_point()
-            rx, ry, string = point(string)
+            rx, ry, string = point(surface, string)
             radii_ratio = ry / rx
             rotation, large, sweep, string = string.split(" ", 3)
             rotation = radians(float(rotation))
             large, sweep = bool(int(large)), bool(int(sweep))
-            x3, y3, string = point(string)
+            x3, y3, string = point(surface, string)
 
             if letter == "A":
                 # Absolute x3 and y3, convert to relative
@@ -109,18 +109,18 @@ def path(surface, node):
 
         elif letter == "c":
             # Relative curve
-            x1, y1, string = point(string)
-            x2, y2, string = point(string)
-            x3, y3, string = point(string)
+            x1, y1, string = point(surface, string)
+            x2, y2, string = point(surface, string)
+            x3, y3, string = point(surface, string)
             node.tangents.extend((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
 
         elif letter == "C":
             # Curve
-            x1, y1, string = point(string)
-            x2, y2, string = point(string)
-            x3, y3, string = point(string)
+            x1, y1, string = point(surface, string)
+            x2, y2, string = point(surface, string)
+            x3, y3, string = point(surface, string)
             node.tangents.extend((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
@@ -128,28 +128,28 @@ def path(surface, node):
         elif letter == "h":
             # Relative horizontal line
             x, string = string.split(" ", 1)
-            angle = 0 if size(x) > 0 else pi
+            angle = 0 if size(surface, x) > 0 else pi
             node.tangents.extend((-angle, angle))
-            surface.context.rel_line_to(size(x), 0)
+            surface.context.rel_line_to(size(surface, x), 0)
 
         elif letter == "H":
             # Horizontal line
             x, string = string.split(" ", 1)
             old_x = surface.context.get_current_point()[1]
-            angle = 0 if size(x) > old_x else pi
+            angle = 0 if size(surface, x) > old_x else pi
             node.tangents.extend((-angle, angle))
-            surface.context.line_to(size(x), old_x)
+            surface.context.line_to(size(surface, x), old_x)
 
         elif letter == "l":
             # Relative straight line
-            x, y, string = point(string)
+            x, y, string = point(surface, string)
             angle = point_angle(0, 0, x, y)
             node.tangents.extend((-angle, angle))
             surface.context.rel_line_to(x, y)
 
         elif letter == "L":
             # Straight line
-            x, y, string = point(string)
+            x, y, string = point(surface, string)
             old_x, old_y = surface.context.get_current_point()
             angle = point_angle(old_x, old_y, x, y)
             node.tangents.extend((-angle, angle))
@@ -157,12 +157,12 @@ def path(surface, node):
 
         elif letter == "m":
             # Current point relative move
-            x, y, string = point(string)
+            x, y, string = point(surface, string)
             surface.context.rel_move_to(x, y)
 
         elif letter == "M":
             # Current point move
-            x, y, string = point(string)
+            x, y, string = point(surface, string)
             surface.context.move_to(x, y)
 
         elif letter == "q":
@@ -172,8 +172,8 @@ def path(surface, node):
             string, next_string = string.split("t", 1)
             x1, y1 = 0, 0
             while string:
-                x2, y2, string = point(string)
-                x3, y3, string = point(string)
+                x2, y2, string = point(surface, string)
+                x3, y3, string = point(surface, string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
                 surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
@@ -187,8 +187,8 @@ def path(surface, node):
             string, next_string = string.split("T", 1)
             x1, y1 = surface.context.get_current_point()
             while string:
-                x2, y2, string = point(string)
-                x3, y3, string = point(string)
+                x2, y2, string = point(surface, string)
+                x3, y3, string = point(surface, string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
                 surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
@@ -201,8 +201,8 @@ def path(surface, node):
             # TODO: manage tangents
             x1 = x3 - x2 if last_letter in "cs" else 0
             y1 = y3 - y2 if last_letter in "cs" else 0
-            x2, y2, string = point(string)
-            x3, y3, string = point(string)
+            x2, y2, string = point(surface, string)
+            x3, y3, string = point(surface, string)
             node.tangents.extend((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
@@ -212,10 +212,10 @@ def path(surface, node):
             # TODO: manage last_letter in "cs"
             # TODO: manage tangents
             x, y = surface.context.get_current_point()
-            x2, y2, string = point(string)
+            x2, y2, string = point(surface, string)
             x1 = x3 if last_letter in "CS" else x
             y1 = y2 if last_letter in "CS" else y
-            x3, y3, string = point(string)
+            x3, y3, string = point(surface, string)
             node.tangents.extend((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
@@ -226,7 +226,7 @@ def path(surface, node):
             x1, y1 = 0, 0
             x2 = 2 * x1 - x2
             y2 = 2 * y1 - y2
-            x3, y3, string = point(string)
+            x3, y3, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                 x1, y1, x2, y2, x3, y3)
             node.tangents.extend((0, 0))
@@ -238,7 +238,7 @@ def path(surface, node):
             x1, y1 = surface.context.get_current_point()
             x2 = 2 * x1 - x2
             y2 = 2 * y1 - y2
-            x3, y3, string = point(string)
+            x3, y3, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                 x1, y1, x2, y2, x3, y3)
             node.tangents.extend((0, 0))
@@ -247,17 +247,17 @@ def path(surface, node):
         elif letter == "v":
             # Relative vertical line
             y, string = string.split(" ", 1)
-            angle = pi / 2 if size(y) > 0 else -pi / 2
+            angle = pi / 2 if size(surface, y) > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
-            surface.context.rel_line_to(0, size(y))
+            surface.context.rel_line_to(0, size(surface, y))
 
         elif letter == "V":
             # Vertical line
             y, string = string.split(" ", 1)
             old_y = surface.context.get_current_point()[0]
-            angle = pi / 2 if size(y) > 0 else -pi / 2
+            angle = pi / 2 if size(surface, y) > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
-            surface.context.line_to(old_y, size(y))
+            surface.context.line_to(old_y, size(surface, y))
 
         elif letter in "zZ":
             # End of path

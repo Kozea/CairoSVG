@@ -29,28 +29,29 @@ def circle(surface, node):
     """Draw a circle ``node`` on ``surface``."""
     surface.context.new_sub_path()
     surface.context.arc(
-        size(node.get("x")) + size(node.get("cx")),
-        size(node.get("y")) + size(node.get("cy")),
-        size(node.get("r")), 0, 2 * pi)
+        size(surface, node.get("x")) + size(surface, node.get("cx")),
+        size(surface, node.get("y")) + size(surface, node.get("cy")),
+        size(surface, node.get("r")), 0, 2 * pi)
 
 
 def ellipse(surface, node):
     """Draw an ellipse ``node`` on ``surface``."""
-    y_scale_ratio = size(node.get("ry")) / size(node.get("rx"))
+    ratio = size(surface, node.get("ry")) / size(surface, node.get("rx"))
     surface.context.new_sub_path()
     surface.context.save()
-    surface.context.scale(1, y_scale_ratio)
+    surface.context.scale(1, ratio)
     surface.context.arc(
-        size(node.get("x")) + size(node.get("cx")),
-        (size(node.get("y")) + size(node.get("cy"))) / y_scale_ratio,
-        size(node.get("rx")), 0, 2 * pi)
+        size(surface, node.get("x")) + size(surface, node.get("cx")),
+        (size(surface, node.get("y")) + size(surface, node.get("cy"))) / ratio,
+        size(surface, node.get("rx")), 0, 2 * pi)
     surface.context.restore()
 
 
 def line(surface, node):
     """Draw a line ``node``."""
     x1, y1, x2, y2 = tuple(
-        size(node.get(position)) for position in ("x1", "y1", "x2", "y2"))
+        size(surface, node.get(position))
+        for position in ("x1", "y1", "x2", "y2"))
     surface.context.move_to(x1, y1)
     surface.context.line_to(x2, y2)
 
@@ -65,21 +66,22 @@ def polyline(surface, node):
     """Draw a polyline ``node``."""
     points = normalize(node.get("points"))
     if points:
-        x, y, points = point(points)
+        x, y, points = point(surface, points)
         surface.context.move_to(x, y)
         while points:
-            x, y, points = point(points)
+            x, y, points = point(surface, points)
             surface.context.line_to(x, y)
 
 
 def rect(surface, node):
     """Draw a rect ``node`` on ``surface``."""
-    x, y = size(node.get("x")), size(node.get("y"))
-    width, height = size(node.get("width")), size(node.get("height"))
-    if size(node.get("rx")) == 0:
+    x, y = size(surface, node.get("x")), size(surface, node.get("y"))
+    width = size(surface, node.get("width"))
+    height = size(surface, node.get("height"))
+    if size(surface, node.get("rx")) == 0:
         surface.context.rectangle(x, y, width, height)
     else:
-        r = size(node.get("rx"))
+        r = size(surface, node.get("rx"))
         a, b, c, d = x, width + x, y, height + y
         if r > width - r:
             r = width / 2

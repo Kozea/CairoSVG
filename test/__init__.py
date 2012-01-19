@@ -70,7 +70,7 @@ def generate_function(description):
         size1 = (width1, height1)
         png_filename = os.path.join(
             OUTPUT_FOLDER, os.path.basename(png_filename))
-        cairosvg.svg2png(url=svg_filename, write_to=png_filename)
+        cairosvg.svg2png(url=svg_filename, write_to=png_filename, dpi=72)
         width2, height2, pixels2, _ = png.Reader(png_filename).asRGBA()
         size2 = (width2, height2)
 
@@ -195,7 +195,7 @@ def test_low_level_api():
     # Same as above, longer version
     tree = cairosvg.parser.Tree(url=svg_filename)
     file_like = io.BytesIO()
-    surface = cairosvg.surface.PNGSurface(tree, file_like)
+    surface = cairosvg.surface.PNGSurface(tree, file_like, 96)
     surface.finish()
     assert file_like.getvalue() == expected_content
 
@@ -203,7 +203,7 @@ def test_low_level_api():
     expected_width, expected_height, _, _ = png_result
 
     # Abstract surface
-    surface = cairosvg.surface.PNGSurface(tree, output=None)
+    surface = cairosvg.surface.PNGSurface(tree, None, 96)
     assert surface.width == expected_width
     assert surface.height == expected_height
     assert cairo.SurfacePattern(surface.cairo).get_surface() is surface.cairo
@@ -270,17 +270,15 @@ def test_script():
     assert test_main(['--version'], exit=True).strip() == \
          cairosvg.VERSION.encode('ascii')
     assert test_main([svg_filename]) == expected_pdf
-    assert test_main([svg_filename, '-f', 'Pdf']) == expected_pdf
+    assert test_main([svg_filename, '-d', '72', '-f', 'Pdf']) == expected_pdf
     assert test_main([svg_filename, '-f', 'png']) == expected_png
     assert test_main(['-'], input_=svg_filename) == expected_pdf
 
     # Test DPI
-    default_dpi = cairosvg.units.DPI
     output = test_main([svg_filename, '-d', '10', '-f', 'png'])
     width, height = png.Reader(bytes=output).asRGBA()[:2]
     eq_(width, 47)
     eq_(height, 20)
-    cairosvg.units.DPI = default_dpi
 
     temp = tempfile.mkdtemp()
     try:

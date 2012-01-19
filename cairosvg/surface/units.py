@@ -21,7 +21,6 @@ Units functions.
 """
 
 
-DPI = 72.
 UNITS = {
     "mm": 1 / 25.4,
     "cm": 1 / 2.54,
@@ -38,7 +37,7 @@ class NotImplementedUnitError(ValueError, NotImplementedError):
     """Exception raised when an unit is not implemented."""
 
 
-def size(string=None):
+def size(surface, string=None):
     """Replace a string with units by a float value."""
     if not string:
         return 0
@@ -52,7 +51,8 @@ def size(string=None):
             if coefficient == NotImplemented:
                 raise NotImplementedUnitError
             else:
-                return number * (DPI * coefficient if coefficient else 1)
+                return number * (
+                    surface.dpi * coefficient if coefficient else 1)
 
     # Unknown size or multiple sizes
     return 0

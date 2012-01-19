@@ -25,7 +25,6 @@ import sys
 import optparse
 
 from . import surface
-from .surface import units
 
 
 VERSION = '0.3dev'
@@ -41,7 +40,7 @@ for _output_format, _surface_type in SURFACES.items():
     _function = (
         # Two lambdas needed for the closure
         lambda surface_type: lambda *args, **kwargs:  # pylint: disable=W0108
-        surface_type.convert(*args, **kwargs))(_surface_type)
+            surface_type.convert(*args, **kwargs))(_surface_type)
     _name = 'svg2%s' % _output_format.lower()
     _function.__name__ = _name
     _function.__doc__ = surface.Surface.convert.__doc__.replace(
@@ -57,15 +56,11 @@ def main():
     option_parser.add_option(
         "-f", "--format", help="output format")
     option_parser.add_option(
-        "-d", "--dpi", help="svg resolution")
+        "-d", "--dpi", help="svg resolution", default=96)
     option_parser.add_option(
         "-o", "--output",
         default="", help="output filename")
     options, args = option_parser.parse_args()
-
-    # Set the resolution
-    if options.dpi:
-        units.DPI = float(options.dpi)
 
     # Parse the SVG
     output_format = (
@@ -89,6 +84,7 @@ def main():
         # Python 2/3 hack
         input_ = getattr(sys.stdin, "buffer", sys.stdin)
         SURFACES[output_format.upper()].convert(
-            file_obj=input_, write_to=output)
+            file_obj=input_, write_to=output, dpi=float(options.dpi))
     else:
-        SURFACES[output_format.upper()].convert(url=url, write_to=output)
+        SURFACES[output_format.upper()].convert(
+            url=url, write_to=output, dpi=float(options.dpi))
