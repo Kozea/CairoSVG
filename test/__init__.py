@@ -220,7 +220,8 @@ def test_script():
     def run(*script_args, **kwargs):
         """Same as ``subprocess.check_output`` which is new in 2.7."""
         process = subprocess.Popen(
-            [script] + list(script_args), stdout=subprocess.PIPE, **kwargs)
+            [sys.executable, script] + list(script_args),
+            stdout=subprocess.PIPE, **kwargs)
         output = process.communicate()[0]
         return_code = process.poll()
         assert return_code == 0
@@ -258,9 +259,9 @@ def test_script():
                 main()
         finally:
             output = sys.stdout.getvalue()
+            sys.stdin, sys.stdout = old_stdin, old_stdout
             if exit:
                 output = output.encode('ascii')
-            sys.stdin, sys.stdout = old_stdin, old_stdout
             eq_(output, run(*args, **kwargs))
 
         return output
