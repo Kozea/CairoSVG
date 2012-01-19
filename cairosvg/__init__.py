@@ -62,29 +62,31 @@ def main():
         default="", help="output filename")
     options, args = option_parser.parse_args()
 
-    # Parse the SVG
-    output_format = (
-        options.format or
-        os.path.splitext(options.output)[1].lstrip(".") or
-        "pdf")
-
     # Print help if no argument is given
     if not args:
         option_parser.print_help()
         sys.exit()
 
+    kwargs = {'dpi': float(options.dpi)}
+
     if not options.output or options.output == '-':
         # Python 2/3 hack
-        output = getattr(sys.stdout, "buffer", sys.stdout)
+        bytes_stdout = getattr(sys.stdout, "buffer", sys.stdout)
+        kwargs['write_to'] = bytes_stdout
     else:
-        output = options.output
+        kwargs['write_to'] = options.output
 
     url = args[0]
     if url == "-":
         # Python 2/3 hack
-        input_ = getattr(sys.stdin, "buffer", sys.stdin)
-        SURFACES[output_format.upper()].convert(
-            file_obj=input_, write_to=output, dpi=float(options.dpi))
+        bytes_stdin = getattr(sys.stdin, "buffer", sys.stdin)
+        kwargs['file_obj'] = bytes_stdin
     else:
-        SURFACES[output_format.upper()].convert(
-            url=url, write_to=output, dpi=float(options.dpi))
+        kwargs['url'] = url
+
+    output_format = (
+        options.format or
+        os.path.splitext(options.output)[1].lstrip(".") or
+        "pdf")
+
+    SURFACES[output_format.upper()].convert(**kwargs)
