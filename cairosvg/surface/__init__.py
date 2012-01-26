@@ -199,7 +199,8 @@ class Surface(object):
                             values.append(size(self, value))
                         if ttype == "matrix":
                             matrix = cairo.Matrix(*values)
-                            self.context.set_matrix(matrix)
+                            self.context.set_matrix(
+                                matrix.multiply(self.context.get_matrix()))
                         elif ttype == "rotate":
                             matrix = self.context.get_matrix()
                             self.context.rotate(math.radians(float(values[0])))

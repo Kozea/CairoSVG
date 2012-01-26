@@ -26,7 +26,8 @@ import cairo
 from math import radians
 
 from .colors import color
-from .helpers import filter_fill_content, node_format, preserve_ratio, urls
+from .helpers import (
+    filter_fill_content, node_format, preserve_ratio, urls, normalize)
 from .units import size
 from ..parser import Tree
 
@@ -68,15 +69,13 @@ def gradient(surface, node):
     if gradient_node.tag == "linearGradient":
         linpat = cairo.LinearGradient(x1, y1, x2, y2)
         for child in gradient_node.children:
-            offset = child.get("offset")
             stop_color = color(
-                child.get("stop-color"), child.get("stop-opacity", 1))
+                child.get("stop-color"), float(child.get("stop-opacity", 1)))
             offset = child.get("offset")
             if "%" in offset:
                 offset = float(offset.strip("%")) / 100
             linpat.add_color_stop_rgba(float(offset), *stop_color)
         surface.context.set_source(linpat)
-        surface.context.fill_preserve()
     elif gradient_node.tag == "radialGradient":
         r = float(gradient_node.get("r"))
         cx = float(gradient_node.get("cx"))
@@ -93,7 +92,22 @@ def gradient(surface, node):
                 child.get("stop-color"), child.get("stop-opacity", 1))
             radpat.add_color_stop_rgba(float(offset), *stop_color)
         surface.context.set_source(radpat)
-        surface.context.fill_preserve()
+
+    transformation = gradient_node.get("gradientTransform")
+    if transformation:
+        transformation = transformation.replace("matrix", "")
+        transformation = transformation.replace("(", "")
+        transformation = normalize(transformation).strip()
+        transformation += " "
+        values = []
+        while transformation:
+            value, transformation = transformation.split(" ", 1)
+            values.append(size(surface, value))
+        matrix = cairo.Matrix(*values)
+        surface.context.set_matrix(
+            matrix.multiply(surface.context.get_matrix()))
+
+    surface.context.fill_preserve()
 
 
 def linear_gradient(surface, node):
