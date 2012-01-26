@@ -42,6 +42,15 @@ class Node(dict):
         self.tag = node.tag.split("}", 1)[-1]
         self.text = node.text
 
+        # Handle the CSS
+        style = node.attrib.get("style")
+        if style:
+            for attribute in style.split(";"):
+                if ":" in attribute:
+                    name, value = attribute.split(":", 1)
+                    node.attrib[name.strip()] = value.strip()
+            del node.attrib["style"]
+
         # Inherits from parent properties
         if parent is not None:
             items = parent.copy()
@@ -59,6 +68,8 @@ class Node(dict):
             self.parent = parent
 
         # TODO: manage other attributes that should be multiplicated
+        # TODO: handle opacity the right way (no transparency between plain
+        # elements in a semi-transparent parent)
         properties = dict(node.attrib.items())
         for key in properties:
             if "opacity" in key:
@@ -67,7 +78,7 @@ class Node(dict):
                         float(parent.get(key, 1.0)) * float(properties[key]))
         self.update(properties)
 
-        # manage text by creating children
+        # Manage text by creating children
         if self.tag == "text" or self.tag == "textPath":
             self.children = self.text_children(node)
 
