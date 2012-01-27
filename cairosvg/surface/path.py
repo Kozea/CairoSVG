@@ -265,10 +265,6 @@ def path(surface, node):
             node.tangents.extend((0, 0))
             surface.context.close_path()
 
-        else:
-            # TODO: manage other letters
-            raise NotImplementedError
-
         string = string.strip()
 
         if string and letter not in "mM":
