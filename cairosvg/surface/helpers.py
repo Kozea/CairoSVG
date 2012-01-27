@@ -61,6 +61,8 @@ def normalize(string=None):
     while "  " in string:
         string = string.replace("  ", " ")
 
+    string = string.replace("e -", "e-")
+
     return string
 
 
