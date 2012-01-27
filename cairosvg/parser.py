@@ -22,15 +22,16 @@ SVG Parser.
 
 from xml.etree import ElementTree
 from xml.parsers import expat
+
+# Python 2/3 magic imports
+# pylint: disable=E0611,F0401
 try:
     from urllib import urlopen
-except ImportError:
-    from urllib.request import urlopen  # Python 3
-
-try:
     import urlparse
 except ImportError:
+    from urllib.request import urlopen
     from urllib import parse as urlparse  # Python 3
+# pylint: enable=E0611,F0401
 
 
 # ElementTree's API changed between 2.6 and 2.7

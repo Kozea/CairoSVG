@@ -54,6 +54,7 @@ SIZE_TOLERANCE = 1
 if not os.path.exists(OUTPUT_FOLDER):
     os.mkdir(OUTPUT_FOLDER)
 
+
 def same(tuple1, tuple2, tolerence=0):
     """Return if the tuples values are quite the same."""
     for value1, value2 in zip(tuple1, tuple2):
@@ -227,10 +228,10 @@ def test_script():
         assert return_code == 0
         return output
 
-    def test_main(args, exit=False, input_=None):
+    def test_main(args, exit_=False, input_=None):
         """Test main called with given ``args``.
 
-        If ``exit`` is ``True``, check that ``SystemExit`` is raised. We then
+        If ``exit_`` is ``True``, check that ``SystemExit`` is raised. We then
         assume that the program output is an unicode string.
 
         If ``input_`` is given, use this stream as input stream.
@@ -247,7 +248,7 @@ def test_script():
             kwargs = {}
 
         try:
-            if exit:
+            if exit_:
                 try:
                     # Python 2/3 hack
                     if hasattr(sys.stdout, "getbuffer"):
@@ -260,15 +261,15 @@ def test_script():
         finally:
             output = sys.stdout.getvalue()
             sys.stdin, sys.stdout = old_stdin, old_stdout
-            if exit:
+            if exit_:
                 output = output.encode('ascii')
             eq_(output, run(*args, **kwargs))
 
         return output
 
-    assert test_main([], exit=True).startswith(b'Usage: ')
-    assert test_main(['--help'], exit=True).startswith(b'Usage: ')
-    assert test_main(['--version'], exit=True).strip() == \
+    assert test_main([], exit_=True).startswith(b'Usage: ')
+    assert test_main(['--help'], exit_=True).startswith(b'Usage: ')
+    assert test_main(['--version'], exit_=True).strip() == \
          cairosvg.VERSION.encode('ascii')
     assert test_main([svg_filename]) == expected_pdf
     assert test_main([svg_filename, '-d', '72', '-f', 'Pdf']) == expected_pdf
