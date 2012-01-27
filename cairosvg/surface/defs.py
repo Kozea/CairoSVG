@@ -111,6 +111,8 @@ def radial_gradient(surface, node):
 def pattern(surface, node):
     """Draw a pattern image."""
     pattern_node = surface.patterns[filter_fill_content(node)]
+    transform(surface, pattern_node.get("patternTransform"))
+
     if pattern_node.tag == "pattern":
         from . import SVGSurface  # circular import
         pattern_surface = SVGSurface(
