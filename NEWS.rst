@@ -2,7 +2,17 @@
  News
 ======
 
-Version 0.2, released on 2011-12-XX
+
+Version 0.3, released on 2012-01-27
+===================================
+
+* Simple inline CSS support
+* Support for transformations in patterns and gradients
+* Real by-surface DPI management (default value set to 96)
+* Handle exponents
+
+
+Version 0.2, released on 2012-01-04
 ===================================
 
 * **Change the Python API again** to be compatible with 0.1.1 and before:
