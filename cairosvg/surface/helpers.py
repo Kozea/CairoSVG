@@ -20,7 +20,8 @@ Surface helpers.
 
 """
 
-from math import pi, cos, sin, atan
+import cairo
+from math import pi, cos, sin, atan, radians
 
 from .units import size
 
@@ -146,6 +147,52 @@ def quadratic_points(x1, y1, x2, y2, x3, y3):
 def rotate(x, y, angle):
     """Rotate a point of an angle around the origin point."""
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
+
+
+def transform(surface, string):
+    """Update ``surface`` matrix according to transformation ``string``."""
+    if not string:
+        return
+
+    transformations = string.split(")")
+    for transformation in transformations:
+        for ttype in (
+            "scale", "translate", "matrix", "rotate", "skewX",
+            "skewY"):
+            if ttype in transformation:
+                transformation = transformation.replace(ttype, "")
+                transformation = transformation.replace("(", "")
+                transformation = normalize(transformation).strip() + " "
+                values = []
+                while transformation:
+                    value, transformation = \
+                        transformation.split(" ", 1)
+                    values.append(size(surface, value))
+                if ttype == "matrix":
+                    matrix = cairo.Matrix(*values)
+                    surface.context.set_matrix(
+                        matrix.multiply(surface.context.get_matrix()))
+                elif ttype == "rotate":
+                    matrix = surface.context.get_matrix()
+                    surface.context.rotate(radians(float(values[0])))
+                elif ttype == "skewX":
+                    matrix = surface.context.get_matrix()
+                    degree = radians(float(values[0]))
+                    mtrx = cairo.Matrix(
+                        matrix[0], matrix[1], matrix[2] + degree,
+                        matrix[3], matrix[4], matrix[5])
+                    surface.context.set_matrix(mtrx)
+                elif ttype == "skewY":
+                    matrix = surface.context.get_matrix()
+                    degree = radians(float(values[0]))
+                    mtrx = cairo.Matrix(
+                        matrix[0], matrix[1] + degree, matrix[2],
+                        matrix[3], matrix[4], matrix[5])
+                    surface.context.set_matrix(mtrx)
+                else:
+                    if len(values) == 1:
+                        values = 2 * values
+                    getattr(surface.context, ttype)(*values)
 
 
 def urls(string):

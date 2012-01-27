@@ -22,12 +22,11 @@ Cairo surface creators.
 
 import cairo
 import io
-import math
 
 from ..parser import Tree
 from .colors import color
 from .defs import gradient_or_pattern, parse_def
-from .helpers import node_format, normalize
+from .helpers import node_format, transform
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
@@ -181,47 +180,7 @@ class Surface(object):
             size(self, node.get("x")), size(self, node.get("y")))
 
         # Transform the context according to the ``transform`` attribute
-        if node.get("transform"):
-            transformations = node["transform"].split(")")
-            for transformation in transformations:
-                for ttype in (
-                        "scale", "translate", "matrix", "rotate", "skewX",
-                        "skewY"):
-                    if ttype in transformation:
-                        transformation = transformation.replace(ttype, "")
-                        transformation = transformation.replace("(", "")
-                        transformation = normalize(transformation).strip()
-                        transformation += " "
-                        values = []
-                        while transformation:
-                            value, transformation = \
-                                transformation.split(" ", 1)
-                            values.append(size(self, value))
-                        if ttype == "matrix":
-                            matrix = cairo.Matrix(*values)
-                            self.context.set_matrix(
-                                matrix.multiply(self.context.get_matrix()))
-                        elif ttype == "rotate":
-                            matrix = self.context.get_matrix()
-                            self.context.rotate(math.radians(float(values[0])))
-                        elif ttype == "skewX":
-                            matrix = self.context.get_matrix()
-                            degree = math.radians(float(values[0]))
-                            mtrx = cairo.Matrix(
-                                matrix[0], matrix[1], matrix[2] + degree,
-                                matrix[3], matrix[4], matrix[5])
-                            self.context.set_matrix(mtrx)
-                        elif ttype == "skewY":
-                            matrix = self.context.get_matrix()
-                            degree = math.radians(float(values[0]))
-                            mtrx = cairo.Matrix(
-                                matrix[0], matrix[1] + degree, matrix[2],
-                                matrix[3], matrix[4], matrix[5])
-                            self.context.set_matrix(mtrx)
-                        else:
-                            if len(values) == 1:
-                                values = 2 * values
-                            getattr(self.context, ttype)(*values)
+        transform(self, node.get("transform"))
 
         if node.tag in PATH_TAGS:
             # Set 1 as default stroke-width
