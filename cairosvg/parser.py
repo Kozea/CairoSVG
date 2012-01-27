@@ -20,10 +20,18 @@ SVG Parser.
 
 """
 
-import urllib
-import urlparse
 from xml.etree import ElementTree
 from xml.parsers import expat
+try:
+    from urllib import urlopen
+except ImportError:
+    from urllib.request import urlopen  # Python 3
+
+try:
+    import urlparse
+except ImportError:
+    from urllib import parse as urlparse  # Python 3
+
 
 # ElementTree's API changed between 2.6 and 2.7
 # pylint: disable=C0103
@@ -125,7 +133,11 @@ class Tree(Node):
                 elif element_id:
                     url = parent.url
             self.url = url
-            tree = ElementTree.parse(urllib.urlopen(url)).getroot()
+            if urlparse.urlparse(url).scheme:
+                input_ = urlopen(url)
+            else:
+                input_ = url  # filename
+            tree = ElementTree.parse(input_).getroot()
             if element_id:
                 iterator = (
                     tree.iter() if hasattr(tree, 'iter')
