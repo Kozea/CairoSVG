@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="400px" height="200px" viewBox="0 0 4000 2000"
      xmlns="http://www.w3.org/2000/svg" version="1.1">
@@ -7,17 +7,17 @@
   <desc>Illustrates various units options</desc>
 
   <!-- Frame the picture -->
-  <rect x="5" y="5" width="3990" height="1990" 
+  <rect x="5" y="5" width="3990" height="1990"
         fill="none" stroke="blue" stroke-width="10"/>
 
   <g fill="blue" stroke="red" font-family="Verdana" font-size="150">
     <!-- Absolute unit specifiers -->
     <g transform="translate(400,0)">
       <text x="-50" y="300" fill="black" stroke="none">Abs. units:</text>
-      <rect x="0" y="400" width="4in" height="2in" stroke-width=".4in"/>
+      <rect x="0" y="400" width="5.33in" height="2.66in" stroke-width=".533in"/>
       <rect x="0" y="750" width="384" height="192" stroke-width="38.4"/>
       <g transform="scale(2)">
-        <rect x="0" y="600" width="4in" height="2in" stroke-width=".4in"/>
+        <rect x="0" y="600" width="5.33in" height="2.66in" stroke-width=".533in"/>
       </g>
     </g>
 
@@ -42,4 +42,3 @@
     </g>
   </g>
 </svg>
-

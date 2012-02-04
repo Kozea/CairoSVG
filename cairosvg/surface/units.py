@@ -27,19 +27,17 @@ UNITS = {
     "in": 1,
     "pt": 1 / 72.,
     "pc": 1 / 6.,
-    "px": None,
-    "em": NotImplemented,
-    "ex": NotImplemented}
+    "px": None}
 
 
-class NotImplementedUnitError(ValueError, NotImplementedError):
-    """Exception raised when an unit is not implemented."""
-
-
-def size(surface, string, reference=None):
+def size(surface, string, reference="xy"):
     """Replace a ``string`` with units by a float value.
 
-    If ``reference`` is given, it is used as reference for percentages.
+    If ``reference`` is a float, it is used as reference for percentages. If it
+    is ``'x'``, we use the viewport width as reference. If it is ``'y'``, we
+    use the viewport height as reference. If it is ``'xy'``, we use
+    ``(viewport_width ** 2 + viewport_height ** 2) ** .5 / 2 ** .5`` as
+    reference.
 
     """
     if not string:
@@ -49,19 +47,25 @@ def size(surface, string, reference=None):
         return float(string)
 
     if "%" in string:
-        if reference is None:
-            raise ValueError("Percentage given with no reference")
-        else:
-            return float(string.strip(" %")) * reference / 100
+        if reference == "x":
+            reference = surface.context_width or 0
+        elif reference == "y":
+            reference = surface.context_height or 0
+        elif reference == "xy":
+            reference = (
+                (surface.context_width ** 2 + surface.context_height ** 2)
+                ** .5 / 2 ** .5)
+        return float(string.strip(" %")) * reference / 100
+    elif "em" in string:
+        return surface.font_size * float(string.strip(" em"))
+    elif "ex" in string:
+        # Assume that 1em == 2ex
+        return surface.font_size * float(string.strip(" ex")) / 2
 
     for unit, coefficient in UNITS.items():
         if unit in string:
             number = float(string.strip(" " + unit))
-            if coefficient == NotImplemented:
-                raise NotImplementedUnitError
-            else:
-                return number * (
-                    surface.dpi * coefficient if coefficient else 1)
+            return number * (surface.dpi * coefficient if coefficient else 1)
 
     # Unknown size or multiple sizes
     return 0

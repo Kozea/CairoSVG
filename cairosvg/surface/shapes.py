@@ -29,28 +29,31 @@ def circle(surface, node):
     """Draw a circle ``node`` on ``surface``."""
     surface.context.new_sub_path()
     surface.context.arc(
-        size(surface, node.get("x")) + size(surface, node.get("cx")),
-        size(surface, node.get("y")) + size(surface, node.get("cy")),
+        size(surface, node.get("x"), "x") + size(surface, node.get("cx"), "x"),
+        size(surface, node.get("y"), "y") + size(surface, node.get("cy"), "y"),
         size(surface, node.get("r")), 0, 2 * pi)
 
 
 def ellipse(surface, node):
     """Draw an ellipse ``node`` on ``surface``."""
-    ratio = size(surface, node.get("ry")) / size(surface, node.get("rx"))
+    ratio = (
+        size(surface, node.get("ry"), "y") /
+        size(surface, node.get("rx"), "x"))
     surface.context.new_sub_path()
     surface.context.save()
     surface.context.scale(1, ratio)
     surface.context.arc(
-        size(surface, node.get("x")) + size(surface, node.get("cx")),
-        (size(surface, node.get("y")) + size(surface, node.get("cy"))) / ratio,
-        size(surface, node.get("rx")), 0, 2 * pi)
+        size(surface, node.get("x"), "x") + size(surface, node.get("cx"), "x"),
+        (size(surface, node.get("y"), "y") +
+         size(surface, node.get("cy"), "y")) / ratio,
+        size(surface, node.get("rx"), "x"), 0, 2 * pi)
     surface.context.restore()
 
 
 def line(surface, node):
     """Draw a line ``node``."""
     x1, y1, x2, y2 = tuple(
-        size(surface, node.get(position))
+        size(surface, node.get(position), position[0])
         for position in ("x1", "y1", "x2", "y2"))
     surface.context.move_to(x1, y1)
     surface.context.line_to(x2, y2)
@@ -75,13 +78,14 @@ def polyline(surface, node):
 
 def rect(surface, node):
     """Draw a rect ``node`` on ``surface``."""
-    x, y = size(surface, node.get("x")), size(surface, node.get("y"))
-    width = size(surface, node.get("width"))
-    height = size(surface, node.get("height"))
-    if size(surface, node.get("rx")) == 0:
+    # TODO: handle ry
+    x, y = size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
+    width = size(surface, node.get("width"), "x")
+    height = size(surface, node.get("height"), "y")
+    if size(surface, node.get("rx"), "x") == 0:
         surface.context.rectangle(x, y, width, height)
     else:
-        r = size(surface, node.get("rx"))
+        r = size(surface, node.get("rx"), "x")
         a, b, c, d = x, width + x, y, height + y
         if r > width - r:
             r = width / 2

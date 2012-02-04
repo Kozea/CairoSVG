@@ -99,7 +99,7 @@ def text(surface, node):
     text_extents = surface.context.text_extents(node.text)
     x_bearing = text_extents[0]
     width = text_extents[2]
-    x, y = size(surface, node.get("x")), size(surface, node.get("y"))
+    x, y = size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
     text_anchor = node.get("text-anchor")
     if text_anchor == "middle":
         x -= width / 2. + x_bearing
@@ -162,7 +162,7 @@ def text_path(surface, node):
         surface.context.save()
         surface.context.translate(x, y)
         surface.context.rotate(angle)
-        surface.context.translate(0, size(surface, node.get("y")))
+        surface.context.translate(0, size(surface, node.get("y"), "y"))
         surface.context.move_to(0, 0)
         surface.context.show_text(letter)
         surface.context.restore()
@@ -171,18 +171,20 @@ def text_path(surface, node):
 
     # Remember the relative cursor position
     surface.cursor_position = \
-        size(surface, node.get("x")), size(surface, node.get("y"))
+        size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
 
 
 def tspan(surface, node):
     """Draw a tspan ``node``."""
     x, y = [[i] for i in surface.cursor_position]
     if "x" in node:
-        x = [size(surface, i) for i in normalize(node["x"]).strip().split(" ")]
+        x = [size(surface, i, "x")
+             for i in normalize(node["x"]).strip().split(" ")]
     if "y" in node:
-        y = [size(surface, i) for i in normalize(node["y"]).strip().split(" ")]
+        y = [size(surface, i, "y")
+             for i in normalize(node["y"]).strip().split(" ")]
 
-    string = (node.text or '').strip()
+    string = (node.text or "").strip()
     if not string:
         return
     fill = node.get("fill")
@@ -196,15 +198,15 @@ def tspan(surface, node):
             x = surface.cursor_position[0]
         if y == None:
             y = surface.cursor_position[1]
-        node["x"] = str(x + size(surface, node.get("dx")))
-        node["y"] = str(y + size(surface, node.get("dy")))
+        node["x"] = str(x + size(surface, node.get("dx"), "x"))
+        node["y"] = str(y + size(surface, node.get("dy"), "y"))
         node["fill"] = fill
         node.text = letters
         if node.parent.tag == "text":
             text(surface, node)
         else:
-            node["x"] = str(x + size(surface, node.get("dx")))
-            node["y"] = str(y + size(surface, node.get("dy")))
+            node["x"] = str(x + size(surface, node.get("dx"), "x"))
+            node["y"] = str(y + size(surface, node.get("dy"), "y"))
             text_path(surface, node)
             if node.parent.children[-1] == node:
                 surface.total_width = 0

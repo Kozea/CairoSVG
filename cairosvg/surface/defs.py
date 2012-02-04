@@ -57,10 +57,10 @@ def gradient(surface, node):
     """Gradients colors."""
     gradient_node = surface.gradients[filter_fill_content(node)]
 
-    x = float(size(surface, node.get("x")))
-    y = float(size(surface, node.get("y")))
-    height = float(size(surface, node.get("height")))
-    width = float(size(surface, node.get("width")))
+    x = float(size(surface, node.get("x"), "x"))
+    y = float(size(surface, node.get("y"), "y"))
+    height = float(size(surface, node.get("height"), "x"))
+    width = float(size(surface, node.get("width"), "y"))
     x1 = float(gradient_node.get("x1", x))
     x2 = float(gradient_node.get("x2", x + width))
     y1 = float(gradient_node.get("y1", y))
@@ -206,7 +206,7 @@ def use(surface, node):
     """Draw the content of another SVG file."""
     surface.context.save()
     surface.context.translate(
-        size(surface, node.get("x")), size(surface, node.get("y")))
+        size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y"))
     if "x" in node:
         del node["x"]
     if "y" in node:

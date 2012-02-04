@@ -39,6 +39,9 @@ class Surface(object):
     The ``width`` and ``height`` attributes are in device units (pixels for
     PNG, else points).
 
+    The ``context_width`` and ``context_height`` attributes are in user units
+    (i.e. in pixels), they represent the size of the active viewport.
+
     """
 
     # Subclasses must either define this or override _create_surface()
@@ -88,6 +91,8 @@ class Surface(object):
         """
         self.cairo = None
         self.context = None
+        self.context_width, self.context_height = None, None
+        self.font_size = None
         self.cursor_position = 0, 0
         self.total_width = 0
         self.markers = {}
@@ -137,9 +142,10 @@ class Surface(object):
         return cairo_surface, width, height
 
     def set_context_size(self, width, height, viewbox):
-        """Set the context size."""
+        """Set the Cairo context size, set the SVG viewport size."""
         if viewbox:
             x, y, x_size, y_size = viewbox
+            self.context_width, self.context_height = x_size, y_size
             x_ratio, y_ratio = width / x_size, height / y_size
             if x_ratio > y_ratio:
                 self.context.translate((width - x_size * y_ratio) / 2, 0)
@@ -152,6 +158,8 @@ class Surface(object):
             else:
                 self.context.scale(x_ratio, y_ratio)
                 self.context.translate(-x, -y)
+        else:
+            self.context_width, self.context_height = width, height
 
     def finish(self):
         """Read the surface content."""
@@ -163,6 +171,8 @@ class Surface(object):
 
     def draw(self, node, stroke_and_fill=True):
         """Draw ``node`` and its children."""
+        self.font_size = size(self, node.get("font-size", "12pt"))
+
         # Do not draw defs
         if node.tag == "defs":
             for child in node.children:
@@ -177,7 +187,8 @@ class Surface(object):
 
         self.context.save()
         self.context.move_to(
-            size(self, node.get("x")), size(self, node.get("y")))
+            size(self, node.get("x"), "x"),
+            size(self, node.get("y"), "y"))
 
         # Transform the context according to the ``transform`` attribute
         transform(self, node.get("transform"))

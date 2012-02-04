@@ -43,11 +43,11 @@ def filter_fill_content(node):
 
 def node_format(surface, node):
     """Return ``(width, height, viewbox)`` of ``node``."""
-    width = size(surface, node.get("width"))
-    height = size(surface, node.get("height"))
+    width = size(surface, node.get("width"), "x")
+    height = size(surface, node.get("height"), "y")
     viewbox = node.get("viewBox")
     if viewbox:
-        viewbox = tuple(size(surface, pos) for pos in viewbox.split())
+        viewbox = tuple(float(position) for position in viewbox.split())
         width = width or viewbox[2]
         height = height or viewbox[3]
     return width, height, viewbox
@@ -72,7 +72,7 @@ def point(surface, string=None):
         return (0, 0, "")
 
     x, y, string = (string.strip() + " ").split(" ", 2)
-    return size(surface, x), size(surface, y), string
+    return size(surface, x, "x"), size(surface, y, "y"), string
 
 
 def point_angle(cx, cy, px, py):
@@ -86,8 +86,8 @@ def point_angle(cx, cy, px, py):
 def preserve_ratio(surface, node):
     """Manage the ratio preservation."""
     if node.tag == "marker":
-        scale_x = size(surface, node.get("markerWidth", "3"))
-        scale_y = size(surface, node.get("markerHeight", "3"))
+        scale_x = size(surface, node.get("markerWidth", "3"), "x")
+        scale_y = size(surface, node.get("markerHeight", "3"), "y")
         translate_x = -size(surface, node.get("refX"))
         translate_y = -size(surface, node.get("refY"))
     elif node.tag == "svg":
@@ -169,6 +169,7 @@ def transform(surface, string):
                 while transformation:
                     value, transformation = \
                         transformation.split(" ", 1)
+                    # TODO: manage the x/y sizes here
                     values.append(size(surface, value))
                 if ttype == "matrix":
                     matrix = cairo.Matrix(*values)

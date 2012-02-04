@@ -128,17 +128,17 @@ def path(surface, node):
         elif letter == "h":
             # Relative horizontal line
             x, string = string.split(" ", 1)
-            angle = 0 if size(surface, x) > 0 else pi
+            angle = 0 if size(surface, x, "x") > 0 else pi
             node.tangents.extend((-angle, angle))
-            surface.context.rel_line_to(size(surface, x), 0)
+            surface.context.rel_line_to(size(surface, x, "x"), 0)
 
         elif letter == "H":
             # Horizontal line
             x, string = string.split(" ", 1)
             old_x = surface.context.get_current_point()[1]
-            angle = 0 if size(surface, x) > old_x else pi
+            angle = 0 if size(surface, x, "x") > old_x else pi
             node.tangents.extend((-angle, angle))
-            surface.context.line_to(size(surface, x), old_x)
+            surface.context.line_to(size(surface, x, "x"), old_x)
 
         elif letter == "l":
             # Relative straight line
@@ -247,17 +247,17 @@ def path(surface, node):
         elif letter == "v":
             # Relative vertical line
             y, string = string.split(" ", 1)
-            angle = pi / 2 if size(surface, y) > 0 else -pi / 2
+            angle = pi / 2 if size(surface, y, "y") > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
-            surface.context.rel_line_to(0, size(surface, y))
+            surface.context.rel_line_to(0, size(surface, y, "y"))
 
         elif letter == "V":
             # Vertical line
             y, string = string.split(" ", 1)
             old_y = surface.context.get_current_point()[0]
-            angle = pi / 2 if size(surface, y) > 0 else -pi / 2
+            angle = pi / 2 if size(surface, y, "y") > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
-            surface.context.line_to(old_y, size(surface, y))
+            surface.context.line_to(old_y, size(surface, y, "y"))
 
         elif letter in "zZ":
             # End of path
