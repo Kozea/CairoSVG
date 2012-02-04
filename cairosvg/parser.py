@@ -117,8 +117,6 @@ class Tree(Node):
         file_obj = kwargs.pop('file_obj', None)
         url = kwargs.pop('url', None)
         parent = kwargs.pop('parent', None)
-        if kwargs:
-            raise TypeError('Unexpected arguments', kwargs.keys())
 
         if bytestring is not None:
             tree = ElementTree.fromstring(bytestring)
