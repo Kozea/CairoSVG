@@ -24,7 +24,8 @@ About SVG
 
 No animations are supported in CairoSVG, as the output formats are mainly
 static. More generally, no real DOM support is offered, highly limiting the
-possibility of implementing features such as CSS or JavaScript support.
+possibility of implementing features such as external CSS or JavaScript
+support.
 
 
 SVG MIME type, file name extension and Macintosh file type
@@ -49,7 +50,10 @@ when parsing the XML. However, basic XML features such as namespaces are
 internally used. XLink is partially supported and should work for the standard
 usage.
 
-CSS, XSLT, DOM, XML-SS, SMIL and Web Accessibility are not supported at all.
+Inline CSS is basically supported.
+
+External CSS, XSLT, DOM, XML-SS, SMIL and Web Accessibility are not supported
+at all.
 
 The basic Unicode features are supported, and should work for latin
 left-to-right-written languages. Other configurations are not tested yet.
@@ -83,8 +87,9 @@ to these formats waithout rastering when possible.
 Based on ElementTree, CairoSVG needs SVG files that are XML tree, and is not
 fault-tolerent. Namespaces are well supported.
 
-CSS is not supported at all, but using a simple CSS pre-processor before
-CairoSVG (transforming the CSS into XML attributes) is possible.
+Inline CSS is supported, but external stylesheets are not supported at all.
+Using a simple CSS pre-processor before CairoSVG (transforming the CSS into XML
+attributes) is possible.
 
 
 Important SVG concepts
@@ -205,15 +210,13 @@ Frequencies are not supported.
 
 Standard URI and IRI forms are supported, including fragment identifiers.
 
-Numbers are supported, including integers and floats with the negative
-values. Exponents are not supported.
+Numbers are supported, including exponents, integers and floats with the
+negative values.
 
-Lengths are supported, with ``mm``, ``cm``, ``in``, ``pt`` and ``pc`` units.
+Lengths are supported, with ``mm``, ``cm``, ``in``, ``pt``, ``pc``, ``em``,
+``ex`` and ``%`` units.
 
 Lists of various values are supported.
-
-Percentages are only supported for gradients and ``startOffset`` attributes in
-paths.
 
 Times are not supported.
 
@@ -277,8 +280,8 @@ The ``symbol`` tag is not supported.
 The ‘use’ element
 -----------------
 
-The ``use`` tag supports local external SVG files (no HTTP support, for
-example).
+The ``use`` tag supports local and distant (i.e. available through HTTP)
+external SVG files.
 
 
 The ‘image’ element
@@ -318,7 +321,8 @@ The DOM interfaces are not supported.
 Styling
 =======
 
-Styling cannot be done with CSS or XSL.
+Styling cannot be done with XSL or external CSS. Inline CSS is basically
+supported.
 
 Here are some properties that can be used as XML attributes:
 
@@ -426,11 +430,9 @@ children of the root ``svg`` element. These pages can have different sizes.
 The viewport size must be given in the tag, as no negotiation process can be
 realized with the parent surface.
 
-``em``, ``ex`` and percentages units are not supported for the sizes.
-
 The coordinates transformations are correctly handled by CairoSVG, including
 nested transformations. Most of the transformations applied to external
-elements, including the ones in ``defs`` tags, are not supported.
+elements, including the ones in the gradients and the patterns, are supported.
 
 
 The initial viewport
@@ -488,8 +490,8 @@ Only the ``svg`` element establishes a new viewport in CairoSVG.
 Units
 -----
 
-``mm``, ``cm``, ``in``, ``pt`` and ``pc`` units are supported. ``em``, ``ex``
-and percentages units are not supported.
+``mm``, ``cm``, ``in``, ``pt``, ``pc``, ``em``, ``ex`` and percentages units
+are supported.
 
 
 Object bounding box units
