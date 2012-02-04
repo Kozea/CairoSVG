@@ -142,14 +142,8 @@ def text_path(surface, node):
     cairo_path = surface.context.copy_path_flat()
     surface.context.new_path()
 
-    start_offset = node.get("startOffset", 0)
-    if start_offset:
-        if "%" in start_offset:
-            start_offset = (
-                path_length(cairo_path) *
-                float(start_offset.rstrip(" %")) / 100)
-        else:
-            start_offset = size(surface, start_offset)
+    start_offset = size(
+        surface, node.get("startOffset", 0), path_length(cairo_path))
     surface.total_width += start_offset
 
     x, y = point_following_path(cairo_path, surface.total_width)

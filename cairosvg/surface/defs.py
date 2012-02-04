@@ -73,10 +73,8 @@ def gradient(surface, node):
         for child in gradient_node.children:
             stop_color = color(
                 child.get("stop-color"), float(child.get("stop-opacity", 1)))
-            offset = child.get("offset")
-            if "%" in offset:
-                offset = float(offset.strip("%")) / 100
-            linpat.add_color_stop_rgba(float(offset), *stop_color)
+            offset = size(surface, child.get("offset"), 1)
+            linpat.add_color_stop_rgba(offset, *stop_color)
         surface.context.set_source(linpat)
     elif gradient_node.tag == "radialGradient":
         r = float(gradient_node.get("r"))
@@ -87,9 +85,7 @@ def gradient(surface, node):
         radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
         for child in gradient_node.children:
-            offset = child.get("offset")
-            if "%" in offset:
-                offset = float(offset.strip("%")) / 100
+            offset = size(surface, child.get("offset"), 1)
             stop_color = color(
                 child.get("stop-color"), child.get("stop-opacity", 1))
             radpat.add_color_stop_rgba(float(offset), *stop_color)

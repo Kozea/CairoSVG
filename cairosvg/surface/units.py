@@ -29,21 +29,30 @@ UNITS = {
     "pc": 1 / 6.,
     "px": None,
     "em": NotImplemented,
-    "ex": NotImplemented,
-    "%": NotImplemented}
+    "ex": NotImplemented}
 
 
 class NotImplementedUnitError(ValueError, NotImplementedError):
     """Exception raised when an unit is not implemented."""
 
 
-def size(surface, string=None):
-    """Replace a string with units by a float value."""
+def size(surface, string, reference=None):
+    """Replace a ``string`` with units by a float value.
+
+    If ``reference`` is given, it is used as reference for percentages.
+
+    """
     if not string:
         return 0
 
     if string.replace(".", "", 1).lstrip(" -").isdigit():
         return float(string)
+
+    if "%" in string:
+        if reference is None:
+            raise ValueError("Percentage given with no reference")
+        else:
+            return float(string.strip(" %")) * reference / 100
 
     for unit, coefficient in UNITS.items():
         if unit in string:
