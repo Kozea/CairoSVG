@@ -74,6 +74,7 @@ class Node(dict):
 
             self.update(items)
             self.url = parent.url
+            self.xml_tree = parent.xml_tree
             self.parent = parent
 
         # TODO: manage other attributes that should be multiplicated
@@ -132,11 +133,14 @@ class Tree(Node):
                 elif element_id:
                     url = parent.url
             self.url = url
-            if urlparse.urlparse(url).scheme:
-                input_ = urlopen(url)
+            if url:
+                if urlparse.urlparse(url).scheme:
+                    input_ = urlopen(url)
+                else:
+                    input_ = url  # filename
+                tree = ElementTree.parse(input_).getroot()
             else:
-                input_ = url  # filename
-            tree = ElementTree.parse(input_).getroot()
+                tree = parent.xml_tree
             if element_id:
                 iterator = (
                     tree.iter() if hasattr(tree, 'iter')
@@ -151,5 +155,6 @@ class Tree(Node):
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
+        self.xml_tree = tree
         super(Tree, self).__init__(tree, parent)
         self.root = True
