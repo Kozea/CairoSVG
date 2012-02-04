@@ -77,15 +77,13 @@ class Node(dict):
             self.xml_tree = parent.xml_tree
             self.parent = parent
 
-        # TODO: manage other attributes that should be multiplicated
         # TODO: handle opacity the right way (no transparency between plain
         # elements in a semi-transparent parent)
         properties = dict(node.attrib.items())
         for key in properties:
-            if "opacity" in key:
-                if parent is not None:
-                    properties[key] = str(
-                        float(parent.get(key, 1.0)) * float(properties[key]))
+            if "opacity" in key and parent is not None:
+                properties[key] = str(
+                    float(parent.get(key, 1.0)) * float(properties[key]))
         self.update(properties)
 
         # Manage text by creating children
@@ -99,7 +97,7 @@ class Node(dict):
         """Create children and return them."""
         children = []
 
-        for child in (node):
+        for child in node:
             children.append(Node(child, parent=self))
             if child.tail:
                 anonymous = ElementTree.Element('tspan')

@@ -171,6 +171,7 @@ class Surface(object):
 
     def draw(self, node, stroke_and_fill=True):
         """Draw ``node`` and its children."""
+        old_font_size = self.font_size
         self.font_size = size(self, node.get("font-size", "12pt"))
 
         # Do not draw defs
@@ -254,6 +255,7 @@ class Surface(object):
             self.context.restore()
 
         self.parent_node = self._old_parent_node
+        self.font_size = old_font_size
 
 
 class MultipageSurface(Surface):

@@ -109,15 +109,13 @@ def pattern(surface, node):
     pattern_node = surface.patterns[filter_fill_content(node)]
     transform(surface, pattern_node.get("patternTransform"))
 
-    if pattern_node.tag == "pattern":
-        from . import SVGSurface  # circular import
-        pattern_surface = SVGSurface(
-            tree=pattern_node, output=None, dpi=surface.dpi)
-        pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
-        pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
-        surface.context.set_source(pattern_pattern)
-        surface.context.fill_preserve()
-        pattern_surface.finish()
+    from . import SVGSurface  # circular import
+    pattern_surface = SVGSurface(pattern_node, None, surface.dpi)
+    pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
+    pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
+    surface.context.set_source(pattern_pattern)
+    surface.context.fill_preserve()
+    pattern_surface.finish()
 
 
 def draw_marker(surface, node, position="mid"):
@@ -142,11 +140,8 @@ def draw_marker(surface, node, position="mid"):
 
     while node.pending_markers:
         next_point, markers = node.pending_markers.pop(0)
-
-        if node.tangents != []:
-            angle1 = node.tangents.pop(0)
-        if node.tangents != []:
-            angle2 = node.tangents.pop(0)
+        angle1 = node.tangents.pop(0)
+        angle2 = node.tangents.pop(0)
 
         for active_marker in markers:
             if not active_marker.startswith("#"):
@@ -157,8 +152,6 @@ def draw_marker(surface, node, position="mid"):
 
                 angle = marker_node.get("orient", "0")
                 if angle == "auto":
-                    if angle1 is None:
-                        angle1 = angle2
                     angle = float(angle1 + angle2) / 2
                 else:
                     angle = radians(float(angle))

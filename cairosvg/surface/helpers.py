@@ -98,8 +98,10 @@ def preserve_ratio(surface, node):
         scale_y = height / viewbox_height
 
         align = node.get("preserveAspectRatio", "xMidYMid").split(" ")[0]
-        if align != "none":
-            mos_properties = node.get("preserveAspectRatio", "").split(' ')
+        if align == "none":
+            return
+        else:
+            mos_properties = node.get("preserveAspectRatio", "").split(" ")
             if mos_properties:
                 meet_or_slice = mos_properties[1]
             if meet_or_slice == "slice":
@@ -131,8 +133,6 @@ def preserve_ratio(surface, node):
 
             surface.context.rectangle(0, 0, width, height)
             surface.context.clip()
-        else:
-            return
 
     return scale_x, scale_y, translate_x, translate_y
 
