@@ -186,6 +186,10 @@ class Surface(object):
         self._old_parent_node = self.parent_node
         self.parent_node = node
 
+        opacity = float(node.get("opacity", 1))
+        if opacity < 1:
+            self.context.push_group()
+
         self.context.save()
         self.context.move_to(
             size(self, node.get("x"), "x"),
@@ -219,9 +223,8 @@ class Surface(object):
             TAGS[node.tag](self, node)
 
         # Get stroke and fill opacity
-        opacity = float(node.get("opacity", 1))
-        stroke_opacity = opacity * float(node.get("stroke-opacity", 1))
-        fill_opacity = opacity * float(node.get("fill-opacity", 1))
+        stroke_opacity = float(node.get("stroke-opacity", 1))
+        fill_opacity = float(node.get("fill-opacity", 1))
 
         # Manage dispaly and visibility
         display = node.get("display", "inline") != "none"
@@ -253,6 +256,10 @@ class Surface(object):
             # Restoring context is useless if we are in the root tag, it may
             # raise an exception if we have multiple svg tags
             self.context.restore()
+
+        if opacity < 1:
+            self.context.pop_group_to_source()
+            self.context.paint_with_alpha(opacity)
 
         self.parent_node = self._old_parent_node
         self.font_size = old_font_size

@@ -106,14 +106,11 @@ def text(surface, node):
     elif text_anchor == "end":
         x -= width + x_bearing
 
-    # Get global text opacity
-    opacity = float(node.get("opacity", 1))
-
     surface.context.move_to(x, y)
     if "url(#" in node.get("fill"):
         gradient_or_pattern(surface, node)
     else:
-        surface.context.set_source_rgba(*color(node.get("fill"), opacity))
+        surface.context.set_source_rgba(*color(node.get("fill")))
     surface.context.show_text(node.text)
     node["fill"] = "#00000000"
 
@@ -124,9 +121,8 @@ def text(surface, node):
 def text_path(surface, node):
     """Draw text on a path."""
     surface.context.save()
-    opacity = float(node.get("opacity", 1))
     if "url(#" not in node.get("fill"):
-        surface.context.set_source_rgba(*color(node.get("fill"), opacity))
+        surface.context.set_source_rgba(*color(node.get("fill")))
 
     id_path = node.get("{http://www.w3.org/1999/xlink}href")
     if not id_path.startswith("#"):

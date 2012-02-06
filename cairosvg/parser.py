@@ -63,9 +63,9 @@ class Node(dict):
         # Inherits from parent properties
         if parent is not None:
             items = parent.copy()
-            not_inherited = ("transform", )
-            if self.tag == 'tspan':
-                not_inherited += ('x', 'y')
+            not_inherited = ("transform", "opacity")
+            if self.tag == "tspan":
+                not_inherited += ("x", "y")
             for attribute in not_inherited:
                 if attribute in items:
                     del items[attribute]
@@ -77,14 +77,7 @@ class Node(dict):
             self.xml_tree = parent.xml_tree
             self.parent = parent
 
-        # TODO: handle opacity the right way (no transparency between plain
-        # elements in a semi-transparent parent)
-        properties = dict(node.attrib.items())
-        for key in properties:
-            if "opacity" in key and parent is not None:
-                properties[key] = str(
-                    float(parent.get(key, 1.0)) * float(properties[key]))
-        self.update(properties)
+        self.update(dict(node.attrib.items()))
 
         # Manage text by creating children
         if self.tag == "text" or self.tag == "textPath":

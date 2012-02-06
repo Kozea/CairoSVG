@@ -7,6 +7,7 @@ Version 1.0, coming soon
 ========================
 
 * Percentages, em and ex units
+* Real opacity
 
 
 Version 0.3, released on 2012-01-27
