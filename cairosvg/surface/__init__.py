@@ -275,13 +275,12 @@ class MultipageSurface(Surface):
             # Multi-page
             for page in svg_children:
                 width, height, viewbox = node_format(self, page)
-                # TODO: test this
+                self.context.save()
+                self.set_context_size(width, height, viewbox)
                 width *= self.device_units_per_user_units
                 height *= self.device_units_per_user_units
                 self.page_sizes.append((width, height))
                 self.cairo.set_size(width, height)
-                self.context.save()
-                self.set_context_size(width, height, viewbox)
                 self.draw(page)
                 self.context.restore()
                 self.cairo.show_page()
