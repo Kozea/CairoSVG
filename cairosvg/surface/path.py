@@ -168,7 +168,6 @@ def path(surface, node):
         elif letter == "q":
             # Relative quadratic curve
             # TODO: manage next letter "T"
-            # TODO: manage tangents
             string, next_string = string.split("t", 1)
             x1, y1 = 0, 0
             while string:
@@ -183,7 +182,6 @@ def path(surface, node):
         elif letter == "Q":
             # Quadratic curve
             # TODO: manage next letter "t"
-            # TODO: manage tangents
             string, next_string = string.split("T", 1)
             x1, y1 = surface.context.get_current_point()
             while string:
@@ -198,7 +196,6 @@ def path(surface, node):
         elif letter == "s":
             # Relative smooth curve
             # TODO: manage last_letter in "CS"
-            # TODO: manage tangents
             x1 = x3 - x2 if last_letter in "cs" else 0
             y1 = y3 - y2 if last_letter in "cs" else 0
             x2, y2, string = point(surface, string)
@@ -210,11 +207,10 @@ def path(surface, node):
         elif letter == "S":
             # Smooth curve
             # TODO: manage last_letter in "cs"
-            # TODO: manage tangents
             x, y = surface.context.get_current_point()
+            x1 = 2 * x3 - x2 if last_letter in "CS" else x
+            y1 = 2 * y3 - y2 if last_letter in "CS" else y
             x2, y2, string = point(surface, string)
-            x1 = x3 if last_letter in "CS" else x
-            y1 = y2 if last_letter in "CS" else y
             x3, y3, string = point(surface, string)
             node.tangents.extend((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
@@ -222,7 +218,6 @@ def path(surface, node):
 
         elif letter == "t":
             # Relative quadratic curve end
-            # TODO: manage tangents
             x1, y1 = 0, 0
             x2 = 2 * x1 - x2
             y2 = 2 * y1 - y2
@@ -234,7 +229,6 @@ def path(surface, node):
 
         elif letter == "T":
             # Quadratic curve end
-            # TODO: manage tangents
             x1, y1 = surface.context.get_current_point()
             x2 = 2 * x1 - x2
             y2 = 2 * y1 - y2
@@ -261,7 +255,6 @@ def path(surface, node):
 
         elif letter in "zZ":
             # End of path
-            # TODO: manage tangents
             node.tangents.extend((0, 0))
             surface.context.close_path()
 
