@@ -20,11 +20,21 @@ SVG Parser.
 
 """
 
-from xml.etree import ElementTree
-from xml.parsers import expat
-
-# Python 2/3 magic imports
+# Fallbacks for Python 2/3 and lxml/ElementTree
 # pylint: disable=E0611,F0401
+try:
+    import lxml.etree as ElementTree
+    from lxml.etree import XMLSyntaxError as ParseError
+    HAS_LXML = True
+except ImportError:
+    from xml.etree import ElementTree
+    from xml.parsers import expat
+    # ElementTree's API changed between 2.6 and 2.7
+    # pylint: disable=C0103
+    ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
+    # pylint: enable=C0103
+    HAS_LXML = False
+
 try:
     from urllib import urlopen
     import urlparse
@@ -34,10 +44,8 @@ except ImportError:
 # pylint: enable=E0611,F0401
 
 
-# ElementTree's API changed between 2.6 and 2.7
-# pylint: disable=C0103
-ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
-# pylint: enable=C0103
+from .css import apply_stylesheets
+
 
 
 class Node(dict):
@@ -84,7 +92,9 @@ class Node(dict):
             self.children = self.text_children(node)
 
         if not self.children:
-            self.children = tuple(Node(child, self) for child in node)
+            self.children = tuple(
+                Node(child, self) for child in node
+                if isinstance(child.tag, basestring))
 
     def text_children(self, node):
         """Create children and return them."""
@@ -146,6 +156,7 @@ class Tree(Node):
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
+        apply_stylesheets(tree)
         self.xml_tree = tree
         super(Tree, self).__init__(tree, parent)
         self.root = True
