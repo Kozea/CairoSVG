@@ -164,7 +164,7 @@ COLORS = {  # Taken from Inkscape
 
 def color(string=None, opacity=1):
     """Replace ``string`` representing a color by a RGBA tuple."""
-    if not string or string == "none":
+    if not string or string in ("none", "transparent"):
         return (0, 0, 0, 0)
 
     string = string.strip().lower()
@@ -172,9 +172,9 @@ def color(string=None, opacity=1):
     if string.startswith("rgba"):
         r, g, b, a = tuple(
             float(i) for i in string.strip(" rgba()").split(","))
-        return r, g, b, a * opacity
+        return r / 255, g / 255, b / 255, a * opacity
     elif string.startswith("rgb"):
-        r, g, b = tuple(float(i) for i in string.strip(" rgb()").split(","))
+        r, g, b = tuple(float(i) / 255 for i in string.strip(" rgb()").split(","))
         return r, g, b, opacity
 
     if string in COLORS:
