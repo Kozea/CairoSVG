@@ -47,8 +47,9 @@ def remove_svg_namespace(tree):
     prefix = '{http://www.w3.org/2000/svg}'
     prefix_len = len(prefix)
     for element in tree.iter():
-        if element.tag.startswith(prefix):
-            element.tag = element.tag[prefix_len:]
+        tag = element.tag
+        if hasattr(tag, 'startswith') and tag.startswith(prefix):
+            element.tag = tag[prefix_len:]
 
 
 def find_stylesheets(tree):
@@ -73,7 +74,7 @@ def get_declarations(rule):
         if declaration.name.startswith('-'):
             continue
         # TODO: filter out invalid values
-        yield declaration.name, declaration.cssText
+        yield declaration.name, declaration.cssText, bool(declaration.priority)
 
 
 def match_selector(rule, tree):
@@ -99,12 +100,13 @@ def apply_stylesheets(tree):
         declarations = list(get_declarations(rule))
         for element, specificity in match_selector(rule, tree):
             style = style_by_element.setdefault(element, {})
-            for name, value in declarations:
+            for name, value, important in declarations:
+                weight = important, specificity
                 if name in style:
-                    _old_value, old_specificity = style[name]
-                    if old_specificity > specificity:
+                    _old_value, old_weight = style[name]
+                    if old_weight > weight:
                         continue
-                style[name] = value, specificity
+                style[name] = value, weight
 
     for element, style in style_by_element.iteritems():
         values = [v for v, _ in style.itervalues()]
