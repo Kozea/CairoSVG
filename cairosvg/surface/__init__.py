@@ -180,6 +180,11 @@ class Surface(object):
                 parse_def(self, child)
             return
 
+        # Do not draw elements with width or height of 0
+        if (("width" in node and size(self, node["width"]) == 0) or
+            ("height" in node and size(self, node["height"]) == 0)):
+            return
+
         node.tangents = [None]
         node.pending_markers = []
 
