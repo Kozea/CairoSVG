@@ -39,10 +39,22 @@ except ImportError:
 CSS_CAPABLE = HAS_LXML and HAS_CSSUTILS and HAS_CSSSELECT
 
 
+def remove_svg_namespace(tree):
+    """
+    lxml.cssselect does not support empty/default namespaces, so remove
+    any SVG namespace.
+    """
+    prefix = '{http://www.w3.org/2000/svg}'
+    prefix_len = len(prefix)
+    for element in tree.iter():
+        if element.tag.startswith(prefix):
+            element.tag = element.tag[prefix_len:]
+
+
 def find_stylesheets(tree):
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
-        if (element.tag == '{http://www.w3.org/2000/svg}style' and
+        if (element.tag == 'style' and
                 # TODO: support contentStyleType on <svg>
                 element.get('type', 'text/css') == 'text/css'):
             # TODO: pass href for relative URLs
@@ -68,8 +80,7 @@ def match_selector(rule, tree):
     for selector in rule.selectorList:
         specificity = selector.specificity
         try:
-            matcher = cssselect.CSSSelector(selector.selectorText,
-                namespaces={'svg': 'http://www.w3.org/2000/svg'})
+            matcher = cssselect.CSSSelector(selector.selectorText)
         except cssselect.ExpressionError:
             # Unsupported selector
             # TODO: warn
@@ -82,6 +93,7 @@ def apply_stylesheets(tree):
     if not CSS_CAPABLE:
         # TODO: warn?
         return
+    remove_svg_namespace(tree)
     style_by_element = {}
     for rule in find_style_rules(tree):
         declarations = list(get_declarations(rule))
