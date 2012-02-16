@@ -47,7 +47,6 @@ except ImportError:
 from .css import apply_stylesheets
 
 
-
 class Node(dict):
     """SVG node with dict-like properties and children."""
     def __init__(self, node, parent=None):
