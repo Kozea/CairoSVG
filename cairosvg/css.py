@@ -40,29 +40,33 @@ CSS_CAPABLE = HAS_LXML and HAS_CSSUTILS and HAS_CSSSELECT
 
 
 def remove_svg_namespace(tree):
+    """Remove the SVG namespace from ``tree`` tags.
+
+    ``lxml.cssselect`` does not support empty/default namespaces, so remove any
+    SVG namespace.
+
     """
-    lxml.cssselect does not support empty/default namespaces, so remove
-    any SVG namespace.
-    """
-    prefix = '{http://www.w3.org/2000/svg}'
+    prefix = "{http://www.w3.org/2000/svg}"
     prefix_len = len(prefix)
     for element in tree.iter():
         tag = element.tag
-        if hasattr(tag, 'startswith') and tag.startswith(prefix):
+        if hasattr(tag, "startswith") and tag.startswith(prefix):
             element.tag = tag[prefix_len:]
 
 
 def find_stylesheets(tree):
+    """Find the stylesheets included in ``tree``."""
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
-        if (element.tag == 'style' and
+        if (element.tag == "style" and
                 # TODO: support contentStyleType on <svg>
-                element.get('type', 'text/css') == 'text/css'):
+                element.get("type", "text/css") == "text/css"):
             # TODO: pass href for relative URLs
             yield cssutils.parseString(element.text, validate=False)
 
 
 def find_style_rules(tree):
+    """Find the style rules in ``tree``."""
     for stylesheet in find_stylesheets(tree):
         for rule in stylesheet.cssRules:
             if rule.type == rule.STYLE_RULE:
@@ -70,14 +74,17 @@ def find_style_rules(tree):
 
 
 def get_declarations(rule):
+    """Get the declarations in ``rule``."""
     for declaration in rule.style.getProperties(all=True):
-        if declaration.name.startswith('-'):
+        if declaration.name.startswith("-"):
+            # Ignore properties prefixed by "-"
             continue
         # TODO: filter out invalid values
         yield declaration.name, declaration.cssText, bool(declaration.priority)
 
 
 def match_selector(rule, tree):
+    """Yield the ``(element, specificity)`` in ``tree`` matching ``rule``."""
     for selector in rule.selectorList:
         specificity = selector.specificity
         try:
@@ -91,6 +98,7 @@ def match_selector(rule, tree):
 
 
 def apply_stylesheets(tree):
+    """Apply the stylesheet in ``tree`` to ``tree``."""
     if not CSS_CAPABLE:
         # TODO: warn?
         return
@@ -110,5 +118,5 @@ def apply_stylesheets(tree):
 
     for element, style in style_by_element.iteritems():
         values = [v for v, _ in style.itervalues()]
-        values.append(element.get('style', ''))
-        element.set('style', ';'.join(values))
+        values.append(element.get("style", ""))
+        element.set("style", ";".join(values))
