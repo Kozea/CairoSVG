@@ -121,7 +121,10 @@ class Tree(Node):
 
         if bytestring is not None:
             tree = ElementTree.fromstring(bytestring)
-            self.url = None
+            self.url = url
+        elif file_obj is not None:
+            tree = ElementTree.parse(file_obj).getroot()
+            self.url = getattr(file_obj, 'name', url)
         elif url is not None:
             if "#" in url:
                 url, element_id = url.split("#", 1)
@@ -149,9 +152,6 @@ class Tree(Node):
                     if element.get("id") == element_id:
                         tree = element
                         break
-        elif file_obj is not None:
-            tree = ElementTree.parse(file_obj).getroot()
-            self.url = getattr(file_obj, 'name', url)
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
