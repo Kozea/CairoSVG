@@ -229,15 +229,15 @@ text-decoration: none;
 
 #rss {
 background: black url(rss.png) -1px 1px no-repeat;
-border-radius: 6px;
+border-radius: 8px;
 color: transparent;
 display: block;
-float: right;
 font-size: 0;
 height: 32px;
-margin: 1em;
 opacity: 1;
-padding: 0;
+position: fixed;
+right: 16px;
+top: 16px;
 width: 32px;
 }
 
