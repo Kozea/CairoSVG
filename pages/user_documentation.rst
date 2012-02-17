@@ -64,7 +64,9 @@ standard input.
 Examples
 --------
 
-Here are some usage examples::
+Here are some usage examples:
+
+.. code-block:: bash
 
   # Convert to pdf, write to standard output
   cairosvg test.svg
