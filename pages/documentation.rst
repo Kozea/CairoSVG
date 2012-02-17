@@ -2,6 +2,7 @@
  Documentation
 ===============
 
+
 User documentation
 ==================
 
@@ -9,13 +10,14 @@ This document describes how to install and use CairoSVG.
 
 - `User documentation </user_documentation>`_
 
+
 Project description
 ===================
 
 This document defines the main goals of CairoSVG, what it covers and what it
 does not.
 
-- *Coming soon*
+- `Project description </project_description>`_
 
 
 SVG 1.1 support
