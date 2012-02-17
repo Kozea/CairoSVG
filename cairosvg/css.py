@@ -39,6 +39,10 @@ except ImportError:
 CSS_CAPABLE = HAS_LXML and HAS_CSSUTILS and HAS_CSSSELECT
 
 
+# Python 2/3 compat
+iteritems = getattr(dict, 'iteritems', dict.items)
+
+
 def remove_svg_namespace(tree):
     """Remove the SVG namespace from ``tree`` tags.
 
@@ -116,7 +120,7 @@ def apply_stylesheets(tree):
                         continue
                 style[name] = value, weight
 
-    for element, style in style_by_element.iteritems():
+    for element, style in iteritems(style_by_element):
         values = [v for v, _ in style.itervalues()]
         values.append(element.get("style", ""))
         element.set("style", ";".join(values))

@@ -47,6 +47,13 @@ except ImportError:
 from .css import apply_stylesheets
 
 
+# Python 2/3 compat
+try:
+    basestring
+except NameError:
+    basestring = str
+
+
 class Node(dict):
     """SVG node with dict-like properties and children."""
     def __init__(self, node, parent=None):
