@@ -6,6 +6,12 @@
 Version 1.0, coming soon
 ========================
 
+* A lot of things!
+
+
+Version 0.3.1, released on 2012-02-20
+=====================================
+
 * Percentages, em and ex units
 * Real opacity
 
