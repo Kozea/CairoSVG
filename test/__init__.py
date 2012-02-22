@@ -29,6 +29,7 @@ import io
 import tempfile
 import shutil
 import subprocess
+import platform
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
 import png
@@ -238,8 +239,13 @@ def test_script():
 
         """
         sys.argv = ['cairosvg.py'] + args
-        old_stdout, sys.stdout = sys.stdout, io.BytesIO()
-        old_stdin = sys.stdin
+        old_stdin, old_stdout = sys.stdin, sys.stdout
+
+        output_buffer = io.BytesIO()
+        if sys.version_info.major >= 3:
+            sys.stdout = io.TextIOWrapper(output_buffer)
+        else:
+            sys.stdout = output_buffer
 
         if input_:
             kwargs = {'stdin': open(input_, 'rb')}
@@ -247,23 +253,20 @@ def test_script():
         else:
             kwargs = {}
 
-        try:
-            if exit_:
-                try:
-                    # Python 2/3 hack
-                    if hasattr(sys.stdout, "getbuffer"):
-                        sys.stdout = io.StringIO()
-                    assert_raises(main(), SystemExit)
-                except SystemExit:
-                    pass
-            else:
+        if exit_:
+            try:
                 main()
-        finally:
-            output = sys.stdout.getvalue()
-            sys.stdin, sys.stdout = old_stdin, old_stdout
-            if exit_:
-                output = output.encode('ascii')
-            eq_(output, run(*args, **kwargs))
+            except SystemExit:
+                pass
+            else:
+                raise Exception('CairoSVG did not exit')
+        else:
+            main()
+
+        sys.stdout.flush()
+        output = output_buffer.getvalue()
+        sys.stdin, sys.stdout = old_stdin, old_stdout
+        eq_(output, run(*args, **kwargs))
 
         return output
 
