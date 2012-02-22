@@ -171,11 +171,13 @@ def color(string=None, opacity=1):
 
     if string.startswith("rgba"):
         r, g, b, a = tuple(
-            float(i) for i in string.strip(" rgba()").split(","))
+            float(i.strip(" %")) * 2.55 if "%" in i else float(i)
+            for i in string.strip(" rgba()").split(","))
         return r / 255, g / 255, b / 255, a * opacity
     elif string.startswith("rgb"):
         r, g, b = tuple(
-            float(i) / 255 for i in string.strip(" rgb()").split(","))
+            float(i.strip(" %")) / 100 if "%" in i else float(i) / 255
+            for i in string.strip(" rgb()").split(","))
         return r, g, b, opacity
 
     if string in COLORS:
