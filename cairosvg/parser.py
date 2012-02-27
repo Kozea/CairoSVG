@@ -131,7 +131,10 @@ class Tree(Node):
             self.url = url
         elif file_obj is not None:
             tree = ElementTree.parse(file_obj).getroot()
-            self.url = getattr(file_obj, 'name', url)
+            if url:
+                self.url = url
+            else:
+                self.url = getattr(file_obj, 'name', None)
         elif url is not None:
             if "#" in url:
                 url, element_id = url.split("#", 1)
