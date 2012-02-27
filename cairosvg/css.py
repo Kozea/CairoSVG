@@ -40,7 +40,7 @@ CSS_CAPABLE = HAS_LXML and HAS_CSSUTILS and HAS_CSSSELECT
 
 
 # Python 2/3 compat
-iteritems = getattr(dict, 'iteritems', dict.items)
+iteritems = getattr(dict, 'iteritems', dict.items)  # pylint: disable=C0103
 
 
 def remove_svg_namespace(tree):

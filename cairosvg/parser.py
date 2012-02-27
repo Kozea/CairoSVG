@@ -48,10 +48,12 @@ from .css import apply_stylesheets
 
 
 # Python 2/3 compat
+# pylint: disable=C0103,W0622
 try:
     basestring
 except NameError:
     basestring = str
+# pylint: enable=C0103,W0622
 
 
 class Node(dict):
