@@ -65,19 +65,11 @@ class Node(dict):
         self.tag = node.tag.split("}", 1)[-1]
         self.text = node.text
 
-        # Handle the CSS
-        style = node.attrib.get("style")
-        if style:
-            for attribute in style.split(";"):
-                if ":" in attribute:
-                    name, value = attribute.split(":", 1)
-                    node.attrib[name.strip()] = value.strip()
-            del node.attrib["style"]
 
         # Inherits from parent properties
         if parent is not None:
             items = parent.copy()
-            not_inherited = ("transform", "opacity")
+            not_inherited = ("transform", "opacity", "style")
             if self.tag == "tspan":
                 not_inherited += ("x", "y")
             for attribute in not_inherited:
@@ -92,6 +84,13 @@ class Node(dict):
             self.parent = parent
 
         self.update(dict(node.attrib.items()))
+
+        # Handle the CSS
+        style = self.pop("style", "")
+        for declaration in style.split(";"):
+            if ":" in declaration:
+                name, value = declaration.split(":", 1)
+                self[name.strip()] = value.strip()
 
         # Manage text by creating children
         if self.tag == "text" or self.tag == "textPath":
