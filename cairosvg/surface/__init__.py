@@ -26,7 +26,7 @@ import io
 from ..parser import Tree
 from .colors import color
 from .defs import gradient_or_pattern, parse_def
-from .helpers import node_format, transform
+from .helpers import node_format, transform, normalize
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
@@ -220,6 +220,12 @@ class Surface(object):
             self.context.set_line_join(cairo.LINE_JOIN_ROUND)
         if join_cap == "bevel":
             self.context.set_line_join(cairo.LINE_JOIN_BEVEL)
+
+        dash_array = normalize(node.get("stroke-dasharray", "")).split()
+        if dash_array:
+            dashes = [size(self, dash, 1) for dash in dash_array]
+            offset = size(self, node.get("stroke-dashoffset"), 1)
+            self.context.set_dashes(dashes, offset)
 
         miter_limit = float(node.get("stroke-miterlimit", 4))
         self.context.set_miter_limit(miter_limit)
