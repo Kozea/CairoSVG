@@ -393,8 +393,8 @@ Color and Painting properties:
 - marker-start: basically supported
 - shape-rendering: not supported
 - stroke: supported
-- stroke-dasharray: not supported
-- stroke-dashoffset: not supported
+- stroke-dasharray: supported
+- stroke-dashoffset: supported
 - stroke-linecap: supported
 - stroke-linejoin: supported
 - stroke-miterlimit: supported
