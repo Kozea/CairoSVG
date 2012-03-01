@@ -225,7 +225,7 @@ class Surface(object):
         if dash_array:
             dashes = [size(self, dash, 1) for dash in dash_array]
             offset = size(self, node.get("stroke-dashoffset"), 1)
-            self.context.set_dashes(dashes, offset)
+            self.context.set_dash(dashes, offset)
 
         miter_limit = float(node.get("stroke-miterlimit", 4))
         self.context.set_miter_limit(miter_limit)
