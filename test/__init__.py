@@ -29,7 +29,6 @@ import io
 import tempfile
 import shutil
 import subprocess
-import platform
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
 import png
