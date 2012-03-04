@@ -21,7 +21,7 @@ Surface helpers.
 """
 
 import cairo
-from math import pi, cos, sin, atan, radians
+from math import pi, cos, sin, tan, atan, radians
 
 from .units import size
 
@@ -172,26 +172,17 @@ def transform(surface, string):
                     # TODO: manage the x/y sizes here
                     values.append(size(surface, value))
                 if ttype == "matrix":
-                    matrix = cairo.Matrix(*values)
-                    surface.context.set_matrix(
-                        matrix.multiply(surface.context.get_matrix()))
+                    surface.context.transform(cairo.Matrix(*values))
                 elif ttype == "rotate":
-                    matrix = surface.context.get_matrix()
                     surface.context.rotate(radians(float(values[0])))
                 elif ttype == "skewX":
-                    matrix = surface.context.get_matrix()
-                    degree = radians(float(values[0]))
-                    mtrx = cairo.Matrix(
-                        matrix[0], matrix[1], matrix[2] + degree,
-                        matrix[3], matrix[4], matrix[5])
-                    surface.context.set_matrix(mtrx)
+                    tangent = tan(radians(float(values[0])))
+                    surface.context.transform(
+                        cairo.Matrix(1, 0, tangent, 1, 0, 0))
                 elif ttype == "skewY":
-                    matrix = surface.context.get_matrix()
-                    degree = radians(float(values[0]))
-                    mtrx = cairo.Matrix(
-                        matrix[0], matrix[1] + degree, matrix[2],
-                        matrix[3], matrix[4], matrix[5])
-                    surface.context.set_matrix(mtrx)
+                    tangent = tan(radians(float(values[0])))
+                    surface.context.transform(
+                        cairo.Matrix(1, tangent, 0, 1, 0, 0))
                 else:
                     if len(values) == 1:
                         values = 2 * values
