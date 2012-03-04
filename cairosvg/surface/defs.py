@@ -78,10 +78,10 @@ def gradient(surface, node):
         surface.context.set_source(linpat)
     elif gradient_node.tag == "radialGradient":
         r = float(size(surface, gradient_node.get("r", "50%")))
-        cx = float(size(gradient_node.get("cx", "50%"), "x"))
-        cy = float(size(gradient_node.get("cy", "50%"), "y"))
-        fx = float(size(gradient_node.get("fx", str(cx)), "x"))
-        fy = float(size(gradient_node.get("fy", str(cy)), "y"))
+        cx = float(size(surface, gradient_node.get("cx", "50%"), "x"))
+        cy = float(size(surface, gradient_node.get("cy", "50%"), "y"))
+        fx = float(size(surface, gradient_node.get("fx", str(cx)), "x"))
+        fy = float(size(surface, gradient_node.get("fy", str(cy)), "y"))
         radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
         for child in gradient_node.children:
