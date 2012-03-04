@@ -223,9 +223,10 @@ class Surface(object):
 
         dash_array = normalize(node.get("stroke-dasharray", "")).split()
         if dash_array:
-            dashes = [size(self, dash, 1) for dash in dash_array]
-            offset = size(self, node.get("stroke-dashoffset"), 1)
-            self.context.set_dash(dashes, offset)
+            dashes = [size(self, dash) for dash in dash_array]
+            if sum(dashes):
+                offset = size(self, node.get("stroke-dashoffset"))
+                self.context.set_dash(dashes, offset)
 
         miter_limit = float(node.get("stroke-miterlimit", 4))
         self.context.set_miter_limit(miter_limit)
@@ -254,6 +255,7 @@ class Surface(object):
 
             # Stroke
             self.context.set_line_width(size(self, node.get("stroke-width")))
+            # TODO: handle gradients
             self.context.set_source_rgba(
                 *color(node.get("stroke"), stroke_opacity))
             self.context.stroke()

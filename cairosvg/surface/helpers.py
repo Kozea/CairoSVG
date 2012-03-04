@@ -92,8 +92,8 @@ def preserve_ratio(surface, node):
         translate_y = -size(surface, node.get("refY"))
     elif node.tag == "svg":
         width, height, viewbox = node_format(surface, node)
-        viewbox_width = viewbox[2] - viewbox[0]
-        viewbox_height = viewbox[3] - viewbox[1]
+        viewbox_width = viewbox[2]
+        viewbox_height = viewbox[3]
         scale_x = width / viewbox_width
         scale_y = height / viewbox_height
 

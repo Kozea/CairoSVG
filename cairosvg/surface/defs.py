@@ -61,10 +61,10 @@ def gradient(surface, node):
     y = float(size(surface, node.get("y"), "y"))
     height = float(size(surface, node.get("height"), "x"))
     width = float(size(surface, node.get("width"), "y"))
-    x1 = float(gradient_node.get("x1", x))
-    x2 = float(gradient_node.get("x2", x + width))
-    y1 = float(gradient_node.get("y1", y))
-    y2 = float(gradient_node.get("y2", y + height))
+    x1 = float(size(surface, gradient_node.get("x1", str(x)), "x"))
+    x2 = float(size(surface, gradient_node.get("x2", str(x + width)), "x"))
+    y1 = float(size(surface, gradient_node.get("y1", str(y)), "y"))
+    y2 = float(size(surface, gradient_node.get("y2", str(y + height)), "y"))
 
     transform(surface, gradient_node.get("gradientTransform"))
 
@@ -77,17 +77,17 @@ def gradient(surface, node):
             linpat.add_color_stop_rgba(offset, *stop_color)
         surface.context.set_source(linpat)
     elif gradient_node.tag == "radialGradient":
-        r = float(gradient_node.get("r"))
-        cx = float(gradient_node.get("cx"))
-        cy = float(gradient_node.get("cy"))
-        fx = float(gradient_node.get("fx", cx))
-        fy = float(gradient_node.get("fy", cy))
+        r = float(size(surface, gradient_node.get("r", "50%")))
+        cx = float(size(gradient_node.get("cx", "50%"), "x"))
+        cy = float(size(gradient_node.get("cy", "50%"), "y"))
+        fx = float(size(gradient_node.get("fx", str(cx)), "x"))
+        fy = float(size(gradient_node.get("fy", str(cy)), "y"))
         radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
         for child in gradient_node.children:
             offset = size(surface, child.get("offset"), 1)
             stop_color = color(
-                child.get("stop-color"), child.get("stop-opacity", 1))
+                child.get("stop-color"), float(child.get("stop-opacity", 1)))
             radpat.add_color_stop_rgba(float(offset), *stop_color)
         surface.context.set_source(radpat)
 

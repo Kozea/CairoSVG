@@ -27,18 +27,23 @@ from .helpers import normalize, point, size
 
 def circle(surface, node):
     """Draw a circle ``node`` on ``surface``."""
+    r = size(surface, node.get("r"))
+    if not r:
+        return
     surface.context.new_sub_path()
     surface.context.arc(
         size(surface, node.get("x"), "x") + size(surface, node.get("cx"), "x"),
         size(surface, node.get("y"), "y") + size(surface, node.get("cy"), "y"),
-        size(surface, node.get("r")), 0, 2 * pi)
+        r, 0, 2 * pi)
 
 
 def ellipse(surface, node):
     """Draw an ellipse ``node`` on ``surface``."""
-    ratio = (
-        size(surface, node.get("ry"), "y") /
-        size(surface, node.get("rx"), "x"))
+    rx = size(surface, node.get("rx"), "x")
+    ry = size(surface, node.get("ry"), "y")
+    if not rx or not ry:
+        return
+    ratio = ry / rx
     surface.context.new_sub_path()
     surface.context.save()
     surface.context.scale(1, ratio)
