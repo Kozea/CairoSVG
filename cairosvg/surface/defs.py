@@ -59,33 +59,41 @@ def gradient(surface, node):
 
     transform(surface, gradient_node.get("gradientTransform"))
 
-    if gradient_node.tag == "linearGradient":
-        x1 = float(size(surface, gradient_node.get("x1", "0%"), "x"))
-        x2 = float(size(surface, gradient_node.get("x2", "100%"), "x"))
-        y1 = float(size(surface, gradient_node.get("y1", "0%"), "y"))
-        y2 = float(size(surface, gradient_node.get("y2", "0%"), "y"))
-        pattern = cairo.LinearGradient(x1, y1, x2, y2)
-    elif gradient_node.tag == "radialGradient":
-        r = float(size(surface, gradient_node.get("r", "50%")))
-        cx = float(size(surface, gradient_node.get("cx", "50%"), "x"))
-        cy = float(size(surface, gradient_node.get("cy", "50%"), "y"))
-        fx = float(size(surface, gradient_node.get("fx", str(cx)), "x"))
-        fy = float(size(surface, gradient_node.get("fy", str(cy)), "y"))
-        pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
-
-    pattern.set_extend(getattr(
-        cairo, "EXTEND_%s" % node.get("spreadMethod", "pad").upper()))
-
-    if gradient_node.get("gradientUnits") == "objectBoundingBox":
+    if gradient_node.get("gradientUnits") == "userSpaceOnUse":
+        width_ref, height_ref = "x", "y"
+        diagonal_ref = "xy"
+    else:
         x = float(size(surface, node.get("x"), "x"))
         y = float(size(surface, node.get("y"), "y"))
         width = float(size(surface, node.get("width"), "x"))
         height = float(size(surface, node.get("height"), "y"))
+        width_ref = height_ref = diagonal_ref = 1
+
+    if gradient_node.tag == "linearGradient":
+        x1 = float(size(surface, gradient_node.get("x1", "0%"), width_ref))
+        x2 = float(size(surface, gradient_node.get("x2", "100%"), width_ref))
+        y1 = float(size(surface, gradient_node.get("y1", "0%"), height_ref))
+        y2 = float(size(surface, gradient_node.get("y2", "0%"), height_ref))
+        pattern = cairo.LinearGradient(x1, y1, x2, y2)
+
+    elif gradient_node.tag == "radialGradient":
+        r = float(size(surface, gradient_node.get("r", "50%"), diagonal_ref))
+        cx = float(size(surface, gradient_node.get("cx", "50%"), width_ref))
+        cy = float(size(surface, gradient_node.get("cy", "50%"), height_ref))
+        fx = float(size(surface, gradient_node.get("fx", str(cx)), width_ref))
+        fy = float(size(surface, gradient_node.get("fy", str(cy)), height_ref))
+        pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
+
+    if gradient_node.get("gradientUnits") != "userSpaceOnUse":
         pattern.set_matrix(cairo.Matrix(
             1 / width, 0, 0, 1 / height, - x / width, - y / height))
 
+    pattern.set_extend(getattr(
+        cairo, "EXTEND_%s" % node.get("spreadMethod", "pad").upper()))
+
+    offset = 0
     for child in gradient_node.children:
-        offset = size(surface, child.get("offset"), 1)
+        offset = max(offset, size(surface, child.get("offset"), 1))
         stop_color = color(
             child.get("stop-color"), float(child.get("stop-opacity", 1)))
         pattern.add_color_stop_rgba(offset, *stop_color)
