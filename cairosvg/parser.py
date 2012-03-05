@@ -163,6 +163,9 @@ class Tree(Node):
                     if element.get("id") == element_id:
                         tree = element
                         break
+                else:
+                    raise TypeError(
+                        'No tag with id="%s" found.' % element_id)
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
