@@ -57,40 +57,43 @@ def gradient(surface, node):
     """Gradients colors."""
     gradient_node = surface.gradients[filter_fill_content(node)]
 
-    x = float(size(surface, node.get("x"), "x"))
-    y = float(size(surface, node.get("y"), "y"))
-    height = float(size(surface, node.get("height"), "x"))
-    width = float(size(surface, node.get("width"), "y"))
-    x1 = float(size(surface, gradient_node.get("x1", str(x)), "x"))
-    x2 = float(size(surface, gradient_node.get("x2", str(x + width)), "x"))
-    y1 = float(size(surface, gradient_node.get("y1", str(y)), "y"))
-    y2 = float(size(surface, gradient_node.get("y2", str(y + height)), "y"))
-
     transform(surface, gradient_node.get("gradientTransform"))
 
     if gradient_node.tag == "linearGradient":
-        linpat = cairo.LinearGradient(x1, y1, x2, y2)
-        for child in gradient_node.children:
-            stop_color = color(
-                child.get("stop-color"), float(child.get("stop-opacity", 1)))
-            offset = size(surface, child.get("offset"), 1)
-            linpat.add_color_stop_rgba(offset, *stop_color)
-        surface.context.set_source(linpat)
+        x1 = float(size(surface, gradient_node.get("x1", "0%"), "x"))
+        x2 = float(size(surface, gradient_node.get("x2", "100%"), "x"))
+        y1 = float(size(surface, gradient_node.get("y1", "0%"), "y"))
+        y2 = float(size(surface, gradient_node.get("y2", "0%"), "y"))
+        pattern = cairo.LinearGradient(x1, y1, x2, y2)
     elif gradient_node.tag == "radialGradient":
         r = float(size(surface, gradient_node.get("r", "50%")))
         cx = float(size(surface, gradient_node.get("cx", "50%"), "x"))
         cy = float(size(surface, gradient_node.get("cy", "50%"), "y"))
         fx = float(size(surface, gradient_node.get("fx", str(cx)), "x"))
         fy = float(size(surface, gradient_node.get("fy", str(cy)), "y"))
-        radpat = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
+        pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
-        for child in gradient_node.children:
-            offset = size(surface, child.get("offset"), 1)
-            stop_color = color(
-                child.get("stop-color"), float(child.get("stop-opacity", 1)))
-            radpat.add_color_stop_rgba(float(offset), *stop_color)
-        surface.context.set_source(radpat)
+    pattern.set_extend(getattr(
+        cairo, "EXTEND_%s" % node.get("spreadMethod", "pad").upper()))
 
+    if gradient_node.get("gradientUnits") == "objectBoundingBox":
+        x = float(size(surface, node.get("x"), "x"))
+        y = float(size(surface, node.get("y"), "y"))
+        width = float(size(surface, node.get("width"), "x"))
+        height = float(size(surface, node.get("height"), "y"))
+        pattern.set_matrix(cairo.Matrix(
+            1 / width, 0, 0, 1 / height, - x / width, - y / height))
+
+    for child in gradient_node.children:
+        offset = size(surface, child.get("offset"), 1)
+        stop_color = color(
+            child.get("stop-color"), float(child.get("stop-opacity", 1)))
+        pattern.add_color_stop_rgba(offset, *stop_color)
+
+    pattern.set_extend(getattr(
+        cairo, "EXTEND_%s" % gradient_node.get("spreadMethod", "pad").upper()))
+
+    surface.context.set_source(pattern)
     surface.context.fill_preserve()
 
 
