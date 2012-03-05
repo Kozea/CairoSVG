@@ -174,7 +174,11 @@ def transform(surface, string):
                 if ttype == "matrix":
                     surface.context.transform(cairo.Matrix(*values))
                 elif ttype == "rotate":
-                    surface.context.rotate(radians(float(values[0])))
+                    angle = radians(float(values.pop(0)))
+                    x, y = values or (0, 0)
+                    surface.context.translate(x, y)
+                    surface.context.rotate(angle)
+                    surface.context.translate(-x, -y)
                 elif ttype == "skewX":
                     tangent = tan(radians(float(values[0])))
                     surface.context.transform(
