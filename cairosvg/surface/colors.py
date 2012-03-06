@@ -168,7 +168,36 @@ COLORS = {
     "white": "rgb(255, 255, 255)",
     "whitesmoke": "rgb(245, 245, 245)",
     "yellow": "rgb(255, 255, 0)",
-    "yellowgreen": "rgb(154, 205, 50)"}
+    "yellowgreen": "rgb(154, 205, 50)",
+
+    "activeborder": "#0000ff",
+    "activecaption": "#0000ff",
+    "appworkspace": "#ffffff",
+    "background": "#ffffff",
+    "buttonface": "#000000",
+    "buttonhighlight": "#cccccc",
+    "buttonshadow": "#333333",
+    "buttontext": "#000000",
+    "captiontext": "#000000",
+    "graytext": "#333333",
+    "highlight": "#0000ff",
+    "highlighttext": "#cccccc",
+    "inactiveborder": "#333333",
+    "inactivecaption": "#cccccc",
+    "inactivecaptiontext": "#333333",
+    "infobackground": "#cccccc",
+    "infotext": "#000000",
+    "menu": "#cccccc",
+    "menutext": "#333333",
+    "scrollbar": "#cccccc",
+    "threeddarkshadow": "#333333",
+    "threedface": "#cccccc",
+    "threedhighlight": "#ffffff",
+    "threedlightshadow": "#333333",
+    "threedshadow": "#333333",
+    "window": "#cccccc",
+    "windowframe": "#cccccc",
+    "windowtext": "#000000"}
 
 
 def color(string=None, opacity=1):
