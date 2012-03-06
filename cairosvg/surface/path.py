@@ -167,31 +167,25 @@ def path(surface, node):
 
         elif letter == "q":
             # Relative quadratic curve
-            # TODO: manage next letter "T"
-            string, next_string = string.split("t", 1)
             x1, y1 = 0, 0
-            while string:
+            while string and string[0] not in PATH_LETTERS:
                 x2, y2, string = point(surface, string)
                 x3, y3, string = point(surface, string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
                 surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             node.tangents.extend((0, 0))
-            string = "t" + next_string
 
         elif letter == "Q":
             # Quadratic curve
-            # TODO: manage next letter "t"
-            string, next_string = string.split("T", 1)
             x1, y1 = surface.context.get_current_point()
-            while string:
+            while string and string[0] not in PATH_LETTERS:
                 x2, y2, string = point(surface, string)
                 x3, y3, string = point(surface, string)
                 xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                     x1, y1, x2, y2, x3, y3)
                 surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             node.tangents.extend((0, 0))
-            string = "T" + next_string
 
         elif letter == "s":
             # Relative smooth curve
