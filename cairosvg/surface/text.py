@@ -107,7 +107,7 @@ def text(surface, node):
         x -= width + x_bearing
 
     surface.context.move_to(x, y)
-    if "url(#" in node.get("fill"):
+    if "url(#" in (node.get("fill") or ""):
         gradient_or_pattern(surface, node)
     else:
         surface.context.set_source_rgba(*color(node.get("fill")))
@@ -121,7 +121,7 @@ def text(surface, node):
 def text_path(surface, node):
     """Draw text on a path."""
     surface.context.save()
-    if "url(#" not in node.get("fill", ""):
+    if "url(#" not in (node.get("fill") or ""):
         surface.context.set_source_rgba(*color(node.get("fill")))
 
     id_path = node.get("{http://www.w3.org/1999/xlink}href")

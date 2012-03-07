@@ -102,7 +102,6 @@ def gradient(surface, node):
         cairo, "EXTEND_%s" % gradient_node.get("spreadMethod", "pad").upper()))
 
     surface.context.set_source(pattern)
-    surface.context.fill_preserve()
 
 
 def linear_gradient(surface, node):
@@ -125,8 +124,6 @@ def pattern(surface, node):
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
     pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
     surface.context.set_source(pattern_pattern)
-    surface.context.fill_preserve()
-    pattern_surface.finish()
 
 
 def draw_marker(surface, node, position="mid"):

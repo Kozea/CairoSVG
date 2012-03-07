@@ -244,20 +244,22 @@ class Surface(object):
 
         if stroke_and_fill and visible:
             # Fill
-            if "url(#" in node.get("fill", ""):
+            if "url(#" in (node.get("fill") or ""):
                 gradient_or_pattern(self, node)
             else:
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(
                     *color(node.get("fill", "black"), fill_opacity))
-                self.context.fill_preserve()
+            self.context.fill_preserve()
 
             # Stroke
             self.context.set_line_width(size(self, node.get("stroke-width")))
-            # TODO: handle gradients
-            self.context.set_source_rgba(
-                *color(node.get("stroke"), stroke_opacity))
+            if "url(#" in (node.get("stroke") or ""):
+                gradient_or_pattern(self, node)
+            else:
+                self.context.set_source_rgba(
+                    *color(node.get("stroke"), stroke_opacity))
             self.context.stroke()
 
         # Draw children
