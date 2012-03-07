@@ -157,6 +157,7 @@ def transform(surface, string):
         return
 
     transformations = string.split(")")
+    matrix = cairo.Matrix()
     for transformation in transformations:
         for ttype in (
             "scale", "translate", "matrix", "rotate", "skewX",
@@ -172,25 +173,36 @@ def transform(surface, string):
                     # TODO: manage the x/y sizes here
                     values.append(size(surface, value))
                 if ttype == "matrix":
-                    surface.context.transform(cairo.Matrix(*values))
+                    matrix = cairo.Matrix(*values).multiply(matrix)
                 elif ttype == "rotate":
                     angle = radians(float(values.pop(0)))
                     x, y = values or (0, 0)
-                    surface.context.translate(x, y)
-                    surface.context.rotate(angle)
-                    surface.context.translate(-x, -y)
+                    matrix.translate(x, y)
+                    matrix.rotate(angle)
+                    matrix.translate(-x, -y)
                 elif ttype == "skewX":
                     tangent = tan(radians(float(values[0])))
-                    surface.context.transform(
-                        cairo.Matrix(1, 0, tangent, 1, 0, 0))
+                    matrix = \
+                        cairo.Matrix(1, 0, tangent, 1, 0, 0).multiply(matrix)
                 elif ttype == "skewY":
                     tangent = tan(radians(float(values[0])))
-                    surface.context.transform(
-                        cairo.Matrix(1, tangent, 0, 1, 0, 0))
+                    matrix = \
+                        cairo.Matrix(1, tangent, 0, 1, 0, 0).multiply(matrix)
                 else:
                     if len(values) == 1:
                         values = 2 * values
-                    getattr(surface.context, ttype)(*values)
+                    getattr(matrix, ttype)(*values)
+    try:
+        matrix.invert()
+    except cairo.Error:
+        # Matrix not invertible, clip the surface to an empty path
+        active_path = surface.context.copy_path()
+        surface.context.new_path()
+        surface.context.clip()
+        surface.context.append_path(active_path)
+    else:
+        matrix.invert()
+        surface.context.transform(matrix)
 
 
 def urls(string):
