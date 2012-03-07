@@ -67,8 +67,8 @@ class Node(dict):
         self.tag = node.tag.split("}", 1)[-1]
         self.text = node.text
 
-
         # Inherits from parent properties
+        # TODO: drop other attributes that should not be inherited
         if parent is not None:
             items = parent.copy()
             not_inherited = ("transform", "opacity", "style")
@@ -77,8 +77,6 @@ class Node(dict):
             for attribute in not_inherited:
                 if attribute in items:
                     del items[attribute]
-
-            # TODO: drop other attributes that should not be inherited
 
             self.update(items)
             self.url = parent.url
@@ -93,6 +91,22 @@ class Node(dict):
             if ":" in declaration:
                 name, value = declaration.split(":", 1)
                 self[name.strip()] = value.strip()
+
+        # Replace currentColor by a real color value
+        color_attributes = (
+            "fill", "stroke", "stop-color", "flood-color",
+            "lighting-color")
+        for attribute in color_attributes:
+            if self.get(attribute) == "currentColor":
+                self[attribute] = self.get("color", "black")
+
+        # Replace inherit by the parent value
+        for attribute, value in self.items():
+            if value == "inherit":
+                if parent is not None and attribute in parent:
+                    self[attribute] = parent.get(attribute)
+                else:
+                    del self[attribute]
 
         # Manage text by creating children
         if self.tag == "text" or self.tag == "textPath":
