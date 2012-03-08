@@ -24,10 +24,16 @@ Optionally handle CSS stylesheets.
 from .parser import HAS_LXML
 
 try:
-    import cssutils
-    HAS_CSSUTILS = True
+    import tinycss
+    HAS_TINYCSS = True
 except ImportError:
-    HAS_CSSUTILS = False
+    HAS_TINYCSS = False
+else:
+    from tinycss.css21 import CSS21Parser
+    from tinycss.selectors3 import Selectors3ParserMixin
+
+    class CSSParser(Selectors3ParserMixin, CSS21Parser):
+        """Custom CSS parser."""
 
 try:
     from lxml import cssselect
@@ -36,7 +42,7 @@ except ImportError:
     HAS_CSSSELECT = False
 
 
-CSS_CAPABLE = HAS_LXML and HAS_CSSUTILS and HAS_CSSSELECT
+CSS_CAPABLE = HAS_LXML and HAS_CSSSELECT and HAS_TINYCSS
 
 
 # Python 2/3 compat
@@ -60,45 +66,47 @@ def remove_svg_namespace(tree):
 
 def find_stylesheets(tree):
     """Find the stylesheets included in ``tree``."""
+    # TODO: support contentStyleType on <svg>
+    default_type = "text/css"
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
         if (element.tag == "style" and
-                # TODO: support contentStyleType on <svg>
-                element.get("type", "text/css") == "text/css"):
+                element.get("type", default_type) == "text/css"):
             # TODO: pass href for relative URLs
-            yield cssutils.parseString(element.text, validate=False)
+            # TODO: support media types
+            # TODO: what if <style> has children elements?
+            yield CSSParser().parse_stylesheet(element.text)
+    # TODO: support <?xml-stylesheet ... ?>
 
 
 def find_style_rules(tree):
     """Find the style rules in ``tree``."""
     for stylesheet in find_stylesheets(tree):
-        for rule in stylesheet.cssRules:
-            if rule.type == rule.STYLE_RULE:
+        # TODO: warn for each stylesheet.errors
+        for rule in stylesheet.statements:
+            # TODO: support @import and @media
+            if not rule.at_keyword:
                 yield rule
 
 
 def get_declarations(rule):
     """Get the declarations in ``rule``."""
-    for declaration in rule.style.getProperties(all=True):
+    for declaration in rule.declarations:
         if declaration.name.startswith("-"):
             # Ignore properties prefixed by "-"
             continue
         # TODO: filter out invalid values
-        yield declaration.name, declaration.cssText, bool(declaration.priority)
+        yield (declaration.name, declaration.value.as_css,
+               bool(declaration.priority))
 
 
 def match_selector(rule, tree):
     """Yield the ``(element, specificity)`` in ``tree`` matching ``rule``."""
-    for selector in rule.selectorList:
-        specificity = selector.specificity
-        try:
-            matcher = cssselect.CSSSelector(selector.selectorText)
-        except cssselect.ExpressionError:
-            # Unsupported selector
-            # TODO: warn
-            continue
-        for element in matcher(tree):
-            yield element, specificity
+    for selector in rule.selector_list:
+        if not selector.pseudo_element:
+            specificity = selector.specificity
+            for element in selector.match(tree):
+                yield element, specificity
 
 
 def apply_stylesheets(tree):
@@ -121,6 +129,7 @@ def apply_stylesheets(tree):
                 style[name] = value, weight
 
     for element, style in iteritems(style_by_element):
-        values = [v for v, _ in style.itervalues()]
+        values = ['%s: %s' % (name, value)
+                  for name, (value, weight) in style.iteritems()]
         values.append(element.get("style", ""))
         element.set("style", ";".join(values))
