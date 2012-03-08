@@ -39,14 +39,15 @@ import cairosvg.parser
 import cairosvg.surface
 
 
-REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "reference")
+REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
+TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
-ALL_FILES = sorted((
-        os.path.join(REFERENCE_FOLDER, filename)
-        for filename in os.listdir(REFERENCE_FOLDER)
-        if os.path.isfile(os.path.join(REFERENCE_FOLDER, filename))),
-                   key=lambda name: name.lower())
-FILES = list(zip(ALL_FILES[::2], ALL_FILES[1::2]))
+ALL_FILES = sorted(
+    os.listdir(TEST_FOLDER), key=lambda name: name.lower())
+FILES = [(
+    os.path.join(REFERENCE_FOLDER, "%s.png" % os.path.splitext(filename)[0]),
+    os.path.join(TEST_FOLDER, filename))
+    for filename in ALL_FILES]
 PIXEL_TOLERANCE = 65 * 255
 SIZE_TOLERANCE = 1
 
