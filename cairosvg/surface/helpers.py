@@ -26,15 +26,22 @@ from math import pi, cos, sin, tan, atan, radians
 from .units import size
 
 
+class PointError(Exception):
+    """Exception raised when parsing a point fails."""
+
+
 def distance(x1, y1, x2, y2):
     """Get the distance between two points."""
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
-def filter_fill_content(node):
-    """Extract the content of fill and remove unnecessary characters."""
-    content = list(urls(node.get("fill")))[0]
-    if "url" in node.get("fill"):
+def filter_fill_or_stroke(node, value):
+    """Remove unnecessary characters from fill or stroke value."""
+    if not value:
+        return
+
+    content = list(urls(value))[0]
+    if "url" in value:
         if not content.startswith("#"):
             return
         content = content[1:]
@@ -71,7 +78,11 @@ def point(surface, string=None):
     if not string:
         return (0, 0, "")
 
-    x, y, string = (string.strip() + " ").split(" ", 2)
+    try:
+        x, y, string = (string.strip() + " ").split(" ", 2)
+    except ValueError:
+        raise PointError("The point cannot be found in string %s" % string)
+
     return size(surface, x, "x"), size(surface, y, "y"), string
 
 
@@ -188,10 +199,14 @@ def transform(surface, string):
                     tangent = tan(radians(float(values[0])))
                     matrix = \
                         cairo.Matrix(1, tangent, 0, 1, 0, 0).multiply(matrix)
-                else:
+                elif ttype == "translate":
+                    if len(values) == 1:
+                        values += (0,)
+                    matrix.translate(*values)
+                elif ttype == "scale":
                     if len(values) == 1:
                         values = 2 * values
-                    getattr(matrix, ttype)(*values)
+                    matrix.scale(*values)
     try:
         matrix.invert()
     except cairo.Error:

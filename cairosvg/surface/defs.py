@@ -26,8 +26,7 @@ import cairo
 from math import radians
 
 from .colors import color
-from .helpers import (
-    filter_fill_content, node_format, preserve_ratio, urls, transform)
+from .helpers import node_format, preserve_ratio, urls, transform
 from .units import size
 from ..parser import Tree
 
@@ -44,18 +43,17 @@ def parse_def(surface, node):
         surface.paths[node["id"]] = node
 
 
-def gradient_or_pattern(surface, node):
+def gradient_or_pattern(surface, node, name):
     """Gradient or pattern color."""
-    name = filter_fill_content(node)
     if name in surface.gradients:
-        return gradient(surface, node)
+        return gradient(surface, node, name)
     elif name in surface.patterns:
-        return pattern(surface, node)
+        return pattern(surface, node, name)
 
 
-def gradient(surface, node):
+def gradient(surface, node, name):
     """Gradients colors."""
-    gradient_node = surface.gradients[filter_fill_content(node)]
+    gradient_node = surface.gradients[name]
 
     transform(surface, gradient_node.get("gradientTransform"))
 
@@ -114,9 +112,9 @@ def radial_gradient(surface, node):
     parse_def(surface, node)
 
 
-def pattern(surface, node):
+def pattern(surface, node, name):
     """Draw a pattern image."""
-    pattern_node = surface.patterns[filter_fill_content(node)]
+    pattern_node = surface.patterns[name]
     transform(surface, pattern_node.get("patternTransform"))
 
     from . import SVGSurface  # circular import
@@ -150,6 +148,9 @@ def draw_marker(surface, node, position="mid"):
         next_point, markers = node.pending_markers.pop(0)
         angle1 = node.tangents.pop(0)
         angle2 = node.tangents.pop(0)
+
+        if angle1 is None:
+            angle1 = angle2
 
         for active_marker in markers:
             if not active_marker.startswith("#"):
@@ -215,7 +216,8 @@ def use(surface, node):
     if "viewBox" in node:
         del node["viewBox"]
     href = node.get("{http://www.w3.org/1999/xlink}href")
-    tree = Tree(url=href, parent=node)
+    url = list(urls(href))[0]
+    tree = Tree(url=url, parent=node)
     surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
     surface.context.restore()

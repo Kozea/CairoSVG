@@ -26,7 +26,8 @@ import io
 from ..parser import Tree
 from .colors import color
 from .defs import gradient_or_pattern, parse_def
-from .helpers import node_format, transform, normalize
+from .helpers import (
+    node_format, transform, normalize, filter_fill_or_stroke, PointError)
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
@@ -232,7 +233,11 @@ class Surface(object):
         self.context.set_miter_limit(miter_limit)
 
         if node.tag in TAGS:
-            TAGS[node.tag](self, node)
+            try:
+                TAGS[node.tag](self, node)
+            except PointError:
+                # Error in point parsing, do nothing
+                pass
 
         # Get stroke and fill opacity
         stroke_opacity = float(node.get("stroke-opacity", 1))
@@ -245,7 +250,8 @@ class Surface(object):
         if stroke_and_fill and visible:
             # Fill
             if "url(#" in (node.get("fill") or ""):
-                gradient_or_pattern(self, node)
+                name = filter_fill_or_stroke(node, node.get("fill"))
+                gradient_or_pattern(self, node, name)
             else:
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
@@ -256,7 +262,8 @@ class Surface(object):
             # Stroke
             self.context.set_line_width(size(self, node.get("stroke-width")))
             if "url(#" in (node.get("stroke") or ""):
-                gradient_or_pattern(self, node)
+                name = filter_fill_or_stroke(node, node.get("stroke"))
+                gradient_or_pattern(self, node, name)
             else:
                 self.context.set_source_rgba(
                     *color(node.get("stroke"), stroke_opacity))

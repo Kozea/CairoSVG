@@ -33,7 +33,7 @@ except ImportError:
 
 from .colors import color
 from .defs import gradient_or_pattern
-from .helpers import distance, normalize, point_angle
+from .helpers import distance, normalize, point_angle, filter_fill_or_stroke
 from .units import size
 
 
@@ -108,7 +108,8 @@ def text(surface, node):
 
     surface.context.move_to(x, y)
     if "url(#" in (node.get("fill") or ""):
-        gradient_or_pattern(surface, node)
+        name = filter_fill_or_stroke(node, node.get("fill"))
+        gradient_or_pattern(surface, node, name)
     else:
         surface.context.set_source_rgba(*color(node.get("fill")))
     surface.context.show_text(node.text)
@@ -124,7 +125,7 @@ def text_path(surface, node):
     if "url(#" not in (node.get("fill") or ""):
         surface.context.set_source_rgba(*color(node.get("fill")))
 
-    id_path = node.get("{http://www.w3.org/1999/xlink}href")
+    id_path = node.get("{http://www.w3.org/1999/xlink}href", "")
     if not id_path.startswith("#"):
         return
     id_path = id_path[1:]
@@ -143,7 +144,7 @@ def text_path(surface, node):
     surface.total_width += start_offset
 
     x, y = point_following_path(cairo_path, surface.total_width)
-    string = node.text.strip(" \n")
+    string = (node.text or "").strip(" \n")
     letter_spacing = size(surface, node.get("letter-spacing"))
 
     for letter in string:

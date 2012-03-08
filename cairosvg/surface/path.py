@@ -52,9 +52,20 @@ def path(surface, node):
             x1, y1 = surface.context.get_current_point()
             rx, ry, string = point(surface, string)
             radii_ratio = ry / rx
-            rotation, large, sweep, string = string.split(" ", 3)
+            rotation, string = string.split(" ", 1)
             rotation = radians(float(rotation))
+
+            # The large and sweep values are not always separated from the
+            # following values, here is the crazy parser
+            large, string = string[0], string[1:].strip()
+            while not large[-1].isdigit():
+                large, string = large + string[0], string[1:].strip()
+            sweep, string = string[0], string[1:].strip()
+            while not sweep[-1].isdigit():
+                sweep, string = sweep + string[0], string[1:].strip()
+
             large, sweep = bool(int(large)), bool(int(sweep))
+
             x3, y3, string = point(surface, string)
 
             if letter == "A":
@@ -127,14 +138,14 @@ def path(surface, node):
 
         elif letter == "h":
             # Relative horizontal line
-            x, string = string.split(" ", 1)
+            x, string = (string + " ").split(" ", 1)
             angle = 0 if size(surface, x, "x") > 0 else pi
             node.tangents.extend((-angle, angle))
             surface.context.rel_line_to(size(surface, x, "x"), 0)
 
         elif letter == "H":
             # Horizontal line
-            x, string = string.split(" ", 1)
+            x, string = (string + " ").split(" ", 1)
             old_x = surface.context.get_current_point()[1]
             angle = 0 if size(surface, x, "x") > old_x else pi
             node.tangents.extend((-angle, angle))
@@ -213,6 +224,8 @@ def path(surface, node):
         elif letter == "t":
             # Relative quadratic curve end
             x1, y1 = 0, 0
+            if last_letter not in "QqTt":
+                x2, y2 = x1, y1
             x2 = 2 * x1 - x2
             y2 = 2 * y1 - y2
             x3, y3, string = point(surface, string)
@@ -224,6 +237,8 @@ def path(surface, node):
         elif letter == "T":
             # Quadratic curve end
             x1, y1 = surface.context.get_current_point()
+            if last_letter not in "QqTt":
+                x2, y2 = x1, y1
             x2 = 2 * x1 - x2
             y2 = 2 * y1 - y2
             x3, y3, string = point(surface, string)
@@ -234,14 +249,14 @@ def path(surface, node):
 
         elif letter == "v":
             # Relative vertical line
-            y, string = string.split(" ", 1)
+            y, string = (string + " ").split(" ", 1)
             angle = pi / 2 if size(surface, y, "y") > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
             surface.context.rel_line_to(0, size(surface, y, "y"))
 
         elif letter == "V":
             # Vertical line
-            y, string = string.split(" ", 1)
+            y, string = (string + " ").split(" ", 1)
             old_y = surface.context.get_current_point()[0]
             angle = pi / 2 if size(surface, y, "y") > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
