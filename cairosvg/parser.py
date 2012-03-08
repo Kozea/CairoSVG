@@ -44,6 +44,9 @@ except ImportError:
 # pylint: enable=E0611,F0401,W0611
 
 
+import gzip
+import os.path
+
 from .css import apply_stylesheets
 
 
@@ -166,6 +169,8 @@ class Tree(Node):
                     input_ = urlopen(url)
                 else:
                     input_ = url  # filename
+                if os.path.splitext(url)[1].lower() == "svgz":
+                    input_ = gzip.open(url)
                 tree = ElementTree.parse(input_).getroot()
             else:
                 tree = parent.xml_tree
