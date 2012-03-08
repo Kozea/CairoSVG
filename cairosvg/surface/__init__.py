@@ -91,7 +91,6 @@ class Surface(object):
 
         """
         self.cairo = None
-        self.context = None
         self.context_width, self.context_height = None, None
         self.font_size = None
         self.cursor_position = 0, 0
@@ -268,6 +267,8 @@ class Surface(object):
                 self.context.set_source_rgba(
                     *color(node.get("stroke"), stroke_opacity))
             self.context.stroke()
+        elif not visible:
+            self.context.new_path()
 
         # Draw children
         if display:
