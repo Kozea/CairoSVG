@@ -86,7 +86,7 @@ def text(surface, node):
 
     # TODO: manage font variant
     font_size = size(surface, node.get("font-size", "12pt"))
-    font_family = node.get("font-family", "Sans")
+    font_family = (node.get("font-family") or "sans-serif").split(",")[0]
     font_style = getattr(
         cairo, ("font_slant_%s" % node.get("font-style")).upper(),
         cairo.FONT_SLANT_NORMAL)
