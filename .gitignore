@@ -5,3 +5,4 @@
 /MANIFEST
 /.tox
 .coverage
+.noseids
