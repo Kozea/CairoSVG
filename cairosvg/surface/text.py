@@ -78,7 +78,7 @@ def text(surface, node):
     """Draw a text ``node``."""
     # Set black as default text color
     if not node.get("fill"):
-        node["fill"] = node.get("color") or "#000000"
+        node["fill"] = "#000000"
 
     # TODO: find a better way to manage white spaces in text nodes
     node.text = (node.text or "").lstrip()

@@ -17,3 +17,8 @@ You'll find in this folder:
 
 You can test CairoSVG by launching ``nosetests`` in the root folder of the
 repository.
+
+As CairoSVG does not handle SVG fonts, you can generate OTF fonts and install
+them in order to test CairoSVG with the right fonts. There's a script called
+``generate.py`` in the ``resources`` folder that can do that for you if you
+have FontForge installed on your system.

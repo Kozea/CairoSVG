@@ -67,5 +67,11 @@ def size(surface, string, reference="xy"):
             number = float(string.strip(" " + unit))
             return number * (surface.dpi * coefficient if coefficient else 1)
 
+    # Try to return the number at the beginning of the string
+    return_string = ""
+    while string and (string[0].isdigit() or string[0] in "+-."):
+        return_string += string[0]
+        string = string[1:]
+
     # Unknown size or multiple sizes
-    return 0
+    return float(return_string) if return_string else 0

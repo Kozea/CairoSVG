@@ -61,7 +61,7 @@ def node_format(surface, node):
 
 
 def normalize(string=None):
-    """Normalize a string corresponding to an array of various vaues."""
+    """Normalize a string corresponding to an array of various values."""
     string = string.replace("-", " -")
     string = string.replace(",", " ")
 
@@ -70,7 +70,17 @@ def normalize(string=None):
 
     string = string.replace("e -", "e-")
 
-    return string
+    values = string.split(" ")
+    string = ""
+    for value in values:
+        if value.count(".") > 1:
+            numbers = value.split(".")
+            string += "%s.%s " % (numbers.pop(0), numbers.pop(0))
+            string += ".%s " % " .".join(numbers)
+        else:
+            string += value + " "
+
+    return string.strip()
 
 
 def point(surface, string=None):

@@ -24,6 +24,7 @@ This module handles gradients and patterns.
 
 import cairo
 from math import radians
+from copy import deepcopy
 
 from .colors import color
 from .helpers import node_format, preserve_ratio, urls, transform
@@ -33,14 +34,16 @@ from ..parser import Tree
 
 def parse_def(surface, node):
     """Parse the SVG definitions."""
-    if node.tag == "marker":
-        surface.markers[node["id"]] = node
-    if "gradient" in node.tag.lower():
-        surface.gradients[node["id"]] = node
-    if "pattern" in node.tag.lower():
-        surface.patterns[node["id"]] = node
-    if "path" in node.tag:
-        surface.paths[node["id"]] = node
+    for def_type in ("marker", "gradient", "pattern", "path"):
+        if def_type in node.tag.lower():
+            def_list = getattr(surface, def_type + "s")
+            name = node["id"]
+            href = node.get("{http://www.w3.org/1999/xlink}href")
+            if href and href[0] == "#" and href[1:] in def_list:
+                new_node = deepcopy(def_list[href[1:]])
+                new_node.update(node)
+                node = new_node
+            def_list[name] = node
 
 
 def gradient_or_pattern(surface, node, name):

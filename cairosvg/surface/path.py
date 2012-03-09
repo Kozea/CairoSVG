@@ -46,6 +46,10 @@ def path(surface, node):
         string = string.strip()
         if string.split(" ", 1)[0] in PATH_LETTERS:
             letter, string = (string + " ").split(" ", 1)
+        elif letter == "M":
+            letter = "L"
+        elif letter == "m":
+            letter = "l"
 
         if letter in "aA":
             # Elliptic curve
@@ -179,23 +183,21 @@ def path(surface, node):
         elif letter == "q":
             # Relative quadratic curve
             x1, y1 = 0, 0
-            while string and string[0] not in PATH_LETTERS:
-                x2, y2, string = point(surface, string)
-                x3, y3, string = point(surface, string)
-                xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
-                    x1, y1, x2, y2, x3, y3)
-                surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+            x2, y2, string = point(surface, string)
+            x3, y3, string = point(surface, string)
+            xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
+                x1, y1, x2, y2, x3, y3)
+            surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             node.tangents.extend((0, 0))
 
         elif letter == "Q":
             # Quadratic curve
             x1, y1 = surface.context.get_current_point()
-            while string and string[0] not in PATH_LETTERS:
-                x2, y2, string = point(surface, string)
-                x3, y3, string = point(surface, string)
-                xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
-                    x1, y1, x2, y2, x3, y3)
-                surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+            x2, y2, string = point(surface, string)
+            x3, y3, string = point(surface, string)
+            xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
+                x1, y1, x2, y2, x3, y3)
+            surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             node.tangents.extend((0, 0))
 
         elif letter == "s":
@@ -223,11 +225,16 @@ def path(surface, node):
 
         elif letter == "t":
             # Relative quadratic curve end
-            x1, y1 = 0, 0
             if last_letter not in "QqTt":
-                x2, y2 = x1, y1
-            x2 = 2 * x1 - x2
-            y2 = 2 * y1 - y2
+                x2, y2, x3, y3 = 0, 0, 0, 0
+            elif last_letter in "QT":
+                x2 -= x1
+                y2 -= y1
+                x3 -= x1
+                y3 -= y1
+            x2 = x3 - x2
+            y2 = y3 - y2
+            x1, y1 = 0, 0
             x3, y3, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                 x1, y1, x2, y2, x3, y3)
@@ -236,11 +243,15 @@ def path(surface, node):
 
         elif letter == "T":
             # Quadratic curve end
-            x1, y1 = surface.context.get_current_point()
+            abs_x, abs_y = surface.context.get_current_point()
             if last_letter not in "QqTt":
-                x2, y2 = x1, y1
-            x2 = 2 * x1 - x2
-            y2 = 2 * y1 - y2
+                x2, y2, x3, y3 = abs_x, abs_y, abs_x, abs_y
+            elif last_letter in "qt":
+                x2 += x1
+                y2 += y1
+            x2 = 2 * abs_x - x2
+            y2 = 2 * abs_y - y2
+            x1, y1 = abs_x, abs_y
             x3, y3, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                 x1, y1, x2, y2, x3, y3)
