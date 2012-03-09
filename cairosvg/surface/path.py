@@ -28,7 +28,8 @@ from .units import size
 
 
 PATH_LETTERS = "achlmqstvzACHLMQSTVZ"
-PATH_TAGS = ("circle", "line", "path", "polyline", "polygon", "rect")
+PATH_TAGS = (
+    "circle", "ellipse", "line", "path", "polygon", "polyline", "rect")
 
 
 def path(surface, node):
