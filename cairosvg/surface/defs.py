@@ -41,6 +41,7 @@ def parse_def(surface, node):
             href = node.get("{http://www.w3.org/1999/xlink}href")
             if href and href[0] == "#" and href[1:] in def_list:
                 new_node = deepcopy(def_list[href[1:]])
+                print(new_node)
                 new_node.update(node)
                 node = new_node
             def_list[name] = node
@@ -49,12 +50,32 @@ def parse_def(surface, node):
 def gradient_or_pattern(surface, node, name):
     """Gradient or pattern color."""
     if name in surface.gradients:
-        return gradient(surface, node, name)
+        return draw_gradient(surface, node, name)
     elif name in surface.patterns:
-        return pattern(surface, node, name)
+        return draw_pattern(surface, node, name)
 
 
-def gradient(surface, node, name):
+def marker(surface, node):
+    """Store a marker definition."""
+    parse_def(surface, node)
+
+
+def linear_gradient(surface, node):
+    """Store a linear gradient definition."""
+    parse_def(surface, node)
+
+
+def radial_gradient(surface, node):
+    """Store a radial gradient definition."""
+    parse_def(surface, node)
+
+
+def pattern(surface, node):
+    """Store a pattern definition."""
+    parse_def(surface, node)
+
+
+def draw_gradient(surface, node, name):
     """Gradients colors."""
     gradient_node = surface.gradients[name]
 
@@ -96,7 +117,8 @@ def gradient(surface, node, name):
     for child in gradient_node.children:
         offset = max(offset, size(surface, child.get("offset"), 1))
         stop_color = color(
-            child.get("stop-color"), float(child.get("stop-opacity", 1)))
+            child.get("stop-color", "black"),
+            float(child.get("stop-opacity", 1)))
         pattern.add_color_stop_rgba(offset, *stop_color)
 
     pattern.set_extend(getattr(
@@ -105,19 +127,12 @@ def gradient(surface, node, name):
     surface.context.set_source(pattern)
 
 
-def linear_gradient(surface, node):
-    """Store a linear gradient definition."""
-    parse_def(surface, node)
-
-
-def radial_gradient(surface, node):
-    """Store a radial gradient definition."""
-    parse_def(surface, node)
-
-
-def pattern(surface, node, name):
+def draw_pattern(surface, node, name):
     """Draw a pattern image."""
     pattern_node = surface.patterns[name]
+    pattern_node.tag = "g"
+    transform(surface, "translate(%s %s)" % (
+        pattern_node.get("x"), pattern_node.get("y")))
     transform(surface, pattern_node.get("patternTransform"))
 
     from . import SVGSurface  # circular import
@@ -200,11 +215,6 @@ def draw_marker(surface, node, position="mid"):
 
     if position == "mid":
         node.pending_markers.append(pending_marker)
-
-
-def marker(surface, node):
-    """Store a marker definition."""
-    parse_def(surface, node)
 
 
 def use(surface, node):

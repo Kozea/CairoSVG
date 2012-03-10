@@ -15,5 +15,9 @@ Tag ``image``
 =============
 
 - ``coords-viewattr-04-f``
+- ``struct-image-*``
+- ``struct-symbol-01-b``
+- ``render-groups-*``
+- ``struct-use-01-t``
 
-This test doesn't pass because the ``image`` tag is not handled.
+These test doesn't pass because the ``image`` tag is not handled.

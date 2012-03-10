@@ -226,7 +226,12 @@ def color(string=None, opacity=1):
     if len(string) == 9:
         opacity *= int(string[7:9], 16) / 255
 
-    plain_color = tuple(
-        int(value, 16) / 255. for value in (
-            string[1:3], string[3:5], string[5:7]))
-    return plain_color + (opacity,)
+    try:
+        plain_color = tuple(
+            int(value, 16) / 255. for value in (
+                string[1:3], string[3:5], string[5:7]))
+    except ValueError:
+        # Unknown color, return black
+        return (0, 0, 0, 1)
+    else:
+        return plain_color + (opacity,)

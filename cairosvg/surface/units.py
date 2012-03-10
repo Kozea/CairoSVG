@@ -43,8 +43,11 @@ def size(surface, string, reference="xy"):
     if not string:
         return 0
 
-    if string.replace(".", "", 1).lstrip(" -").isdigit():
+    try:
         return float(string)
+    except ValueError:
+        # Not a float, try something else
+        pass
 
     if "%" in string:
         if reference == "x":

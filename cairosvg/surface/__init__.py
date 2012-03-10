@@ -271,7 +271,8 @@ class Surface(object):
             self.context.new_path()
 
         # Draw children
-        if display:
+        if display and node.tag not in (
+                "linearGradient", "radialGradient", "marker", "pattern"):
             for child in node.children:
                 self.draw(child, stroke_and_fill)
 

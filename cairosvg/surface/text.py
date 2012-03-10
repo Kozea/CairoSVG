@@ -107,13 +107,7 @@ def text(surface, node):
         x -= width + x_bearing
 
     surface.context.move_to(x, y)
-    if "url(#" in (node.get("fill") or ""):
-        name = filter_fill_or_stroke(node, node.get("fill"))
-        gradient_or_pattern(surface, node, name)
-    else:
-        surface.context.set_source_rgba(*color(node.get("fill")))
-    surface.context.show_text(node.text)
-    node["fill"] = "#00000000"
+    surface.context.text_path(node.text)
 
     # Remember the absolute cursor position
     surface.cursor_position = surface.context.get_current_point()

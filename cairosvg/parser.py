@@ -59,6 +59,21 @@ except NameError:
 # pylint: enable=C0103,W0622
 
 
+def remove_svg_namespace(tree):
+    """Remove the SVG namespace from ``tree`` tags.
+
+    ``lxml.cssselect`` does not support empty/default namespaces, so remove any
+    SVG namespace.
+
+    """
+    prefix = "{http://www.w3.org/2000/svg}"
+    prefix_len = len(prefix)
+    for element in tree.iter():
+        tag = element.tag
+        if hasattr(tag, "startswith") and tag.startswith(prefix):
+            element.tag = tag[prefix_len:]
+
+
 class Node(dict):
     """SVG node with dict-like properties and children."""
     def __init__(self, node, parent=None):
@@ -67,15 +82,17 @@ class Node(dict):
         self.children = ()
 
         self.root = False
-        self.tag = node.tag.split("}", 1)[-1]
+        self.tag = node.tag
         self.text = node.text
 
         # Inherits from parent properties
         # TODO: drop other attributes that should not be inherited
         if parent is not None:
             items = parent.copy()
-            not_inherited = ("transform", "opacity", "style")
-            if self.tag == "tspan":
+            not_inherited = (
+                "transform", "opacity", "style", "viewBox", "stop-color",
+                "stop-opacity")
+            if self.tag in ("tspan", "pattern"):
                 not_inherited += ("x", "y")
             for attribute in not_inherited:
                 if attribute in items:
@@ -188,6 +205,7 @@ class Tree(Node):
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
+        remove_svg_namespace(tree)
         apply_stylesheets(tree)
         self.xml_tree = tree
         super(Tree, self).__init__(tree, parent)

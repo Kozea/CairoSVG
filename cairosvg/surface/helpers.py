@@ -21,7 +21,7 @@ Surface helpers.
 """
 
 import cairo
-from math import pi, cos, sin, tan, atan, radians
+from math import cos, sin, tan, atan2, radians
 
 from .units import size
 
@@ -98,10 +98,7 @@ def point(surface, string=None):
 
 def point_angle(cx, cy, px, py):
     """Return angle between x axis and point knowing given center."""
-    angle = pi if cx >= px else 0
-    angle *= -1 if cy > py else 1
-    angle += atan((cy - py) * (1 / (cx - px)) if (cx - px) else float("inf"))
-    return angle
+    return atan2(py - cy, px - cx)
 
 
 def preserve_ratio(surface, node):

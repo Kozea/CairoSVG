@@ -11,6 +11,7 @@
 Text on a Path
 ==============
 
+- ``text-path-01-b``
 - ``text-path-02-b``
 - ``text-align-04-b``
 
@@ -41,11 +42,12 @@ handled correctly and raises errors. This has to be handled when the module is
 rewritten.
 
 
-Decoration and Spacing
-======================
+Decoration, Spacing, Bidi, Kerning, Alt Glyphs
+==============================================
 
 - ``textdecoration01``
 - ``text-ws-03-t``
+- other ``text-%*``
 
 Text decoration, spacing, kerning, and various other features are not handled
 in Cairo, and thus cannot be handled in CairoSVG. One solution to solve this

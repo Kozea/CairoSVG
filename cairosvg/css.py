@@ -49,21 +49,6 @@ CSS_CAPABLE = HAS_LXML and HAS_CSSSELECT and HAS_TINYCSS
 iteritems = getattr(dict, 'iteritems', dict.items)  # pylint: disable=C0103
 
 
-def remove_svg_namespace(tree):
-    """Remove the SVG namespace from ``tree`` tags.
-
-    ``lxml.cssselect`` does not support empty/default namespaces, so remove any
-    SVG namespace.
-
-    """
-    prefix = "{http://www.w3.org/2000/svg}"
-    prefix_len = len(prefix)
-    for element in tree.iter():
-        tag = element.tag
-        if hasattr(tag, "startswith") and tag.startswith(prefix):
-            element.tag = tag[prefix_len:]
-
-
 def find_stylesheets(tree):
     """Find the stylesheets included in ``tree``."""
     # TODO: support contentStyleType on <svg>
@@ -114,7 +99,6 @@ def apply_stylesheets(tree):
     if not CSS_CAPABLE:
         # TODO: warn?
         return
-    remove_svg_namespace(tree)
     style_by_element = {}
     for rule in find_style_rules(tree):
         declarations = list(get_declarations(rule))
