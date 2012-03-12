@@ -47,6 +47,7 @@ Decoration, Spacing, Bidi, Kerning, Alt Glyphs
 
 - ``textdecoration01``
 - ``text-ws-03-t``
+- ``styling-css-05-b``
 - other ``text-%*``
 
 Text decoration, spacing, kerning, and various other features are not handled
