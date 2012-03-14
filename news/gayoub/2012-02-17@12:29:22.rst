@@ -20,4 +20,4 @@ The two missing items need a lot of time:
   files.
 
 If anyone is interested in one of these tasks, you can `contact us
-<http://localhost:5000/contribute/>`_ whenever you want!
+</contribute>`_ whenever you want!
