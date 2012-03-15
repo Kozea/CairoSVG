@@ -45,9 +45,9 @@ OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
 ALL_FILES = sorted(
     os.listdir(TEST_FOLDER), key=lambda name: name.lower())
 FILES = [(
-    os.path.join(REFERENCE_FOLDER, "%s.png" % os.path.splitext(filename)[0]),
-    os.path.join(TEST_FOLDER, filename))
-    for filename in ALL_FILES]
+    os.path.join(REFERENCE_FOLDER, "%s.png" % os.path.splitext(name)[0]),
+    os.path.join(TEST_FOLDER, name))
+    for name in ALL_FILES]
 PIXEL_TOLERANCE = 65 * 255
 SIZE_TOLERANCE = 1
 

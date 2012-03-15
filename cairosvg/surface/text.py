@@ -32,8 +32,7 @@ except ImportError:
 # pylint: enable=E0611
 
 from .colors import color
-from .defs import gradient_or_pattern
-from .helpers import distance, normalize, point_angle, filter_fill_or_stroke
+from .helpers import distance, normalize, point_angle
 from .units import size
 
 

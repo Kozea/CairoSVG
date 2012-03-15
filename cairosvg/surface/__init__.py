@@ -249,7 +249,7 @@ class Surface(object):
         if stroke_and_fill and visible:
             # Fill
             if "url(#" in (node.get("fill") or ""):
-                name = filter_fill_or_stroke(node, node.get("fill"))
+                name = filter_fill_or_stroke(node.get("fill"))
                 gradient_or_pattern(self, node, name)
             else:
                 if node.get("fill-rule") == "evenodd":
@@ -261,7 +261,7 @@ class Surface(object):
             # Stroke
             self.context.set_line_width(size(self, node.get("stroke-width")))
             if "url(#" in (node.get("stroke") or ""):
-                name = filter_fill_or_stroke(node, node.get("stroke"))
+                name = filter_fill_or_stroke(node.get("stroke"))
                 gradient_or_pattern(self, node, name)
             else:
                 self.context.set_source_rgba(

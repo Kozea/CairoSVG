@@ -121,7 +121,7 @@ class Node(dict):
                 self[attribute] = self.get("color", "black")
 
         # Replace inherit by the parent value
-        for attribute, value in self.items():
+        for attribute, value in dict(self).items():
             if value == "inherit":
                 if parent is not None and attribute in parent:
                     self[attribute] = parent.get(attribute)

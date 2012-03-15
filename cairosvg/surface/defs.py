@@ -52,7 +52,7 @@ def gradient_or_pattern(surface, node, name):
     if name in surface.gradients:
         return draw_gradient(surface, node, name)
     elif name in surface.patterns:
-        return draw_pattern(surface, node, name)
+        return draw_pattern(surface, name)
 
 
 def marker(surface, node):
@@ -96,7 +96,7 @@ def draw_gradient(surface, node, name):
         x2 = float(size(surface, gradient_node.get("x2", "100%"), width_ref))
         y1 = float(size(surface, gradient_node.get("y1", "0%"), height_ref))
         y2 = float(size(surface, gradient_node.get("y2", "0%"), height_ref))
-        pattern = cairo.LinearGradient(x1, y1, x2, y2)
+        gradient_pattern = cairo.LinearGradient(x1, y1, x2, y2)
 
     elif gradient_node.tag == "radialGradient":
         r = float(size(surface, gradient_node.get("r", "50%"), diagonal_ref))
@@ -104,13 +104,13 @@ def draw_gradient(surface, node, name):
         cy = float(size(surface, gradient_node.get("cy", "50%"), height_ref))
         fx = float(size(surface, gradient_node.get("fx", str(cx)), width_ref))
         fy = float(size(surface, gradient_node.get("fy", str(cy)), height_ref))
-        pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
+        gradient_pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
     if gradient_node.get("gradientUnits") != "userSpaceOnUse":
-        pattern.set_matrix(cairo.Matrix(
+        gradient_pattern.set_matrix(cairo.Matrix(
             1 / width, 0, 0, 1 / height, - x / width, - y / height))
 
-    pattern.set_extend(getattr(
+    gradient_pattern.set_extend(getattr(
         cairo, "EXTEND_%s" % node.get("spreadMethod", "pad").upper()))
 
     offset = 0
@@ -119,15 +119,15 @@ def draw_gradient(surface, node, name):
         stop_color = color(
             child.get("stop-color", "black"),
             float(child.get("stop-opacity", 1)))
-        pattern.add_color_stop_rgba(offset, *stop_color)
+        gradient_pattern.add_color_stop_rgba(offset, *stop_color)
 
-    pattern.set_extend(getattr(
+    gradient_pattern.set_extend(getattr(
         cairo, "EXTEND_%s" % gradient_node.get("spreadMethod", "pad").upper()))
 
-    surface.context.set_source(pattern)
+    surface.context.set_source(gradient_pattern)
 
 
-def draw_pattern(surface, node, name):
+def draw_pattern(surface, name):
     """Draw a pattern image."""
     pattern_node = surface.patterns[name]
     pattern_node.tag = "g"

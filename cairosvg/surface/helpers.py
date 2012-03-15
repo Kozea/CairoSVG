@@ -25,6 +25,14 @@ from math import cos, sin, tan, atan2, radians
 
 from .units import size
 
+# Python 2/3 management
+# pylint: disable=C0103
+try:
+    Error = cairo.Error
+except AttributeError:
+    Error = SystemError
+# pylint: enable=C0103
+
 
 class PointError(Exception):
     """Exception raised when parsing a point fails."""
@@ -35,7 +43,7 @@ def distance(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
-def filter_fill_or_stroke(node, value):
+def filter_fill_or_stroke(value):
     """Remove unnecessary characters from fill or stroke value."""
     if not value:
         return
@@ -216,7 +224,7 @@ def transform(surface, string):
                     matrix.scale(*values)
     try:
         matrix.invert()
-    except cairo.Error:
+    except Error:
         # Matrix not invertible, clip the surface to an empty path
         active_path = surface.context.copy_path()
         surface.context.new_path()

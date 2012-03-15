@@ -23,6 +23,8 @@ Optionally handle CSS stylesheets.
 
 from .parser import HAS_LXML
 
+# Modules detections
+# pylint: disable=W0611
 try:
     import tinycss
     HAS_TINYCSS = True
@@ -40,13 +42,14 @@ try:
     HAS_CSSSELECT = True
 except ImportError:
     HAS_CSSSELECT = False
+# pylint: enable=W0611
 
 
 CSS_CAPABLE = HAS_LXML and HAS_CSSSELECT and HAS_TINYCSS
 
 
 # Python 2/3 compat
-iteritems = getattr(dict, 'iteritems', dict.items)  # pylint: disable=C0103
+iteritems = getattr(dict, "iteritems", dict.items)  # pylint: disable=C0103
 
 
 def find_stylesheets(tree):
@@ -113,7 +116,7 @@ def apply_stylesheets(tree):
                 style[name] = value, weight
 
     for element, style in iteritems(style_by_element):
-        values = ['%s: %s' % (name, value)
-                  for name, (value, weight) in style.iteritems()]
+        values = ["%s: %s" % (name, value)
+                  for name, (value, weight) in iteritems(style)]
         values.append(element.get("style", ""))
         element.set("style", ";".join(values))
