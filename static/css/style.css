@@ -303,8 +303,10 @@ footer li a:focus {
   padding: .5em 2em;
 }
 
-.contents p {
-  font-size: 120%;
+.contents header {
+  counter-reset: title;
+  font-size: 1.2em;
+  margin-top: 1em;
 }
 
 .contents a:hover,
@@ -354,7 +356,7 @@ footer li a:focus {
   padding: 0 .25em;
 }
 
-.abstract h3 {
+.abstract header {
   display: none;
 }
 
