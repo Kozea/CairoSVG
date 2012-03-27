@@ -26,16 +26,12 @@ from .parser import HAS_LXML
 # Modules detections
 # pylint: disable=W0611
 try:
-    import tinycss
+    import tinycss.selectors3
     HAS_TINYCSS = True
 except ImportError:
     HAS_TINYCSS = False
 else:
-    from tinycss.css21 import CSS21Parser
-    from tinycss.selectors3 import Selectors3ParserMixin
-
-    class CSSParser(Selectors3ParserMixin, CSS21Parser):
-        """Custom CSS parser."""
+    CSS_PARSER = tinycss.make_parser(with_selectors3=True)
 
 try:
     from lxml import cssselect
@@ -63,7 +59,7 @@ def find_stylesheets(tree):
             # TODO: pass href for relative URLs
             # TODO: support media types
             # TODO: what if <style> has children elements?
-            yield CSSParser().parse_stylesheet(element.text)
+            yield CSS_PARSER.parse_stylesheet(element.text)
     # TODO: support <?xml-stylesheet ... ?>
 
 
