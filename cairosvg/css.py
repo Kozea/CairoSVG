@@ -67,7 +67,7 @@ def find_style_rules(tree):
     """Find the style rules in ``tree``."""
     for stylesheet in find_stylesheets(tree):
         # TODO: warn for each stylesheet.errors
-        for rule in stylesheet.statements:
+        for rule in stylesheet.rules:
             # TODO: support @import and @media
             if not rule.at_keyword:
                 yield rule
