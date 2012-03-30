@@ -15,7 +15,7 @@
             stroke-linejoin="miter"/>
     <use stroke="#ffcccc" stroke-width="5" xlink:href="#path1"/>
     <use xlink:href="#circle1"/>
-    <text text-anchor="middle" font-size="50" font-family="Verdana"
+    <text text-anchor="middle" font-size="50" font-family="Liberation Sans"
             y="230">'miter' join</text>
   </g>
   <g transform="translate(600,75)">
@@ -23,7 +23,7 @@
             stroke-linejoin="round"/>
     <use stroke="#ffcccc" stroke-width="5" xlink:href="#path1"/>
     <use xlink:href="#circle1"/>
-    <text text-anchor="middle" font-size="50" font-family="Verdana"
+    <text text-anchor="middle" font-size="50" font-family="Liberation Sans"
             y="230">'round' join</text>
   </g>
   <g transform="translate(1000,75)">
@@ -31,7 +31,7 @@
             stroke-linejoin="bevel"/>
     <use stroke="#ffcccc" stroke-width="5" xlink:href="#path1"/>
     <use xlink:href="#circle1"/>
-    <text text-anchor="middle" font-size="50" font-family="Verdana"
+    <text text-anchor="middle" font-size="50" font-family="Liberation Sans"
             y="230">'bevel' join</text>
   </g>
 </svg>

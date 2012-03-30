@@ -6,7 +6,7 @@
   <desc>Example text01 - 'Hello, out there' in blue</desc>
 
   <text x="250" y="150" 
-        font-family="Verdana" font-size="55" fill="blue" >
+        font-family="Liberation Sans" font-size="55" fill="blue" >
     Hello, out there
   </text>
 

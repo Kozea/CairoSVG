@@ -14,7 +14,7 @@
     <rect x="297" y="0" width="3" height="3" />
     <rect x="0" y="97" width="3" height="3" />
   </g>
-  <g font-size="14" font-family="Verdana" >
+  <g font-size="14" font-family="Liberation Sans" >
     <text x="10" y="20">(0,0)</text>
     <text x="240" y="20">(300,0)</text>
     <text x="10" y="90">(0,100)</text>

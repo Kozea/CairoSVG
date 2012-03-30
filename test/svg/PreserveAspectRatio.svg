@@ -17,7 +17,7 @@ fill='none' stroke='blue'/>">
 ]>
 
 <svg width="450px" height="300px" version="1.1"
-     xmlns="http://www.w3.org/2000/svg" font-family="Verdana">
+     xmlns="http://www.w3.org/2000/svg" font-family="Liberation Sans">
   <desc>Example PreserveAspectRatio - illustrates preserveAspectRatio attribute</desc>
   <rect x="1" y="1" width="448" height="298"
         fill="none" stroke="blue"/>

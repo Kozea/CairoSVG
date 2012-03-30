@@ -10,10 +10,10 @@
   </defs>
   <desc>Example tref01 - inline vs reference text content</desc>
 
-  <text x="100" y="100" font-size="45" fill="blue" font-family="Verdana" >
+  <text x="100" y="100" font-size="45" fill="blue" font-family="Liberation Sans" >
     Inline character data
   </text>
-  <text x="100" y="200" font-size="45" fill="red" font-family="Verdana" >
+  <text x="100" y="200" font-size="45" fill="red" font-family="Liberation Sans" >
     <tref xlink:href="#ReferencedText"/>
   </text>
 

@@ -10,7 +10,7 @@
     <line x1="1.5" y1="0" x2="1.5" y2="150" />
   </g>
   <g>
-    <text x="30" y="30" font-size="20" font-family="Verdana" >
+    <text x="30" y="30" font-size="20" font-family="Liberation Sans" >
       ABC (orig coord system)
     </text>
   </g>

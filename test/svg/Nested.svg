@@ -15,7 +15,7 @@
       <line x1="0" y1="0" x2="50" y2="0" />
       <line x1="0" y1="0" x2="0" y2="50" />
     </g>
-    <text x="0" y="0" font-size="16" font-family="Verdana" >
+    <text x="0" y="0" font-size="16" font-family="Liberation Sans" >
       ....Translate(1)
     </text>
     <!-- Second, a rotate -->
@@ -24,7 +24,7 @@
         <line x1="0" y1="0" x2="50" y2="0" />
         <line x1="0" y1="0" x2="0" y2="50" />
       </g>
-      <text x="0" y="0" font-size="16" font-family="Verdana" >
+      <text x="0" y="0" font-size="16" font-family="Liberation Sans" >
         ....Rotate(2)
       </text>
       <!-- Third, another translate -->
@@ -33,7 +33,7 @@
           <line x1="0" y1="0" x2="50" y2="0" />
           <line x1="0" y1="0" x2="0" y2="50" />
         </g>
-        <text x="0" y="0" font-size="16" font-family="Verdana" >
+        <text x="0" y="0" font-size="16" font-family="Liberation Sans" >
           ....Translate(3)
         </text>
       </g>

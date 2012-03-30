@@ -13,7 +13,7 @@
   <desc>Example toap03 - text on a path with startOffset attribute</desc>
 
   <use xlink:href="#MyPath" fill="none" stroke="red"  />
-  <text font-family="Verdana" font-size="42.5" fill="blue" >
+  <text font-family="Liberation Sans" font-size="42.5" fill="blue" >
     <textPath xlink:href="#MyPath" startOffset="78.5%">
       We go up, then we go down, then up again
     </textPath>

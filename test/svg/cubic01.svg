@@ -25,8 +25,8 @@
   <circle fill="#888888" stroke="none" cx="250" cy="100" r="10" />
   <circle fill="#888888" stroke="none" cx="400" cy="300" r="10" />
   <circle fill="none" stroke="blue" stroke-width="4" cx="250" cy="300" r="9" />
-  <text font-size="22" font-family="Verdana" x="25"
+  <text font-size="22" font-family="Liberation Sans" x="25"
         y="70">M100,200 C100,100 250,100 250,200</text>
-  <text font-size="22" font-family="Verdana" x="325" y="350"
+  <text font-size="22" font-family="Liberation Sans" x="325" y="350"
         text-anchor="middle">S400,300 400,200</text>
 </svg>

@@ -14,7 +14,7 @@
   <desc>Example toap04 - text on a path layout rules</desc>
 
   <use xlink:href="#MyPath" fill="none" stroke="red"  />
-  <text font-family="Verdana" font-size="60" fill="blue" letter-spacing="2" >
+  <text font-family="Liberation Sans" font-size="60" fill="blue" letter-spacing="2" >
     <textPath xlink:href="#MyPath">
       Choose shame or get war 
     </textPath>

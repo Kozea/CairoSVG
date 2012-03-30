@@ -6,7 +6,7 @@
   <desc>Example tspan02 - using tspan's dx and dy attributes 
         for incremental positioning adjustments</desc>
 
-  <g font-family="Verdana" font-size="45" >
+  <g font-family="Liberation Sans" font-size="45" >
     <text x="200" y="150" fill="blue" >
       But you
         <tspan dx="2em" dy="-50" font-weight="bold" fill="red" >

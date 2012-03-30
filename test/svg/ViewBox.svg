@@ -20,7 +20,7 @@
   <path fill="red"  d="M 750,100 L 250,900 L 1250,900 z"/>
 
   <!-- A text string that spans most of the viewport -->
-  <text x="100" y="600" font-size="200" font-family="Verdana" >
+  <text x="100" y="600" font-size="200" font-family="Liberation Sans" >
     Stretch to fit
   </text>
 </svg>

@@ -7,7 +7,7 @@
   <desc>Pictures showing the result of setting
         large-arc-flag and sweep-flag to the four
         possible combinations of 0 and 1.</desc>
-  <g font-family="Verdana" >
+  <g font-family="Liberation Sans" >
     <defs>
       <g id="baseEllipses" font-size="20" >
         <ellipse cx="125" cy="125" rx="100" ry="50"

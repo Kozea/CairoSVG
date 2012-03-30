@@ -6,7 +6,7 @@
   <desc>Example tspan03 - using tspan's x and y attributes 
         for multiline text and precise glyph positioning</desc>
 
-  <g font-family="Verdana" font-size="45" >
+  <g font-family="Liberation Sans" font-size="45" >
     <text fill="rgb(255,164,0)" >
       <tspan x="300 350 400 450 500 550 600 650" y="100">
         Cute and
