@@ -46,7 +46,7 @@ and a poor font management.
 
 Many languages that must be supported by SVG readers are not supported by
 CairoSVG, including ECMAScript and XSLT. External CSS is supported with
-optional dependancies.
+optional dependencies.
 
 CairoSVG assumes that the input SVG files are perfect SVG files. If one SVG is
 not well formed, CairoSVG can do anything, including not rendering at
