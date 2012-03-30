@@ -23,7 +23,7 @@ known to work with Python 2.6, 2.7, 3.1 and 3.2.
 Linux and MacOS users certainly have Python already installed. For Windows
 users, please install Python [#]_ thanks to the adequate installer.
 
-CairoSVG can use lxml [#]_ to parse the SVG file, and cssutils [#]_ to apply
+CairoSVG can use lxml [#]_ to parse the SVG file, and tinycss [#]_ to apply
 external CSS (i.e. not included in the ``style`` attribute of the tags). If
 these packages are not available, CSS will only be supported in the ``style``
 attributes.
@@ -34,7 +34,7 @@ attributes.
 
 .. [#] `lxml website <http://lxml.de/>`_.
 
-.. [#] `cssutils website <http://cthedot.de/cssutils/>`_.
+.. [#] `tinycss website <http://packages.python.org/tinycss/>`_.
 
 
 CairoSVG
