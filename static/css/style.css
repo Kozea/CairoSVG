@@ -263,6 +263,18 @@ nav li a[href]:focus {
   box-shadow: 0 0 5px #d60;
 }
 
+article footer div {
+  padding: 0.2em;
+}
+
+article footer div > a:first-child {
+  margin-right: 0.5em;
+}
+
+article footer div > * {
+  display: inline;
+}
+
 footer {
   clear: both;
 }
