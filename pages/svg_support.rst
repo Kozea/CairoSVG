@@ -24,15 +24,14 @@ About SVG
 
 No animations are supported in CairoSVG, as the output formats are mainly
 static. More generally, no real DOM support is offered, highly limiting the
-possibility of implementing features such as external CSS or JavaScript
-support.
+possibility of implementing features such as JavaScript support.
 
 
 SVG MIME type, file name extension and Macintosh file type
 ----------------------------------------------------------
 
-CairoSVG does not directly read gzip-compressed SVG files. It does not rely on
-the ``.svg`` input file extension.
+CairoSVG can directly read gzip-compressed SVG files, relying on the ``.svg``
+or ``.svgz`` input file extension to know if the file should be uncompressed.
 
 
 SVG Namespace, Public Identifier and System Identifier
@@ -50,10 +49,10 @@ when parsing the XML. However, basic XML features such as namespaces are
 internally used. XLink is partially supported and should work for the standard
 usage.
 
-Inline CSS is basically supported.
+Inline and external CSS is basically supported.
 
-External CSS, XSLT, DOM, XML-SS, SMIL and Web Accessibility are not supported
-at all.
+External XSLT, DOM, XML-SS, SMIL and Web Accessibility are not supported at
+all.
 
 The basic Unicode features are supported, and should work for latin
 left-to-right-written languages. Other configurations are not tested yet.
@@ -82,14 +81,13 @@ Explaining the name: SVG
 
 CairoSVG respects the scalable and vector parts of the format, when
 possible. PDF and PostScript formats allow vector graphics, and Cairo exports
-to these formats waithout rastering when possible.
+to these formats without rastering when possible.
 
-Based on ElementTree, CairoSVG needs SVG files that are XML tree, and is not
-fault-tolerent. Namespaces are well supported.
+Based on ElementTree or lxml, CairoSVG needs SVG files that are XML tree, and
+is not fault-tolerent. Namespaces are well supported.
 
-Inline CSS is supported, but external stylesheets are not supported at all.
-Using a simple CSS pre-processor before CairoSVG (transforming the CSS into XML
-attributes) is possible.
+Inline CSS is supported. External stylesheets are also supported when the
+tinycss and lxml libraries are available.
 
 
 Important SVG concepts
@@ -155,9 +153,8 @@ Types of graphics elements
 Painting shapes and text
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Elements are filled and stoked. Filling supports plain colors, simple gradients
-and simple patterns. Stoking only supports plain colors. Transparency is
-supported for both filling and stoking.
+Elements are filled and stroked. Filling and stroking support plain colors,
+simple gradients and simple patterns, with or without opacity.
 
 Painting raster images
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -321,7 +318,7 @@ The DOM interfaces are not supported.
 Styling
 =======
 
-Styling cannot be done with XSL or external CSS. Inline CSS is basically
+Styling cannot be done with XSL. Inline and external CSS are basically
 supported.
 
 Here are some properties that can be used as XML attributes:
