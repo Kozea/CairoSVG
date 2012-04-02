@@ -80,8 +80,10 @@ def get_declarations(rule):
             # Ignore properties prefixed by "-"
             continue
         # TODO: filter out invalid values
-        yield (declaration.name, declaration.value.as_css,
-               bool(declaration.priority))
+        yield (
+            declaration.name,
+            ''.join(v.as_css for v in declaration.value),
+            bool(declaration.priority))
 
 
 def match_selector(rule, tree):
