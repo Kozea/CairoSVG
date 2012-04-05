@@ -82,7 +82,7 @@ def get_declarations(rule):
         # TODO: filter out invalid values
         yield (
             declaration.name,
-            ''.join(v.as_css for v in declaration.value),
+            declaration.value.as_css(),
             bool(declaration.priority))
 
 
