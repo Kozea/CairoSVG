@@ -56,7 +56,6 @@ def path(surface, node):
             # Elliptic curve
             x1, y1 = surface.context.get_current_point()
             rx, ry, string = point(surface, string)
-            radii_ratio = ry / rx
             rotation, string = string.split(" ", 1)
             rotation = radians(float(rotation))
 
@@ -77,6 +76,13 @@ def path(surface, node):
                 # Absolute x3 and y3, convert to relative
                 x3 -= x1
                 y3 -= y1
+
+            # rx=0 or ry=0 means straight line
+            if not rx or not ry:
+                string = "l %f %f %s" % (x3, y3, string)
+                continue
+
+            radii_ratio = ry / rx
 
             # Cancel the rotation of the second point
             xe, ye = rotate(x3, y3, -rotation)
