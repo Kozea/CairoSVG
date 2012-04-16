@@ -30,8 +30,6 @@ setup(
     author="Kozea",
     author_email="guillaume.ayoub@kozea.fr",
     url="http://www.cairosvg.org/",
-    download_url="http://www.cairosvg.org/src/cairosvg/CairoSVG-%s.tar.gz" % \
-        cairosvg.VERSION,
     license="GNU LGPL v3",
     platforms="Any",
     packages=["cairosvg", "cairosvg.surface"],
