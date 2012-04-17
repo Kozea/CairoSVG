@@ -19,7 +19,7 @@ You can test CairoSVG by launching ``nosetests`` in the root folder of the
 repository. You can launch the tests only on one image (or more than one,
 separated by a comma) using::
 
-  CAIROSVG_TEST_FILES=image.svg nosetests --match=test_images test/__init__.py
+  CAIROSVG_TEST_FILES=image.svg nosetests --match=test_images test
 
 As CairoSVG does not handle SVG fonts, you can generate OTF fonts and install
 them in order to test CairoSVG with the right fonts. They have already been
