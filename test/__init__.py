@@ -42,8 +42,13 @@ import cairosvg.surface
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
 TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
-ALL_FILES = sorted(
-    os.listdir(TEST_FOLDER), key=lambda name: name.lower())
+
+if os.environ.get("CAIROSVG_TEST_FILES"):
+    ALL_FILES = os.environ["CAIROSVG_TEST_FILES"].split(",")
+else:
+    ALL_FILES = os.listdir(TEST_FOLDER)
+
+ALL_FILES.sort(key=lambda name: name.lower())
 FILES = [(
     os.path.join(REFERENCE_FOLDER, "%s.png" % os.path.splitext(name)[0]),
     os.path.join(TEST_FOLDER, name))
