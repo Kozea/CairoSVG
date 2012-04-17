@@ -19,6 +19,11 @@ Text on a Path
 when the text must be drawn after or before the path. This has to be handled
 when the module is rewritten.
 
+- ``toap04``
+
+This test doesn't have the same output on 32-bit and 64-bit hardware. May be
+fixed when the module is rewritten.
+
 
 Rotation
 ========
