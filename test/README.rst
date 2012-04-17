@@ -5,7 +5,7 @@
 The CairoSVG testing suite is based on the official SVG test suite available on
 the W3 website:
 
-`http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview`_
+http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview
 
 You'll find in this folder:
 
@@ -19,10 +19,10 @@ You can test CairoSVG by launching ``nosetests`` in the root folder of the
 repository.
 
 As CairoSVG does not handle SVG fonts, you can generate OTF fonts and install
-them in order to test CairoSVG with the right fonts. The OTF fonts are available
-in the ``resourches`` folder. There's also a script called ``generate.py`` in
-the ``resources`` folder that can do that for you if you have FontForge
-installed on your system.
+them in order to test CairoSVG with the right fonts. They have already been
+generated for you in the ``resources`` folder. There's also a script called
+``generate.py`` in the ``resources`` folder that can do that again if you have
+FontForge installed on your system.
 
 You need these fonts to be installed to get pixel-by-pixel equivalent images in
 the tests:
