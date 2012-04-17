@@ -150,6 +150,7 @@ def path(surface, node):
         elif letter == "h":
             # Relative horizontal line
             x, string = (string + " ").split(" ", 1)
+            old_x, old_y = surface.context.get_current_point()
             angle = 0 if size(surface, x, "x") > 0 else pi
             node.tangents.extend((-angle, angle))
             surface.context.rel_line_to(size(surface, x, "x"), 0)
@@ -157,10 +158,10 @@ def path(surface, node):
         elif letter == "H":
             # Horizontal line
             x, string = (string + " ").split(" ", 1)
-            old_x = surface.context.get_current_point()[1]
+            old_x, old_y = surface.context.get_current_point()
             angle = 0 if size(surface, x, "x") > old_x else pi
             node.tangents.extend((-angle, angle))
-            surface.context.line_to(size(surface, x, "x"), old_x)
+            surface.context.line_to(size(surface, x, "x"), old_y)
 
         elif letter == "l":
             # Relative straight line
@@ -268,6 +269,7 @@ def path(surface, node):
         elif letter == "v":
             # Relative vertical line
             y, string = (string + " ").split(" ", 1)
+            old_x, old_y = surface.context.get_current_point()
             angle = pi / 2 if size(surface, y, "y") > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
             surface.context.rel_line_to(0, size(surface, y, "y"))
@@ -275,10 +277,10 @@ def path(surface, node):
         elif letter == "V":
             # Vertical line
             y, string = (string + " ").split(" ", 1)
-            old_y = surface.context.get_current_point()[0]
+            old_x, old_y = surface.context.get_current_point()
             angle = pi / 2 if size(surface, y, "y") > 0 else -pi / 2
             node.tangents.extend((-angle, angle))
-            surface.context.line_to(old_y, size(surface, y, "y"))
+            surface.context.line_to(old_x, size(surface, y, "y"))
 
         elif letter in "zZ":
             # End of path
@@ -286,6 +288,10 @@ def path(surface, node):
             surface.context.close_path()
 
         string = string.strip()
+
+        if letter in "hHvV":
+            if string.split(" ", 1)[0] not in PATH_LETTERS:
+                surface.context.move_to(*surface.context.get_current_point())
 
         if string and letter not in "mM":
             draw_marker(surface, node, "mid")
