@@ -2,12 +2,13 @@
  To-Do List
 ============
 
+Many features that can be easily added to CairoSVG are listed in the different
+folders of the ``test/fail`` directory.
 
 1.0
 ===
 
-- Handle character rotations (tspan05)
-- Add real life tests
+- Handle character rotations
 - Clean code and remove useless TODOs
 
 

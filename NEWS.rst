@@ -3,10 +3,11 @@
 ======
 
 
-Version 1.0, coming soon
-========================
+Version 0.4, released on 2012-04-19
+===================================
 
-* A lot of things!
+* Reliable testing suite
+* Use tinycss instead of cssutils to parse CSS
 
 
 Version 0.3.1, released on 2012-02-20
