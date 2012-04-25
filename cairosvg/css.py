@@ -23,25 +23,15 @@ Optionally handle CSS stylesheets.
 
 from .parser import HAS_LXML
 
-# Modules detections
+# Detect optional depedencies
 # pylint: disable=W0611
 try:
-    import tinycss.selectors3
-    HAS_TINYCSS = True
+    import tinycss
+    import cssselect
+    CSS_CAPABLE = HAS_LXML
 except ImportError:
-    HAS_TINYCSS = False
-else:
-    CSS_PARSER = tinycss.make_parser(with_selectors3=True)
-
-try:
-    from lxml import cssselect
-    HAS_CSSSELECT = True
-except ImportError:
-    HAS_CSSSELECT = False
+    CSS_CAPABLE = False
 # pylint: enable=W0611
-
-
-CSS_CAPABLE = HAS_LXML and HAS_CSSSELECT and HAS_TINYCSS
 
 
 # Python 2/3 compat
@@ -59,7 +49,7 @@ def find_stylesheets(tree):
             # TODO: pass href for relative URLs
             # TODO: support media types
             # TODO: what if <style> has children elements?
-            yield CSS_PARSER.parse_stylesheet(element.text)
+            yield tinycss.make_parser().parse_stylesheet(element.text)
     # TODO: support <?xml-stylesheet ... ?>
 
 
@@ -88,10 +78,12 @@ def get_declarations(rule):
 
 def match_selector(rule, tree):
     """Yield the ``(element, specificity)`` in ``tree`` matching ``rule``."""
-    for selector in rule.selector_list:
+    selector_list = cssselect.parse(rule.selector.as_css())
+    translator = cssselect.GenericTranslator()
+    for selector in selector_list:
         if not selector.pseudo_element:
-            specificity = selector.specificity
-            for element in selector.match(tree):
+            specificity = selector.specificity()
+            for element in tree.xpath(translator.selector_to_xpath(selector)):
                 yield element, specificity
 
 
