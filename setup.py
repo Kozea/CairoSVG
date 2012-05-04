@@ -20,9 +20,6 @@ from os import path
 
 from distutils.core import setup
 
-import cairosvg
-
-
 with open(path.join(path.dirname(__file__), 'cairosvg', '__init__.py')) as fd:
     VERSION = re.search("VERSION = '([^']+)'", fd.read().strip()).group(1)
 
