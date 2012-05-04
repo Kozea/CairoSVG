@@ -27,7 +27,7 @@ import optparse
 from . import surface
 
 
-VERSION = '0.4.1+'
+VERSION = '0.4.2'
 SURFACES = {
     'SVG': surface.SVGSurface,  # Tell us if you actually use this one!
     'PNG': surface.PNGSurface,

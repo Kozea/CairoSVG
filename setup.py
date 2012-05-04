@@ -15,16 +15,23 @@ For further information, please visit the `CairoSVG Website
 
 """
 
+import re
+from os import path
+
 from distutils.core import setup
 
 import cairosvg
+
+
+with open(path.join(path.dirname(__file__), 'cairosvg', '__init__.py')) as fd:
+    VERSION = re.search("VERSION = '([^']+)'", fd.read().strip()).group(1)
 
 
 # When the version is updated, ``cairosvg.VERSION`` must be modified.
 # A new section in the ``NEWS`` file must be added too.
 setup(
     name="CairoSVG",
-    version=cairosvg.VERSION,
+    version=VERSION,
     description="A Simple SVG Converter for Cairo",
     long_description=__doc__,
     author="Kozea",
