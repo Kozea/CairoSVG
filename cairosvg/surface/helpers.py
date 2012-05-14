@@ -222,6 +222,10 @@ def transform(surface, string):
                     if len(values) == 1:
                         values = 2 * values
                     matrix.scale(*values)
+    apply_matrix_transform(surface, matrix)
+
+
+def apply_matrix_transform(surface, matrix):
     try:
         matrix.invert()
     except Error:

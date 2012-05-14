@@ -27,7 +27,8 @@ from ..parser import Tree
 from .colors import color
 from .defs import gradient_or_pattern, parse_def
 from .helpers import (
-    node_format, transform, normalize, filter_fill_or_stroke, PointError)
+    node_format, transform, normalize, filter_fill_or_stroke,
+    apply_matrix_transform, PointError)
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
@@ -147,17 +148,19 @@ class Surface(object):
             x, y, x_size, y_size = viewbox
             self.context_width, self.context_height = x_size, y_size
             x_ratio, y_ratio = width / x_size, height / y_size
+            matrix = cairo.Matrix()
             if x_ratio > y_ratio:
-                self.context.translate((width - x_size * y_ratio) / 2, 0)
-                self.context.scale(y_ratio, y_ratio)
-                self.context.translate(-x, -y / y_ratio * x_ratio)
+                matrix.translate((width - x_size * y_ratio) / 2, 0)
+                matrix.scale(y_ratio, y_ratio)
+                matrix.translate(-x, -y / y_ratio * x_ratio)
             elif x_ratio < y_ratio:
-                self.context.translate(0, (height - y_size * x_ratio) / 2)
-                self.context.scale(x_ratio, x_ratio)
-                self.context.translate(-x / x_ratio * y_ratio, -y)
+                matrix.translate(0, (height - y_size * x_ratio) / 2)
+                matrix.scale(x_ratio, x_ratio)
+                matrix.translate(-x / x_ratio * y_ratio, -y)
             else:
-                self.context.scale(x_ratio, y_ratio)
-                self.context.translate(-x, -y)
+                matrix.scale(x_ratio, y_ratio)
+                matrix.translate(-x, -y)
+            apply_matrix_transform(self, matrix)
         else:
             self.context_width, self.context_height = width, height
 

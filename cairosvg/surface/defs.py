@@ -41,7 +41,6 @@ def parse_def(surface, node):
             href = node.get("{http://www.w3.org/1999/xlink}href")
             if href and href[0] == "#" and href[1:] in def_list:
                 new_node = deepcopy(def_list[href[1:]])
-                print(new_node)
                 new_node.update(node)
                 node = new_node
             def_list[name] = node
