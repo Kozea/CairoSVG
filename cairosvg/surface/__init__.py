@@ -92,7 +92,6 @@ class Surface(object):
         """
         self.cairo = None
         self.context_width, self.context_height = None, None
-        self.font_size = None
         self.cursor_position = 0, 0
         self.total_width = 0
         self.markers = {}
@@ -103,6 +102,7 @@ class Surface(object):
         self._old_parent_node = self.parent_node = None
         self.output = output
         self.dpi = dpi
+        self.font_size = size(self, "12pt")
         width, height, viewbox = node_format(self, tree)
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
