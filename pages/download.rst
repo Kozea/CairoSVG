@@ -48,7 +48,12 @@ You can download the CairoSVG package for each release:
 Linux Distribution Packages
 ===========================
 
-*Not packaged yet.*
+Radicale has been packaged for:
+
+- `ArchLinux (AUR) <https://aur.archlinux.org/packages.php?ID=57202>`_ by Simon
+  Sapin
+- `Gentoo (Kozea Overlay)
+  <https://github.com/Kozea/Overlay/tree/master/dev-python/cairosvg>`_
 
 If you are interested in creating packages for Linux distributions, read the
 `"Contribute" page </contribute/>`_.
