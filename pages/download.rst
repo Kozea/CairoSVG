@@ -67,8 +67,9 @@ Radicale has been packaged for:
 
 - `ArchLinux (AUR) <https://aur.archlinux.org/packages.php?ID=57202>`_ by Simon
   Sapin
-- `Gentoo (Kozea Overlay)
-  <https://github.com/Kozea/Overlay/tree/master/dev-python/cairosvg>`_
+- `Debian <http://packages.debian.org/cairosvg>`_ by Michael Fladischer
+- `Gentoo <http://packages.gentoo.org/package/media-gfx/cairosvg>`_ by Samuli
+  Suominen
 
 If you are interested in creating packages for Linux distributions, read the
 `"Contribute" page </contribute/>`_.
