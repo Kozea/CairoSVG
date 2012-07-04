@@ -3,6 +3,32 @@
 ======
 
 
+Version 0.4.4, released on 2012-07-05
+=====================================
+
+* Use a default font size of 12pt
+* Fix a bug about non-invertible matrices
+* Fix the installation for python 3 with LANG=C
+
+
+Version 0.4.3, released on 2012-05-04
+=====================================
+
+* Fix the version detection without cairo
+
+
+Version 0.4.2, released on 2012-05-04
+=====================================
+
+* Don't rely on cairo import to find the version
+
+
+Version 0.4.1, released on 2012-04-25
+=====================================
+
+* Use cssselect
+
+
 Version 0.4, released on 2012-04-19
 ===================================
 
