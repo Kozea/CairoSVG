@@ -15,12 +15,14 @@ For further information, please visit the `CairoSVG Website
 
 """
 
+import codecs
 import re
 from os import path
 
 from distutils.core import setup
 
-with open(path.join(path.dirname(__file__), 'cairosvg', '__init__.py')) as fd:
+init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
+with codecs.open(init_path, 'r', 'utf-8') as fd:
     VERSION = re.search("VERSION = '([^']+)'", fd.read().strip()).group(1)
 
 
