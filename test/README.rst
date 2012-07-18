@@ -27,6 +27,8 @@ generated for you in the ``resources`` folder. There's also a script called
 ``generate.py`` in the ``resources`` folder that can do that again if you have
 FontForge installed on your system.
 
+The version of cairo needed to make these tests work perfectly is 1.12.2.
+
 You need these fonts to be installed to get pixel-by-pixel equivalent images in
 the tests:
 
@@ -38,5 +40,5 @@ the tests:
 You also need Arial to be aliased by Liberation Sans (may already be done by
 your distribution).
 
-Last but not least, you have to install ``tinycss`` to make the CSS-related
-tests pass correctly.
+Last but not least, you have to install ``tinycss`` and ``cssselect`` to make
+the CSS-related tests pass correctly.
