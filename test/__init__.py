@@ -61,29 +61,21 @@ if not os.path.exists(OUTPUT_FOLDER):
     os.mkdir(OUTPUT_FOLDER)
 
 
-def same(tuple1, tuple2, tolerence=0):
-    """Return if the tuples values are quite the same."""
-    for value1, value2 in zip(tuple1, tuple2):
-        if abs(value1 - value2) > tolerence:
-            return False
-    return True
-
-
 def generate_function(description):
     """Return a testing function with the given ``description``."""
     def check_image(png_filename, svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
         width1, height1, pixels1, _ = png.Reader(png_filename).asRGBA()
-        size1 = (width1, height1)
         png_filename = os.path.join(
             OUTPUT_FOLDER, os.path.basename(png_filename))
         cairosvg.svg2png(url=svg_filename, write_to=png_filename, dpi=72)
         width2, height2, pixels2, _ = png.Reader(png_filename).asRGBA()
-        size2 = (width2, height2)
 
         # Test size
-        assert same(size1, size2, SIZE_TOLERANCE), \
-            "Bad size (%s != %s)" % (size1, size2)
+        assert abs(width1 - width2) <= SIZE_TOLERANCE, \
+            "Bad width (%s != %s)" % (width1, width2)
+        assert abs(height1 - height2) <= SIZE_TOLERANCE, \
+            "Bad height (%s != %s)" % (height1, height2)
 
         # Test pixels
         width = min(width1, width2)
@@ -103,7 +95,8 @@ def generate_function(description):
                 alpha_pixel2 = (
                     [pixel2[3] * value for value in pixel2[:3]] +
                     [255 * pixel2[3]])
-                assert same(alpha_pixel1, alpha_pixel2, PIXEL_TOLERANCE), \
+                for value1, value2 in zip(alpha_pixel1, alpha_pixel2):
+                    assert abs(value1 - value2) <= PIXEL_TOLERANCE, \
                     "Bad pixel %i, %i (%s != %s)" % (x, y, pixel1, pixel2)
         # pylint: enable=C0103
 
