@@ -17,24 +17,19 @@ Installation
 Dependencies
 ------------
 
-CairoSVG is written in pure Python and only depends on Pycairo [#]_. It is
-known to work with Python 2.6, 2.7, 3.1 and 3.2.
+CairoSVG is written in pure Python and only depends on `Pycairo
+<http://cairographics.org/pycairo/>`. It is known to work with Python 2.6, 2.7,
+3.1 and 3.2.
 
 Linux and MacOS users certainly have Python already installed. For Windows
-users, please install Python [#]_ thanks to the adequate installer.
+users, please install `Python <http://python.org/download/>` thanks to the
+adequate installer.
 
-CairoSVG can use lxml [#]_ to parse the SVG file, and tinycss [#]_ to apply
-external CSS (i.e. not included in the ``style`` attribute of the tags). If
-these packages are not available, CSS will only be supported in the ``style``
-attributes.
-
-.. [#] `Pycairo website <http://cairographics.org/pycairo/>`_.
-
-.. [#] `Python download page <http://python.org/download/>`_.
-
-.. [#] `lxml website <http://lxml.de/>`_.
-
-.. [#] `tinycss website <http://packages.python.org/tinycss/>`_.
+CairoSVG can use `lxml <http://lxml.de/>` to parse the SVG file, and `tinycss
+<http://packages.python.org/tinycss/>` plus `cssselect
+<http://packages.python.org/cssselect/>` to apply external CSS (i.e. not
+included in the ``style`` attribute of the tags). If these packages are not
+available, CSS will only be supported in the ``style`` attributes.
 
 
 CairoSVG
