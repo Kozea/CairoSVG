@@ -35,6 +35,11 @@ PATH_TAGS = (
 def path(surface, node):
     """Draw a path ``node``."""
     string = node.get("d", "")
+
+    if not string.strip():
+        # Don't draw empty paths at all
+        return
+
     draw_marker(surface, node, "start")
 
     for letter in PATH_LETTERS:
@@ -293,7 +298,7 @@ def path(surface, node):
             if string.split(" ", 1)[0] not in PATH_LETTERS:
                 surface.context.move_to(*surface.context.get_current_point())
 
-        if string and letter not in "mM":
+        if string and letter not in "mMzZ":
             draw_marker(surface, node, "mid")
 
         last_letter = letter
