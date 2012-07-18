@@ -68,7 +68,10 @@ def remove_svg_namespace(tree):
     """
     prefix = "{http://www.w3.org/2000/svg}"
     prefix_len = len(prefix)
-    for element in tree.iter():
+    iterator = (
+        tree.iter() if hasattr(tree, 'iter')
+        else tree.getiterator())
+    for element in iterator:
         tag = element.tag
         if hasattr(tag, "startswith") and tag.startswith(prefix):
             element.tag = tag[prefix_len:]
