@@ -3,6 +3,14 @@
 ======
 
 
+Version 1.0, not released yet
+=============================
+
+* Better tests (~5% faster)
+* Fix python 2.6 support
+* Fix markers with empty paths and z/Z points
+
+
 Version 0.4.4, released on 2012-07-05
 =====================================
 
