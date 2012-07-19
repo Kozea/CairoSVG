@@ -548,57 +548,203 @@ Painting: Filling, Stroking and Marker Symbols
 Color
 =====
 
+Introduction
+------------
+
+CairoSVG handles the RGB part of this module.
+
+
+The ‘color’ property
+--------------------
+
+The property as defined by the CSS2 specification is correctly handled.
+
+
+Color profile descriptions
+--------------------------
+
+Color profiles are not handled.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
+
 
 
 Gradients and Patterns
 ======================
+
+Introduction
+------------
+
+Gradients are generally correctly handled whereas patterns are poorly handled.
+
+
+Gradients
+---------
+
+Gradients are correctly handled, as long as Cairo can handle them. Some little
+details may not be rendered correctly, but you can rely on most of the
+generally used features.
+
+
+Patterns
+--------
+
+Patterns are poorly handled. Naive pattens are rendered, but simple features
+such as the ``viewBox`` property are ignored.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
 
 
 
 Clipping, Masking and Compositing
 =================================
 
+Introduction
+------------
+
+Clipping and masking features are not handled at all. Simple alpha compositing
+and opacity are partially supported, 
+
+
+Simple alpha compositing
+------------------------
+
+Alpha compositing is supported in Cairo, but ``color-interpolation`` and
+``color-rendering`` properties are ignored.
+
+
+Clipping paths
+--------------
+
+Clipping is not handled.
+
+
+Masking
+-------
+
+Masking is not handled.
+
+
+Opacity
+-------
+
+The different ``*-opacity`` parameters are correctly handled.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
+
 
 
 Filter Effects
 ==============
+
+Filters are not handled at all.
 
 
 
 Interactivity
 =============
 
+No interactivity features are handled in CairoSVG.
+
 
 
 Linking
 =======
+
+Linking is not handled.
 
 
 
 Scripting
 =========
 
+Scripting is not handled.
+
 
 
 Animation
 =========
+
+Animations are not handled.
 
 
 
 Fonts
 =====
 
+Introduction
+------------
+
+Simple font features, as described by the CSS2 specification, are handled, but
+Cairo has a poor support of complex features about fonts.
+
+SVG fonts are not handled at all.
+
+
+Overview of SVG fonts
+---------------------
+
+SVG fonts are not handled.
+
+
+The ‘font’ element
+------------------
+
+The ``font`` element is ignored.
+
+
+The ‘glyph’ element
+-------------------
+
+The ``glyph`` element is ignored.
+
+
+The ‘missing-glyph’ element
+---------------------------
+
+The ``missing-glyph`` element is ignored.
+
+
+Glyph selection rules
+---------------------
+
+Glyphs are not handled.
+
+
+The ‘hkern’ and ‘vkern’ elements
+--------------------------------
+
+The ``hkern`` and ``vkern`` elements are ignored.
+
+
+Describing a font
+-----------------
+
+Fonts, as defined by CSS2, are naively handled. Nevertheless, there is no real
+strategy to choose a font from its name, CairoSVG relies on Cairo for this
+choice.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
+
 
 
 Metadata
 ========
 
-
-
-Backwards Compatibility
-=======================
-
-
-
-Extensibility
-=============
+Metadata are ignored.
