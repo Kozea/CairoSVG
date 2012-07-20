@@ -20,12 +20,14 @@ Root tag drawer.
 
 """
 
-from .helpers import preserve_ratio
+from .helpers import preserve_ratio, node_format
 
 
 def svg(surface, node):
     """Draw a svg ``node``."""
     if node.get("preserveAspectRatio", "none") != "none":
+        _, _, viewbox = node_format(surface, node)
+        node.image_width, node.image_height = viewbox[2:]
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, node)
         surface.context.translate(*surface.context.get_current_point())

@@ -116,20 +116,18 @@ def preserve_ratio(surface, node):
         scale_y = size(surface, node.get("markerHeight", "3"), "y")
         translate_x = -size(surface, node.get("refX"))
         translate_y = -size(surface, node.get("refY"))
-    elif node.tag == "svg":
-        width, height, viewbox = node_format(surface, node)
-        viewbox_width = viewbox[2]
-        viewbox_height = viewbox[3]
-        scale_x = width / viewbox_width
-        scale_y = height / viewbox_height
+    elif node.tag in ("svg", "image"):
+        width, height, _ = node_format(surface, node)
+        scale_x = width / node.image_width
+        scale_y = height / node.image_height
 
         align = node.get("preserveAspectRatio", "xMidYMid").split(" ")[0]
         if align == "none":
-            return
+            return scale_x, scale_y, 0, 0
         else:
-            mos_properties = node.get("preserveAspectRatio", "").split(" ")
-            if mos_properties:
-                meet_or_slice = mos_properties[1]
+            mos_properties = node.get("preserveAspectRatio", "").split()
+            meet_or_slice = (
+                mos_properties[1] if len(mos_properties) > 1 else None)
             if meet_or_slice == "slice":
                 scale_value = max(scale_x, scale_y)
             else:
@@ -146,16 +144,16 @@ def preserve_ratio(surface, node):
                 translate_y = 0
 
             if x_position == "mid":
-                translate_x = (width / scale_x - viewbox_width) / 2.
+                translate_x = (width / scale_x - node.image_width) / 2.
 
             if y_position == "mid":
-                translate_y = (height / scale_y - viewbox_height) / 2.
+                translate_y = (height / scale_y - node.image_height) / 2.
 
             if x_position == "max":
-                translate_x = width / scale_x - viewbox_width
+                translate_x = width / scale_x - node.image_width
 
             if y_position == "max":
-                translate_y = height / scale_y - viewbox_height
+                translate_y = height / scale_y - node.image_height
 
             surface.context.rectangle(0, 0, width, height)
             surface.context.clip()

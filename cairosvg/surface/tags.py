@@ -21,6 +21,7 @@ SVG tags functions.
 """
 
 from .defs import linear_gradient, marker, pattern, radial_gradient, use
+from .image import image
 from .path import path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
 from .svg import svg
@@ -30,6 +31,7 @@ TAGS = {
     "a": tspan,
     "circle": circle,
     "ellipse": ellipse,
+    "image": image,
     "line": line,
     "linearGradient": linear_gradient,
     "marker": marker,

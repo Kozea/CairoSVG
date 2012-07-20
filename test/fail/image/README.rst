@@ -18,6 +18,5 @@ Tag ``image``
 - ``struct-image-*``
 - ``struct-symbol-01-b``
 - ``render-groups-*``
-- ``struct-use-01-t``
 
-These test doesn't pass because the ``image`` tag is not handled.
+These test doesn't pass because the ``image`` tag is not handled correctly.
