@@ -42,7 +42,7 @@ def image(surface, node):
     if urlparse.urlparse(url).scheme:
         input_ = urlopen(url)
     else:
-        input_ = open(url)  # filename
+        input_ = open(url, 'rb')  # filename
     try:
         image_surface = cairo.ImageSurface.create_from_png(input_)
     except:
