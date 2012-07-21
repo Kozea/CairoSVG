@@ -14,7 +14,6 @@ URI.
 Tag ``image``
 =============
 
-- ``coords-viewattr-04-f``
 - ``struct-image-*``
 - ``struct-symbol-01-b``
 - ``render-groups-*``

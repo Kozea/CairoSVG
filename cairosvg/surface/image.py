@@ -20,16 +20,55 @@ Images manager.
 
 """
 
+import base64
 import cairo
 from io import BytesIO
 try:
-    from urllib import urlopen
+    from urllib import urlopen, unquote
     import urlparse
+    unquote_to_bytes = lambda data: unquote(
+        data.encode('ascii') if isinstance(data, unicode) else data)
 except ImportError:
     from urllib.request import urlopen
     from urllib import parse as urlparse  # Python 3
+    from urllib.parse import unquote_to_bytes
+from .helpers import node_format, size, preserve_ratio
+from ..parser import Tree
 
-from .helpers import size, preserve_ratio
+
+def open_data_url(url):
+    """Decode URLs with the 'data' scheme. urllib can handle them
+    in Python 2, but that is broken in Python 3.
+
+    Inspired from Python 2.7.2’s urllib.py.
+
+    """
+    # syntax of data URLs:
+    # dataurl   := "data:" [ mediatype ] [ ";base64" ] "," data
+    # mediatype := [ type "/" subtype ] *( ";" parameter )
+    # data      := *urlchar
+    # parameter := attribute "=" value
+    try:
+        header, data = url.split(",", 1)
+    except ValueError:
+        raise IOError("bad data URL")
+    header = header[5:]  # len("data:") == 5
+    if header:
+        semi = header.rfind(";")
+        if semi >= 0 and "=" not in header[semi:]:
+            encoding = header[semi+1:]
+        else:
+            encoding = ""
+    else:
+        encoding = ""
+
+    data = unquote_to_bytes(data)
+    if encoding == "base64":
+        missing_padding = 4 - len(data) % 4
+        if missing_padding:
+            data += b"=" * missing_padding
+        return base64.decodestring(data)
+    return data
 
 
 def image(surface, node):
@@ -37,21 +76,61 @@ def image(surface, node):
     url = node.get("{http://www.w3.org/1999/xlink}href")
     if not url:
         return
-    if node.url:
-        url = urlparse.urljoin(node.url, url)
-    if urlparse.urlparse(url).scheme:
-        input_ = urlopen(url)
+    if url.startswith("data:"):
+        image_bytes = open_data_url(url)
     else:
-        input_ = open(url, 'rb')  # filename
-    try:
-        image_surface = cairo.ImageSurface.create_from_png(input_)
-    except:
-        # Failed to load image
+        if node.url:
+            url = urlparse.urljoin(node.url, url)
+        if urlparse.urlparse(url).scheme:
+            input_ = urlopen(url)
+        else:
+            input_ = open(url, 'rb')  # filename
+        image_bytes = input_.read()
+
+    if len(image_bytes) < 5:
         return
 
     x, y = size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
     width = size(surface, node.get("width"), "x")
     height = size(surface, node.get("height"), "y")
+    surface.context.rectangle(x, y, width, height)
+    surface.context.clip()
+
+    if image_bytes[:4] == b"\x89PNG":
+        png_bytes = image_bytes
+    elif image_bytes[:5] == b"\x3csvg ":
+        surface.context.save()
+        surface.context.translate(x, y)
+        if "x" in node:
+            del node["x"]
+        if "y" in node:
+            del node["y"]
+        if "viewBox" in node:
+            del node["viewBox"]
+        tree = Tree(bytestring=image_bytes)
+        width, height, viewbox = node_format(surface, tree)
+        node.image_width = width
+        node.image_height = height
+        scale_x, scale_y, translate_x, translate_y = \
+            preserve_ratio(surface, node)
+        surface.set_context_size(*node_format(surface, tree))
+        surface.context.translate(*surface.context.get_current_point())
+        surface.context.scale(scale_x, scale_y)
+        surface.context.translate(translate_x, translate_y)
+        surface.draw(tree)
+        surface.context.restore()
+        # Restore twice, because draw does not restore at the end of svg tags
+        surface.context.restore()
+        return
+    else:
+        try:
+            from pystacia import read_blob
+            png_bytes = read_blob(image_bytes).get_blob('png')
+        except:
+            # No way to handle the image
+            return
+
+    image_surface = cairo.ImageSurface.create_from_png(BytesIO(png_bytes))
 
     node.image_width = image_surface.get_width()
     node.image_height = image_surface.get_height()

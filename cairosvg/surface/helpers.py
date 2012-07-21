@@ -155,9 +155,6 @@ def preserve_ratio(surface, node):
             if y_position == "max":
                 translate_y = height / scale_y - node.image_height
 
-            surface.context.rectangle(0, 0, width, height)
-            surface.context.clip()
-
     return scale_x, scale_y, translate_x, translate_y
 
 

@@ -6,7 +6,7 @@
 Version 1.0, not released yet
 =============================
 
-* Simple support of the ``image`` tag
+* Simple support of the ``image`` tag thanks to pystacia
 * Better tests (~5% faster)
 * Fix python 2.6 support
 * Fix markers with empty paths and z/Z points

@@ -26,10 +26,12 @@ from .helpers import preserve_ratio, node_format
 def svg(surface, node):
     """Draw a svg ``node``."""
     if node.get("preserveAspectRatio", "none") != "none":
-        _, _, viewbox = node_format(surface, node)
+        width, height, viewbox = node_format(surface, node)
         node.image_width, node.image_height = viewbox[2:]
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, node)
+        surface.context.rectangle(0, 0, width, height)
+        surface.context.clip()
         surface.context.translate(*surface.context.get_current_point())
         surface.context.scale(scale_x, scale_y)
         surface.context.translate(translate_x, translate_y)
