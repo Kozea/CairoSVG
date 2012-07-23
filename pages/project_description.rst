@@ -15,7 +15,7 @@ Main Goal
 =========
 
 CairoSVG has one main goal: convert SVG to Cairo surfaces, with Pycairo as only
-dependency. This requirement makes CairoSVG independant from X, Glib or GTK+.
+dependency. This requirement makes CairoSVG independant from X, Glib, Qt or GTK+.
 
 
 What CairoSVG Is

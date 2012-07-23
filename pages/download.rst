@@ -70,7 +70,8 @@ Radicale has been packaged for:
 - `Debian <http://packages.debian.org/cairosvg>`_ by Michael Fladischer
 - `Gentoo <http://packages.gentoo.org/package/media-gfx/cairosvg>`_ by Samuli
   Suominen
-- `PyPM <http://code.activestate.com/pypm/cairosvg/>`_
+- `Ubuntu <http://packages.ubuntu.com/cairosvg>`_ by the MOTU and Michael
+  Fladischer
 
 If you are interested in creating packages for Linux distributions, read the
 `"Contribute" page </contribute/>`_.

@@ -21,7 +21,7 @@ CairoSVG is written in pure Python and only depends on `Pycairo
 <http://cairographics.org/pycairo/>`_. It is known to work with Python 2.6,
 2.7, 3.1 and 3.2.
 
-Linux and MacOS users certainly have Python already installed. For Windows
+Linux and OS X users certainly have Python already installed. For Windows
 users, please install `Python <http://python.org/download/>`_ thanks to the
 adequate installer.
 

@@ -8,12 +8,6 @@ As a Lazy Person
 Want to write kind words? Please contact guillaume.ayoub@kozea.fr.
 
 
-As a Jabberer
-=============
-
-Want to say something? Join our Jabber room: cairosvg@room.jabber.kozea.fr.
-
-
 As a Simple User
 ================
 
