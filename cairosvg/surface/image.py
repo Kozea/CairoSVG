@@ -79,6 +79,9 @@ def image(surface, node):
     if url.startswith("data:"):
         image_bytes = open_data_url(url)
     else:
+        base_url = node.get("{http://www.w3.org/XML/1998/namespace}base")
+        if base_url:
+            url = urlparse.urljoin(base_url, url)
         if node.url:
             url = urlparse.urljoin(node.url, url)
         if urlparse.urlparse(url).scheme:
