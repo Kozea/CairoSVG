@@ -111,9 +111,12 @@ def image(surface, node):
         if "viewBox" in node:
             del node["viewBox"]
         tree = Tree(bytestring=image_bytes)
-        width, height, viewbox = node_format(surface, tree)
-        node.image_width = width
-        node.image_height = height
+        tree_width, tree_height, viewbox = node_format(surface, tree)
+        if not tree_width or not tree_height:
+            tree_width = tree["width"] = width
+            tree_height = tree["height"] = height
+        node.image_width = tree_width or width
+        node.image_height = tree_height or height
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, node)
         surface.set_context_size(*node_format(surface, tree))
