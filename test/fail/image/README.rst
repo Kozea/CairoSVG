@@ -16,6 +16,5 @@ Tag ``image``
 
 - ``struct-image-*``
 - ``struct-symbol-01-b``
-- ``render-groups-*``
 
 These test doesn't pass because the ``image`` tag is not handled correctly.
