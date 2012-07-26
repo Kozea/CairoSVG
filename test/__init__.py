@@ -50,8 +50,12 @@ else:
 
 ALL_FILES.sort(key=lambda name: name.lower())
 FILES = [(
-    os.path.join(REFERENCE_FOLDER, "%s.png" % os.path.splitext(name)[0]),
-    os.path.join(TEST_FOLDER, name))
+    os.path.join(
+        os.path.dirname(REFERENCE_FOLDER) if name.startswith("fail")
+        else REFERENCE_FOLDER, "%s.png" % os.path.splitext(name)[0]),
+    os.path.join(
+        os.path.dirname(TEST_FOLDER) if name.startswith("fail")
+        else TEST_FOLDER, name))
     for name in ALL_FILES]
 PIXEL_TOLERANCE = 65 * 255
 SIZE_TOLERANCE = 1
