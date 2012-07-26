@@ -32,6 +32,7 @@ The version of cairo needed to make these tests work perfectly is 1.12.2.
 You need these fonts to be installed to get pixel-by-pixel equivalent images in
 the tests:
 
+- Anglepoise
 - Blocky
 - CalaLig
 - SVGFreeSans
