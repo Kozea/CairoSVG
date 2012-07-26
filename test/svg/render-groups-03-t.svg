@@ -19,7 +19,7 @@
           It also validates basic Shape, Image and text rendering.
         </p>
     </d:testDescription>
-    <d:operatorScript xmlns="http://www.w3.org/1999/xhtml">            
+    <d:operatorScript xmlns="http://www.w3.org/1999/xhtml">
       <p>
 Run the test. No interaction required.
       </p>
@@ -82,7 +82,7 @@ Run the test. No interaction required.
       <!-- the order they are defined. Therefore, none of the 'A' under the    -->
       <!-- rectangle should show. Neither should any of the rectangle under    -->
       <!-- the image.                                                          -->
-      <text font-family="s-larabie-anglepoise, anglepoise" font-size="120" x="30" y="90">SVG</text>
+      <text font-family="anglepoise" font-size="120" x="30" y="90">SVG</text>
       <rect x="70" y="55" width="130" height="70" fill="rgb(130, 0, 50)"/>
       <image x="162" y="75" width="80" height="80" xlink:href="../images/sign.png"/>
     </g>
