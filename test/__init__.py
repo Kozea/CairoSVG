@@ -67,6 +67,11 @@ if not os.path.exists(OUTPUT_FOLDER):
 
 def generate_function(description):
     """Return a testing function with the given ``description``."""
+    if sys.version_info[0] >= 3:  # Python 3
+        get_pixel = lambda pixels, i: list(pixels[i:i + 4])
+    else:  # Python 2
+        get_pixel = lambda pixels, i: map(ord, pixels[i:i + 4])
+
     def check_image(png_filename, svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
         image1 = pystacia.read(png_filename).get_raw('RGBA')
@@ -91,11 +96,11 @@ def generate_function(description):
         pixels1 = list(pixels1)
         pixels2 = list(pixels2)
         for i in range(0, 4 * width * height, 4):
-            pixel1 = list(pixels1[i:i + 4])
+            pixel1 = get_pixel(pixels1, i)
             alpha_pixel1 = (
                 [pixel1[3] * value for value in pixel1[:3]] +
                 [255 * pixel1[3]])
-            pixel2 = list(pixels2[i:i + 4])
+            pixel2 = get_pixel(pixels2, i)
             alpha_pixel2 = (
                 [pixel2[3] * value for value in pixel2[:3]] +
                 [255 * pixel2[3]])
