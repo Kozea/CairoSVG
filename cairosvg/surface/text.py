@@ -79,11 +79,11 @@ def text(surface, node):
     if not node.get("fill"):
         node["fill"] = "#000000"
 
-    # TODO: find a better way to manage white spaces in text nodes
+    # TODO: really handle white spaces in text nodes
+    # http://www.w3.org/TR/SVG/text.html#WhiteSpace
     node.text = (node.text or "").lstrip()
     node.text = node.text.rstrip() + " "
 
-    # TODO: manage font variant
     font_size = size(surface, node.get("font-size", "12pt"))
     font_family = (node.get("font-family") or "sans-serif").split(",")[0]
     font_style = getattr(

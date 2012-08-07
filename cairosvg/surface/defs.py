@@ -143,7 +143,6 @@ def draw_pattern(surface, name):
 
 def draw_marker(surface, node, position="mid"):
     """Draw a marker."""
-    # TODO: manage markers for other tags than path
     if position == "start":
         node.markers = {
             "start": list(urls(node.get("marker-start", ""))),

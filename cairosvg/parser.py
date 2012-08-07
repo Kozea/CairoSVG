@@ -89,7 +89,6 @@ class Node(dict):
         self.text = node.text
 
         # Inherits from parent properties
-        # TODO: drop other attributes that should not be inherited
         if parent is not None:
             items = parent.copy()
             not_inherited = (

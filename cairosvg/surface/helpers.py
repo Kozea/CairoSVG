@@ -180,9 +180,8 @@ def transform(surface, string):
     transformations = string.split(")")
     matrix = cairo.Matrix()
     for transformation in transformations:
-        for ttype in (
-            "scale", "translate", "matrix", "rotate", "skewX",
-            "skewY"):
+        for ttype in ("scale", "translate", "matrix", "rotate", "skewX",
+                      "skewY"):
             if ttype in transformation:
                 transformation = transformation.replace(ttype, "")
                 transformation = transformation.replace("(", "")
