@@ -284,7 +284,7 @@ external SVG files.
 The ‘image’ element
 -------------------
 
-The ``image`` tag is not supported.
+The ``image`` tag is supported by Pystacia.
 
 
 Conditional processing
@@ -304,7 +304,7 @@ Common attributes
 
 The ``id`` attribute is supported.
 
-The ``xml:base`` attribute is not supported.
+The ``xml:base`` attribute is supported for images.
 
 
 DOM interfaces
@@ -524,24 +524,31 @@ The DOM interfaces are not supported.
 
 
 
-
 Paths
 =====
+
+*Coming soon*
 
 
 
 Basic Shapes
 ============
 
+*Coming soon*
+
 
 
 Text
 ====
 
+*Coming soon*
+
 
 
 Painting: Filling, Stroking and Marker Symbols
 ==============================================
+
+*Coming soon*
 
 
 
