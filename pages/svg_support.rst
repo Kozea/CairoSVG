@@ -159,7 +159,7 @@ simple gradients and simple patterns, with or without opacity.
 Painting raster images
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Included raster images are not supported.
+Included raster images are supported by the Pystacia package.
 
 
 Filtering painted regions
