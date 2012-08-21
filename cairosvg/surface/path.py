@@ -290,13 +290,15 @@ def path(surface, node):
         elif letter in "zZ":
             # End of path
             node.tangents.extend((0, 0))
+            abs_x, abs_y = surface.context.get_current_point()
             surface.context.close_path()
+            surface.context.move_to(abs_x, abs_y)
 
         string = string.strip()
 
         if letter in "hHvV":
             if string.split(" ", 1)[0] not in PATH_LETTERS:
-                surface.context.move_to(*surface.context.get_current_point())
+                surface.context.line_to(*surface.context.get_current_point())
 
         if string and letter not in "mMzZ":
             draw_marker(surface, node, "mid")
