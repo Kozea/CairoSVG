@@ -25,7 +25,7 @@ import io
 
 from ..parser import Tree
 from .colors import color
-from .defs import gradient_or_pattern, parse_def
+from .defs import gradient_or_pattern, parse_def, paint_mask
 from .helpers import (
     node_format, transform, normalize, filter_fill_or_stroke,
     apply_matrix_transform, PointError)
@@ -80,7 +80,7 @@ class Surface(object):
         if write_to is None:
             return output.getvalue()
 
-    def __init__(self, tree, output, dpi):
+    def __init__(self, tree, output, dpi, parent_surface=None):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -95,10 +95,18 @@ class Surface(object):
         self.context_width, self.context_height = None, None
         self.cursor_position = 0, 0
         self.total_width = 0
-        self.markers = {}
-        self.gradients = {}
-        self.patterns = {}
-        self.paths = {}
+        if parent_surface:
+            self.markers = parent_surface.markers
+            self.gradients = parent_surface.gradients
+            self.patterns = parent_surface.patterns
+            self.masks = parent_surface.masks
+            self.paths = parent_surface.paths
+        else:
+            self.markers = {}
+            self.gradients = {}
+            self.patterns = {}
+            self.masks = {}
+            self.paths = {}
         self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.output = output
@@ -194,8 +202,9 @@ class Surface(object):
         self._old_parent_node = self.parent_node
         self.parent_node = node
 
+        mask = filter_fill_or_stroke(node.get("mask"))
         opacity = float(node.get("opacity", 1))
-        if opacity < 1:
+        if mask or opacity < 1:
             self.context.push_group()
 
         self.context.save()
@@ -288,9 +297,12 @@ class Surface(object):
             # raise an exception if we have multiple svg tags
             self.context.restore()
 
-        if opacity < 1:
+        if mask or opacity < 1:
             self.context.pop_group_to_source()
-            self.context.paint_with_alpha(opacity)
+            if mask:
+                paint_mask(self, node, mask, opacity)
+            else:
+                self.context.paint_with_alpha(opacity)
 
         self.parent_node = self._old_parent_node
         self.font_size = old_font_size

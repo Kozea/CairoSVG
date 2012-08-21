@@ -45,7 +45,7 @@ def update_def_href(surface, def_name, def_dict):
 
 def parse_def(surface, node):
     """Parse the SVG definitions."""
-    for def_type in ("marker", "gradient", "pattern", "path"):
+    for def_type in ("marker", "gradient", "pattern", "path", "mask"):
         if def_type in node.tag.lower():
             getattr(surface, def_type + "s")[node["id"]] = node
 
@@ -65,6 +65,11 @@ def marker(surface, node):
     parse_def(surface, node)
 
 
+def mask(surface, node):
+    """Store a mask definition."""
+    parse_def(surface, node)
+
+
 def linear_gradient(surface, node):
     """Store a linear gradient definition."""
     parse_def(surface, node)
@@ -78,6 +83,29 @@ def radial_gradient(surface, node):
 def pattern(surface, node):
     """Store a pattern definition."""
     parse_def(surface, node)
+
+
+def paint_mask(surface, node, name, opacity):
+    """Paint the mask of the current surface."""
+    mask_node = surface.masks[name]
+    mask_node.tag = "g"
+    mask_node["opacity"] = opacity
+    transform(surface, "translate(%s %s)" % (
+        mask_node.get("x"), mask_node.get("y")))
+
+    from . import SVGSurface  # circular import
+    mask_surface = SVGSurface(mask_node, None, surface.dpi, surface)
+    mask_pattern = cairo.SurfacePattern(mask_surface.cairo)
+
+    if mask_node.get("maskUnits") != "userSpaceOnUse":
+        x = float(size(surface, node.get("x"), "x"))
+        y = float(size(surface, node.get("y"), "y"))
+        width = float(size(surface, node.get("width", "120%"), "x"))
+        height = float(size(surface, node.get("height", "120%"), "y"))
+        mask_pattern.set_matrix(cairo.Matrix(
+            1 / width, 0, 0, 1 / height, - x / width, - y / height))
+
+    surface.context.mask(mask_pattern)
 
 
 def draw_gradient(surface, node, name):
@@ -141,7 +169,7 @@ def draw_pattern(surface, name):
     transform(surface, pattern_node.get("patternTransform"))
 
     from . import SVGSurface  # circular import
-    pattern_surface = SVGSurface(pattern_node, None, surface.dpi)
+    pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
     pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
     surface.context.set_source(pattern_pattern)
@@ -232,6 +260,8 @@ def use(surface, node):
         del node["y"]
     if "viewBox" in node:
         del node["viewBox"]
+    if "mask" in node:
+        del node["mask"]
     href = node.get("{http://www.w3.org/1999/xlink}href")
     url = list(urls(href))[0]
     tree = Tree(url=url, parent=node)
