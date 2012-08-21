@@ -290,9 +290,7 @@ def path(surface, node):
         elif letter in "zZ":
             # End of path
             node.tangents.extend((0, 0))
-            abs_x, abs_y = surface.context.get_current_point()
             surface.context.close_path()
-            surface.context.move_to(abs_x, abs_y)
 
         string = string.strip()
 
