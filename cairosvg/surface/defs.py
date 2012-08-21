@@ -32,25 +32,31 @@ from .units import size
 from ..parser import Tree
 
 
+def update_def_href(surface, def_name, def_dict):
+    """Update the attributes of the def according to its href attribute."""
+    def_node = def_dict[def_name]
+    href = def_node.get("{http://www.w3.org/1999/xlink}href")
+    if href and href[0] == "#" and href[1:] in def_dict:
+        new_def_node = deepcopy(def_dict[href[1:]])
+        new_def_node.update(def_node)
+        def_node = new_def_node
+        def_dict[def_name] = def_node
+
+
 def parse_def(surface, node):
     """Parse the SVG definitions."""
     for def_type in ("marker", "gradient", "pattern", "path"):
         if def_type in node.tag.lower():
-            def_list = getattr(surface, def_type + "s")
-            name = node["id"]
-            href = node.get("{http://www.w3.org/1999/xlink}href")
-            if href and href[0] == "#" and href[1:] in def_list:
-                new_node = deepcopy(def_list[href[1:]])
-                new_node.update(node)
-                node = new_node
-            def_list[name] = node
+            getattr(surface, def_type + "s")[node["id"]] = node
 
 
 def gradient_or_pattern(surface, node, name):
     """Gradient or pattern color."""
     if name in surface.gradients:
+        update_def_href(surface, name, surface.gradients)
         return draw_gradient(surface, node, name)
     elif name in surface.patterns:
+        update_def_href(surface, name, surface.patterns)
         return draw_pattern(surface, name)
 
 
