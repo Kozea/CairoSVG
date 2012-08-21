@@ -303,5 +303,7 @@ def path(surface, node):
 
         last_letter = letter
 
-    node.tangents.append(node.tangents[-1])
-    draw_marker(surface, node, "end")
+    if node.tangents != [None]:
+        # node.tangents == [None] means empty path
+        node.tangents.append(node.tangents[-1])
+        draw_marker(surface, node, "end")
