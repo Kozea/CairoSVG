@@ -251,6 +251,7 @@ class Surface(object):
 
         if stroke_and_fill and visible:
             # Fill
+            self.context.save()
             if "url(#" in (node.get("fill") or ""):
                 name = filter_fill_or_stroke(node.get("fill"))
                 gradient_or_pattern(self, node, name)
@@ -260,8 +261,10 @@ class Surface(object):
                 self.context.set_source_rgba(
                     *color(node.get("fill", "black"), fill_opacity))
             self.context.fill_preserve()
+            self.context.restore()
 
             # Stroke
+            self.context.save()
             self.context.set_line_width(size(self, node.get("stroke-width")))
             if "url(#" in (node.get("stroke") or ""):
                 name = filter_fill_or_stroke(node.get("stroke"))
@@ -270,6 +273,7 @@ class Surface(object):
                 self.context.set_source_rgba(
                     *color(node.get("stroke"), stroke_opacity))
             self.context.stroke()
+            self.context.restore()
         elif not visible:
             self.context.new_path()
 
