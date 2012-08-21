@@ -296,10 +296,6 @@ def path(surface, node):
 
         string = string.strip()
 
-        if letter in "hHvV":
-            if string.split(" ", 1)[0] not in PATH_LETTERS:
-                surface.context.line_to(*surface.context.get_current_point())
-
         if string and letter not in "mMzZ":
             draw_marker(surface, node, "mid")
 
