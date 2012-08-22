@@ -90,22 +90,35 @@ def paint_mask(surface, node, name, opacity):
     mask_node = surface.masks[name]
     mask_node.tag = "g"
     mask_node["opacity"] = opacity
-    transform(surface, "translate(%s %s)" % (
-        mask_node.get("x"), mask_node.get("y")))
+
+    if mask_node.get("maskUnits") != "userSpaceOnUse":
+        x = float(size(surface, node.get("x"), "x"))
+        y = float(size(surface, node.get("y"), "y"))
+        width = float(size(surface, node.get("width"), "x"))
+        height = float(size(surface, node.get("height"), "y"))
+        width_ref = width
+        height_ref = height
+    else:
+        width_ref, height_ref = "x", "y"
+
+    mask_node["x"] = float(
+        size(surface, mask_node.get("x", "-10%"), width_ref))
+    mask_node["y"] = float(
+        size(surface, mask_node.get("y", "-10%"), height_ref))
+    mask_node["height"] = float(
+        size(surface, mask_node.get("height", "120%"), width_ref))
+    mask_node["width"] = float(
+        size(surface, mask_node.get("width", "120%"), height_ref))
+
+    surface.context.save()
+    transform(surface, "translate(%s %s)" % (x, y))
 
     from . import SVGSurface  # circular import
     mask_surface = SVGSurface(mask_node, None, surface.dpi, surface)
     mask_pattern = cairo.SurfacePattern(mask_surface.cairo)
 
-    if mask_node.get("maskUnits") != "userSpaceOnUse":
-        x = float(size(surface, node.get("x"), "x"))
-        y = float(size(surface, node.get("y"), "y"))
-        width = float(size(surface, node.get("width", "120%"), "x"))
-        height = float(size(surface, node.get("height", "120%"), "y"))
-        mask_pattern.set_matrix(cairo.Matrix(
-            1 / width, 0, 0, 1 / height, - x / width, - y / height))
-
     surface.context.mask(mask_pattern)
+    surface.context.restore()
 
 
 def draw_gradient(surface, node, name):
