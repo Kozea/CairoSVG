@@ -65,6 +65,7 @@ Vector Filters
 - ``filters-offset-01-b``
 - ``filters-offset-02-b``
 - ``filters-tile-01-b``
+- ``masking-filter-01-f``
 
 Some of these filters are `included in Cairo
 <http://cairographics.org/operators/>`_ and can be easily handled by

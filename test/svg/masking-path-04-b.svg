@@ -53,13 +53,13 @@
     <g shape-rendering="geometricPrecision">
       <defs>
         <clipPath id="sample" clipPathUnits="userSpaceOnUse">
-          <text x="45" y="270" font-size="100" font-family="Impact">Clip Test</text>
+          <text x="45" y="270" font-size="100" font-family="Anglepoise">Clip Test</text>
         </clipPath>
       </defs>
 
       <g>
         <image xlink:href="../images/bluesquidj.png" preserveAspectRatio="none" x="30" y="20" width="410" height="140"/>
-        <text x="55" y="130" font-size="100" font-family="Impact" fill="yellow">Clip Test</text>
+        <text x="55" y="130" font-size="100" font-family="Anglepoise" fill="yellow">Clip Test</text>
       </g>
       <g>
         <image xlink:href="../images/bluesquidj.png" preserveAspectRatio="none" x="20" y="170" width="410" height="160" clip-path="url(#sample)"/>

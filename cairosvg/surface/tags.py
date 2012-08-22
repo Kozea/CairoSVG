@@ -20,7 +20,8 @@ SVG tags functions.
 
 """
 
-from .defs import linear_gradient, marker, mask, pattern, radial_gradient, use
+from .defs import (
+    clip_path, linear_gradient, marker, mask, pattern, radial_gradient, use)
 from .image import image
 from .path import path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
@@ -30,6 +31,7 @@ from .text import text, text_path, tspan
 TAGS = {
     "a": tspan,
     "circle": circle,
+    "clipPath": clip_path,
     "ellipse": ellipse,
     "image": image,
     "line": line,

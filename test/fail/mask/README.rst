@@ -2,8 +2,39 @@
  Mask
 ======
 
-`Clipping, masking and compositing <http://www.w3.org/TR/SVG/masking.html>`_ is
-not really well handled, but it seems quite easy to make some of these tests
-work as equivalent features are available in Cairo. If you want to write some
-easy code and be remembered as *The one who fixed masks in CairoSVG*, you
-definitely are in the right folder to start your work.
+Luminance Masks
+===============
+
+- ``masking-intro-01-f``
+- ``masking-path-11-b``
+
+SVG relies on the luminance and the alpha channel to apply masks, whereas Cairo
+only handles alpha. The only way to fix this is to find a "luminance-to-alpha"
+filter.
+
+
+Even-Odd Rule
+=============
+
+- ``masking-path-05-f``
+
+The even-odd rule must be handled by path according to the SVG
+specification. Unfortunately, Cairo clips all the paths with the same fill
+rule.
+
+
+Clip Property
+=============
+
+- ``masking-path-06-b``
+
+The clip property is not handled at all, it looks easy to add.
+
+
+Clip Path Intersections
+=======================
+
+- ``masking-path-07-b``
+
+This test is a hard one, and a lot of things fail here including nested
+clip-path properties and use/clipPath inherited attributes.

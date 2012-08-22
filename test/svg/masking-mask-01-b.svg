@@ -113,7 +113,7 @@
       <rect x="60" y="250" width="200" height="25" fill="white" fill-opacity="1"/>
       <rect x="60" y="275" width="200" height="25" fill="white" fill-opacity="0.7"/>
     </mask>
-    <text x="60" y="280" font-family="larabie-anglepoise" font-size="110" fill="lime" mask="url(#mask3)">SVG</text>
+    <text x="60" y="280" font-family="anglepoise" font-size="110" fill="lime" mask="url(#mask3)">SVG</text>
     <text  font-size="12" x="200" y="225">Text with mask containing rectangles</text>
     <text  font-size="12" x="200" y="240">of various opacities</text>
     </g>

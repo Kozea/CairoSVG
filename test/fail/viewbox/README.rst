@@ -21,6 +21,8 @@ Bad Viewbox and Nested ``svg`` Tags
 ===================================
 
 - ``coords-viewattr-03-b``
+- ``masking-path-03-b``
+- ``masking-path-14-f``
 - ``struct-svg-03-f``
 - ``struct-group-02-b``
 

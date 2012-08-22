@@ -243,6 +243,27 @@ class Surface(object):
         miter_limit = float(node.get("stroke-miterlimit", 4))
         self.context.set_miter_limit(miter_limit)
 
+        # Clip
+        if "url(#" in (node.get("clip-path") or ""):
+            name = filter_fill_or_stroke(node["clip-path"])
+            path = self.paths.get(name)
+            if path:
+                self.context.save()
+                if path.get("clipPathUnits") == "objectBoundingBox":
+                    x = float(size(self, node.get("x"), "x"))
+                    y = float(size(self, node.get("y"), "y"))
+                    width = float(size(self, node.get("width"), "x"))
+                    height = float(size(self, node.get("height"), "y"))
+                    self.context.translate(x, y)
+                    self.context.scale(width, height)
+                path.tag = "g"
+                self.draw(path, stroke_and_fill=False)
+                self.context.restore()
+                if node.get("clip-rule") == "evenodd":
+                    self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
+                self.context.clip()
+                self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
+
         if node.tag in TAGS:
             try:
                 TAGS[node.tag](self, node)
@@ -262,7 +283,7 @@ class Surface(object):
             # Fill
             self.context.save()
             if "url(#" in (node.get("fill") or ""):
-                name = filter_fill_or_stroke(node.get("fill"))
+                name = filter_fill_or_stroke(node["fill"])
                 gradient_or_pattern(self, node, name)
             else:
                 if node.get("fill-rule") == "evenodd":
@@ -288,7 +309,8 @@ class Surface(object):
 
         # Draw children
         if display and node.tag not in (
-                "linearGradient", "radialGradient", "marker", "pattern"):
+                "linearGradient", "radialGradient", "marker", "pattern",
+                "mask", "clipPath"):
             for child in node.children:
                 self.draw(child, stroke_and_fill)
 
@@ -299,7 +321,7 @@ class Surface(object):
 
         if mask or opacity < 1:
             self.context.pop_group_to_source()
-            if mask:
+            if mask and mask in self.masks:
                 paint_mask(self, node, mask, opacity)
             else:
                 self.context.paint_with_alpha(opacity)

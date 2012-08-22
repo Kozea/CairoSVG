@@ -85,19 +85,28 @@ def pattern(surface, node):
     parse_def(surface, node)
 
 
+def clip_path(surface, node):
+    """Store a clip path definition."""
+    surface.paths[node["id"]] = node
+
+
 def paint_mask(surface, node, name, opacity):
     """Paint the mask of the current surface."""
     mask_node = surface.masks[name]
     mask_node.tag = "g"
     mask_node["opacity"] = opacity
 
-    x = float(size(surface, node.get("x"), "x"))
-    y = float(size(surface, node.get("y"), "y"))
-    if mask_node.get("maskUnits") != "userSpaceOnUse":
-        width_ref = float(size(surface, node.get("width"), "x"))
-        height_ref = float(size(surface, node.get("height"), "y"))
-    else:
+    if mask_node.get("maskUnits") == "userSpaceOnUse":
         width_ref, height_ref = "x", "y"
+    else:
+        x = float(size(surface, node.get("x"), "x"))
+        y = float(size(surface, node.get("y"), "y"))
+        width = float(size(surface, node.get("width"), "x"))
+        height = float(size(surface, node.get("height"), "y"))
+        width_ref = width
+        height_ref = height
+        mask_node["transform"] = "%s scale(%f, %f)" % (
+            mask_node.get("transform", ""), width, height)
 
     mask_node["x"] = float(
         size(surface, mask_node.get("x", "-10%"), width_ref))
@@ -108,14 +117,18 @@ def paint_mask(surface, node, name, opacity):
     mask_node["width"] = float(
         size(surface, mask_node.get("width", "120%"), height_ref))
 
-    surface.context.save()
-    transform(surface, "translate(%s %s)" % (x, y))
+    if mask_node.get("maskUnits") == "userSpaceOnUse":
+        x = mask_node["x"]
+        y = mask_node["y"]
+        mask_node["viewBox"] = "%f %f %f %f" % (
+            mask_node["x"], mask_node["y"],
+            mask_node["width"], mask_node["height"])
 
     from . import SVGSurface  # circular import
     mask_surface = SVGSurface(mask_node, None, surface.dpi, surface)
-    mask_pattern = cairo.SurfacePattern(mask_surface.cairo)
-
-    surface.context.mask(mask_pattern)
+    surface.context.save()
+    surface.context.translate(x, y)
+    surface.context.mask_surface(mask_surface.cairo)
     surface.context.restore()
 
 
@@ -153,7 +166,6 @@ def draw_gradient(surface, node, name):
     if gradient_node.get("gradientUnits") != "userSpaceOnUse":
         gradient_pattern.set_matrix(cairo.Matrix(
             1 / width, 0, 0, 1 / height, - x / width, - y / height))
-
     gradient_pattern.set_extend(getattr(
         cairo, "EXTEND_%s" % node.get("spreadMethod", "pad").upper()))
 
