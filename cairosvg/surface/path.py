@@ -186,7 +186,10 @@ def path(surface, node):
         elif letter == "m":
             # Current point relative move
             x, y, string = point(surface, string)
-            surface.context.rel_move_to(x, y)
+            if surface.context.has_current_point():
+                surface.context.rel_move_to(x, y)
+            else:
+                surface.context.move_to(x, y)
 
         elif letter == "M":
             # Current point move
