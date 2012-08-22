@@ -101,7 +101,7 @@ def image(surface, node):
 
     if image_bytes[:4] == b"\x89PNG":
         png_bytes = image_bytes
-    elif image_bytes[:5] == b"\x3csvg ":
+    elif image_bytes[:5] in (b"\x3csvg ", b"\x3c?xml"):
         surface.context.save()
         surface.context.translate(x, y)
         if "x" in node:
