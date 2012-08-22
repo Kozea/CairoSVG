@@ -136,15 +136,15 @@ The elements are rendered in the order of the SVG document.
 How groups are rendered
 -----------------------
 
-Opacity values of groups are applied to the elements
-of the group. Filter effects and masks are not supported.
+Opacity values of groups are applied to the rendered inner elements. Simple
+masks and clips are supported. Filter effects are not supported.
 
 
 How elements are rendered
 -------------------------
 
-Opacity values of elements are applied. Filter effects and masks are not
-supported.
+Opacity values of elements are applied. Simple masks and clips are
+supported. Filter effects are not supported.
 
 
 Types of graphics elements
@@ -171,7 +171,8 @@ Filter effects are not supported.
 Clipping, masking and object opacity
 ------------------------------------
 
-Clipping and masking are not supported.
+Path clipping and alpha masking are supported. Clip and overflow of new
+viewports is not supported. Masks based on luminance are not supported.
 
 Transparency, with simple alpha blending, is supported for semi-transparent
 colors and opacity values.
@@ -352,9 +353,9 @@ Other properties for visual media:
 
 Clipping, Masking and Compositing properties:
 
-- clip-path: not supported
-- clip-rule: not supported
-- mask: not supported
+- clip-path: supported
+- clip-rule: supported
+- mask: basically supported
 - opacity: supported
 
 Filter Effects properties:
@@ -617,8 +618,8 @@ Clipping, Masking and Compositing
 Introduction
 ------------
 
-Clipping and masking features are not handled at all. Simple alpha compositing
-and opacity are partially supported, 
+Some of the clipping and masking features are handled. Simple alpha compositing
+and opacity are partially supported,
 
 
 Simple alpha compositing
@@ -631,13 +632,13 @@ Alpha compositing is supported in Cairo, but ``color-interpolation`` and
 Clipping paths
 --------------
 
-Clipping is not handled.
+Path clipping is handled, but new viewports are not clipped.
 
 
 Masking
 -------
 
-Masking is not handled.
+Masking is handled with alpha-based masks, but not with luminance-based ones.
 
 
 Opacity
