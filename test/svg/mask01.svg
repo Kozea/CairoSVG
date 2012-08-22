@@ -16,7 +16,7 @@
       <rect x="0" y="0" width="800" height="300" fill="url(#Gradient)"  />
     </mask>
     <text id="Text" x="400" y="200" 
-          font-family="Verdana" font-size="100" text-anchor="middle" >
+          font-family="Liberation Sans" font-size="100" text-anchor="middle" >
       Masked text
     </text>
   </defs>

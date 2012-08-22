@@ -91,13 +91,11 @@ def paint_mask(surface, node, name, opacity):
     mask_node.tag = "g"
     mask_node["opacity"] = opacity
 
+    x = float(size(surface, node.get("x"), "x"))
+    y = float(size(surface, node.get("y"), "y"))
     if mask_node.get("maskUnits") != "userSpaceOnUse":
-        x = float(size(surface, node.get("x"), "x"))
-        y = float(size(surface, node.get("y"), "y"))
-        width = float(size(surface, node.get("width"), "x"))
-        height = float(size(surface, node.get("height"), "y"))
-        width_ref = width
-        height_ref = height
+        width_ref = float(size(surface, node.get("width"), "x"))
+        height_ref = float(size(surface, node.get("height"), "y"))
     else:
         width_ref, height_ref = "x", "y"
 
