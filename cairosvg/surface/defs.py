@@ -251,9 +251,13 @@ def draw_marker(surface, node, position="mid"):
                 scale_x, scale_y, translate_x, translate_y = \
                     preserve_ratio(surface, marker_node)
 
-                viewbox = node_format(surface, marker_node)[-1]
-                viewbox_width = viewbox[2] - viewbox[0]
-                viewbox_height = viewbox[3] - viewbox[1]
+                width, height, viewbox = node_format(surface, marker_node)
+                if viewbox:
+                    viewbox_width = viewbox[2] - viewbox[0]
+                    viewbox_height = viewbox[3] - viewbox[1]
+                else:
+                    viewbox_width = width or 0
+                    viewbox_height = height or 0
 
                 surface.context.new_path()
                 for child in marker_node.children:
