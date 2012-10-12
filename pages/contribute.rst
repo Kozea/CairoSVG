@@ -2,22 +2,27 @@
  Contribute
 ============
 
-As a Lazy Person
-================
+Send Us a Mail
+==============
 
 Want to write kind words? Please contact guillaume.ayoub@kozea.fr.
 
 
-As a Simple User
-================
+Chat with Us on IRC
+===================
 
-Found a bug? Want a new feature? Report a new issue on the `CairoSVG
-bug-tracker <http://redmine.kozea.fr/projects/cairosvg>`_ (registration
-needed).
+Want to say something? Join our IRC room: ##kozea on Freenode.
 
 
-As a Hacker
+Report Bugs
 ===========
 
+Found a bug? Want a new feature? Report a new issue on the :buglink:`CairoSVG
+bug-tracker` (registration needed).
+
+
+Hack
+====
+
 Interested in hacking? Feel free to clone the :codelink:`git repository on
-GitHub` if you want to add new features, fix bugs or update documentation.
+Github` if you want to add new features, fix bugs or update documentation.
