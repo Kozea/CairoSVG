@@ -188,8 +188,7 @@ def transform(surface, string):
                 transformation = normalize(transformation).strip() + " "
                 values = []
                 while transformation:
-                    value, transformation = \
-                        transformation.split(" ", 1)
+                    value, transformation = transformation.split(" ", 1)
                     # TODO: manage the x/y sizes here
                     values.append(size(surface, value))
                 if ttype == "matrix":
