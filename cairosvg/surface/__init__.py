@@ -208,12 +208,12 @@ class Surface(object):
             self.context.push_group()
 
         self.context.save()
+        # Transform the context according to the ``transform`` attribute
+        transform(self, node.get("transform"))
+
         self.context.move_to(
             size(self, node.get("x"), "x"),
             size(self, node.get("y"), "y"))
-
-        # Transform the context according to the ``transform`` attribute
-        transform(self, node.get("transform"))
 
         if node.tag in PATH_TAGS:
             # Set 1 as default stroke-width
