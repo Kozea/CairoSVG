@@ -1,0 +1,17 @@
+CairoSVG 0.5
+============
+
+CairoSVG 0.4 has been released, with exciting new features and a lot of
+bugfixes:
+
+* Simple support of the ``image`` tag thanks to pystacia
+* Better tests with pystacia instead of pypng (~35% faster)
+* Handle s after C/S and S after c/s in paths
+* Handle rounded corners with 2 different radii for rectangles
+* Fix python 2.6 support
+* Fix markers with empty paths and z/Z points
+* Fix initial m in paths with no current point
+* Fix transformations order
+
+Don't expect new features before the next 1.0 version: only documentation and
+bugfixes are expected during the next weeks.
