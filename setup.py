@@ -43,7 +43,7 @@ setup(
     scripts=["bin/cairosvg"],
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: "

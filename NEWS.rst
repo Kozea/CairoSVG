@@ -3,12 +3,19 @@
 ======
 
 
-Version 0.5, not released on 2012-12-13
-=======================================
+Version 1.0, not released yet
+=============================
+
+See the roadmap: http://redmine.kozea.fr/projects/cairosvg/roadmap
+
+
+Version 0.5, released on 2012-12-13
+===================================
 
 * Simple support of the ``image`` tag thanks to pystacia
 * Better tests with pystacia instead of pypng (~35% faster)
 * Handle s after C/S and S after c/s in paths
+* Handle rounded corners with 2 different radii for rectangles
 * Fix python 2.6 support
 * Fix markers with empty paths and z/Z points
 * Fix initial m in paths with no current point
