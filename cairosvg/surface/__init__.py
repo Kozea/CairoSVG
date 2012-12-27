@@ -275,7 +275,7 @@ class Surface(object):
         stroke_opacity = float(node.get("stroke-opacity", 1))
         fill_opacity = float(node.get("fill-opacity", 1))
 
-        # Manage dispaly and visibility
+        # Manage display and visibility
         display = node.get("display", "inline") != "none"
         visible = display and (node.get("visibility", "visible") != "hidden")
 
