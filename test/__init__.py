@@ -215,8 +215,8 @@ def test_low_level_api():
     surface = cairosvg.surface.PNGSurface(tree, None, 96)
     assert surface.width == expected_width
     assert surface.height == expected_height
-    assert cairo.SurfacePattern(surface.cairo).get_surface() is surface.cairo
-    assert_raises(TypeError, cairo.SurfacePattern, 'Not a cairo.Surface.')
+    assert cairo.SurfacePattern(surface.cairo)
+    assert_raises(Exception, cairo.SurfacePattern, 'Not a cairo.Surface.')
 
 
 def test_script():
