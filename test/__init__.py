@@ -31,12 +31,14 @@ import shutil
 import subprocess
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
-import cairo
 import pystacia
 
 from cairosvg import main
 import cairosvg.parser
 import cairosvg.surface
+
+# After cairosvg to give a chance to cairocffi.install_as_pycairo()
+import cairo
 
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
