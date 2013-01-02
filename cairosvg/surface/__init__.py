@@ -27,8 +27,8 @@ from ..parser import Tree
 from .colors import color
 from .defs import gradient_or_pattern, parse_def, paint_mask
 from .helpers import (
-    node_format, transform, normalize, filter_fill_or_stroke,
-    apply_matrix_transform, PointError)
+    node_format, transform, normalize, paint, urls, apply_matrix_transform,
+    PointError)
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
@@ -193,7 +193,7 @@ class Surface(object):
 
         # Do not draw elements with width or height of 0
         if (("width" in node and size(self, node["width"]) == 0) or
-            ("height" in node and size(self, node["height"]) == 0)):
+           ("height" in node and size(self, node["height"]) == 0)):
             return
 
         node.tangents = [None]
@@ -202,7 +202,8 @@ class Surface(object):
         self._old_parent_node = self.parent_node
         self.parent_node = node
 
-        mask = filter_fill_or_stroke(node.get("mask"))
+        masks = urls(node.get("mask"))
+        mask = masks[0][1:] if masks else None
         opacity = float(node.get("opacity", 1))
         if mask or opacity < 1:
             self.context.push_group()
@@ -245,8 +246,8 @@ class Surface(object):
 
         # Clip
         if "url(#" in (node.get("clip-path") or ""):
-            name = filter_fill_or_stroke(node["clip-path"])
-            path = self.paths.get(name)
+            paths = urls(node["clip-path"])
+            path = self.paths.get(paths[0][1:]) if paths else None
             if path:
                 self.context.save()
                 if path.get("clipPathUnits") == "objectBoundingBox":
@@ -279,29 +280,24 @@ class Surface(object):
         display = node.get("display", "inline") != "none"
         visible = display and (node.get("visibility", "visible") != "hidden")
 
-        if stroke_and_fill and visible:
+        if stroke_and_fill and visible and node.tag in TAGS:
             # Fill
             self.context.save()
-            if "url(#" in (node.get("fill") or ""):
-                name = filter_fill_or_stroke(node["fill"])
-                gradient_or_pattern(self, node, name)
-            else:
+            paint_source, paint_color = paint(node.get("fill", "black"))
+            if not gradient_or_pattern(self, node, paint_source):
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-                self.context.set_source_rgba(
-                    *color(node.get("fill", "black"), fill_opacity))
+                self.context.set_source_rgba(*color(paint_color, fill_opacity))
             self.context.fill_preserve()
             self.context.restore()
 
             # Stroke
             self.context.save()
             self.context.set_line_width(size(self, node.get("stroke-width")))
-            if "url(#" in (node.get("stroke") or ""):
-                name = filter_fill_or_stroke(node.get("stroke"))
-                gradient_or_pattern(self, node, name)
-            else:
+            paint_source, paint_color = paint(node.get("stroke"))
+            if not gradient_or_pattern(self, node, paint_source):
                 self.context.set_source_rgba(
-                    *color(node.get("stroke"), stroke_opacity))
+                    *color(paint_color, stroke_opacity))
             self.context.stroke()
             self.context.restore()
         elif not visible:
