@@ -28,7 +28,7 @@ from copy import deepcopy
 
 from .colors import color
 from .helpers import node_format, preserve_ratio, urls, transform
-from .units import size, UNITS
+from .units import size
 from ..parser import Tree
 
 
@@ -45,7 +45,8 @@ def update_def_href(surface, def_name, def_dict):
 
 def parse_def(surface, node):
     """Parse the SVG definitions."""
-    for def_type in ("marker", "gradient", "pattern", "path", "mask"):
+    for def_type in (
+            "marker", "gradient", "pattern", "path", "mask", "filter"):
         if def_type in node.tag.lower():
             getattr(surface, def_type + "s")[node["id"]] = node
 
@@ -67,6 +68,11 @@ def marker(surface, node):
 
 def mask(surface, node):
     """Store a mask definition."""
+    parse_def(surface, node)
+
+
+def filter_(surface, node):
+    """Store a filter definition."""
     parse_def(surface, node)
 
 

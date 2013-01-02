@@ -101,12 +101,14 @@ class Surface(object):
             self.patterns = parent_surface.patterns
             self.masks = parent_surface.masks
             self.paths = parent_surface.paths
+            self.filters = parent_surface.filters
         else:
             self.markers = {}
             self.gradients = {}
             self.patterns = {}
             self.masks = {}
             self.paths = {}
+            self.filters = {}
         self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.output = output
@@ -306,7 +308,7 @@ class Surface(object):
         # Draw children
         if display and node.tag not in (
                 "linearGradient", "radialGradient", "marker", "pattern",
-                "mask", "clipPath"):
+                "mask", "clipPath", "filter"):
             for child in node.children:
                 self.draw(child, stroke_and_fill)
 
