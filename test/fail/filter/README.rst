@@ -54,7 +54,6 @@ CairoSVG won't include its own filters.
 Vector Filters
 ==============
 
-- ``feBlend``
 - ``feColorMatrix``
 - ``feComponentTransfer``
 - ``feComposite``
