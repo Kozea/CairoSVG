@@ -43,17 +43,25 @@ def distance(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
-def filter_fill_or_stroke(value):
-    """Remove unnecessary characters from fill or stroke value."""
-    if not value:
-        return
+def paint(value):
+    """Extract from value an uri and a color.
 
-    content = list(urls(value))[0]
-    if "url" in value:
-        if not content.startswith("#"):
-            return
-        content = content[1:]
-    return content
+    See http://www.w3.org/TR/SVG/painting.html#SpecifyingPaint
+
+    """
+    if not value:
+        return None, None
+
+    value = value.strip()
+
+    if value.startswith("url"):
+        source = urls(value.split(")")[0])[0][1:]
+        color = value.split(")", 1)[-1].strip() or None
+    else:
+        source = None
+        color = value.strip() or None
+
+    return (source, color)
 
 
 def node_format(surface, node):
@@ -234,8 +242,12 @@ def apply_matrix_transform(surface, matrix):
 
 def urls(string):
     """Parse a comma-separated list of url() strings."""
-    for link in string.split(","):
-        link = link.strip()
-        if link.startswith("url"):
-            link = link[3:]
-        yield link.strip("() ")
+    if not string:
+        return []
+
+    string = string.strip()
+    if string.startswith("url"):
+        string = string[3:]
+    return [
+        link.strip("() ") for link in string.rsplit(")")[0].split(",")
+        if link.strip("() ")]
