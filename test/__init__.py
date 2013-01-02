@@ -66,14 +66,11 @@ SIZE_TOLERANCE = 1
 if not os.path.exists(OUTPUT_FOLDER):
     os.mkdir(OUTPUT_FOLDER)
 
+PYTHON_3 = sys.version_info[0] >= 3
+
 
 def generate_function(description):
     """Return a testing function with the given ``description``."""
-    if sys.version_info[0] >= 3:  # Python 3
-        get_pixel = lambda pixels, i: list(pixels[i:i + 4])
-    else:  # Python 2
-        get_pixel = lambda pixels, i: map(ord, pixels[i:i + 4])
-
     def check_image(png_filename, svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
         image1 = pystacia.read(png_filename).get_raw('RGBA')
@@ -93,23 +90,32 @@ def generate_function(description):
             "Bad height (%s != %s)" % (height1, height2)
 
         # Test pixels
+        if pixels1 == pixels2:
+            return
         width = min(width1, width2)
         height = min(height1, height2)
-        pixels1 = list(pixels1)
-        pixels2 = list(pixels2)
-        for i in range(0, 4 * width * height, 4):
-            pixel1 = get_pixel(pixels1, i)
-            alpha_pixel1 = (
-                [pixel1[3] * value for value in pixel1[:3]] +
-                [255 * pixel1[3]])
-            pixel2 = get_pixel(pixels2, i)
-            alpha_pixel2 = (
-                [pixel2[3] * value for value in pixel2[:3]] +
-                [255 * pixel2[3]])
-            for value1, value2 in zip(alpha_pixel1, alpha_pixel2):
-                assert abs(value1 - value2) <= PIXEL_TOLERANCE, \
-                    "Bad pixel %i, %i (%s != %s)" % (
-                        (i // 4) % width, (i // 4) // width, pixel1, pixel2)
+        if PYTHON_3:  # Iterating on bytes gives ints on Python 3
+            pixels1 = list(pixels1)
+            pixels2 = list(pixels2)
+        else:  # Iterating on bytes gives bytes on Python 2. Get ints.
+            pixels1 = map(ord, pixels1)
+            pixels2 = map(ord, pixels2)
+        stride = 4 * width
+        for j in range(0, stride * height, stride):
+            if pixels1[j:j + stride] == pixels2[j:j + stride]:
+                continue
+            for i in range(j, j + stride, 4):
+                pixel1 = pixels1[i:i + 3]
+                pixel2 = pixels2[i:i + 3]
+                alpha1 = pixels1[i + 3]
+                alpha2 = pixels2[i + 3]
+                pixel1 = [value * alpha1 for value in pixel1] + [alpha1 * 255]
+                pixel2 = [value * alpha2 for value in pixel2] + [alpha2 * 255]
+                assert pixel1 == pixel2 or all(
+                    abs(value1 - value2) <= PIXEL_TOLERANCE
+                    for value1, value2 in zip(pixel1, pixel2)
+                ), "Bad pixel %i, %i (%s != %s)" % (
+                    (i // 4) % width, (i // 4) // width, pixel1, pixel2)
 
     check_image.description = description
     return check_image
