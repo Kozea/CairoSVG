@@ -25,7 +25,7 @@ import io
 
 from ..parser import Tree
 from .colors import color
-from .defs import gradient_or_pattern, parse_def, paint_mask
+from .defs import apply_filter, gradient_or_pattern, parse_def, paint_mask
 from .helpers import (
     node_format, transform, normalize, paint, urls, apply_matrix_transform,
     PointError)
@@ -283,6 +283,9 @@ class Surface(object):
         visible = display and (node.get("visibility", "visible") != "hidden")
 
         if stroke_and_fill and visible and node.tag in TAGS:
+            # Filter
+            apply_filter(self, node)
+
             # Fill
             self.context.save()
             paint_source, paint_color = paint(node.get("fill", "black"))

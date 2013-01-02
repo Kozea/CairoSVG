@@ -32,6 +32,14 @@ from .units import size
 from ..parser import Tree
 
 
+BLEND_OPERATORS = {
+    "normal": 2,
+    "multiply": 14,
+    "screen": 15,
+    "darken": 17,
+    "lighten": 18}
+
+
 def update_def_href(surface, def_name, def_dict):
     """Update the attributes of the def according to its href attribute."""
     def_node = def_dict[def_name]
@@ -309,6 +317,23 @@ def draw_marker(surface, node, position="mid"):
 
     if position == "mid":
         node.pending_markers.append(pending_marker)
+
+
+def apply_filter(surface, node):
+    surface.context.set_operator(BLEND_OPERATORS["normal"])
+
+    if node.tag == "mask":
+        return
+
+    names = urls(node.get("filter"))
+    name = names[0][1:] if names else None
+    if name in surface.filters:
+        filter_node = surface.filters[name]
+        for child in filter_node.children:
+            # Blend
+            if child.tag == "feBlend":
+                surface.context.set_operator(BLEND_OPERATORS.get(
+                    child.get("mode", "normal"), BLEND_OPERATORS["normal"]))
 
 
 def use(surface, node):
