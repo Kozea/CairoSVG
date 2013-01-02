@@ -31,12 +31,12 @@ import shutil
 import subprocess
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
-import cairo
-import pystacia
-
 from cairosvg import main
 import cairosvg.parser
 import cairosvg.surface
+
+# After cairosvg to give a chance to cairocffi.install_as_pycairo()
+import cairo
 
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
@@ -57,32 +57,35 @@ FILES = [(
         os.path.dirname(TEST_FOLDER) if name.startswith("fail")
         else TEST_FOLDER, name))
     for name in ALL_FILES]
-PIXEL_TOLERANCE = 65 * 255
+PIXEL_TOLERANCE = 65
 SIZE_TOLERANCE = 1
 
 
 if not os.path.exists(OUTPUT_FOLDER):
     os.mkdir(OUTPUT_FOLDER)
 
+PYTHON_3 = sys.version_info[0] >= 3
+
 
 def generate_function(description):
     """Return a testing function with the given ``description``."""
-    if sys.version_info[0] >= 3:  # Python 3
-        get_pixel = lambda pixels, i: list(pixels[i:i + 4])
-    else:  # Python 2
-        get_pixel = lambda pixels, i: map(ord, pixels[i:i + 4])
-
     def check_image(png_filename, svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
-        image1 = pystacia.read(png_filename).get_raw('RGBA')
-        pixels1, width1, height1 = (
-            image1['raw'], image1['width'], image1['height'])
+        image1 = cairo.ImageSurface.create_from_png(png_filename)
+        width1 = image1.get_width()
+        height1 = image1.get_height()
+        pixels1 = image1.get_data()[:]
+        assert image1.get_stride() == width1 * 4
+
         png_filename = os.path.join(
             OUTPUT_FOLDER, os.path.basename(png_filename))
-        cairosvg.svg2png(url=svg_filename, write_to=png_filename, dpi=72)
-        image2 = pystacia.read(png_filename).get_raw('RGBA')
-        pixels2, width2, height2 = (
-            image2['raw'], image2['width'], image2['height'])
+        cairosvg_surface = cairosvg.surface.PNGSurface(
+            cairosvg.parser.Tree(url=svg_filename), png_filename, dpi=72)
+        image2 = cairosvg_surface.cairo
+        width2 = image2.get_width()
+        height2 = image2.get_height()
+        pixels2 = image2.get_data()[:]
+        assert image2.get_stride() == width2 * 4
 
         # Test size
         assert abs(width1 - width2) <= SIZE_TOLERANCE, \
@@ -91,23 +94,29 @@ def generate_function(description):
             "Bad height (%s != %s)" % (height1, height2)
 
         # Test pixels
+        if pixels1 == pixels2:
+            return
         width = min(width1, width2)
         height = min(height1, height2)
-        pixels1 = list(pixels1)
-        pixels2 = list(pixels2)
-        for i in range(0, 4 * width * height, 4):
-            pixel1 = get_pixel(pixels1, i)
-            alpha_pixel1 = (
-                [pixel1[3] * value for value in pixel1[:3]] +
-                [255 * pixel1[3]])
-            pixel2 = get_pixel(pixels2, i)
-            alpha_pixel2 = (
-                [pixel2[3] * value for value in pixel2[:3]] +
-                [255 * pixel2[3]])
-            for value1, value2 in zip(alpha_pixel1, alpha_pixel2):
-                assert abs(value1 - value2) <= PIXEL_TOLERANCE, \
-                    "Bad pixel %i, %i (%s != %s)" % (
-                        (i // 4) % width, (i // 4) // width, pixel1, pixel2)
+        if PYTHON_3:  # Iterating on bytes gives ints on Python 3
+            pixels1 = list(pixels1)
+            pixels2 = list(pixels2)
+        else:  # Iterating on bytes gives bytes on Python 2. Get ints.
+            pixels1 = map(ord, pixels1)
+            pixels2 = map(ord, pixels2)
+        stride = 4 * width
+        for j in range(0, stride * height, stride):
+            if pixels1[j:j + stride] == pixels2[j:j + stride]:
+                continue
+            for i in range(j, j + stride, 4):
+                # ImageSurface.get_data is already pre-multiplied.
+                pixel1 = pixels1[i:i + 4]
+                pixel2 = pixels2[i:i + 4]
+                assert pixel1 == pixel2 or all(
+                    abs(value1 - value2) <= PIXEL_TOLERANCE
+                    for value1, value2 in zip(pixel1, pixel2)
+                ), "Bad pixel %i, %i (%s != %s)" % (
+                    (i // 4) % width, (i // 4) // width, pixel1, pixel2)
 
     check_image.description = description
     return check_image
@@ -208,15 +217,17 @@ def test_low_level_api():
     surface.finish()
     assert file_like.getvalue() == expected_content
 
-    png_result = pystacia.read_blob(expected_content)
-    expected_width, expected_height = png_result.size
+    png_result = cairo.ImageSurface.create_from_png(
+        io.BytesIO(expected_content))
+    expected_width = png_result.get_width()
+    expected_height = png_result.get_height()
 
     # Abstract surface
     surface = cairosvg.surface.PNGSurface(tree, None, 96)
     assert surface.width == expected_width
     assert surface.height == expected_height
-    assert cairo.SurfacePattern(surface.cairo).get_surface() is surface.cairo
-    assert_raises(TypeError, cairo.SurfacePattern, 'Not a cairo.Surface.')
+    assert cairo.SurfacePattern(surface.cairo)
+    assert_raises(Exception, cairo.SurfacePattern, 'Not a cairo.Surface.')
 
 
 def test_script():
@@ -288,9 +299,9 @@ def test_script():
 
     # Test DPI
     output = test_main([svg_filename, '-d', '10', '-f', 'png'])
-    width, height = pystacia.read_blob(output).size
-    eq_(width, 47)
-    eq_(height, 20)
+    image = cairo.ImageSurface.create_from_png(io.BytesIO(output))
+    eq_(image.get_width(), 47)
+    eq_(image.get_height(), 20)
 
     temp = tempfile.mkdtemp()
     try:

@@ -24,6 +24,13 @@ import os
 import sys
 import optparse
 
+try:
+    import cairocffi
+except ImportError:
+    pass
+else:
+    cairocffi.install_as_pycairo()
+
 from . import surface
 
 
