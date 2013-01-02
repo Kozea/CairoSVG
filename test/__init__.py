@@ -31,8 +31,6 @@ import shutil
 import subprocess
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
-import pystacia
-
 from cairosvg.surface import cairo
 from cairosvg import main
 import cairosvg.parser
@@ -57,7 +55,7 @@ FILES = [(
         os.path.dirname(TEST_FOLDER) if name.startswith("fail")
         else TEST_FOLDER, name))
     for name in ALL_FILES]
-PIXEL_TOLERANCE = 65 * 255
+PIXEL_TOLERANCE = 65
 SIZE_TOLERANCE = 1
 
 
@@ -71,15 +69,21 @@ def generate_function(description):
     """Return a testing function with the given ``description``."""
     def check_image(png_filename, svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
-        image1 = pystacia.read(png_filename).get_raw('RGBA')
-        pixels1, width1, height1 = (
-            image1['raw'], image1['width'], image1['height'])
+        image1 = cairo.ImageSurface.create_from_png(png_filename)
+        width1 = image1.get_width()
+        height1 = image1.get_height()
+        pixels1 = image1.get_data()[:]
+        assert image1.get_stride() == width1 * 4
+
         png_filename = os.path.join(
             OUTPUT_FOLDER, os.path.basename(png_filename))
-        cairosvg.svg2png(url=svg_filename, write_to=png_filename, dpi=72)
-        image2 = pystacia.read(png_filename).get_raw('RGBA')
-        pixels2, width2, height2 = (
-            image2['raw'], image2['width'], image2['height'])
+        cairosvg_surface = cairosvg.surface.PNGSurface(
+            cairosvg.parser.Tree(url=svg_filename), png_filename, dpi=72)
+        image2 = cairosvg_surface.cairo
+        width2 = image2.get_width()
+        height2 = image2.get_height()
+        pixels2 = image2.get_data()[:]
+        assert image2.get_stride() == width2 * 4
 
         # Test size
         assert abs(width1 - width2) <= SIZE_TOLERANCE, \
@@ -103,12 +107,9 @@ def generate_function(description):
             if pixels1[j:j + stride] == pixels2[j:j + stride]:
                 continue
             for i in range(j, j + stride, 4):
-                pixel1 = pixels1[i:i + 3]
-                pixel2 = pixels2[i:i + 3]
-                alpha1 = pixels1[i + 3]
-                alpha2 = pixels2[i + 3]
-                pixel1 = [value * alpha1 for value in pixel1] + [alpha1 * 255]
-                pixel2 = [value * alpha2 for value in pixel2] + [alpha2 * 255]
+                # ImageSurface.get_data is already pre-multiplied.
+                pixel1 = pixels1[i:i + 4]
+                pixel2 = pixels2[i:i + 4]
                 assert pixel1 == pixel2 or all(
                     abs(value1 - value2) <= PIXEL_TOLERANCE
                     for value1, value2 in zip(pixel1, pixel2)
@@ -214,8 +215,10 @@ def test_low_level_api():
     surface.finish()
     assert file_like.getvalue() == expected_content
 
-    png_result = pystacia.read_blob(expected_content)
-    expected_width, expected_height = png_result.size
+    png_result = cairo.ImageSurface.create_from_png(
+        io.BytesIO(expected_content))
+    expected_width = png_result.get_width()
+    expected_height = png_result.get_height()
 
     # Abstract surface
     surface = cairosvg.surface.PNGSurface(tree, None, 96)
@@ -294,9 +297,9 @@ def test_script():
 
     # Test DPI
     output = test_main([svg_filename, '-d', '10', '-f', 'png'])
-    width, height = pystacia.read_blob(output).size
-    eq_(width, 47)
-    eq_(height, 20)
+    image = cairo.ImageSurface.create_from_png(io.BytesIO(output))
+    eq_(image.get_width(), 47)
+    eq_(image.get_height(), 20)
 
     temp = tempfile.mkdtemp()
     try:
