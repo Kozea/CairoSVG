@@ -192,10 +192,14 @@ def draw_pattern(surface, node, name):
         pattern_node.get("x"), pattern_node.get("y")))
     transform(surface, pattern_node.get("patternTransform"))
 
-    if not pattern_node.get("viewBox") and not (
-            size(surface, pattern_node.get("width", 0), 1) and
-            size(surface, pattern_node.get("height", 0), 1)):
-        return False
+    if pattern_node.get("viewBox"):
+        if not (size(surface, pattern_node.get("width", 1), 1) and
+                size(surface, pattern_node.get("height", 1), 1)):
+            return False
+    else:
+        if not (size(surface, pattern_node.get("width", 0), 1) and
+                size(surface, pattern_node.get("height", 0), 1)):
+            return False
 
     if pattern_node.get("patternUnits") == "userSpaceOnUse":
         pattern_width =  \
