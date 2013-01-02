@@ -93,7 +93,7 @@ class Node(dict):
             items = parent.copy()
             not_inherited = (
                 "transform", "opacity", "style", "viewBox", "stop-color",
-                "stop-opacity")
+                "stop-opacity", "width", "height")
             if self.tag in ("tspan", "pattern"):
                 not_inherited += ("x", "y")
             for attribute in not_inherited:

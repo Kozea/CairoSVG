@@ -28,7 +28,7 @@ from copy import deepcopy
 
 from .colors import color
 from .helpers import node_format, preserve_ratio, urls, transform
-from .units import size
+from .units import size, UNITS
 from ..parser import Tree
 
 
@@ -57,7 +57,7 @@ def gradient_or_pattern(surface, node, name):
         return draw_gradient(surface, node, name)
     elif name in surface.patterns:
         update_def_href(surface, name, surface.patterns)
-        return draw_pattern(surface, name)
+        return draw_pattern(surface, node, name)
 
 
 def marker(surface, node):
@@ -181,9 +181,10 @@ def draw_gradient(surface, node, name):
         cairo, "EXTEND_%s" % gradient_node.get("spreadMethod", "pad").upper()))
 
     surface.context.set_source(gradient_pattern)
+    return True
 
 
-def draw_pattern(surface, name):
+def draw_pattern(surface, node, name):
     """Draw a pattern image."""
     pattern_node = surface.patterns[name]
     pattern_node.tag = "g"
@@ -191,11 +192,35 @@ def draw_pattern(surface, name):
         pattern_node.get("x"), pattern_node.get("y")))
     transform(surface, pattern_node.get("patternTransform"))
 
+    if not pattern_node.get("viewBox") and not (
+            size(surface, pattern_node.get("width", 0), 1) and
+            size(surface, pattern_node.get("height", 0), 1)):
+        return False
+
+    if pattern_node.get("patternUnits") == "userSpaceOnUse":
+        pattern_width =  \
+            float(size(surface, pattern_node.get("width", 0), 1))
+        pattern_height =  \
+            float(size(surface, pattern_node.get("height", 0), 1))
+    else:
+        width = float(size(surface, node.get("width"), "x"))
+        height = float(size(surface, node.get("height"), "y"))
+        pattern_width = \
+            size(surface, pattern_node.pop("width", "0"), 1) * width
+        pattern_height = \
+            size(surface, pattern_node.pop("height", "0"), 1) * height
+        if "viewBox" not in pattern_node:
+            pattern_node["width"] = pattern_width
+            pattern_node["height"] = pattern_height
     from . import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
     pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
+    pattern_pattern.set_matrix(cairo.Matrix(
+        pattern_surface.width / pattern_width, 0, 0,
+        pattern_surface.height / pattern_height, 0, 0))
     surface.context.set_source(pattern_pattern)
+    return True
 
 
 def draw_marker(surface, node, position="mid"):
@@ -290,10 +315,12 @@ def use(surface, node):
     if "mask" in node:
         del node["mask"]
     href = node.get("{http://www.w3.org/1999/xlink}href")
-    url = list(urls(href))[0]
+    tree_urls = urls(href)
+    url = tree_urls[0] if tree_urls else None
     tree = Tree(url=url, parent=node)
     surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
     surface.context.restore()
     # Restore twice, because draw does not restore at the end of svg tags
-    surface.context.restore()
+    if tree.tag != "use":
+        surface.context.restore()
