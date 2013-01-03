@@ -27,7 +27,8 @@ from math import radians
 from copy import deepcopy
 
 from .colors import color
-from .helpers import node_format, preserve_ratio, urls, transform
+from .helpers import node_format, preserve_ratio, paint, urls, transform
+from .shapes import rect
 from .units import size
 from ..parser import Tree
 
@@ -142,6 +143,9 @@ def paint_mask(surface, node, name, opacity):
     mask_surface = SVGSurface(mask_node, None, surface.dpi, surface)
     surface.context.save()
     surface.context.translate(x, y)
+    surface.context.scale(
+        mask_node["width"] / mask_surface.width,
+        mask_node["height"] / mask_surface.height)
     surface.context.mask_surface(mask_surface.cairo)
     surface.context.restore()
 
@@ -319,10 +323,32 @@ def draw_marker(surface, node, position="mid"):
         node.pending_markers.append(pending_marker)
 
 
-def apply_filter(surface, node):
+def apply_filter_before(surface, node):
+    if node.get("id") in surface.masks:
+        return
+
+    names = urls(node.get("filter"))
+    name = names[0][1:] if names else None
+    if name in surface.filters:
+        filter_node = surface.filters[name]
+        for child in filter_node.children:
+            # Offset
+            if child.tag == "feOffset":
+                if filter_node.get("primitiveUnits") == "objectBoundingBox":
+                    width = float(size(surface, node.get("width"), "x"))
+                    height = float(size(surface, node.get("height"), "y"))
+                    dx = size(surface, child.get("dx", 0), 1) * width
+                    dy = size(surface, child.get("dy", 0), 1) * height
+                else:
+                    dx = size(surface, child.get("dx", 0), 1)
+                    dy = size(surface, child.get("dy", 0), 1)
+                surface.context.translate(dx, dy)
+
+
+def apply_filter_after(surface, node):
     surface.context.set_operator(BLEND_OPERATORS["normal"])
 
-    if node.tag == "mask":
+    if node.get("id") in surface.masks:
         return
 
     names = urls(node.get("filter"))
@@ -334,6 +360,30 @@ def apply_filter(surface, node):
             if child.tag == "feBlend":
                 surface.context.set_operator(BLEND_OPERATORS.get(
                     child.get("mode", "normal"), BLEND_OPERATORS["normal"]))
+            # Flood
+            elif child.tag == "feFlood":
+                surface.context.new_path()
+                if filter_node.get("primitiveUnits") == "objectBoundingBox":
+                    x = float(size(surface, node.get("x"), "x"))
+                    y = float(size(surface, node.get("y"), "y"))
+                    x = size(surface, child.get("x", 0), 1) + x
+                    y = size(surface, child.get("y", 0), 1) + y
+                    width = float(size(surface, node.get("width"), "x"))
+                    height = float(size(surface, node.get("height"), "y"))
+                    width = size(surface, child.get("width", 0), 1) * width
+                    height = size(surface, child.get("height", 0), 1) * height
+                else:
+                    x = size(surface, child.get("x", 0), 1)
+                    y = size(surface, child.get("y", 0), 1)
+                    width = size(surface, child.get("width", 0), 1)
+                    height = size(surface, child.get("height", 0), 1)
+                rect_node = dict(x=x, y=y, width=width, height=height)
+                rect(surface, rect_node)
+                surface.context.set_source_rgba(*color(
+                    paint(child.get("flood-color"))[1],
+                    float(child.get("flood-opacity", 1))))
+                surface.context.fill()
+                surface.context.new_path()
 
 
 def use(surface, node):

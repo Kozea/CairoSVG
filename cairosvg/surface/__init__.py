@@ -25,7 +25,9 @@ import io
 
 from ..parser import Tree
 from .colors import color
-from .defs import apply_filter, gradient_or_pattern, parse_def, paint_mask
+from .defs import (
+    apply_filter_after, apply_filter_before, gradient_or_pattern, parse_def,
+    paint_mask)
 from .helpers import (
     node_format, transform, normalize, paint, urls, apply_matrix_transform,
     PointError)
@@ -204,15 +206,15 @@ class Surface(object):
         self._old_parent_node = self.parent_node
         self.parent_node = node
 
+        self.context.save()
+        # Transform the context according to the ``transform`` attribute
+        transform(self, node.get("transform"))
+
         masks = urls(node.get("mask"))
         mask = masks[0][1:] if masks else None
         opacity = float(node.get("opacity", 1))
         if mask or opacity < 1:
             self.context.push_group()
-
-        self.context.save()
-        # Transform the context according to the ``transform`` attribute
-        transform(self, node.get("transform"))
 
         self.context.move_to(
             size(self, node.get("x"), "x"),
@@ -267,12 +269,18 @@ class Surface(object):
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
+        # Filter
+        apply_filter_before(self, node)
+
         if node.tag in TAGS:
             try:
                 TAGS[node.tag](self, node)
             except PointError:
                 # Error in point parsing, do nothing
                 pass
+
+        # Filter
+        apply_filter_after(self, node)
 
         # Get stroke and fill opacity
         stroke_opacity = float(node.get("stroke-opacity", 1))
@@ -283,9 +291,6 @@ class Surface(object):
         visible = display and (node.get("visibility", "visible") != "hidden")
 
         if stroke_and_fill and visible and node.tag in TAGS:
-            # Filter
-            apply_filter(self, node)
-
             # Fill
             self.context.save()
             paint_source, paint_color = paint(node.get("fill", "black"))
@@ -315,17 +320,17 @@ class Surface(object):
             for child in node.children:
                 self.draw(child, stroke_and_fill)
 
-        if not node.root:
-            # Restoring context is useless if we are in the root tag, it may
-            # raise an exception if we have multiple svg tags
-            self.context.restore()
-
         if mask or opacity < 1:
             self.context.pop_group_to_source()
             if mask and mask in self.masks:
                 paint_mask(self, node, mask, opacity)
             else:
                 self.context.paint_with_alpha(opacity)
+
+        if not node.root:
+            # Restoring context is useless if we are in the root tag, it may
+            # raise an exception if we have multiple svg tags
+            self.context.restore()
 
         self.parent_node = self._old_parent_node
         self.font_size = old_font_size
