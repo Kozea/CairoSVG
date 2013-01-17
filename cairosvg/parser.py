@@ -44,6 +44,7 @@ except ImportError:
 # pylint: enable=E0611,F0401,W0611
 
 
+import re
 import gzip
 import os.path
 
@@ -75,6 +76,18 @@ def remove_svg_namespace(tree):
         tag = element.tag
         if hasattr(tag, "startswith") and tag.startswith(prefix):
             element.tag = tag[prefix_len:]
+
+
+def handle_white_spaces(string):
+    """Handle white spaces in text nodes."""
+    # TODO: handle xml:space="preserve"
+    # http://www.w3.org/TR/SVG/text.html#WhiteSpace
+    if not string:
+        return ""
+    string = re.sub("[\n\r]", "", string)
+    string = re.sub("\t", " ", string)
+    string = re.sub(" +", " ", string)
+    return string
 
 
 class Node(dict):
@@ -131,7 +144,7 @@ class Node(dict):
                     del self[attribute]
 
         # Manage text by creating children
-        if self.tag == "text" or self.tag == "textPath":
+        if self.tag in ("text", "textPath", "a"):
             self.children = self.text_children(node)
 
         if not self.children:
@@ -143,14 +156,25 @@ class Node(dict):
         """Create children and return them."""
         children = []
 
-        for child in node:
-            children.append(Node(child, parent=self))
-            if child.tail:
-                anonymous = ElementTree.Element('tspan')
-                anonymous.text = child.tail
-                children.append(Node(anonymous, parent=self))
+        self.text = handle_white_spaces(node.text)
+        self.text = self.text.lstrip(" ")
 
-        return list(children)
+        for child in node:
+            child_node = Node(child, parent=self)
+            child_node.text = handle_white_spaces(child.text)
+            child_node.children = child_node.text_children(child)
+            children.append(child_node)
+            if child.tail:
+                anonymous = Node(ElementTree.Element('tspan'), parent=self)
+                anonymous.text = handle_white_spaces(child.tail)
+                children.append(anonymous)
+
+        if children:
+            children[-1].text = children[-1].text.rstrip(" ")
+        else:
+            self.text = self.text.rstrip(" ")
+
+        return children
 
 
 class Tree(Node):

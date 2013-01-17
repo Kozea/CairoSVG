@@ -79,11 +79,6 @@ def text(surface, node):
     if not node.get("fill"):
         node["fill"] = "#000000"
 
-    # TODO: really handle white spaces in text nodes
-    # http://www.w3.org/TR/SVG/text.html#WhiteSpace
-    node.text = (node.text or "").lstrip()
-    node.text = node.text.rstrip() + " "
-
     font_size = size(surface, node.get("font-size", "12pt"))
     font_family = (node.get("font-family") or "sans-serif").split(",")[0]
     font_style = getattr(
@@ -137,10 +132,9 @@ def text_path(surface, node):
     surface.total_width += start_offset
 
     x, y = point_following_path(cairo_path, surface.total_width)
-    string = (node.text or "").strip(" \n")
     letter_spacing = size(surface, node.get("letter-spacing"))
 
-    for letter in string:
+    for letter in node.text:
         surface.total_width += (
             surface.context.text_extents(letter)[4] + letter_spacing)
         point_on_path = point_following_path(cairo_path, surface.total_width)
@@ -174,19 +168,18 @@ def tspan(surface, node):
         y = [size(surface, i, "y")
              for i in normalize(node["y"]).strip().split(" ")]
 
-    string = (node.text or "").strip()
-    if not string:
+    if not node.text:
         return
     fill = node.get("fill")
     positions = list(zip_longest(x, y))
-    letters_positions = list(zip(positions, string))
+    letters_positions = list(zip(positions, node.text))
     letters_positions = letters_positions[:-1] + [
-        (letters_positions[-1][0], string[len(letters_positions) - 1:])]
+        (letters_positions[-1][0], node.text[len(letters_positions) - 1:])]
 
     for (x, y), letters in letters_positions:
-        if x == None:
+        if x is None:
             x = surface.cursor_position[0]
-        if y == None:
+        if y is None:
             y = surface.cursor_position[1]
         node["x"] = str(x + size(surface, node.get("dx"), "x"))
         node["y"] = str(y + size(surface, node.get("dy"), "y"))
