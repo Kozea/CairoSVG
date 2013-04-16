@@ -36,7 +36,7 @@ setup(
     author="Kozea",
     author_email="guillaume.ayoub@kozea.fr",
     url="http://www.cairosvg.org/",
-    license="GNU LGPL v3",
+    license="GNU LGPL v3+",
     platforms="Any",
     packages=["cairosvg", "cairosvg.surface"],
     provides=["cairosvg"],
@@ -47,7 +47,7 @@ setup(
         "Environment :: Console",
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: "
-        "GNU Library or Lesser General Public License (LGPL)",
+        "GNU Lesser General Public License v3 or later (LGPLv3+)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
