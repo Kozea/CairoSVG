@@ -22,10 +22,10 @@ This module handles gradients and patterns.
 
 """
 
-import cairo
 from math import radians
 from copy import deepcopy
 
+from . import cairo
 from .colors import color
 from .helpers import node_format, preserve_ratio, paint, urls, transform
 from .shapes import rect

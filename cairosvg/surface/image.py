@@ -21,7 +21,6 @@ Images manager.
 """
 
 import base64
-import cairo
 from io import BytesIO
 try:
     from urllib import urlopen, unquote
@@ -32,6 +31,8 @@ except ImportError:
     from urllib.request import urlopen
     from urllib import parse as urlparse  # Python 3
     from urllib.parse import unquote_to_bytes
+
+from . import cairo
 from .helpers import node_format, size, preserve_ratio
 from ..parser import Tree
 

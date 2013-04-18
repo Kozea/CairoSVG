@@ -20,7 +20,6 @@ Text drawers.
 
 """
 
-import cairo
 from math import cos, sin
 
 # Python 2/3 management
@@ -31,6 +30,7 @@ except ImportError:
     from itertools import izip_longest as zip_longest
 # pylint: enable=E0611
 
+from . import cairo
 from .colors import color
 from .helpers import distance, normalize, point_angle
 from .units import size

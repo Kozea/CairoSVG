@@ -20,9 +20,9 @@ Surface helpers.
 
 """
 
-import cairo
 from math import cos, sin, tan, atan2, radians
 
+from . import cairo
 from .units import size
 
 # Python 2/3 management

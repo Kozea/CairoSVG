@@ -20,8 +20,11 @@ Cairo surface creators.
 
 """
 
-import cairo
 import io
+try:
+    import cairocffi as cairo
+except ImportError:
+    import cairo  # pycairo
 
 from ..parser import Tree
 from .colors import color
