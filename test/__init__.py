@@ -84,6 +84,7 @@ def generate_function(description):
         height2 = image2.get_height()
         pixels2 = image2.get_data()[:]
         assert image2.get_stride() == width2 * 4
+        cairosvg_surface.finish()
 
         # Test size
         assert abs(width1 - width2) <= SIZE_TOLERANCE, \
