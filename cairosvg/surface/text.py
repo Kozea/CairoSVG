@@ -109,7 +109,6 @@ def text(surface, node):
 
 def text_path(surface, node):
     """Draw text on a path."""
-    surface.context.save()
     if "url(#" not in (node.get("fill") or ""):
         surface.context.set_source_rgba(*color(node.get("fill")))
 
@@ -123,6 +122,7 @@ def text_path(surface, node):
     else:
         return
 
+    surface.context.save()
     surface.draw(path, False)
     cairo_path = surface.context.copy_path_flat()
     surface.context.new_path()
