@@ -170,7 +170,8 @@ class Node(dict):
                 children.append(anonymous)
 
         if children:
-            children[-1].text = children[-1].text.rstrip(" ")
+            if not children[-1].children:
+                children[-1].text = children[-1].text.rstrip(" ")
         else:
             self.text = self.text.rstrip(" ")
 
