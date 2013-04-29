@@ -185,7 +185,7 @@ def tspan(surface, node):
         node["y"] = str(y + size(surface, node.get("dy"), "y"))
         node["fill"] = fill
         node.text = letters
-        if node.parent.tag == "text":
+        if node.parent.tag in ("text", "tspan"):
             text(surface, node)
         else:
             node["x"] = str(x + size(surface, node.get("dx"), "x"))
