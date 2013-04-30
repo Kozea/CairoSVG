@@ -403,6 +403,12 @@ def use(surface, node):
     tree_urls = urls(href)
     url = tree_urls[0] if tree_urls else None
     tree = Tree(url=url, parent=node)
+
+    if node.tag == "svg":
+        # Explicitely specified
+        # http://www.w3.org/TR/SVG11/struct.html#UseElement
+        tree["width"], tree["height"] = node["width"], node["height"]
+
     surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
     surface.context.restore()
