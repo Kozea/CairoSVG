@@ -27,9 +27,9 @@ adequate installer.
 
 CairoSVG can use `lxml <http://lxml.de/>`_ to parse the SVG file, and `tinycss
 <http://packages.python.org/tinycss/>`_ plus `cssselect
-<http://packages.python.org/cssselect/>`_ to apply external CSS (i.e. not
-included in the ``style`` attribute of the tags). If these packages are not
-available, CSS will only be supported in the ``style`` attributes.
+<http://packages.python.org/cssselect/>`_ to apply CSS not included in the
+``style`` attribute of the tags. If these packages are not available, CSS will
+only be supported in the ``style`` attributes.
 
 Embedded raster images other than PNG are handled by `Pystacia
 <http://liquibits.bitbucket.org/>`_.
