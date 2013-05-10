@@ -58,13 +58,17 @@ Here is the simple CairoSVG usage::
     -v, --version         show version and exit
     -f FORMAT, --format=FORMAT
                           output format
-    -d DPI, --dpi=DPI     svg resolution
+    -d DPI, --dpi=DPI     ratio between 1in and 1px
     -o OUTPUT, --output=OUTPUT
                           output filename
 
 Supported output formats are ``pdf``, ``ps`` and ``png`` (default is
 ``pdf``). The default output is the standard output. If an output filename is
 given, the format is automatically chosen according to the extension.
+
+The ``dpi`` options sets the ratio between pixels and real-life units such
+as millimeters and inches (as explained in the `specification
+<http://www.w3.org/TR/SVG11/coords.html>`_).
 
 Moreover, if ``-`` is used as filename, CairoSVG reads the SVG string from the
 standard input.
