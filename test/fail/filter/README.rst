@@ -47,7 +47,7 @@ Raster Filters
 - ``filters-turb-01-f``
 - ``filters-turb-02-f``
 
-These filters are `missing in Cairo <http://cairographics.org/missing/>`, and
+These filters are `missing in Cairo <http://cairographics.org/missing/>`_, and
 CairoSVG won't include its own filters.
 
 
