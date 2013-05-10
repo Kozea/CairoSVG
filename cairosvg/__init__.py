@@ -56,7 +56,7 @@ def main():
     option_parser.add_option(
         "-f", "--format", help="output format")
     option_parser.add_option(
-        "-d", "--dpi", help="svg resolution", default=96)
+        "-d", "--dpi", help="ratio between 1in and 1px", default=96)
     option_parser.add_option(
         "-o", "--output",
         default="", help="output filename")
