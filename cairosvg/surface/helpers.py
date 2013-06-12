@@ -85,6 +85,7 @@ def normalize(string=None):
         string = string.replace("  ", " ")
 
     string = string.replace("e -", "e-")
+    string = string.replace("E -", "E-")
 
     values = string.split(" ")
     string = ""
