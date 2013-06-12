@@ -115,8 +115,10 @@ class Node(dict):
 
             self.update(items)
             self.url = parent.url
-            self.xml_tree = parent.xml_tree
             self.parent = parent
+        else:
+            self.url = getattr(self, "url", None)
+            self.parent = getattr(self, "parent", None)
 
         self.update(dict(node.attrib.items()))
 
@@ -165,7 +167,7 @@ class Node(dict):
             child_node.children = child_node.text_children(child)
             children.append(child_node)
             if child.tail:
-                anonymous = Node(ElementTree.Element('tspan'), parent=self)
+                anonymous = Node(ElementTree.Element("tspan"), parent=self)
                 anonymous.text = handle_white_spaces(child.tail)
                 children.append(anonymous)
 
@@ -180,13 +182,40 @@ class Node(dict):
 
 class Tree(Node):
     """SVG tree."""
+    def __new__(cls, **kwargs):
+        tree_cache = kwargs.get("tree_cache")
+        if tree_cache:
+            if "url" in kwargs:
+                url_parts = kwargs["url"].split("#", 1)
+                if len(url_parts) == 2:
+                    url, element_id = url_parts
+                else:
+                    url, element_id = url_parts[0], None
+                parent = kwargs.get("parent")
+                if parent and not url:
+                    url = parent.url
+                if (url, element_id) in tree_cache:
+                    cached_tree = tree_cache[(url, element_id)]
+                    new_tree = Node(cached_tree.xml_tree, parent)
+                    new_tree.xml_tree = cached_tree.xml_tree
+                    new_tree.url = url
+                    new_tree.tag = cached_tree.tag
+                    new_tree.root = True
+                    return new_tree
+        return dict.__new__(cls)
+
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
+        if getattr(self, "xml_tree", None) is not None:
+            # The tree has already been parsed
+            return
+
         # Make the parameters keyword-only:
-        bytestring = kwargs.pop('bytestring', None)
-        file_obj = kwargs.pop('file_obj', None)
-        url = kwargs.pop('url', None)
-        parent = kwargs.pop('parent', None)
+        bytestring = kwargs.pop("bytestring", None)
+        file_obj = kwargs.pop("file_obj", None)
+        url = kwargs.pop("url", None)
+        parent = kwargs.pop("parent", None)
+        tree_cache = kwargs.pop("tree_cache", None)
 
         if bytestring is not None:
             tree = ElementTree.fromstring(bytestring)
@@ -196,7 +225,7 @@ class Tree(Node):
             if url:
                 self.url = url
             else:
-                self.url = getattr(file_obj, 'name', None)
+                self.url = getattr(file_obj, "name", None)
         elif url is not None:
             if "#" in url:
                 url, element_id = url.split("#", 1)
@@ -220,7 +249,7 @@ class Tree(Node):
                 tree = parent.xml_tree
             if element_id:
                 iterator = (
-                    tree.iter() if hasattr(tree, 'iter')
+                    tree.iter() if hasattr(tree, "iter")
                     else tree.getiterator())
                 for element in iterator:
                     if element.get("id") == element_id:
@@ -231,9 +260,12 @@ class Tree(Node):
                         'No tag with id="%s" found.' % element_id)
         else:
             raise TypeError(
-                'No input. Use one of bytestring, file_obj or url.')
+                "No input. Use one of bytestring, file_obj or url.")
+
         remove_svg_namespace(tree)
         apply_stylesheets(tree)
         self.xml_tree = tree
         super(Tree, self).__init__(tree, parent)
         self.root = True
+        if tree_cache is not None and url is not None:
+            tree_cache[(self.url, self.get("id"))] = self

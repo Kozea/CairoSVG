@@ -402,7 +402,7 @@ def use(surface, node):
     href = node.get("{http://www.w3.org/1999/xlink}href")
     tree_urls = urls(href)
     url = tree_urls[0] if tree_urls else None
-    tree = Tree(url=url, parent=node)
+    tree = Tree(url=url, parent=node, tree_cache=surface.tree_cache)
 
     if tree.tag == "svg":
         # Explicitely specified

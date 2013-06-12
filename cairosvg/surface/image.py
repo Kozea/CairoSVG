@@ -111,7 +111,8 @@ def image(surface, node):
             del node["y"]
         if "viewBox" in node:
             del node["viewBox"]
-        tree = Tree(url=url, bytestring=image_bytes)
+        tree = Tree(
+            url=url, bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(surface, tree)
         if not tree_width or not tree_height:
             tree_width = tree["width"] = width
