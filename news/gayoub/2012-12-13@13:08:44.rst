@@ -1,7 +1,7 @@
 CairoSVG 0.5
 ============
 
-CairoSVG 0.4 has been released, with exciting new features and a lot of
+CairoSVG 0.5 has been released, with exciting new features and a lot of
 bugfixes:
 
 * Simple support of the ``image`` tag thanks to pystacia
