@@ -101,7 +101,7 @@ def image(surface, node):
     surface.context.clip()
 
     if image_bytes[:4] == b"\x89PNG":
-        png_bytes = image_bytes
+        png_file = BytesIO(image_bytes)
     elif image_bytes[:5] in (b"\x3csvg ", b"\x3c?xml"):
         surface.context.save()
         surface.context.translate(x, y)
@@ -132,13 +132,15 @@ def image(surface, node):
         return
     else:
         try:
-            from pystacia import read_blob
-            png_bytes = read_blob(image_bytes).get_blob('png')
+            from PIL import Image
+            png_file = BytesIO()
+            Image.open(BytesIO(image_bytes)).save(png_file, 'PNG')
+            png_file.seek(0)
         except:
             # No way to handle the image
             return
 
-    image_surface = cairo.ImageSurface.create_from_png(BytesIO(png_bytes))
+    image_surface = cairo.ImageSurface.create_from_png(png_file)
 
     node.image_width = image_surface.get_width()
     node.image_height = image_surface.get_height()
