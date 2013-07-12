@@ -78,15 +78,17 @@ def remove_svg_namespace(tree):
             element.tag = tag[prefix_len:]
 
 
-def handle_white_spaces(string):
+def handle_white_spaces(string, preserve):
     """Handle white spaces in text nodes."""
-    # TODO: handle xml:space="preserve"
     # http://www.w3.org/TR/SVG/text.html#WhiteSpace
     if not string:
         return ""
-    string = re.sub("[\n\r]", "", string)
-    string = re.sub("\t", " ", string)
-    string = re.sub(" +", " ", string)
+    if preserve:
+        string = re.sub("[\n\r\t]", " ", string)
+    else:
+        string = re.sub("[\n\r]", "", string)
+        string = re.sub("\t", " ", string)
+        string = re.sub(" +", " ", string)
     return string
 
 
@@ -157,25 +159,30 @@ class Node(dict):
     def text_children(self, node):
         """Create children and return them."""
         children = []
-
-        self.text = handle_white_spaces(node.text)
-        self.text = self.text.lstrip(" ")
+        space = "{http://www.w3.org/XML/1998/namespace}space"
+        preserve = self.get(space) == "preserve"
+        self.text = handle_white_spaces(node.text, preserve)
+        if not preserve:
+            self.text = self.text.lstrip(" ")
 
         for child in node:
             child_node = Node(child, parent=self)
-            child_node.text = handle_white_spaces(child.text)
+            child_preserve = child_node.get(space) == "preserve"
+            child_node.text = handle_white_spaces(child.text, child_preserve)
             child_node.children = child_node.text_children(child)
             children.append(child_node)
             if child.tail:
                 anonymous = Node(ElementTree.Element("tspan"), parent=self)
-                anonymous.text = handle_white_spaces(child.tail)
+                anonymous.text = handle_white_spaces(child.tail, preserve)
                 children.append(anonymous)
 
         if children:
             if not children[-1].children:
-                children[-1].text = children[-1].text.rstrip(" ")
+                if children[-1].get(space) != "preserve":
+                    children[-1].text = children[-1].text.rstrip(" ")
         else:
-            self.text = self.text.rstrip(" ")
+            if not preserve:
+                self.text = self.text.rstrip(" ")
 
         return children
 
