@@ -43,4 +43,4 @@ You also need Arial to be aliased by Liberation Sans (may already be done by
 your distribution).
 
 Last but not least, you have to install ``tinycss``, ``cssselect``, ``lxml``
-and ``pystacia`` to make the CSS- and raster-related tests pass correctly.
+and ``pillow`` to make the CSS- and raster-related tests pass correctly.
