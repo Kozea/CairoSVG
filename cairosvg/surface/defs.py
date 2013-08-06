@@ -100,7 +100,6 @@ def radial_gradient(surface, node):
 def pattern(surface, node):
     """Store a pattern definition."""
     parse_def(surface, node)
-    print(node)
 
 
 def clip_path(surface, node):
@@ -237,7 +236,6 @@ def draw_pattern(surface, node, name):
         if "viewBox" not in pattern_node:
             pattern_node["width"] = pattern_width
             pattern_node["height"] = pattern_height
-        he
     from . import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
