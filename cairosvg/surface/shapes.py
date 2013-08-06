@@ -32,8 +32,8 @@ def circle(surface, node):
         return
     surface.context.new_sub_path()
     surface.context.arc(
-        size(surface, node.get("x"), "x") + size(surface, node.get("cx"), "x"),
-        size(surface, node.get("y"), "y") + size(surface, node.get("cy"), "y"),
+        size(surface, node.get("cx"), "x"),
+        size(surface, node.get("cy"), "y"),
         r, 0, 2 * pi)
 
 

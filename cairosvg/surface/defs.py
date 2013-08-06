@@ -48,6 +48,8 @@ def update_def_href(surface, def_name, def_dict):
     if href and href[0] == "#" and href[1:] in def_dict:
         new_def_node = deepcopy(def_dict[href[1:]])
         new_def_node.update(def_node)
+        if def_node.children:
+            new_def_node.children = def_node.children
         def_node = new_def_node
         def_dict[def_name] = def_node
 
@@ -98,6 +100,7 @@ def radial_gradient(surface, node):
 def pattern(surface, node):
     """Store a pattern definition."""
     parse_def(surface, node)
+    print(node)
 
 
 def clip_path(surface, node):
@@ -234,6 +237,7 @@ def draw_pattern(surface, node, name):
         if "viewBox" not in pattern_node:
             pattern_node["width"] = pattern_width
             pattern_node["height"] = pattern_height
+        he
     from . import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
