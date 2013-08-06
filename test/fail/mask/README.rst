@@ -23,14 +23,6 @@ specification. Unfortunately, Cairo clips all the paths with the same fill
 rule.
 
 
-Clip Property
-=============
-
-- ``masking-path-06-b``
-
-The clip property is not handled at all, it looks easy to add.
-
-
 Clip Path Intersections
 =======================
 
