@@ -33,7 +33,7 @@ from .defs import (
     paint_mask)
 from .helpers import (
     node_format, transform, normalize, paint, urls, apply_matrix_transform,
-    PointError)
+    PointError, rect)
 from .path import PATH_TAGS
 from .tags import TAGS
 from .units import size
@@ -253,9 +253,25 @@ class Surface(object):
         self.context.set_miter_limit(miter_limit)
 
         # Clip
-        if "url(#" in (node.get("clip-path") or ""):
-            paths = urls(node["clip-path"])
-            path = self.paths.get(paths[0][1:]) if paths else None
+        rect_values = rect(node.get("clip"))
+        if len(rect_values) == 4:
+            top = float(size(self, rect_values[0], "y"))
+            right = float(size(self, rect_values[1], "x"))
+            bottom = float(size(self, rect_values[2], "y"))
+            left = float(size(self, rect_values[3], "x"))
+            x = float(size(self, node.get("x"), "x"))
+            y = float(size(self, node.get("y"), "y"))
+            width = float(size(self, node.get("width"), "x"))
+            height = float(size(self, node.get("height"), "y"))
+            self.context.save()
+            self.context.translate(x, y)
+            self.context.rectangle(
+                left, top, width - left - right, height - top - bottom)
+            self.context.restore()
+            self.context.clip()
+        clip_paths = urls(node.get("clip-path"))
+        if clip_paths:
+            path = self.paths.get(clip_paths[0][1:])
             if path:
                 self.context.save()
                 if path.get("clipPathUnits") == "objectBoundingBox":

@@ -252,3 +252,14 @@ def urls(string):
     return [
         link.strip("() ") for link in string.rsplit(")")[0].split(",")
         if link.strip("() ")]
+
+
+def rect(string):
+    """Parse the rect value of a clip."""
+    if not string:
+        return []
+    string = string.strip()
+    if string.startswith("rect"):
+        return string[4:].strip('() ').split(',')
+    else:
+        return []
