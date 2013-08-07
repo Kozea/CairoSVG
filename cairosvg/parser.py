@@ -94,7 +94,7 @@ def handle_white_spaces(string, preserve):
 
 class Node(dict):
     """SVG node with dict-like properties and children."""
-    def __init__(self, node, parent=None):
+    def __init__(self, node, parent=None, parent_children=False):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
         super(Node, self).__init__()
         self.children = ()
@@ -108,7 +108,8 @@ class Node(dict):
             items = parent.copy()
             not_inherited = (
                 "transform", "opacity", "style", "viewBox", "stop-color",
-                "stop-opacity", "width", "height")
+                "stop-opacity", "width", "height",
+                "{http://www.w3.org/1999/xlink}href", "id")
             if self.tag in ("tspan", "pattern"):
                 not_inherited += ("x", "y")
             for attribute in not_inherited:
@@ -152,8 +153,9 @@ class Node(dict):
             self.children = self.text_children(node)
 
         if not self.children:
+            children_parent = parent if parent_children else node
             self.children = tuple(
-                Node(child, self) for child in node
+                Node(child, self) for child in children_parent
                 if isinstance(child.tag, basestring))
 
     def text_children(self, node):
