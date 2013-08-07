@@ -188,6 +188,9 @@ def tspan(surface, node):
         if node.parent.tag in ("text", "tspan"):
             text(surface, node)
         else:
+            assert node.parent.tag == "textPath"
+            node["{http://www.w3.org/1999/xlink}href"] = \
+                node.parent.get("{http://www.w3.org/1999/xlink}href")
             node["x"] = str(x + size(surface, node.get("dx"), "x"))
             node["y"] = str(y + size(surface, node.get("dy"), "y"))
             text_path(surface, node)

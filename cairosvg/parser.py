@@ -46,6 +46,7 @@ except ImportError:
 
 import re
 import gzip
+import uuid
 import os.path
 
 from .css import apply_stylesheets
@@ -108,7 +109,7 @@ class Node(dict):
             items = parent.copy()
             not_inherited = (
                 "transform", "opacity", "style", "viewBox", "stop-color",
-                "stop-opacity", "width", "height",
+                "stop-opacity", "width", "height", "filter", "mask",
                 "{http://www.w3.org/1999/xlink}href", "id")
             if self.tag in ("tspan", "pattern"):
                 not_inherited += ("x", "y")
@@ -124,6 +125,10 @@ class Node(dict):
             self.parent = getattr(self, "parent", None)
 
         self.update(dict(node.attrib.items()))
+
+        # Give an id for nodes that don't have one
+        if "id" not in self:
+            self["id"] = uuid.uuid4().hex
 
         # Handle the CSS
         style = self.pop("style", "")
@@ -152,10 +157,12 @@ class Node(dict):
         if self.tag in ("text", "textPath", "a"):
             self.children = self.text_children(node)
 
-        if not self.children:
-            children_parent = parent if parent_children else node
+        if parent_children:
+            # TODO: make children inherit attributes from their new parent
+            self.children = parent.children
+        elif not self.children:
             self.children = tuple(
-                Node(child, self) for child in children_parent
+                Node(child, self) for child in node
                 if isinstance(child.tag, basestring))
 
     def text_children(self, node):
@@ -224,6 +231,7 @@ class Tree(Node):
         file_obj = kwargs.pop("file_obj", None)
         url = kwargs.pop("url", None)
         parent = kwargs.pop("parent", None)
+        parent_children = kwargs.pop("parent_children", None)
         tree_cache = kwargs.pop("tree_cache", None)
 
         if bytestring is not None:
@@ -274,7 +282,7 @@ class Tree(Node):
         remove_svg_namespace(tree)
         apply_stylesheets(tree)
         self.xml_tree = tree
-        super(Tree, self).__init__(tree, parent)
+        super(Tree, self).__init__(tree, parent, parent_children)
         self.root = True
         if tree_cache is not None and url is not None:
-            tree_cache[(self.url, self.get("id"))] = self
+            tree_cache[(self.url, self["id"])] = self

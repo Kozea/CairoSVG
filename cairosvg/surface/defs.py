@@ -333,7 +333,7 @@ def draw_marker(surface, node, position="mid"):
 
 
 def apply_filter_before(surface, node):
-    if node.get("id") in surface.masks:
+    if node["id"] in surface.masks:
         return
 
     names = urls(node.get("filter"))
@@ -357,7 +357,7 @@ def apply_filter_before(surface, node):
 def apply_filter_after(surface, node):
     surface.context.set_operator(BLEND_OPERATORS["normal"])
 
-    if node.get("id") in surface.masks:
+    if node["id"] in surface.masks:
         return
 
     names = urls(node.get("filter"))
