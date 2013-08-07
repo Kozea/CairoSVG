@@ -215,8 +215,6 @@ def draw_pattern(surface, node, name):
     """Draw a pattern image."""
     pattern_node = surface.patterns[name]
     pattern_node.tag = "g"
-    transform(surface, "translate(%s %s)" % (
-        pattern_node.get("x"), pattern_node.get("y")))
     transform(surface, pattern_node.get("patternTransform"))
 
     if pattern_node.get("viewBox"):
@@ -229,6 +227,8 @@ def draw_pattern(surface, node, name):
             return False
 
     if pattern_node.get("patternUnits") == "userSpaceOnUse":
+        x = float(size(surface, pattern_node.get("x"), "x"))
+        y = float(size(surface, pattern_node.get("y"), "y"))
         pattern_width =  \
             float(size(surface, pattern_node.get("width", 0), 1))
         pattern_height =  \
@@ -236,6 +236,8 @@ def draw_pattern(surface, node, name):
     else:
         width = float(size(surface, node.get("width"), "x"))
         height = float(size(surface, node.get("height"), "y"))
+        x = float(size(surface, pattern_node.get("x"), 1)) * width
+        y = float(size(surface, pattern_node.get("y"), 1)) * height
         pattern_width = \
             size(surface, pattern_node.pop("width", "0"), 1) * width
         pattern_height = \
@@ -243,13 +245,15 @@ def draw_pattern(surface, node, name):
         if "viewBox" not in pattern_node:
             pattern_node["width"] = pattern_width
             pattern_node["height"] = pattern_height
+            if pattern_node.get("patternContentUnits") == "objectBoundingBox":
+                pattern_node["transform"] = "scale(%s, %s)" % (width, height)
     from . import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
     pattern_pattern.set_extend(cairo.EXTEND_REPEAT)
     pattern_pattern.set_matrix(cairo.Matrix(
         pattern_surface.width / pattern_width, 0, 0,
-        pattern_surface.height / pattern_height, 0, 0))
+        pattern_surface.height / pattern_height, -x, -y))
     surface.context.set_source(pattern_pattern)
     return True
 
