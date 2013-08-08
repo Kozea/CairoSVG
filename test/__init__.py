@@ -32,10 +32,12 @@ import subprocess
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
 from cairosvg.surface import cairo
-from cairosvg import main
+from cairosvg import main, features
 import cairosvg.parser
 import cairosvg.surface
 
+
+features.LOCALE = "en_US"
 
 REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
 TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
