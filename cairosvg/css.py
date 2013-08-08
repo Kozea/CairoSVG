@@ -76,6 +76,7 @@ def find_style_rules(tree):
         for rule in find_stylesheets_rules(stylesheet, tree.url):
             yield rule
 
+
 def get_declarations(rule):
     """Get the declarations in ``rule``."""
     for declaration in rule.declarations:
