@@ -131,7 +131,7 @@ class Node(dict):
             self["id"] = uuid.uuid4().hex
 
         # Handle the CSS
-        style = self.pop("style", "").lower() + ";" + self.pop("_style", "")
+        style = self.pop("_style", "") + ";" + self.pop("style", "").lower()
         for declaration in style.split(";"):
             if ":" in declaration:
                 name, value = declaration.split(":", 1)
