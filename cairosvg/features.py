@@ -16,10 +16,10 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This module implements some helpers related to
-SVG conditional processing.
+Helpers related to SVG conditional processing.
 
 """
+
 import locale
 
 
@@ -35,15 +35,13 @@ SUPPORTED_FEATURES = set(
 
 
 def has_features(features):
-    """Check the given features are supported by CairoSVG."""
+    """Check whether ``features`` are supported by CairoSVG."""
     return SUPPORTED_FEATURES.issuperset(features.split(' '))
 
 
 def support_languages(languages):
-    """Check the given languages are parts of the user preferences
-    locales.
-    """
+    """Check whether one of ``languages`` is part of the user locales."""
     for language in languages.replace(' ', '').split(','):
-        if not LOCALE.startswith(language):
-            return False
-    return True
+        if LOCALE.startswith(language):
+            return True
+    return False
