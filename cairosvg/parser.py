@@ -131,7 +131,7 @@ class Node(dict):
             self["id"] = uuid.uuid4().hex
 
         # Handle the CSS
-        style = self.pop("style", "")
+        style = self.pop("style", "").lower() + ";" + self.pop("_style", "")
         for declaration in style.split(";"):
             if ":" in declaration:
                 name, value = declaration.split(":", 1)
@@ -278,10 +278,9 @@ class Tree(Node):
         else:
             raise TypeError(
                 "No input. Use one of bytestring, file_obj or url.")
-
         remove_svg_namespace(tree)
-        apply_stylesheets(tree)
         self.xml_tree = tree
+        apply_stylesheets(self)
         super(Tree, self).__init__(tree, parent, parent_children)
         self.root = True
         if tree_cache is not None and url is not None:
