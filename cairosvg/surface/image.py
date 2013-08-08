@@ -21,6 +21,7 @@ Images manager.
 """
 
 import base64
+import gzip
 from io import BytesIO
 try:
     from urllib import urlopen, unquote
@@ -102,7 +103,10 @@ def image(surface, node):
 
     if image_bytes[:4] == b"\x89PNG":
         png_file = BytesIO(image_bytes)
-    elif image_bytes[:5] in (b"<svg ", b"<?xml", b"<!DOC"):
+    elif (image_bytes[:5] in (b"<svg ", b"<?xml", b"<!DOC") or
+            image_bytes[:2] == b"\x1f\x8b"):
+        if image_bytes[:2] == b"\x1f\x8b":
+            image_bytes = gzip.GzipFile(fileobj=BytesIO(image_bytes)).read()
         surface.context.save()
         surface.context.translate(x, y)
         if "x" in node:
