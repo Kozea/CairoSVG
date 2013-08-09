@@ -51,6 +51,7 @@ import os.path
 
 from .css import apply_stylesheets
 from .features import match_features
+from .surface.helpers import urls
 
 
 # Python 2/3 compat
@@ -111,9 +112,7 @@ class Node(dict):
             not_inherited = (
                 "transform", "opacity", "style", "viewBox", "stop-color",
                 "stop-opacity", "width", "height", "filter", "mask",
-                "{http://www.w3.org/1999/xlink}href", "id")
-            if self.tag in ("tspan", "pattern"):
-                not_inherited += ("x", "y")
+                "{http://www.w3.org/1999/xlink}href", "id", "x", "y")
             for attribute in not_inherited:
                 if attribute in items:
                     del items[attribute]
@@ -180,7 +179,15 @@ class Node(dict):
             self.text = self.text.lstrip(" ")
 
         for child in node:
-            child_node = Node(child, parent=self)
+            if child.tag == "tref":
+                href = child.get("{http://www.w3.org/1999/xlink}href")
+                tree_urls = urls(href)
+                url = tree_urls[0] if tree_urls else None
+                child_node = Tree(url=url, parent=self)
+                child_node.tag = "tspan"
+                child = child_node.xml_tree
+            else:
+                child_node = Node(child, parent=self)
             child_preserve = child_node.get(space) == "preserve"
             child_node.text = handle_white_spaces(child.text, child_preserve)
             child_node.children = child_node.text_children(child)

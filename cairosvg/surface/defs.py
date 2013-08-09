@@ -424,7 +424,8 @@ def use(surface, node):
     if tree.tag == "svg":
         # Explicitely specified
         # http://www.w3.org/TR/SVG11/struct.html#UseElement
-        tree["width"], tree["height"] = node["width"], node["height"]
+        if "width" in node and "height" in node:
+            tree["width"], tree["height"] = node["width"], node["height"]
 
     surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
