@@ -30,6 +30,7 @@ from .helpers import node_format, preserve_ratio, paint, urls, transform
 from .shapes import rect
 from .units import size
 from ..parser import Tree
+from ..features import match_features
 
 
 BLEND_OPERATORS = {
@@ -416,6 +417,9 @@ def use(surface, node):
     tree_urls = urls(href)
     url = tree_urls[0] if tree_urls else None
     tree = Tree(url=url, parent=node, tree_cache=surface.tree_cache)
+
+    if not match_features(tree.xml_tree):
+        return
 
     if tree.tag == "svg":
         # Explicitely specified

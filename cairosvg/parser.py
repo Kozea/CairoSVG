@@ -50,7 +50,7 @@ import uuid
 import os.path
 
 from .css import apply_stylesheets
-from .features import has_features, support_languages
+from .features import match_features
 
 
 # Python 2/3 compat
@@ -165,18 +165,10 @@ class Node(dict):
             self.children = []
             for child in node:
                 if isinstance(child.tag, basestring):
-                    if self.tag == "switch":
-                        if child.attrib.get("requiredExtensions"):
-                            continue
-                        if child.attrib.get("requiredFeatures"):
-                            if not has_features(child.attrib["requiredFeatures"]):
-                                continue
-                        if child.attrib.get("systemLanguage"):
-                            if not support_languages(child.attrib["systemLanguage"]):
-                                continue
-                    self.children.append(Node(child, self))
-                    if self.tag == "switch":
-                        break
+                    if match_features(child):
+                        self.children.append(Node(child, self))
+                        if self.tag == "switch":
+                            break
 
     def text_children(self, node):
         """Create children and return them."""

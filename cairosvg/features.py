@@ -23,9 +23,10 @@ Helpers related to SVG conditional processing.
 import locale
 
 
+ROOT = "http://www.w3.org/TR/SVG11/feature"
 LOCALE = locale.getdefaultlocale()[0]
 SUPPORTED_FEATURES = set(
-    "http://www.w3.org/TR/SVG11/feature#" + feature for feature in [
+    ROOT + "#" + feature for feature in [
         "SVG",
         "SVG-static",
         "CoreAttribute",
@@ -51,12 +52,24 @@ SUPPORTED_FEATURES = set(
 
 def has_features(features):
     """Check whether ``features`` are supported by CairoSVG."""
-    return SUPPORTED_FEATURES.issuperset(features.split(' '))
+    return SUPPORTED_FEATURES >= set(features.strip().split(" "))
 
 
 def support_languages(languages):
     """Check whether one of ``languages`` is part of the user locales."""
-    for language in languages.replace(' ', '').split(','):
-        if LOCALE.startswith(language):
+    for language in languages.split(","):
+        language = language.strip()
+        if language and LOCALE.startswith(language):
             return True
     return False
+
+
+def match_features(node):
+    """Check the node match the conditional processing attributes."""
+    if "requiredExtensions" in node.attrib:
+        return False
+    if not has_features(node.attrib.get("requiredFeatures", ROOT + "#SVG")):
+        return False
+    if not support_languages(node.attrib.get("systemLanguage", LOCALE)):
+        return False
+    return True
