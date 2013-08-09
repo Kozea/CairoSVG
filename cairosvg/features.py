@@ -26,11 +26,26 @@ import locale
 LOCALE = locale.getdefaultlocale()[0]
 SUPPORTED_FEATURES = set(
     "http://www.w3.org/TR/SVG11/feature#" + feature for feature in [
+        "SVG",
+        "SVG-static",
+        "CoreAttribute",
+        "Structure",
+        "BasicStructure",
+        "ConditionalProcessing",
+        "Image",
+        "Style",
+        "ViewportAttribute",
         "Shape",
-        "XlinkAttribute",
-        "Pattern",
         "BasicText",
-        "SVGDOM"
+        "BasicPaintAttribute",
+        "OpacityAttribute",
+        "BasicGraphicsAttribute",
+        "Marker",
+        "Gradient",
+        "Pattern",
+        "Clip",
+        "BasicClip",
+        "Mask"
     ])
 
 
