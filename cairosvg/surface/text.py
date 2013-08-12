@@ -123,7 +123,9 @@ def text_path(surface, node):
         return
 
     surface.context.save()
-    surface.draw(path, False)
+    surface.stroke_and_fill = False
+    surface.draw(path)
+    surface.stroke_and_fill = True
     cairo_path = surface.context.copy_path_flat()
     surface.context.new_path()
 

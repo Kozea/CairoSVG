@@ -120,6 +120,7 @@ class Surface(object):
         self.output = output
         self.dpi = dpi
         self.font_size = size(self, "12pt")
+        self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
@@ -188,7 +189,7 @@ class Surface(object):
         """Draw the root ``node``."""
         self.draw(node)
 
-    def draw(self, node, stroke_and_fill=True):
+    def draw(self, node):
         """Draw ``node`` and its children."""
         old_font_size = self.font_size
         self.font_size = size(self, node.get("font-size", "12pt"))
@@ -203,7 +204,6 @@ class Surface(object):
         if (("width" in node and size(self, node["width"]) == 0) or
            ("height" in node and size(self, node["height"]) == 0)):
             return
-
         node.tangents = [None]
         node.pending_markers = []
 
@@ -282,7 +282,9 @@ class Surface(object):
                     self.context.translate(x, y)
                     self.context.scale(width, height)
                 path.tag = "g"
-                self.draw(path, stroke_and_fill=False)
+                self.stroke_and_fill = False
+                self.draw(path)
+                self.stroke_and_fill = True
                 self.context.restore()
                 if node.get("clip-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
@@ -310,7 +312,7 @@ class Surface(object):
         display = node.get("display", "inline") != "none"
         visible = display and (node.get("visibility", "visible") != "hidden")
 
-        if stroke_and_fill and visible and node.tag in TAGS:
+        if self.stroke_and_fill and visible and node.tag in TAGS:
             # Fill
             self.context.save()
             paint_source, paint_color = paint(node.get("fill", "black"))
@@ -338,7 +340,7 @@ class Surface(object):
                 "linearGradient", "radialGradient", "marker", "pattern",
                 "mask", "clipPath", "filter"):
             for child in node.children:
-                self.draw(child, stroke_and_fill)
+                self.draw(child)
 
         if mask or opacity < 1:
             self.context.pop_group_to_source()
