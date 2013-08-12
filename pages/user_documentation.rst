@@ -43,8 +43,8 @@ CairoSVG can be freely downloaded on the `project website, download section
 folder of your choice.
 
 
-Usage
-=====
+Command-Line Usage
+==================
 
 Description
 -----------
@@ -91,3 +91,23 @@ Here are some usage examples:
 
   # Convert an SVG string to pdf, write to standard output
   echo "<svg height='30' width='30'><text y='10'>123</text></svg>" | cairosvg -
+
+
+API
+===
+
+The ``cairosvg`` module offers 4 functions:
+
+- ``svg2pdf``,
+- ``svg2png``,
+- ``svg2ps``, and
+- ``svg2svg`` (!).
+
+These functions expect *one* of these parameters:
+
+- ``bytestring``, a byte string containing SVG, or
+- ``url``, an URL or a filename, or
+- ``file_obj``, a file-like object.
+
+If the ``write_to`` argument is provided (filename or file-like object), the
+output is written there. Otherwise, the function returns a byte string.
