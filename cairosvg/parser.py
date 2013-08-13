@@ -51,7 +51,7 @@ import os.path
 
 from .css import apply_stylesheets
 from .features import match_features
-from .surface.helpers import urls
+from .surface.helpers import urls, rotations, pop_rotation
 
 
 # Python 2/3 compat
@@ -111,7 +111,7 @@ class Node(dict):
             items = parent.copy()
             not_inherited = (
                 "transform", "opacity", "style", "viewBox", "stop-color",
-                "stop-opacity", "width", "height", "filter", "mask",
+                "stop-opacity", "width", "height", "filter", "mask", "rotate",
                 "{http://www.w3.org/1999/xlink}href", "id", "x", "y")
             for attribute in not_inherited:
                 if attribute in items:
@@ -177,7 +177,20 @@ class Node(dict):
         self.text = handle_white_spaces(node.text, preserve)
         if not preserve:
             self.text = self.text.lstrip(" ")
-
+        original_rotate = rotations(self)
+        rotate = list(original_rotate)
+        #if "rotate" in self:
+            #original_rotate = [
+                #float(i) for i in
+                #normalize(self["rotate"]).strip().split(" ")]
+        #else:
+            #original_rotate = []
+        #rotate = list(original_rotate)
+        if original_rotate:
+            pop_rotation(self, original_rotate, rotate)
+            #self["rotate"] = " ".join(
+                #str(rotate.pop(0) if rotate else original_rotate[-1])
+                #for i in range(len(self.text)))
         for child in node:
             if child.tag == "tref":
                 href = child.get("{http://www.w3.org/1999/xlink}href")
@@ -191,10 +204,20 @@ class Node(dict):
             child_preserve = child_node.get(space) == "preserve"
             child_node.text = handle_white_spaces(child.text, child_preserve)
             child_node.children = child_node.text_children(child)
+            if original_rotate and ("rotate" not in child_node):
+                pop_rotation(child_node, original_rotate, rotate)
+                #child_node["rotate"] = " ".join(
+                    #str(rotate.pop(0) if rotate else original_rotate[-1])
+                    #for i in range(len(child_node.text)))
             children.append(child_node)
             if child.tail:
                 anonymous = Node(ElementTree.Element("tspan"), parent=self)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
+                if original_rotate:
+                    pop_rotation(anonymous, original_rotate, rotate)
+                    #anonymous["rotate"] = " ".join(
+                        #str(rotate.pop(0) if rotate else original_rotate[-1])
+                        #for i in range(len(anonymous.text)))
                 children.append(anonymous)
 
         if children:

@@ -263,3 +263,28 @@ def rect(string):
         return string[4:].strip('() ').split(',')
     else:
         return []
+
+
+def rotations(node):
+    """Retrieves the original rotations of a `text` or `tspan` node."""
+    if "rotate" in node:
+        original_rotate = [
+            float(i) for i in normalize(node["rotate"]).strip().split(" ")]
+        return original_rotate
+    return []
+
+
+def pop_rotation(node, original_rotate, rotate):
+    """Removes the rotations of a node that are already used."""
+    node["rotate"] = " ".join(
+        str(rotate.pop(0) if rotate else original_rotate[-1])
+        for i in range(len(node.text)))
+
+
+def radians_values(node):
+    """Returns the radians values of the rotation angles."""
+    if "rotate" in node:
+        rotate = [radians(float(i))
+                  for i in normalize(node["rotate"]).strip().split(" ")]
+        return rotate
+    return []

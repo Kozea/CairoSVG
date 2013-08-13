@@ -49,5 +49,5 @@ TAGS = {
     "svg": svg,
     "text": text,
     "textPath": text_path,
-    "tspan": tspan,
+    "tspan": text,
     "use": use}
