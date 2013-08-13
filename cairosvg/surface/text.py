@@ -93,8 +93,7 @@ def text(surface, node):
     text_extents = surface.context.text_extents(node.text)
     x_bearing = text_extents[0]
     width = text_extents[2]
-    x, y = [i for i in surface.cursor_position]
-    #x, y = size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
+    x, y = surface.cursor_position
     if "x" in node:
         x = size(surface, node["x"], "x")
     if "y" in node:
@@ -111,7 +110,6 @@ def text(surface, node):
     elif text_anchor == "end":
         x -= width + x_bearing
 
-    surface.context.move_to(x, y)
     if "rotate" in node:
         rotate = [radians(float(i))
                   for i in normalize(node["rotate"]).strip().split(" ")]
@@ -119,10 +117,11 @@ def text(surface, node):
         rotate = []
     if rotate:
         for i, letter in enumerate(node.text):
+            surface.context.save()
             r = rotate[i] if i < len(rotate) - 1 else rotate[-1]
+            surface.context.move_to(x, y)
             cursor_position = surface.context.get_current_point()
             text_extents = surface.context.text_extents(letter)
-            surface.context.save()
             surface.context.rotate(r)
             surface.context.text_path(letter)
             surface.context.restore()
