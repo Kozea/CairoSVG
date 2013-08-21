@@ -199,7 +199,7 @@ class Node(dict):
             child_preserve = child_node.get(space) == "preserve"
             child_node.text = handle_white_spaces(child.text, child_preserve)
             child_node.children = child_node.text_children(child)
-            if original_rotate and ("rotate" not in child_node):
+            if original_rotate and "rotate" not in child_node:
                 pop_rotation(child_node, original_rotate, rotate)
             children.append(child_node)
             if child.tail:

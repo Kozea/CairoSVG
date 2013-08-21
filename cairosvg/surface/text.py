@@ -115,34 +115,38 @@ def text(surface, node):
     else:
         x_align = 0
 
-    if not node.text:
-        return
-
     last_dx, last_dy, last_r = dx[-1], dy[-1], rotate[-1]
     letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
-    for [x, y, dx, dy, r], letter in letters_positions:
-        surface.context.save()
-        if x is None:
-            x = surface.cursor_position[0]
-        if y is None:
-            y = surface.cursor_position[1]
-        if dx is None:
-            dx = 0
-        if dy is None:
-            dy = 0
-        if r is None:
-            r = last_r
-        surface.context.move_to(x + dx, y + dy)
-        surface.context.rel_move_to(-x_align, 0)
-        cursor_position = surface.context.get_current_point()
-        surface.context.rotate(r)
-        surface.context.text_path(letter)
-        surface.context.restore()
-        surface.context.move_to(*cursor_position)
-        text_extents = surface.context.text_extents(letter)
-        surface.context.rel_move_to(*text_extents[4:])
-        surface.context.rel_move_to(x_align, 0)
-        surface.cursor_position = surface.context.get_current_point()
+    if node.text:
+        for [x, y, dx, dy, r], letter in letters_positions:
+            surface.context.save()
+            if x is None:
+                x = surface.cursor_position[0]
+            if y is None:
+                y = surface.cursor_position[1]
+            if dx is None:
+                dx = 0
+            if dy is None:
+                dy = 0
+            if r is None:
+                r = last_r
+            surface.context.move_to(x + dx, y + dy)
+            surface.context.rel_move_to(-x_align, 0)
+            cursor_position = surface.context.get_current_point()
+            surface.context.rotate(r)
+            surface.context.text_path(letter)
+            surface.context.restore()
+            surface.context.move_to(*cursor_position)
+            text_extents = surface.context.text_extents(letter)
+            surface.context.rel_move_to(*text_extents[4:])
+            surface.context.rel_move_to(x_align, 0)
+            surface.cursor_position = surface.context.get_current_point()
+    else:
+        x = x[0] if x else surface.cursor_position[0]
+        y = y[0] if y else surface.cursor_position[1]
+        dx = dx[0] if dx else 0
+        dy = dy[0] if dy else 0
+        surface.cursor_position = (x + dx, y + dy)
 
 
 def text_path(surface, node):
