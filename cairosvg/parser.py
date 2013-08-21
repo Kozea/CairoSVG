@@ -105,6 +105,7 @@ class Node(dict):
         self.root = False
         self.tag = node.tag
         self.text = node.text
+        self.node = node
 
         # Inherits from parent properties
         if parent is not None:
@@ -124,7 +125,7 @@ class Node(dict):
             self.url = getattr(self, "url", None)
             self.parent = getattr(self, "parent", None)
 
-        self.update(dict(node.attrib.items()))
+        self.update(dict(self.node.attrib.items()))
 
         # Give an id for nodes that don't have one
         if "id" not in self:
@@ -158,8 +159,8 @@ class Node(dict):
             self.children = self.text_children(node)
 
         if parent_children:
-            # TODO: make children inherit attributes from their new parent
-            self.children = parent.children
+            self.children = [Node(child.node, parent=self)
+                             for child in parent.children]
         elif not self.children:
             self.children = []
             for child in node:
@@ -175,30 +176,24 @@ class Node(dict):
         space = "{http://www.w3.org/XML/1998/namespace}space"
         preserve = self.get(space) == "preserve"
         self.text = handle_white_spaces(node.text, preserve)
-        if not preserve:
+        if not preserve and (self.parent.text or " ").endswith(" "):
             self.text = self.text.lstrip(" ")
         original_rotate = rotations(self)
         rotate = list(original_rotate)
-        #if "rotate" in self:
-            #original_rotate = [
-                #float(i) for i in
-                #normalize(self["rotate"]).strip().split(" ")]
-        #else:
-            #original_rotate = []
-        #rotate = list(original_rotate)
         if original_rotate:
             pop_rotation(self, original_rotate, rotate)
-            #self["rotate"] = " ".join(
-                #str(rotate.pop(0) if rotate else original_rotate[-1])
-                #for i in range(len(self.text)))
         for child in node:
             if child.tag == "tref":
                 href = child.get("{http://www.w3.org/1999/xlink}href")
                 tree_urls = urls(href)
                 url = tree_urls[0] if tree_urls else None
-                child_node = Tree(url=url, parent=self)
+                child_tree = Tree(url=url, parent=self)
+                child_tree.clear()
+                child_tree.update(self)
+                child_node = Node(
+                    child, parent=child_tree, parent_children=True)
                 child_node.tag = "tspan"
-                child = child_node.xml_tree
+                child = child_tree.xml_tree
             else:
                 child_node = Node(child, parent=self)
             child_preserve = child_node.get(space) == "preserve"
@@ -206,25 +201,20 @@ class Node(dict):
             child_node.children = child_node.text_children(child)
             if original_rotate and ("rotate" not in child_node):
                 pop_rotation(child_node, original_rotate, rotate)
-                #child_node["rotate"] = " ".join(
-                    #str(rotate.pop(0) if rotate else original_rotate[-1])
-                    #for i in range(len(child_node.text)))
             children.append(child_node)
             if child.tail:
                 anonymous = Node(ElementTree.Element("tspan"), parent=self)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
                 if original_rotate:
                     pop_rotation(anonymous, original_rotate, rotate)
-                    #anonymous["rotate"] = " ".join(
-                        #str(rotate.pop(0) if rotate else original_rotate[-1])
-                        #for i in range(len(anonymous.text)))
                 children.append(anonymous)
 
         if children:
-            if not children[-1].children:
-                if children[-1].get(space) != "preserve":
-                    children[-1].text = children[-1].text.rstrip(" ")
-        else:
+            for i, child in enumerate(children):
+                if not child.children:
+                    if children[-1].get(space) != "preserve":
+                        children[-1].text = children[-1].text.rstrip(" ")
+        elif self.tag == "text":
             if not preserve:
                 self.text = self.text.rstrip(" ")
 
