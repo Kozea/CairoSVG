@@ -156,7 +156,7 @@ class Node(dict):
 
         # Manage text by creating children
         if self.tag in ("text", "textPath", "a"):
-            self.children = self.text_children(node)
+            self.children, _ = self.text_children(node, True, True)
 
         if parent_children:
             self.children = [Node(child.node, parent=self)
@@ -170,18 +170,20 @@ class Node(dict):
                         if self.tag == "switch":
                             break
 
-    def text_children(self, node):
+    def text_children(self, node, trailing_space, text_root=False):
         """Create children and return them."""
         children = []
         space = "{http://www.w3.org/XML/1998/namespace}space"
         preserve = self.get(space) == "preserve"
         self.text = handle_white_spaces(node.text, preserve)
-        if not preserve and (self.parent.text or " ").endswith(" "):
+        if trailing_space and not preserve:
             self.text = self.text.lstrip(" ")
         original_rotate = rotations(self)
         rotate = list(original_rotate)
         if original_rotate:
             pop_rotation(self, original_rotate, rotate)
+        if self.text:
+            trailing_space = self.text.endswith(" ")
         for child in node:
             if child.tag == "tref":
                 href = child.get("{http://www.w3.org/1999/xlink}href")
@@ -198,15 +200,21 @@ class Node(dict):
                 child_node = Node(child, parent=self)
             child_preserve = child_node.get(space) == "preserve"
             child_node.text = handle_white_spaces(child.text, child_preserve)
-            child_node.children = child_node.text_children(child)
+            child_node.children, trailing_space = \
+                child_node.text_children(child, trailing_space)
+            trailing_space = child_node.text.endswith(" ")
             if original_rotate and "rotate" not in child_node:
                 pop_rotation(child_node, original_rotate, rotate)
             children.append(child_node)
             if child.tail:
                 anonymous = Node(ElementTree.Element("tspan"), parent=self)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
+                if trailing_space and not preserve:
+                    anonymous.text = anonymous.text.lstrip(" ")
                 if original_rotate:
                     pop_rotation(anonymous, original_rotate, rotate)
+                if anonymous.text:
+                    trailing_space = anonymous.text.endswith(" ")
                 children.append(anonymous)
 
         if children:
@@ -214,11 +222,10 @@ class Node(dict):
                 if not child.children:
                     if children[-1].get(space) != "preserve":
                         children[-1].text = children[-1].text.rstrip(" ")
-        elif self.tag == "text":
-            if not preserve:
-                self.text = self.text.rstrip(" ")
+        elif text_root and not preserve:
+            self.text = self.text.rstrip(" ")
 
-        return children
+        return children, trailing_space
 
 
 class Tree(Node):
