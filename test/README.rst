@@ -38,7 +38,7 @@ the tests:
 - CalaLig
 - SVGFreeSans
 - Liberation Sans
-- FreeSerifBoldItalic
+- FreeSerif*
 
 You also need Arial to be aliased by Liberation Sans (may already be done by
 your distribution).

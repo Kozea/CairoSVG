@@ -290,5 +290,5 @@ def zip_letters(xl, yl, dxl, dyl, rl, word):
     avoid setting an x,y or rotation value that have already been used.
     """
     return (
-        ([pl.pop(0) if pl else None for pl in xl, yl, dxl, dyl, rl], char)
+        ([pl.pop(0) if pl else None for pl in (xl, yl, dxl, dyl, rl)], char)
         for char in word)

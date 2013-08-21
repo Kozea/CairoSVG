@@ -217,12 +217,7 @@ class Node(dict):
                     trailing_space = anonymous.text.endswith(" ")
                 children.append(anonymous)
 
-        if children:
-            for i, child in enumerate(children):
-                if not child.children:
-                    if children[-1].get(space) != "preserve":
-                        children[-1].text = children[-1].text.rstrip(" ")
-        elif text_root and not preserve:
+        if text_root and not children and not preserve:
             self.text = self.text.rstrip(" ")
 
         return children, trailing_space

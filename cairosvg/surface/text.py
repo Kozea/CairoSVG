@@ -104,7 +104,7 @@ def text(surface, node):
         dy = [float(size(surface, i, "y"))
               for i in normalize(node["dy"]).strip().split(" ")]
     if "rotate" in node:
-        rotate = [radians(float(i))
+        rotate = [radians(float(i)) if i else 0
                   for i in normalize(node["rotate"]).strip().split(" ")]
 
     text_anchor = node.get("text-anchor")

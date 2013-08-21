@@ -14,48 +14,21 @@ Text on a Path
 - ``text-path-01-b``
 - ``text-path-02-b``
 - ``text-align-04-b``
+- ``toap02``
 
 `Text on a path <http://www.w3.org/TR/SVG/text.html#TextOnAPath>`_ doesn't work
-when the text must be drawn after or before the path. This has to be handled
-when the module is rewritten.
-
-- ``toap04``
-
-This test doesn't have the same output on 32-bit and 64-bit hardware. May be
-fixed when the module is rewritten.
-
-
-Rotation
-========
-
-- ``tspan04``
-- ``tspan05``
-
-`Glyph rotation
-<http://www.w3.org/TR/SVG/text.html#TextElementRotateAttribute>`_ is not
-managed at all. This has to be handled when the module is rewritten.
-
-
-Reference
-=========
-
-- ``text-ws-03-t``
-
-`Character reference
-<http://www.w3.org/TR/SVG/text.html#TextElementRotateAttribute>`_ is not
-handled correctly and raises errors. This has to be handled when the module is
-rewritten.
+when the text must be drawn after or before the path, or with nested
+tspans. This has to be handled when the module is rewritten.
 
 
 Decoration, Spacing, Bidi, Kerning, Alt Glyphs
 ==============================================
 
 - ``textdecoration01``
-- ``text-ws-03-t``
 - ``styling-css-05-b``
 - other ``text-%*``
 
-Text decoration, spacing, kerning, and various other features are not handled
+Text decoration, kerning, and various other features are not handled
 in Cairo, and thus cannot be handled in CairoSVG. One solution to solve this
 problem would be to use Pango, but that's a huge dependency. You can consider
 these features as "won't fix".
