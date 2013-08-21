@@ -27,10 +27,10 @@ from .image import image
 from .path import path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
 from .svg import svg
-from .text import text, text_path, tspan
+from .text import text, text_path
 
 TAGS = {
-    "a": tspan,
+    "a": text,
     "circle": circle,
     "clipPath": clip_path,
     "ellipse": ellipse,

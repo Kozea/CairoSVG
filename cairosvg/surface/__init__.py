@@ -349,6 +349,10 @@ class Surface(object):
             else:
                 self.context.paint_with_alpha(opacity)
 
+        # Clean cursor's position after 'text' tags
+        if node.tag == "text":
+            self.cursor_position = 0, 0
+
         if not node.root:
             # Restoring context is useless if we are in the root tag, it may
             # raise an exception if we have multiple svg tags

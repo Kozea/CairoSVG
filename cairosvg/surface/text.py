@@ -24,15 +24,11 @@ from math import cos, sin, radians
 
 # Python 2/3 management
 # pylint: disable=E0611
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
 # pylint: enable=E0611
 
 from . import cairo
 from .colors import color
-from .helpers import distance, normalize, point_angle
+from .helpers import distance, normalize, point_angle, zip_letters
 from .units import size
 
 
@@ -93,45 +89,60 @@ def text(surface, node):
     text_extents = surface.context.text_extents(node.text)
     x_bearing = text_extents[0]
     width = text_extents[2]
-    x, y = surface.cursor_position
+
+    x, y, dx, dy, rotate = [], [], [0], [0], [0]
     if "x" in node:
-        x = size(surface, node["x"], "x")
+        x = [float(size(surface, i, "x"))
+             for i in normalize(node["x"]).strip().split(" ")]
     if "y" in node:
-        y = size(surface, node["y"], "y")
-    if "rotate" in node:
-        rotate = [float(i)
-                  for i in normalize(node["rotate"]).strip().split(" ")]
-    else:
-        rotate = [0]
-
-    text_anchor = node.get("text-anchor")
-    if text_anchor == "middle":
-        x -= width / 2. + x_bearing
-    elif text_anchor == "end":
-        x -= width + x_bearing
-
+        y = [float(size(surface, i, "y"))
+             for i in normalize(node["y"]).strip().split(" ")]
+    if "dx" in node:
+        dx = [float(size(surface, i, "x"))
+              for i in normalize(node["dx"]).strip().split(" ")]
+    if "dy" in node:
+        dy = [float(size(surface, i, "y"))
+              for i in normalize(node["dy"]).strip().split(" ")]
     if "rotate" in node:
         rotate = [radians(float(i))
                   for i in normalize(node["rotate"]).strip().split(" ")]
-    else:
-        rotate = []
-    if rotate:
-        for i, letter in enumerate(node.text):
-            surface.context.save()
-            r = rotate[i] if i < len(rotate) - 1 else rotate[-1]
-            surface.context.move_to(x, y)
-            cursor_position = surface.context.get_current_point()
-            text_extents = surface.context.text_extents(letter)
-            surface.context.rotate(r)
-            surface.context.text_path(letter)
-            surface.context.restore()
-            surface.context.move_to(*cursor_position)
-            surface.context.rel_move_to(*text_extents[4:])
-    else:
-        surface.context.text_path(node.text)
 
-    # Remember the absolute cursor position
-    surface.cursor_position = surface.context.get_current_point()
+    text_anchor = node.get("text-anchor")
+    if text_anchor == "middle":
+        x_align = width / 2. + x_bearing
+    elif text_anchor == "end":
+        x_align = width + x_bearing
+    else:
+        x_align = 0
+
+    if not node.text:
+        return
+
+    last_dx, last_dy, last_r = dx[-1], dy[-1], rotate[-1]
+    letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
+    for [x, y, dx, dy, r], letter in letters_positions:
+        surface.context.save()
+        if x is None:
+            x = surface.cursor_position[0]
+        if y is None:
+            y = surface.cursor_position[1]
+        if dx is None:
+            dx = 0
+        if dy is None:
+            dy = 0
+        if r is None:
+            r = last_r
+        surface.context.move_to(x + dx, y + dy)
+        surface.context.rel_move_to(-x_align, 0)
+        cursor_position = surface.context.get_current_point()
+        surface.context.rotate(r)
+        surface.context.text_path(letter)
+        surface.context.restore()
+        surface.context.move_to(*cursor_position)
+        text_extents = surface.context.text_extents(letter)
+        surface.context.rel_move_to(*text_extents[4:])
+        surface.context.rel_move_to(x_align, 0)
+        surface.cursor_position = surface.context.get_current_point()
 
 
 def text_path(surface, node):
@@ -185,51 +196,3 @@ def text_path(surface, node):
     # Remember the relative cursor position
     surface.cursor_position = \
         size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
-
-
-def tspan(surface, node):
-    """Draw a tspan ``node``."""
-    #x, y = [[i] for i in surface.cursor_position]
-    #if "x" in node:
-        #x = [size(surface, i, "x")
-             #for i in normalize(node["x"]).strip().split(" ")]
-    #if "y" in node:
-        #y = [size(surface, i, "y")
-             #for i in normalize(node["y"]).strip().split(" ")]
-    #if "rotate" in node:
-        #rotate = [float(i)
-                  #for i in normalize(node["rotate"]).strip().split(" ")]
-    #else:
-        #rotate = [0]
-
-    #if not node.text:
-        #return
-    #fill = node.get("fill")
-    #positions = list(zip_longest(x, y, rotate))
-    #letters_positions = list(zip(positions, node.text))
-    #letters_positions = letters_positions[:-1] + [
-        #(letters_positions[-1][0], node.text[len(letters_positions) - 1:])]
-
-    #for (x, y, r), letters in letters_positions:
-        #if x is None:
-            #x = surface.cursor_position[0]
-        #if y is None:
-            #y = surface.cursor_position[1]
-        #if r is None:
-            #r = rotate[-1]
-        #node["x"] = str(x + size(surface, node.get("dx"), "x"))
-        #node["y"] = str(y + size(surface, node.get("dy"), "y"))
-        #node["rotate"] = str(r)
-        #node["fill"] = fill
-        #node.text = letters
-        #if node.parent.tag in ("text", "tspan"):
-            #text(surface, node)
-        #else:
-            #assert node.parent.tag == "textPath"
-            #node["{http://www.w3.org/1999/xlink}href"] = \
-                #node.parent.get("{http://www.w3.org/1999/xlink}href")
-            #node["x"] = str(x + size(surface, node.get("dx"), "x"))
-            #node["y"] = str(y + size(surface, node.get("dy"), "y"))
-            #text_path(surface, node)
-            #if node.parent.children[-1] == node:
-                #surface.total_width = 0

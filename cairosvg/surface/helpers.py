@@ -281,10 +281,14 @@ def pop_rotation(node, original_rotate, rotate):
         for i in range(len(node.text)))
 
 
-def radians_values(node):
-    """Returns the radians values of the rotation angles."""
-    if "rotate" in node:
-        rotate = [radians(float(i))
-                  for i in normalize(node["rotate"]).strip().split(" ")]
-        return rotate
-    return []
+def zip_letters(xl, yl, dxl, dyl, rl, word):
+    """Returns a list with the current letter's positions (x, y and rotation).
+    E.g.: for letter 'L' with positions x = 10, y = 20 and rotation = 30:
+    >>> [[10, 20, 30], 'L']
+
+    Store the last value of each position and pop the first one in order to
+    avoid setting an x,y or rotation value that have already been used.
+    """
+    return (
+        ([pl.pop(0) if pl else None for pl in xl, yl, dxl, dyl, rl], char)
+        for char in word)
