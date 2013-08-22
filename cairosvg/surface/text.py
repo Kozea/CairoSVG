@@ -27,7 +27,6 @@ from math import cos, sin, radians
 # pylint: enable=E0611
 
 from . import cairo
-from .colors import color
 from .helpers import distance, normalize, point_angle, zip_letters
 from .units import size
 
@@ -86,11 +85,20 @@ def text(surface, node):
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(font_size)
 
+    text_path_href = (
+        node.get("{http://www.w3.org/1999/xlink}href", "") or
+        node.parent.get("{http://www.w3.org/1999/xlink}href", ""))
+    text_path = surface.paths.get(text_path_href.lstrip("#"))
+
     text_extents = surface.context.text_extents(node.text)
     x_bearing = text_extents[0]
     width = text_extents[2]
 
-    x, y, dx, dy, rotate = [], [], [0], [0], [0]
+    if text_path:
+        x, y, dx, dy, rotate = [], [], [0], [0], [0]
+    else:
+        x, y, dx, dy, rotate = [], [], [], [], [0]
+
     if "x" in node:
         x = [float(size(surface, i, "x"))
              for i in normalize(node["x"]).strip().split(" ")]
@@ -107,96 +115,81 @@ def text(surface, node):
         rotate = [radians(float(i)) if i else 0
                   for i in normalize(node["rotate"]).strip().split(" ")]
 
-    text_anchor = node.get("text-anchor")
-    if text_anchor == "middle":
-        x_align = width / 2. + x_bearing
-    elif text_anchor == "end":
-        x_align = width + x_bearing
-    else:
-        x_align = 0
+    if text_path:
+        surface.stroke_and_fill = False
+        surface.draw(text_path)
+        surface.stroke_and_fill = True
+        cairo_path = surface.context.copy_path_flat()
+        surface.context.new_path()
+        start_offset = size(
+            surface, node.get("startOffset", 0), path_length(cairo_path))
+        surface.text_path_width += start_offset
 
-    last_dx, last_dy, last_r = dx[-1], dy[-1], rotate[-1]
+        x1, y1 = point_following_path(cairo_path, surface.text_path_width)
+        letter_spacing = size(surface, node.get("letter-spacing"))
+    else:
+        text_anchor = node.get("text-anchor")
+        if text_anchor == "middle":
+            x_align = width / 2. + x_bearing
+        elif text_anchor == "end":
+            x_align = width + x_bearing
+        else:
+            x_align = 0
+
+    last_r = rotate[-1]
     letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
     if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
+            # print x, y, dx, dy, r, letter
             surface.context.save()
-            if x is None:
-                x = surface.cursor_position[0]
-            if y is None:
-                y = surface.cursor_position[1]
-            if dx is None:
-                dx = 0
-            if dy is None:
-                dy = 0
-            if r is None:
-                r = last_r
-            surface.context.move_to(x + dx, y + dy)
-            surface.context.rel_move_to(-x_align, 0)
-            cursor_position = surface.context.get_current_point()
-            surface.context.rotate(r)
+            if text_path:
+                if dx is not None:
+                    surface.cursor_d_position[0] += dx
+                if dy is not None:
+                    surface.cursor_d_position[1] += dy
+                surface.text_path_width += (
+                    surface.context.text_extents(letter)[4] + letter_spacing)
+                point_on_path = point_following_path(
+                    cairo_path, surface.text_path_width + surface.cursor_d_position[0])
+                if point_on_path:
+                    x2, y2 = point_on_path
+                else:
+                    continue
+                r = point_angle(x1, y1, x2, y2)
+                surface.context.translate(x1, y1)
+                surface.context.rotate(r)
+                surface.context.translate(0, surface.cursor_d_position[1])
+                surface.context.move_to(0, 0)
+                x1, y1 = x2, y2
+            else:
+                if x is None:
+                    x = surface.cursor_position[0]
+                if y is None:
+                    y = surface.cursor_position[1]
+                if dx is None:
+                    dx = 0
+                if dy is None:
+                    dy = 0
+                if r is None:
+                    r = last_r
+                surface.context.move_to(x + dx, y + dy)
+                cursor_position = surface.context.get_current_point()
+                surface.context.rel_move_to(-x_align, 0)
+                surface.context.rotate(r)
+
             surface.context.text_path(letter)
-            surface.context.restore()
-            surface.context.move_to(*cursor_position)
-            text_extents = surface.context.text_extents(letter)
-            surface.context.rel_move_to(*text_extents[4:])
-            surface.context.rel_move_to(x_align, 0)
-            surface.cursor_position = surface.context.get_current_point()
+            if text_path:
+                surface.cursor_position = surface.context.get_current_point()
+                surface.context.restore()
+            else:
+                text_extents = surface.context.text_extents(letter)
+                surface.context.restore()
+                surface.context.move_to(*cursor_position)
+                surface.context.rel_move_to(*text_extents[4:])
+                surface.cursor_position = surface.context.get_current_point()
     else:
         x = x[0] if x else surface.cursor_position[0]
         y = y[0] if y else surface.cursor_position[1]
         dx = dx[0] if dx else 0
         dy = dy[0] if dy else 0
         surface.cursor_position = (x + dx, y + dy)
-
-
-def text_path(surface, node):
-    """Draw text on a path."""
-    if "url(#" not in (node.get("fill") or ""):
-        surface.context.set_source_rgba(*color(node.get("fill")))
-
-    id_path = node.get("{http://www.w3.org/1999/xlink}href", "")
-    if not id_path.startswith("#"):
-        return
-    id_path = id_path[1:]
-
-    if id_path in surface.paths:
-        path = surface.paths.get(id_path)
-    else:
-        return
-
-    surface.context.save()
-    surface.stroke_and_fill = False
-    surface.draw(path)
-    surface.stroke_and_fill = True
-    cairo_path = surface.context.copy_path_flat()
-    surface.context.new_path()
-
-    start_offset = size(
-        surface, node.get("startOffset", 0), path_length(cairo_path))
-    surface.total_width += start_offset
-
-    x, y = point_following_path(cairo_path, surface.total_width)
-    letter_spacing = size(surface, node.get("letter-spacing"))
-
-    for letter in node.text:
-        surface.total_width += (
-            surface.context.text_extents(letter)[4] + letter_spacing)
-        point_on_path = point_following_path(cairo_path, surface.total_width)
-        if point_on_path:
-            x2, y2 = point_on_path
-        else:
-            continue
-        angle = point_angle(x, y, x2, y2)
-        surface.context.save()
-        surface.context.translate(x, y)
-        surface.context.rotate(angle + float(node.get("rotate", 0)))
-        surface.context.translate(0, size(surface, node.get("y"), "y"))
-        surface.context.move_to(0, 0)
-        surface.context.show_text(letter)
-        surface.context.restore()
-        x, y = x2, y2
-    surface.context.restore()
-
-    # Remember the relative cursor position
-    surface.cursor_position = \
-        size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")

@@ -27,7 +27,7 @@ from .image import image
 from .path import path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
 from .svg import svg
-from .text import text, text_path
+from .text import text
 
 TAGS = {
     "a": text,
@@ -48,6 +48,6 @@ TAGS = {
     "rect": rect,
     "svg": svg,
     "text": text,
-    "textPath": text_path,
+    "textPath": text,
     "tspan": text,
     "use": use}

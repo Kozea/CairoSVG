@@ -99,7 +99,8 @@ class Surface(object):
         self.cairo = None
         self.context_width, self.context_height = None, None
         self.cursor_position = 0, 0
-        self.total_width = 0
+        self.cursor_d_position = [0, 0]
+        self.text_path_width = 0
         self.tree_cache = {(tree.url, tree["id"]): tree}
         if parent_surface:
             self.markers = parent_surface.markers
@@ -352,6 +353,7 @@ class Surface(object):
         # Clean cursor's position after 'text' tags
         if node.tag == "text":
             self.cursor_position = 0, 0
+            self.text_path_width = 0
 
         if not node.root:
             # Restoring context is useless if we are in the root tag, it may
