@@ -98,7 +98,7 @@ class Surface(object):
         """
         self.cairo = None
         self.context_width, self.context_height = None, None
-        self.cursor_position = 0, 0
+        self.cursor_position = [0, 0]
         self.cursor_d_position = [0, 0]
         self.text_path_width = 0
         self.tree_cache = {(tree.url, tree["id"]): tree}

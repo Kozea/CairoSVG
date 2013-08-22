@@ -89,16 +89,12 @@ def text(surface, node):
         node.get("{http://www.w3.org/1999/xlink}href", "") or
         node.parent.get("{http://www.w3.org/1999/xlink}href", ""))
     text_path = surface.paths.get(text_path_href.lstrip("#"))
-
+    letter_spacing = size(surface, node.get("letter-spacing"))
     text_extents = surface.context.text_extents(node.text)
     x_bearing = text_extents[0]
     width = text_extents[2]
 
-    if text_path:
-        x, y, dx, dy, rotate = [], [], [0], [0], [0]
-    else:
-        x, y, dx, dy, rotate = [], [], [], [], [0]
-
+    x, y, dx, dy, rotate = [], [], [], [], [0]
     if "x" in node:
         x = [float(size(surface, i, "x"))
              for i in normalize(node["x"]).strip().split(" ")]
@@ -114,6 +110,16 @@ def text(surface, node):
     if "rotate" in node:
         rotate = [radians(float(i)) if i else 0
                   for i in normalize(node["rotate"]).strip().split(" ")]
+    last_r = rotate[-1]
+    letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
+
+    text_anchor = node.get("text-anchor")
+    if text_anchor == "middle":
+        x_align = width / 2. + x_bearing
+    elif text_anchor == "end":
+        x_align = width + x_bearing
+    else:
+        x_align = 0
 
     if text_path:
         surface.stroke_and_fill = False
@@ -124,69 +130,41 @@ def text(surface, node):
         start_offset = size(
             surface, node.get("startOffset", 0), path_length(cairo_path))
         surface.text_path_width += start_offset
-
         x1, y1 = point_following_path(cairo_path, surface.text_path_width)
-        letter_spacing = size(surface, node.get("letter-spacing"))
-    else:
-        text_anchor = node.get("text-anchor")
-        if text_anchor == "middle":
-            x_align = width / 2. + x_bearing
-        elif text_anchor == "end":
-            x_align = width + x_bearing
-        else:
-            x_align = 0
 
-    last_r = rotate[-1]
-    letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
     if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
-            # print x, y, dx, dy, r, letter
+            surface.cursor_d_position[0] += dx or 0
+            surface.cursor_d_position[1] += dy or 0
+            extents = surface.context.text_extents(letter)[4]
             surface.context.save()
             if text_path:
-                if dx is not None:
-                    surface.cursor_d_position[0] += dx
-                if dy is not None:
-                    surface.cursor_d_position[1] += dy
-                surface.text_path_width += (
-                    surface.context.text_extents(letter)[4] + letter_spacing)
+                surface.text_path_width += extents + letter_spacing
                 point_on_path = point_following_path(
-                    cairo_path, surface.text_path_width + surface.cursor_d_position[0])
+                    cairo_path,
+                    surface.text_path_width + surface.cursor_d_position[0])
                 if point_on_path:
                     x2, y2 = point_on_path
                 else:
                     continue
-                r = point_angle(x1, y1, x2, y2)
                 surface.context.translate(x1, y1)
-                surface.context.rotate(r)
+                surface.context.rotate(point_angle(x1, y1, x2, y2))
                 surface.context.translate(0, surface.cursor_d_position[1])
                 surface.context.move_to(0, 0)
                 x1, y1 = x2, y2
             else:
-                if x is None:
-                    x = surface.cursor_position[0]
-                if y is None:
-                    y = surface.cursor_position[1]
-                if dx is None:
-                    dx = 0
-                if dy is None:
-                    dy = 0
-                if r is None:
-                    r = last_r
-                surface.context.move_to(x + dx, y + dy)
-                cursor_position = surface.context.get_current_point()
+                x = surface.cursor_position[0] if x is None else x
+                y = surface.cursor_position[1] if y is None else y
+                surface.context.move_to(x + letter_spacing, y)
+                cursor_position = x + letter_spacing + extents, y
+                surface.context.rel_move_to(*surface.cursor_d_position)
                 surface.context.rel_move_to(-x_align, 0)
-                surface.context.rotate(r)
+                surface.context.rotate(last_r if r is None else r)
 
             surface.context.text_path(letter)
-            if text_path:
-                surface.cursor_position = surface.context.get_current_point()
-                surface.context.restore()
-            else:
-                text_extents = surface.context.text_extents(letter)
-                surface.context.restore()
-                surface.context.move_to(*cursor_position)
-                surface.context.rel_move_to(*text_extents[4:])
-                surface.cursor_position = surface.context.get_current_point()
+            surface.context.restore()
+            if not text_path:
+                surface.cursor_position = cursor_position
     else:
         x = x[0] if x else surface.cursor_position[0]
         y = y[0] if y else surface.cursor_position[1]
