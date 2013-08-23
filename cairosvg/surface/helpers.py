@@ -292,3 +292,12 @@ def zip_letters(xl, yl, dxl, dyl, rl, word):
     return (
         ([pl.pop(0) if pl else None for pl in (xl, yl, dxl, dyl, rl)], char)
         for char in word)
+
+
+def flatten(node):
+    flattened_text = [node.text or ""]
+    for child in list(node):
+        flattened_text.append(flatten(child))
+        flattened_text.append(child.tail or "")
+        node.remove(child)
+    return "".join(flattened_text)

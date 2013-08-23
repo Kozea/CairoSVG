@@ -51,7 +51,7 @@ import os.path
 
 from .css import apply_stylesheets
 from .features import match_features
-from .surface.helpers import urls, rotations, pop_rotation
+from .surface.helpers import urls, rotations, pop_rotation, flatten
 
 
 # Python 2/3 compat
@@ -195,7 +195,10 @@ class Node(dict):
                 child_node = Node(
                     child, parent=child_tree, parent_children=True)
                 child_node.tag = "tspan"
+                # Retrieve the referenced node and get its flattened text
+                # and remove the node children.
                 child = child_tree.xml_tree
+                child.text = flatten(child)
             else:
                 child_node = Node(child, parent=self)
             child_preserve = child_node.get(space) == "preserve"
@@ -209,10 +212,10 @@ class Node(dict):
             if child.tail:
                 anonymous = Node(ElementTree.Element("tspan"), parent=self)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
-                if trailing_space and not preserve:
-                    anonymous.text = anonymous.text.lstrip(" ")
                 if original_rotate:
                     pop_rotation(anonymous, original_rotate, rotate)
+                if trailing_space and not preserve:
+                    anonymous.text = anonymous.text.lstrip(" ")
                 if anonymous.text:
                     trailing_space = anonymous.text.endswith(" ")
                 children.append(anonymous)
