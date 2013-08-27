@@ -429,6 +429,8 @@ def use(surface, node):
 
     surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
+    node.pop("fill", None)
+    node.pop("stroke", None)
     surface.context.restore()
     # Restore twice, because draw does not restore at the end of svg tags
     if tree.tag != "use":
