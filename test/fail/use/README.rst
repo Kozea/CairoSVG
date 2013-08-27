@@ -18,13 +18,10 @@ an error. If this error doesn't have to be handled according to the
 specification, then this test can safely fail.
 
 
-Use Attributes
-==============
+Root of URLs
+============
 
-- other ``struct-use-*``
+- ``struct-use-05-b``
 
-Used elements must inherit the attributes of the original document they're
-coming from, and they must inherit the attributes of the ``use`` tag in the
-destination document. That's why we have to parse the full SVG document of the
-external used element, and then include the node referenced in the ``use`` tag
-as a child of the ``use`` tag.
+Hash paths are inherited by ``use`` tags from original files without fixing the
+root of the URLs.
