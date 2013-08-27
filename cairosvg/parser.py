@@ -97,7 +97,7 @@ def handle_white_spaces(string, preserve):
 
 class Node(dict):
     """SVG node with dict-like properties and children."""
-    def __init__(self, node, parent=None, parent_children=False):
+    def __init__(self, node, parent=None, parent_children=False, url=None):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
         super(Node, self).__init__()
         self.children = ()
@@ -119,7 +119,7 @@ class Node(dict):
                     del items[attribute]
 
             self.update(items)
-            self.url = parent.url
+            self.url = url or parent.url
             self.parent = parent
         else:
             self.url = getattr(self, "url", None)
@@ -312,7 +312,7 @@ class Tree(Node):
             else:
                 raise TypeError(
                     'No tag with id="%s" found.' % element_id)
-        super(Tree, self).__init__(self.xml_tree, parent, parent_children)
+        super(Tree, self).__init__(self.xml_tree, parent, parent_children, url)
         self.root = True
         if tree_cache is not None and url is not None:
             tree_cache[(self.url, self["id"])] = self
