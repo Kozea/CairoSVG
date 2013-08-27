@@ -263,6 +263,7 @@ class Tree(Node):
         parent = kwargs.pop("parent", None)
         parent_children = kwargs.pop("parent_children", None)
         tree_cache = kwargs.pop("tree_cache", None)
+        element_id = None
 
         if bytestring is not None:
             tree = ElementTree.fromstring(bytestring)
@@ -294,24 +295,24 @@ class Tree(Node):
                 tree = ElementTree.parse(input_).getroot()
             else:
                 tree = parent.xml_tree
-            if element_id:
-                iterator = (
-                    tree.iter() if hasattr(tree, "iter")
-                    else tree.getiterator())
-                for element in iterator:
-                    if element.get("id") == element_id:
-                        tree = element
-                        break
-                else:
-                    raise TypeError(
-                        'No tag with id="%s" found.' % element_id)
         else:
             raise TypeError(
                 "No input. Use one of bytestring, file_obj or url.")
         remove_svg_namespace(tree)
         self.xml_tree = tree
         apply_stylesheets(self)
-        super(Tree, self).__init__(tree, parent, parent_children)
+        if element_id:
+            iterator = (
+                tree.iter() if hasattr(tree, "iter")
+                else tree.getiterator())
+            for element in iterator:
+                if element.get("id") == element_id:
+                    self.xml_tree = element
+                    break
+            else:
+                raise TypeError(
+                    'No tag with id="%s" found.' % element_id)
+        super(Tree, self).__init__(self.xml_tree, parent, parent_children)
         self.root = True
         if tree_cache is not None and url is not None:
             tree_cache[(self.url, self["id"])] = self
