@@ -38,10 +38,21 @@ except ImportError:
 iteritems = getattr(dict, "iteritems", dict.items)  # pylint: disable=C0103
 
 
-def find_stylesheets(tree):
+def find_stylesheets(tree, url):
     """Find the stylesheets included in ``tree``."""
     # TODO: support contentStyleType on <svg>
     default_type = "text/css"
+    process = tree.getprevious()
+    while process is not None:
+        if (getattr(process, "target", None) == "xml-stylesheet" and
+                process.attrib.get("type", default_type) == "text/css"):
+            # TODO: handle web URLs
+            filename = process.attrib.get("href")
+            if filename:
+                path = os.path.join(os.path.dirname(url), filename)
+                if os.path.isfile(path):
+                    yield tinycss.make_parser().parse_stylesheet_file(path)
+        process = process.getprevious()
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
         if (element.tag == "style" and
@@ -50,7 +61,6 @@ def find_stylesheets(tree):
             # TODO: support media types
             # TODO: what if <style> has children elements?
             yield tinycss.make_parser().parse_stylesheet(element.text)
-    # TODO: support <?xml-stylesheet ... ?>
 
 
 def find_stylesheets_rules(stylesheet, url):
@@ -71,7 +81,7 @@ def find_stylesheets_rules(stylesheet, url):
 
 def find_style_rules(tree):
     """Find the style rules in ``tree``."""
-    for stylesheet in find_stylesheets(tree.xml_tree):
+    for stylesheet in find_stylesheets(tree.xml_tree, tree.url):
         # TODO: warn for each stylesheet.errors
         for rule in find_stylesheets_rules(stylesheet, tree.url):
             yield rule
