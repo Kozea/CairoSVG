@@ -11,14 +11,11 @@
 Text on a Path
 ==============
 
-- ``text-path-01-b``
 - ``text-path-02-b``
 - ``text-align-04-b``
-- ``toap02``
 
-`Text on a path <http://www.w3.org/TR/SVG/text.html#TextOnAPath>`_ doesn't work
-when the text must be drawn after or before the path, or with nested
-tspans. This has to be handled when the module is rewritten.
+`Text on a path <http://www.w3.org/TR/SVG/text.html#TextOnAPath>`_ still
+suffers some little bugs with alignment.
 
 
 Decoration, Spacing, Bidi, Kerning, Alt Glyphs
