@@ -352,7 +352,8 @@ class Surface(object):
 
         # Clean cursor's position after 'text' tags
         if node.tag == "text":
-            self.cursor_position = 0, 0
+            self.cursor_position = [0, 0]
+            self.cursor_d_position = [0, 0]
             self.text_path_width = 0
 
         if not node.root:
