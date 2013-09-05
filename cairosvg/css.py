@@ -55,8 +55,9 @@ def find_stylesheets(tree, url):
         process = process.getprevious()
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
-        if (element.tag == "style" and
-                element.get("type", default_type) == "text/css"):
+        if (element.tag == "style"
+                and element.get("type", default_type) == "text/css"
+                and element.text):
             # TODO: pass href for relative URLs
             # TODO: support media types
             # TODO: what if <style> has children elements?
