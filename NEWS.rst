@@ -3,10 +3,24 @@
 ======
 
 
-Version 1.0, not released yet
+Version 2.0, not released yet
 =============================
 
-See the roadmap: http://redmine.kozea.fr/projects/cairosvg/roadmap
+* Fix markers
+* Fix URL/id handling
+
+
+Version 1.0, released on 2013-09-06
+===================================
+
+* CairoCFFI support
+* Support of more external CSS stylesheets
+* Handle more filters
+* Use pillow instead of pystacia
+* Fix a lot of bugs with text (whitespaces, text on a path, etc.)
+* Inherit attributes in ``use`` tags
+* Cache trees for ``use`` tags
+* Handle conditional structures
 
 
 Version 0.5, released on 2012-12-13
