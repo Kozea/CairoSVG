@@ -96,16 +96,16 @@ def text(surface, node):
 
     x, y, dx, dy, rotate = [], [], [], [], [0]
     if "x" in node:
-        x = [float(size(surface, i, "x"))
+        x = [size(surface, i, "x")
              for i in normalize(node["x"]).strip().split(" ")]
     if "y" in node:
-        y = [float(size(surface, i, "y"))
+        y = [size(surface, i, "y")
              for i in normalize(node["y"]).strip().split(" ")]
     if "dx" in node:
-        dx = [float(size(surface, i, "x"))
+        dx = [size(surface, i, "x")
               for i in normalize(node["dx"]).strip().split(" ")]
     if "dy" in node:
-        dy = [float(size(surface, i, "y"))
+        dy = [size(surface, i, "y")
               for i in normalize(node["dy"]).strip().split(" ")]
     if "rotate" in node:
         rotate = [radians(float(i)) if i else 0

@@ -124,23 +124,21 @@ def paint_mask(surface, node, name, opacity):
     if mask_node.get("maskUnits") == "userSpaceOnUse":
         width_ref, height_ref = "x", "y"
     else:
-        x = float(size(surface, node.get("x"), "x"))
-        y = float(size(surface, node.get("y"), "y"))
-        width = float(size(surface, node.get("width"), "x"))
-        height = float(size(surface, node.get("height"), "y"))
+        x = size(surface, node.get("x"), "x")
+        y = size(surface, node.get("y"), "y")
+        width = size(surface, node.get("width"), "x")
+        height = size(surface, node.get("height"), "y")
         width_ref = width
         height_ref = height
         mask_node["transform"] = "%s scale(%f, %f)" % (
             mask_node.get("transform", ""), width, height)
 
-    mask_node["x"] = float(
-        size(surface, mask_node.get("x", "-10%"), width_ref))
-    mask_node["y"] = float(
-        size(surface, mask_node.get("y", "-10%"), height_ref))
-    mask_node["height"] = float(
-        size(surface, mask_node.get("height", "120%"), width_ref))
-    mask_node["width"] = float(
-        size(surface, mask_node.get("width", "120%"), height_ref))
+    mask_node["x"] = size(surface, mask_node.get("x", "-10%"), width_ref)
+    mask_node["y"] = size(surface, mask_node.get("y", "-10%"), height_ref)
+    mask_node["height"] = size(
+        surface, mask_node.get("height", "120%"), width_ref)
+    mask_node["width"] = size(
+        surface, mask_node.get("width", "120%"), height_ref)
 
     if mask_node.get("maskUnits") == "userSpaceOnUse":
         x = mask_node["x"]
@@ -170,25 +168,25 @@ def draw_gradient(surface, node, name):
         width_ref, height_ref = "x", "y"
         diagonal_ref = "xy"
     else:
-        x = float(size(surface, node.get("x"), "x"))
-        y = float(size(surface, node.get("y"), "y"))
-        width = float(size(surface, node.get("width"), "x"))
-        height = float(size(surface, node.get("height"), "y"))
+        x = size(surface, node.get("x"), "x")
+        y = size(surface, node.get("y"), "y")
+        width = size(surface, node.get("width"), "x")
+        height = size(surface, node.get("height"), "y")
         width_ref = height_ref = diagonal_ref = 1
 
     if gradient_node.tag == "linearGradient":
-        x1 = float(size(surface, gradient_node.get("x1", "0%"), width_ref))
-        x2 = float(size(surface, gradient_node.get("x2", "100%"), width_ref))
-        y1 = float(size(surface, gradient_node.get("y1", "0%"), height_ref))
-        y2 = float(size(surface, gradient_node.get("y2", "0%"), height_ref))
+        x1 = size(surface, gradient_node.get("x1", "0%"), width_ref)
+        x2 = size(surface, gradient_node.get("x2", "100%"), width_ref)
+        y1 = size(surface, gradient_node.get("y1", "0%"), height_ref)
+        y2 = size(surface, gradient_node.get("y2", "0%"), height_ref)
         gradient_pattern = cairo.LinearGradient(x1, y1, x2, y2)
 
     elif gradient_node.tag == "radialGradient":
-        r = float(size(surface, gradient_node.get("r", "50%"), diagonal_ref))
-        cx = float(size(surface, gradient_node.get("cx", "50%"), width_ref))
-        cy = float(size(surface, gradient_node.get("cy", "50%"), height_ref))
-        fx = float(size(surface, gradient_node.get("fx", str(cx)), width_ref))
-        fy = float(size(surface, gradient_node.get("fy", str(cy)), height_ref))
+        r = size(surface, gradient_node.get("r", "50%"), diagonal_ref)
+        cx = size(surface, gradient_node.get("cx", "50%"), width_ref)
+        cy = size(surface, gradient_node.get("cy", "50%"), height_ref)
+        fx = size(surface, gradient_node.get("fx", str(cx)), width_ref)
+        fy = size(surface, gradient_node.get("fy", str(cy)), height_ref)
         gradient_pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
     if gradient_node.get("gradientUnits") != "userSpaceOnUse":
@@ -228,17 +226,15 @@ def draw_pattern(surface, node, name):
             return False
 
     if pattern_node.get("patternUnits") == "userSpaceOnUse":
-        x = float(size(surface, pattern_node.get("x"), "x"))
-        y = float(size(surface, pattern_node.get("y"), "y"))
-        pattern_width =  \
-            float(size(surface, pattern_node.get("width", 0), 1))
-        pattern_height =  \
-            float(size(surface, pattern_node.get("height", 0), 1))
+        x = size(surface, pattern_node.get("x"), "x")
+        y = size(surface, pattern_node.get("y"), "y")
+        pattern_width = size(surface, pattern_node.get("width", 0), 1)
+        pattern_height = size(surface, pattern_node.get("height", 0), 1)
     else:
-        width = float(size(surface, node.get("width"), "x"))
-        height = float(size(surface, node.get("height"), "y"))
-        x = float(size(surface, pattern_node.get("x"), 1)) * width
-        y = float(size(surface, pattern_node.get("y"), 1)) * height
+        width = size(surface, node.get("width"), "x")
+        height = size(surface, node.get("height"), "y")
+        x = size(surface, pattern_node.get("x"), 1) * width
+        y = size(surface, pattern_node.get("y"), 1) * height
         pattern_width = \
             size(surface, pattern_node.pop("width", "0"), 1) * width
         pattern_height = \
@@ -349,8 +345,8 @@ def apply_filter_before(surface, node):
             # Offset
             if child.tag == "feOffset":
                 if filter_node.get("primitiveUnits") == "objectBoundingBox":
-                    width = float(size(surface, node.get("width"), "x"))
-                    height = float(size(surface, node.get("height"), "y"))
+                    width = size(surface, node.get("width"), "x")
+                    height = size(surface, node.get("height"), "y")
                     dx = size(surface, child.get("dx", 0), 1) * width
                     dy = size(surface, child.get("dy", 0), 1) * height
                 else:
@@ -378,12 +374,12 @@ def apply_filter_after(surface, node):
             elif child.tag == "feFlood":
                 surface.context.new_path()
                 if filter_node.get("primitiveUnits") == "objectBoundingBox":
-                    x = float(size(surface, node.get("x"), "x"))
-                    y = float(size(surface, node.get("y"), "y"))
+                    x = size(surface, node.get("x"), "x")
+                    y = size(surface, node.get("y"), "y")
                     x = size(surface, child.get("x", 0), 1) + x
                     y = size(surface, child.get("y", 0), 1) + y
-                    width = float(size(surface, node.get("width"), "x"))
-                    height = float(size(surface, node.get("height"), "y"))
+                    width = size(surface, node.get("width"), "x")
+                    height = size(surface, node.get("height"), "y")
                     width = size(surface, child.get("width", 0), 1) * width
                     height = size(surface, child.get("height", 0), 1) * height
                 else:

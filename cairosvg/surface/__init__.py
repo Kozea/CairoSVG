@@ -256,14 +256,14 @@ class Surface(object):
         # Clip
         rect_values = rect(node.get("clip"))
         if len(rect_values) == 4:
-            top = float(size(self, rect_values[0], "y"))
-            right = float(size(self, rect_values[1], "x"))
-            bottom = float(size(self, rect_values[2], "y"))
-            left = float(size(self, rect_values[3], "x"))
-            x = float(size(self, node.get("x"), "x"))
-            y = float(size(self, node.get("y"), "y"))
-            width = float(size(self, node.get("width"), "x"))
-            height = float(size(self, node.get("height"), "y"))
+            top = size(self, rect_values[0], "y")
+            right = size(self, rect_values[1], "x")
+            bottom = size(self, rect_values[2], "y")
+            left = size(self, rect_values[3], "x")
+            x = size(self, node.get("x"), "x")
+            y = size(self, node.get("y"), "y")
+            width = size(self, node.get("width"), "x")
+            height = size(self, node.get("height"), "y")
             self.context.save()
             self.context.translate(x, y)
             self.context.rectangle(
@@ -276,10 +276,10 @@ class Surface(object):
             if path:
                 self.context.save()
                 if path.get("clipPathUnits") == "objectBoundingBox":
-                    x = float(size(self, node.get("x"), "x"))
-                    y = float(size(self, node.get("y"), "y"))
-                    width = float(size(self, node.get("width"), "x"))
-                    height = float(size(self, node.get("height"), "y"))
+                    x = size(self, node.get("x"), "x")
+                    y = size(self, node.get("y"), "y")
+                    width = size(self, node.get("width"), "x")
+                    height = size(self, node.get("height"), "y")
                     self.context.translate(x, y)
                     self.context.scale(width, height)
                 path.tag = "g"

@@ -41,7 +41,7 @@ def size(surface, string, reference="xy"):
 
     """
     if not string:
-        return 0
+        return 0.
 
     try:
         return float(string)
@@ -77,4 +77,4 @@ def size(surface, string, reference="xy"):
         string = string[1:]
 
     # Unknown size or multiple sizes
-    return float(return_string) if return_string else 0
+    return float(return_string or 0)
