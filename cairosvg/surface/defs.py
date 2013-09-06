@@ -376,19 +376,15 @@ def apply_filter_after(surface, node):
                 if filter_node.get("primitiveUnits") == "objectBoundingBox":
                     x = size(surface, node.get("x"), "x")
                     y = size(surface, node.get("y"), "y")
-                    x = size(surface, child.get("x", 0), 1) + x
-                    y = size(surface, child.get("y", 0), 1) + y
                     width = size(surface, node.get("width"), "x")
                     height = size(surface, node.get("height"), "y")
-                    width = size(surface, child.get("width", 0), 1) * width
-                    height = size(surface, child.get("height", 0), 1) * height
                 else:
-                    x = size(surface, child.get("x", 0), 1)
-                    y = size(surface, child.get("y", 0), 1)
-                    width = size(surface, child.get("width", 0), 1)
-                    height = size(surface, child.get("height", 0), 1)
-                rect_node = dict(x=x, y=y, width=width, height=height)
-                rect(surface, rect_node)
+                    x, y, width, height = 0, 0, 1, 1
+                x += size(surface, child.get("x", 0), 1)
+                y += size(surface, child.get("y", 0), 1)
+                width *= size(surface, child.get("width", 0), 1)
+                height *= size(surface, child.get("height", 0), 1)
+                rect(surface, dict(x=x, y=y, width=width, height=height))
                 surface.context.set_source_rgba(*color(
                     paint(child.get("flood-color"))[1],
                     float(child.get("flood-opacity", 1))))
