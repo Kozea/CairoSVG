@@ -26,6 +26,9 @@ Source Packages
 
 You can download the CairoSVG package for each release:
 
+- `CairoSVG-1.0.tar.gz
+  <http://pypi.python.org/packages/source/C/CairoSVG/CairoSVG-1.0.tar.gz>`_
+  (28 KiB)
 - `CairoSVG-0.5.tar.gz
   <http://pypi.python.org/packages/source/C/CairoSVG/CairoSVG-0.5.tar.gz>`_
   (24 KiB)
