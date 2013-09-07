@@ -74,8 +74,11 @@ Radicale has been packaged for:
 - `ArchLinux (AUR) <https://aur.archlinux.org/packages.php?ID=57202>`_ by Simon
   Sapin
 - `Debian <http://packages.debian.org/cairosvg>`_ by Michael Fladischer
+- `Fedora <https://admin.fedoraproject.org/pkgdb/acls/name/python-cairosvg>`_
+  by ralph
 - `Gentoo <http://packages.gentoo.org/package/media-gfx/cairosvg>`_ by Samuli
   Suominen
+- `openSuSE <http://software.opensuse.org/package/python-CairoSVG>`_
 - `Ubuntu <http://packages.ubuntu.com/cairosvg>`_ by the MOTU and Michael
   Fladischer
 
