@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.1, released on 2013-09-24
+=====================================
+
+* Don't crash when svg tag has no width or height
+
+
 Version 1.0, released on 2013-09-06
 ===================================
 
