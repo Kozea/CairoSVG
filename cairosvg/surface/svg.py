@@ -31,8 +31,8 @@ def svg(surface, node):
         node.image_width = viewbox[2] - viewbox[0]
         node.image_height = viewbox[3] - viewbox[1]
     else:
-        node.image_width = size(surface, node["width"], "x")
-        node.image_height = size(surface, node["height"], "y")
+        node.image_width = size(surface, node.get("width"), "x")
+        node.image_height = size(surface, node.get("height"), "y")
     if node.get("preserveAspectRatio", "none") != "none":
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, node)
