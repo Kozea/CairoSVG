@@ -24,7 +24,7 @@ import locale
 
 
 ROOT = "http://www.w3.org/TR/SVG11/feature"
-LOCALE = locale.getdefaultlocale()[0]
+LOCALE = locale.getdefaultlocale()[0] or ""
 SUPPORTED_FEATURES = set(
     ROOT + "#" + feature for feature in [
         "SVG",
