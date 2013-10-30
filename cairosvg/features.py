@@ -57,6 +57,9 @@ def has_features(features):
 
 def support_languages(languages):
     """Check whether one of ``languages`` is part of the user locales."""
+    if languages is None:
+        return True
+    
     for language in languages.split(","):
         language = language.strip()
         if language and LOCALE.startswith(language):
