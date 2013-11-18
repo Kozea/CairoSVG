@@ -294,7 +294,10 @@ class Tree(Node):
                     input_ = gzip.open(url)
                 tree = ElementTree.parse(input_).getroot()
             else:
-                tree = parent.xml_tree
+                root_parent = parent
+                while root_parent.parent:
+                    root_parent = root_parent.parent
+                tree = root_parent.xml_tree
         else:
             raise TypeError(
                 "No input. Use one of bytestring, file_obj or url.")
