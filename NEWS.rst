@@ -10,6 +10,13 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.2, released on 2013-11-19
+=====================================
+
+* Don't crash when locale is not set
+* Get the xml_tree from the root parent when creating nodes from string
+
+
 Version 1.0.1, released on 2013-09-24
 =====================================
 
