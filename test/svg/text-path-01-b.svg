@@ -48,14 +48,14 @@
     </defs>
     <g id="text-on-path-01">
       <use xlink:href="#Path1" fill="none" stroke="blue"/>
-      <text font-size="36" font-family="Georgia" fill="black">
+      <text font-size="36" font-family="Arial" fill="black">
         <textPath xlink:href="#Path1">Text on a path</textPath>
       </text>
     </g>
     <g id="text-on-path-02">
       <!-- using tspan to change text color and position -->
       <use xlink:href="#Path2" fill="none" stroke="blue"/>
-      <text font-size="36" font-family="Georgia" fill="black">
+      <text font-size="36" font-family="Arial" fill="black">
         <textPath xlink:href="#Path2">
           <tspan dy="-12" fill="fuchsia">Te</tspan><tspan dy="12">x</tspan>t on a path
         </textPath>
