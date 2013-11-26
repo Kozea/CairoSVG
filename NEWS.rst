@@ -14,6 +14,7 @@ Version 1.0.3, not released yet
 ===============================
 
 * Fix clips and viewboxes
+* Don't draw an empty image when locale is not set
 
 
 Version 1.0.2, released on 2013-11-19
