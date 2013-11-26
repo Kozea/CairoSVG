@@ -28,9 +28,11 @@ def svg(surface, node):
     """Draw a svg ``node``."""
     width, height, viewbox = node_format(surface, node)
     if viewbox:
-        node.image_width = viewbox[2] - viewbox[0]
-        node.image_height = viewbox[3] - viewbox[1]
+        rect_x, rect_y = viewbox[0:2]
+        node.image_width = viewbox[2]
+        node.image_height = viewbox[3]
     else:
+        rect_x, rect_y = 0, 0
         node.image_width = size(surface, node.get("width"), "x")
         node.image_height = size(surface, node.get("height"), "y")
     if node.get("preserveAspectRatio", "none") != "none":
@@ -41,7 +43,7 @@ def svg(surface, node):
         scale_x, scale_y, translate_x, translate_y = (1, 1, 0, 0)
         rect_width, rect_height = node.image_width, node.image_height
     surface.context.translate(*surface.context.get_current_point())
-    surface.context.rectangle(0, 0, rect_width, rect_height)
+    surface.context.rectangle(rect_x, rect_y, rect_width, rect_height)
     surface.context.clip()
     surface.context.scale(scale_x, scale_y)
     surface.context.translate(translate_x, translate_y)

@@ -310,8 +310,8 @@ def draw_marker(surface, node, position="mid"):
 
                 width, height, viewbox = node_format(surface, marker_node)
                 if viewbox:
-                    viewbox_width = viewbox[2] - viewbox[0]
-                    viewbox_height = viewbox[3] - viewbox[1]
+                    viewbox_width = viewbox[2]
+                    viewbox_height = viewbox[3]
                 else:
                     viewbox_width = width or 0
                     viewbox_height = height or 0
