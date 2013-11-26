@@ -66,10 +66,12 @@ def support_languages(languages):
 
 def match_features(node):
     """Check the node match the conditional processing attributes."""
+    features = node.attrib.get("requiredFeatures")
+    languages = node.attrib.get("systemLanguage")
     if "requiredExtensions" in node.attrib:
         return False
-    if not has_features(node.attrib.get("requiredFeatures", ROOT + "#SVG")):
+    if features is not None and not has_features(features):
         return False
-    if not support_languages(node.attrib.get("systemLanguage", LOCALE)):
+    if languages is not None and not support_languages(languages):
         return False
     return True
