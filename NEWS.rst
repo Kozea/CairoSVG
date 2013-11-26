@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.3, not released yet
+===============================
+
+* Fix clips and viewboxes
+
+
 Version 1.0.2, released on 2013-11-19
 =====================================
 
