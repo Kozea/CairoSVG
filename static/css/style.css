@@ -245,17 +245,11 @@ nav li a[href]:focus {
 }
 
 #rss, #editable {
-  background: black url(rss.png) -1px 1px no-repeat;
-  border-radius: 8px;
-  color: transparent;
-  display: block;
-  font-size: 0;
-  height: 32px;
-  opacity: 1;
+  background-color: black;
   position: fixed;
-  right: 16px;
-  top: 16px;
-  width: 32px;
+  right: 20px;
+  top: 20px;
+  transition: background-color 0.3s linear;
 }
 
 #rss:hover,
