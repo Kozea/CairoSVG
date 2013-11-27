@@ -244,7 +244,7 @@ nav li a[href]:focus {
   text-decoration: none;
 }
 
-#rss {
+#rss, #editable {
   background: black url(rss.png) -1px 1px no-repeat;
   border-radius: 8px;
   color: transparent;
@@ -259,7 +259,9 @@ nav li a[href]:focus {
 }
 
 #rss:hover,
-#rss:focus {
+#rss:focus,
+#editable:hover,
+#editable:focus {
   background-color: #e70;
   box-shadow: 0 0 5px #d60;
 }
