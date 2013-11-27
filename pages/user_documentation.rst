@@ -9,6 +9,8 @@
 :Abstract: This document is a short description for installing and using
  CairoSVG.
 
+.. editable::
+
 .. contents::
 
 Installation
