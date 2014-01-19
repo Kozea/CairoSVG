@@ -51,11 +51,11 @@ class Surface(object):
 
     The ``callbacks`` callbacks dictionary can contain the following callbacks:
 
-        * ``node_pre_draw(surface, node)``: called before any visible node is
-          drawn to the surface. Note: this callback will only be called for
+        * ``node_pre_render(surface, node)``: called before any visible node is
+          rendered to the surface. Note: this callback will only be called for
           visible nodes (ex, which have a non-zero size, or don't have
-          ``display: none``). If ``False`` is returned the node will not be
-          drawn.
+          ``display: none``). If ``False`` is returned, neither the node nor
+          its chilren will be rendered.
 
         * ``node_pre_descend(surface, node)``: called before the children of a
           ``node`` node are drawn. Note: this callback is only called if the
@@ -319,9 +319,9 @@ class Surface(object):
         # Filter
         apply_filter_before(self, node)
 
-        did_draw = True
+        did_render = True
         if node.tag in TAGS:
-            did_draw = self.draw_node(node)
+            did_render = self.render_node(node)
 
         # Filter
         apply_filter_after(self, node)
@@ -331,7 +331,7 @@ class Surface(object):
         fill_opacity = float(node.get("fill-opacity", 1))
 
         # Manage display and visibility
-        display = did_draw and node.get("display", "inline") != "none"
+        display = did_render and node.get("display", "inline") != "none"
         visible = display and (node.get("visibility", "visible") != "hidden")
 
         if self.stroke_and_fill and visible and node.tag in TAGS:
@@ -387,8 +387,8 @@ class Surface(object):
         self.parent_node = self._old_parent_node
         self.font_size = old_font_size
 
-    def draw_node(self, node):
-        res = self.call_callback("node_pre_draw", node)
+    def render_node(self, node):
+        res = self.call_callback("node_pre_render", node)
         if res is False:
             return False
         try:
