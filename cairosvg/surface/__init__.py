@@ -54,11 +54,13 @@ class Surface(object):
         * ``node_pre_draw(surface, node)``: called before any visible node is
           drawn to the surface. Note: this callback will only be called for
           visible nodes (ex, which have a non-zero size, or don't have
-          ``display: none``).
+          ``display: none``). If ``False`` is returned the node will not be
+          drawn.
 
         * ``node_pre_descend(surface, node)``: called before the children of a
           ``node`` node are drawn. Note: this callback is only called if the
-          node is visible.
+          node is visible. If ``False`` is returned the node's children will be
+          ignored.
 
         * ``node_post_descend(surface, node)``: called after the children of a
           ``node`` node are drawn. Note: this callback is only called if the
@@ -156,8 +158,8 @@ class Surface(object):
     def call_callback(self, cb_name, *args):
         callback = self.callbacks and self.callbacks.get(cb_name)
         if callback is None:
-            return
-        callback(self, *args)
+            return None
+        return callback(self, *args)
 
     @property
     def points_per_pixel(self):
@@ -317,8 +319,9 @@ class Surface(object):
         # Filter
         apply_filter_before(self, node)
 
+        did_draw = True
         if node.tag in TAGS:
-            self.draw_node(node)
+            did_draw = self.draw_node(node)
 
         # Filter
         apply_filter_after(self, node)
@@ -328,7 +331,7 @@ class Surface(object):
         fill_opacity = float(node.get("fill-opacity", 1))
 
         # Manage display and visibility
-        display = node.get("display", "inline") != "none"
+        display = did_draw and node.get("display", "inline") != "none"
         visible = display and (node.get("visibility", "visible") != "hidden")
 
         if self.stroke_and_fill and visible and node.tag in TAGS:
@@ -358,8 +361,8 @@ class Surface(object):
         if display and node.tag not in (
                 "linearGradient", "radialGradient", "marker", "pattern",
                 "mask", "clipPath", "filter"):
-            self.call_callback("node_pre_descend", node)
-            for child in node.children:
+            res = self.call_callback("node_pre_descend", node)
+            for child in (res is not False and node.children or []):
                 self.draw(child)
             self.call_callback("node_post_descend", node)
 
@@ -385,12 +388,15 @@ class Surface(object):
         self.font_size = old_font_size
 
     def draw_node(self, node):
-        self.call_callback("node_pre_draw", node)
+        res = self.call_callback("node_pre_draw", node)
+        if res is False:
+            return False
         try:
             TAGS[node.tag](self, node)
         except PointError:
             # Error in point parsing, do nothing
             pass
+        return True
 
 
 class MultipageSurface(Surface):
