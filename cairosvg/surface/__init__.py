@@ -49,13 +49,28 @@ class Surface(object):
     The ``context_width`` and ``context_height`` attributes are in user units
     (i.e. in pixels), they represent the size of the active viewport.
 
+    The ``callbacks`` callbacks dictionary can contain the following callbacks:
+
+        * ``node_pre_draw(surface, node)``: called before any visible node is
+          drawn to the surface. Note: this callback will only be called for
+          visible nodes (ex, which have a non-zero size, or don't have
+          ``display: none``).
+
+        * ``node_pre_descend(surface, node)``: called before the children of a
+          ``node`` node are drawn. Note: this callback is only called if the
+          node is visible.
+
+        * ``node_post_descend(surface, node)``: called after the children of a
+          ``node`` node are drawn. Note: this callback is only called if the
+          node is visible. Will always be called if ``node_pre_descend`` has
+          been called.
     """
 
     # Subclasses must either define this or override _create_surface()
     surface_class = None
 
     @classmethod
-    def convert(cls, bytestring=None, **kwargs):
+    def convert(cls, bytestring=None, callbacks=None, **kwargs):
         """Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
@@ -81,11 +96,11 @@ class Surface(object):
             output = io.BytesIO()
         else:
             output = write_to
-        cls(tree, output, dpi).finish()
+        cls(tree, output, dpi, callbacks=callbacks).finish()
         if write_to is None:
             return output.getvalue()
 
-    def __init__(self, tree, output, dpi, parent_surface=None):
+    def __init__(self, tree, output, dpi, parent_surface=None, callbacks=None):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -96,6 +111,7 @@ class Surface(object):
         actually written.
 
         """
+        self.callbacks = callbacks
         self.cairo = None
         self.context_width, self.context_height = None, None
         self.cursor_position = [0, 0]
@@ -136,6 +152,12 @@ class Surface(object):
         self.set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
         self.draw_root(tree)
+
+    def call_callback(self, cb_name, *args):
+        callback = self.callbacks and self.callbacks.get(cb_name)
+        if callback is None:
+            return
+        callback(self, *args)
 
     @property
     def points_per_pixel(self):
@@ -296,11 +318,7 @@ class Surface(object):
         apply_filter_before(self, node)
 
         if node.tag in TAGS:
-            try:
-                TAGS[node.tag](self, node)
-            except PointError:
-                # Error in point parsing, do nothing
-                pass
+            self.draw_node(node)
 
         # Filter
         apply_filter_after(self, node)
@@ -340,8 +358,10 @@ class Surface(object):
         if display and node.tag not in (
                 "linearGradient", "radialGradient", "marker", "pattern",
                 "mask", "clipPath", "filter"):
+            self.call_callback("node_pre_descend", node)
             for child in node.children:
                 self.draw(child)
+            self.call_callback("node_post_descend", node)
 
         if mask or opacity < 1:
             self.context.pop_group_to_source()
@@ -363,6 +383,14 @@ class Surface(object):
 
         self.parent_node = self._old_parent_node
         self.font_size = old_font_size
+
+    def draw_node(self, node):
+        self.call_callback("node_pre_draw", node)
+        try:
+            TAGS[node.tag](self, node)
+        except PointError:
+            # Error in point parsing, do nothing
+            pass
 
 
 class MultipageSurface(Surface):
