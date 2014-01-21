@@ -10,8 +10,14 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
-Version 1.0.3, not released yet
-===============================
+Version 1.0.4, released on 2014-01-21
+=====================================
+
+* Clear relative coordinates when absolute coordinates are set in tspan tags
+
+
+Version 1.0.3, released on 2013-11-27
+=====================================
 
 * Fix clips and viewboxes
 * Don't draw an empty image when locale is not set
