@@ -134,6 +134,10 @@ def text(surface, node):
 
     if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
+            if x:
+                surface.cursor_d_position[0] = 0
+            if y:
+                surface.cursor_d_position[1] = 0
             surface.cursor_d_position[0] += dx or 0
             surface.cursor_d_position[1] += dy or 0
             extents = surface.context.text_extents(letter)[4]
