@@ -127,14 +127,24 @@ def text(surface, node):
 
     # XXX This is a hack. The rest of the baseline alignment
     # tags of the SVG 1.1 spec (section 10.9.2) are
-    # not supported. We only even try to align Western
-    # horizontal fonts.
+    # not supported. We only try to align things
+    # that look like Western horizontal fonts.
+    # Finally, we add a "display-anchor" attribute
+    # for aligning the specific text rather than the
+    # font baseline.
     # Nonetheless, there are times when one needs to align
     # text vertically, and this will at least make that
     # possible.
     if max_x_advance > 0 and max_y_advance == 0:
+        display_anchor = node.get("display-anchor")
         alignment_baseline = node.get("alignment-baseline")
-        if alignment_baseline == "central" or \
+        if display_anchor == "middle":
+            y_align = -height / 2.0 - y_bearing
+        elif display_anchor == "top":
+            y_align = -y_bearing
+        elif display_anchor == "bottom":
+            y_align = -height - y_bearing
+        elif alignment_baseline == "central" or \
            alignment_baseline == "middle":
             # XXX This is wrong--Cairo gives no reasonable access
             # to x-height information, so we use font top-to-bottom
