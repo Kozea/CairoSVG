@@ -35,6 +35,10 @@ def svg(surface, node):
         rect_x, rect_y = 0, 0
         node.image_width = size(surface, node.get("width"), "x")
         node.image_height = size(surface, node.get("height"), "y")
+
+    if node.parent is None:
+        return
+
     if node.get("preserveAspectRatio", "none") != "none":
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, node)
