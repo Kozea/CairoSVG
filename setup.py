@@ -23,7 +23,7 @@ from distutils.core import setup
 
 init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
 with codecs.open(init_path, 'r', 'utf-8') as fd:
-    VERSION = re.search("VERSION = '([^']+)'", fd.read().strip()).group(1)
+    VERSION = str(re.search("VERSION = '([^']+)'", fd.read().strip()).group(1))
 
 
 # When the version is updated, ``cairosvg.VERSION`` must be modified.
