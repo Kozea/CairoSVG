@@ -84,19 +84,16 @@ def text(surface, node):
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(font_size)
-    sfe = surface.context.font_extents()
-    (ascent, descent, _, max_x_advance, max_y_advance ) = sfe
+    ascent, descent, _, max_x_advance, max_y_advance = (
+        surface.context.font_extents())
 
     text_path_href = (
         node.get("{http://www.w3.org/1999/xlink}href", "") or
         node.parent.get("{http://www.w3.org/1999/xlink}href", ""))
     text_path = surface.paths.get(text_path_href.lstrip("#"))
     letter_spacing = size(surface, node.get("letter-spacing"))
-    text_extents = surface.context.text_extents(node.text)
-    x_bearing = text_extents[0]
-    y_bearing = text_extents[1]
-    width = text_extents[2]
-    height = text_extents[3]
+    x_bearing, y_bearing, width, height = (
+        surface.context.text_extents(node.text)[:4])
 
     x, y, dx, dy, rotate = [], [], [], [], [0]
     if "x" in node:
@@ -144,20 +141,20 @@ def text(surface, node):
             y_align = -y_bearing
         elif display_anchor == "bottom":
             y_align = -height - y_bearing
-        elif alignment_baseline == "central" or \
-           alignment_baseline == "middle":
+        elif (alignment_baseline == "central" or
+              alignment_baseline == "middle"):
             # XXX This is wrong--Cairo gives no reasonable access
             # to x-height information, so we use font top-to-bottom
             y_align = (ascent + descent) / 2.0 - descent
-        elif alignment_baseline == "text-before-edge" or \
-             alignment_baseline == "before_edge" or \
-             alignment_baseline == "top" or \
-             alignment_baseline == "text-top":
+        elif (alignment_baseline == "text-before-edge" or
+              alignment_baseline == "before_edge" or
+              alignment_baseline == "top" or
+              alignment_baseline == "text-top"):
             y_align = ascent
-        elif alignment_baseline == "text-after-edge" or \
-             alignment_baseline == "after_edge" or \
-             alignment_baseline == "bottom" or \
-             alignment_baseline == "text-bottom":
+        elif (alignment_baseline == "text-after-edge" or
+              alignment_baseline == "after_edge" or
+              alignment_baseline == "bottom" or
+              alignment_baseline == "text-bottom"):
             y_align = -descent
         else:
             y_align = 0
