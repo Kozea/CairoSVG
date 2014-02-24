@@ -40,6 +40,7 @@ setup(
     platforms="Any",
     packages=["cairosvg", "cairosvg.surface"],
     provides=["cairosvg"],
+    install_requires=["cairocffi"],
     scripts=["bin/cairosvg"],
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[
