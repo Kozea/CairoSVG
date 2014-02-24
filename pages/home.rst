@@ -17,7 +17,8 @@ platforms (\*BSD, OS X) and Windows. It is free and open-source software,
 written in Python, released under LGPL version 3.
 
 Contrary to some other libraries, CairoSVG only requires `Pycairo
-<http://cairographics.org/pycairo/>`_ and does not depend on X, Glib or Qt
+<http://cairographics.org/pycairo/>`_ or `cairocffi
+<https://github.com/SimonSapin/cairocffi>`_, and does not depend on X, Glib or Qt
 libraries.
 
 
