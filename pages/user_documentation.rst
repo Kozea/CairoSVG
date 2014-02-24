@@ -93,8 +93,9 @@ Here are some usage examples:
   cairosvg test.svg -o test.ps
 
   # Convert an SVG string to pdf, write to standard output
-  echo "<svg height='30' width='30'><text y='10'>123</text></svg>" \
-       | cairosvg -
+  echo "<svg height='30' width='30'>\
+        <text y='10'>123</text>\
+        </svg>" | cairosvg -
 
 
 API
