@@ -21,7 +21,7 @@ Dependencies
 
 CairoSVG is written in pure Python and only depends on `Pycairo
 <http://cairographics.org/pycairo/>`_ or `cairocffi
-<https://github.com/SimonSapin/cairocffi>_`. It is known to work with
+<https://github.com/SimonSapin/cairocffi>`_. It is known to work with
 Python 2.6, 2.7, 3.2 and 3.3.
 
 Linux and OS X users certainly have Python already installed. For Windows
