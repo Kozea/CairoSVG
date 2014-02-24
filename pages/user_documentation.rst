@@ -83,16 +83,16 @@ Here are some usage examples:
 
 .. code-block:: bash
 
-  # Convert to pdf, write to standard output
+  # Convert to pdf, standard output
   cairosvg test.svg
 
-  # Convert to png, write to standard output
+  # Convert to png, standard output
   cairosvg test.svg -f png
 
   # Convert to ps, write to test.ps
   cairosvg test.svg -o test.ps
 
-  # Convert an SVG string to pdf, write to standard output
+  # Convert an SVG string to pdf, standard output
   echo "<svg height='30' width='30'>\
         <text y='10'>123</text>\
         </svg>" | cairosvg -
