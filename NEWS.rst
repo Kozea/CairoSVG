@@ -10,6 +10,15 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.5, released on 2014-03-06
+=====================================
+
+* Don't inherit clip* and overflow properties
+* Don't transform the root svg tag according to the PreservAspectRatio attribute
+* Add simple support for alignment-baseline
+* Add cairocffi into setup.py deps
+
+
 Version 1.0.4, released on 2014-01-21
 =====================================
 
