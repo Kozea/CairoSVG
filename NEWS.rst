@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.6, released on 2014-03-07
+=====================================
+
+* Fall back to pycairo if cairocffi is unable to find the cairo library
+
+
 Version 1.0.5, released on 2014-03-06
 =====================================
 
