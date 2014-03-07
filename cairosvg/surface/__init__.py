@@ -23,7 +23,7 @@ Cairo surface creators.
 import io
 try:
     import cairocffi as cairo
-except ImportError:
+except (ImportError, OSError):
     import cairo  # pycairo
 
 from ..parser import Tree
