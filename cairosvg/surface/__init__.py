@@ -173,11 +173,11 @@ class Surface(object):
             if x_ratio > y_ratio:
                 matrix.translate((width - x_size * y_ratio) / 2, 0)
                 matrix.scale(y_ratio, y_ratio)
-                matrix.translate(-x, -y / y_ratio * x_ratio)
+                matrix.translate(-x / x_ratio * y_ratio, -y)
             elif x_ratio < y_ratio:
                 matrix.translate(0, (height - y_size * x_ratio) / 2)
                 matrix.scale(x_ratio, x_ratio)
-                matrix.translate(-x / x_ratio * y_ratio, -y)
+                matrix.translate(-x, -y / y_ratio * x_ratio)
             else:
                 matrix.scale(x_ratio, y_ratio)
                 matrix.translate(-x, -y)
