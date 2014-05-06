@@ -10,6 +10,13 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.7, released on 2014-05-06
+=====================================
+
+* Fix scaling with negative viewBox origin
+* Automatically detect size and position of circles and ellipses for gradients
+
+
 Version 1.0.6, released on 2014-03-07
 =====================================
 
