@@ -90,7 +90,7 @@ You can download the CairoSVG package for each release:
 Linux Distribution Packages
 ===========================
 
-Radicale has been packaged for:
+CairoSVG has been packaged for:
 
 - `ArchLinux (AUR) <https://aur.archlinux.org/packages.php?ID=57202>`_ by Simon
   Sapin
