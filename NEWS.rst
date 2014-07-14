@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.8, released on 2014-07-14
+=====================================
+
+* Don't create an atomic layer for transparent tags with no children
+
+
 Version 1.0.7, released on 2014-05-06
 =====================================
 
