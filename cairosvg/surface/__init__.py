@@ -221,7 +221,7 @@ class Surface(object):
         masks = urls(node.get("mask"))
         mask = masks[0][1:] if masks else None
         opacity = float(node.get("opacity", 1))
-        if mask or opacity < 1:
+        if mask or (opacity < 1 and node.children):
             self.context.push_group()
 
         self.context.move_to(
@@ -311,6 +311,9 @@ class Surface(object):
         # Get stroke and fill opacity
         stroke_opacity = float(node.get("stroke-opacity", 1))
         fill_opacity = float(node.get("fill-opacity", 1))
+        if opacity < 1 and not node.children:
+            stroke_opacity *= opacity
+            fill_opacity *= opacity
 
         # Manage display and visibility
         display = node.get("display", "inline") != "none"
@@ -346,7 +349,7 @@ class Surface(object):
             for child in node.children:
                 self.draw(child)
 
-        if mask or opacity < 1:
+        if mask or (opacity < 1 and node.children):
             self.context.pop_group_to_source()
             if mask and mask in self.masks:
                 paint_mask(self, node, mask, opacity)
