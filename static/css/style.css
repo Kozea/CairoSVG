@@ -67,8 +67,8 @@ a {
   transition-duration: 0.25s;
 }
 
-a[href]:hover,
-a[href]:focus {
+article a[href]:hover,
+article a[href]:focus {
   background: #eeeeec;
 }
 
@@ -245,9 +245,9 @@ nav li a[href]:focus {
 
 #rss, #editable {
   background-color: black;
+  bottom: 20px;
   position: fixed;
   right: 20px;
-  top: 20px;
   transition: background-color 0.3s linear;
 }
 

@@ -3,6 +3,7 @@ description: Convert SVG to PNG or PDF
 license: LGPLv3
 public: true
 url: http://www.cairosvg.org/
+pystil: https://kozea.pystil.org/pystil.js
 
 menu:
   - News:
@@ -13,7 +14,13 @@ menu:
       link: /contribute/
   - Download:
       link: /download/
-  
+
+footer:
+  - A Kozea Project:
+      link: http://community.kozea.fr/
+  - Optimized for Standards:
+      link: http://validator.w3.org/check?uri=referer
+
 project (git):
   url: git://github.com/Kozea/CairoSVG.git
   path: cairosvg
@@ -24,6 +31,7 @@ vcs (git):
 
 code browser (github):
   project name: Kozea/CairoSVG
+  ribbon: Fork me on GitHub
 
 bug tracker (github):
   project name: Kozea/CairoSVG
