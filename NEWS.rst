@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.9, released on 2014-08-12
+=====================================
+
+* Don't crash when gradients are applied to paths
+
+
 Version 1.0.8, released on 2014-07-14
 =====================================
 
