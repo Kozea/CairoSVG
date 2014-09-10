@@ -19,7 +19,10 @@ import codecs
 import re
 from os import path
 
-from distutils.core import setup
+from ez_setup import use_setuptools
+use_setuptools("0.7.0")
+
+from setuptools import setup
 
 init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
 with codecs.open(init_path, 'r', 'utf-8') as fd:
@@ -41,7 +44,6 @@ setup(
     packages=["cairosvg", "cairosvg.surface"],
     provides=["cairosvg"],
     install_requires=["cairocffi"],
-    scripts=["bin/cairosvg"],
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -57,4 +59,11 @@ setup(
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
-        "Topic :: Multimedia :: Graphics :: Graphics Conversion"])
+        "Topic :: Multimedia :: Graphics :: Graphics Conversion"
+    ],
+    entry_points = {
+        'console_scripts': [
+            'cairosvg = cariosvg:main',
+        ]
+    },
+)
