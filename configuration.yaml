@@ -25,10 +25,6 @@ project (git):
   url: git://github.com/Kozea/CairoSVG.git
   path: cairosvg
 
-vcs (git):
-  url: git://github.com/Kozea/CairoSVG.git
-  path: /var/db/git/cairosvg.git
-
 code browser (github):
   project name: Kozea/CairoSVG
   ribbon: Fork me on GitHub
