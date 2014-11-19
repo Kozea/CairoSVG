@@ -170,8 +170,8 @@ def draw_gradient(surface, node, name):
     else:
         x = size(surface, node.get("x"), "x")
         y = size(surface, node.get("y"), "y")
-        width = size(surface, node.get("width"), "x")
-        height = size(surface, node.get("height"), "y")
+        width = size(surface, node.get("width", "1"), "x")
+        height = size(surface, node.get("height", "1"), "y")
         width_ref = height_ref = diagonal_ref = 1
 
     if gradient_node.tag == "linearGradient":

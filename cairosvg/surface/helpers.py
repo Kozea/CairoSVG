@@ -250,8 +250,8 @@ def urls(string):
     if string.startswith("url"):
         string = string[3:]
     return [
-        link.strip("() ") for link in string.rsplit(")")[0].split(",")
-        if link.strip("() ")]
+        link.strip("() '\"") for link in string.rsplit(")")[0].split(",")
+        if link.strip("() '\"")]
 
 
 def rect(string):

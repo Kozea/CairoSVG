@@ -10,8 +10,48 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
-Version 1.0.3, not released yet
-===============================
+Version 1.0.9, released on 2014-08-12
+=====================================
+
+* Don't crash when gradients are applied to paths
+
+
+Version 1.0.8, released on 2014-07-14
+=====================================
+
+* Don't create an atomic layer for transparent tags with no children
+
+
+Version 1.0.7, released on 2014-05-06
+=====================================
+
+* Fix scaling with negative viewBox origin
+* Automatically detect size and position of circles and ellipses for gradients
+
+
+Version 1.0.6, released on 2014-03-07
+=====================================
+
+* Fall back to pycairo if cairocffi is unable to find the cairo library
+
+
+Version 1.0.5, released on 2014-03-06
+=====================================
+
+* Don't inherit clip* and overflow properties
+* Don't transform the root svg tag according to the PreservAspectRatio attribute
+* Add simple support for alignment-baseline
+* Add cairocffi into setup.py deps
+
+
+Version 1.0.4, released on 2014-01-21
+=====================================
+
+* Clear relative coordinates when absolute coordinates are set in tspan tags
+
+
+Version 1.0.3, released on 2013-11-27
+=====================================
 
 * Fix clips and viewboxes
 * Don't draw an empty image when locale is not set

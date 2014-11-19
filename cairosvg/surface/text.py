@@ -84,15 +84,16 @@ def text(surface, node):
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(font_size)
+    ascent, descent, _, max_x_advance, max_y_advance = (
+        surface.context.font_extents())
 
     text_path_href = (
         node.get("{http://www.w3.org/1999/xlink}href", "") or
         node.parent.get("{http://www.w3.org/1999/xlink}href", ""))
     text_path = surface.paths.get(text_path_href.lstrip("#"))
     letter_spacing = size(surface, node.get("letter-spacing"))
-    text_extents = surface.context.text_extents(node.text)
-    x_bearing = text_extents[0]
-    width = text_extents[2]
+    x_bearing, y_bearing, width, height = (
+        surface.context.text_extents(node.text)[:4])
 
     x, y, dx, dy, rotate = [], [], [], [], [0]
     if "x" in node:
@@ -121,6 +122,43 @@ def text(surface, node):
     else:
         x_align = 0
 
+    # XXX This is a hack. The rest of the baseline alignment
+    # tags of the SVG 1.1 spec (section 10.9.2) are
+    # not supported. We only try to align things
+    # that look like Western horizontal fonts.
+    # Finally, we add a "display-anchor" attribute
+    # for aligning the specific text rather than the
+    # font baseline.
+    # Nonetheless, there are times when one needs to align
+    # text vertically, and this will at least make that
+    # possible.
+    if max_x_advance > 0 and max_y_advance == 0:
+        display_anchor = node.get("display-anchor")
+        alignment_baseline = node.get("alignment-baseline")
+        if display_anchor == "middle":
+            y_align = -height / 2.0 - y_bearing
+        elif display_anchor == "top":
+            y_align = -y_bearing
+        elif display_anchor == "bottom":
+            y_align = -height - y_bearing
+        elif (alignment_baseline == "central" or
+              alignment_baseline == "middle"):
+            # XXX This is wrong--Cairo gives no reasonable access
+            # to x-height information, so we use font top-to-bottom
+            y_align = (ascent + descent) / 2.0 - descent
+        elif (alignment_baseline == "text-before-edge" or
+              alignment_baseline == "before_edge" or
+              alignment_baseline == "top" or
+              alignment_baseline == "text-top"):
+            y_align = ascent
+        elif (alignment_baseline == "text-after-edge" or
+              alignment_baseline == "after_edge" or
+              alignment_baseline == "bottom" or
+              alignment_baseline == "text-bottom"):
+            y_align = -descent
+        else:
+            y_align = 0
+
     if text_path:
         surface.stroke_and_fill = False
         surface.draw(text_path)
@@ -134,6 +172,10 @@ def text(surface, node):
 
     if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
+            if x:
+                surface.cursor_d_position[0] = 0
+            if y:
+                surface.cursor_d_position[1] = 0
             surface.cursor_d_position[0] += dx or 0
             surface.cursor_d_position[1] += dy or 0
             extents = surface.context.text_extents(letter)[4]
@@ -158,7 +200,7 @@ def text(surface, node):
                 surface.context.move_to(x + letter_spacing, y)
                 cursor_position = x + letter_spacing + extents, y
                 surface.context.rel_move_to(*surface.cursor_d_position)
-                surface.context.rel_move_to(-x_align, 0)
+                surface.context.rel_move_to(-x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
 
             surface.context.text_path(letter)

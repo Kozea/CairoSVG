@@ -40,6 +40,7 @@ setup(
     platforms="Any",
     packages=["cairosvg", "cairosvg.surface"],
     provides=["cairosvg"],
+    install_requires=["cairocffi"],
     scripts=["bin/cairosvg"],
     keywords=["svg", "cairo", "pdf", "png", "postscript"],
     classifiers=[
@@ -55,4 +56,5 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
         "Topic :: Multimedia :: Graphics :: Graphics Conversion"])

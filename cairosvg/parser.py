@@ -113,7 +113,8 @@ class Node(dict):
             not_inherited = (
                 "transform", "opacity", "style", "viewBox", "stop-color",
                 "stop-opacity", "width", "height", "filter", "mask", "rotate",
-                "{http://www.w3.org/1999/xlink}href", "id", "x", "y")
+                "{http://www.w3.org/1999/xlink}href", "id", "x", "y",
+                "overflow", "clip", "clip-path")
             for attribute in not_inherited:
                 if attribute in items:
                     del items[attribute]

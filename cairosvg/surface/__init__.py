@@ -23,7 +23,10 @@ Cairo surface creators.
 import io
 try:
     import cairocffi as cairo
-except ImportError:
+# OSError means cairocffi is installed,
+# but could not load a cairo dynamic library.
+# pycairo may still be available with a statically-linked cairo.
+except (ImportError, OSError):
     import cairo  # pycairo
 
 from ..parser import Tree
@@ -170,11 +173,11 @@ class Surface(object):
             if x_ratio > y_ratio:
                 matrix.translate((width - x_size * y_ratio) / 2, 0)
                 matrix.scale(y_ratio, y_ratio)
-                matrix.translate(-x, -y / y_ratio * x_ratio)
+                matrix.translate(-x / x_ratio * y_ratio, -y)
             elif x_ratio < y_ratio:
                 matrix.translate(0, (height - y_size * x_ratio) / 2)
                 matrix.scale(x_ratio, x_ratio)
-                matrix.translate(-x / x_ratio * y_ratio, -y)
+                matrix.translate(-x, -y / y_ratio * x_ratio)
             else:
                 matrix.scale(x_ratio, y_ratio)
                 matrix.translate(-x, -y)
@@ -218,7 +221,7 @@ class Surface(object):
         masks = urls(node.get("mask"))
         mask = masks[0][1:] if masks else None
         opacity = float(node.get("opacity", 1))
-        if mask or opacity < 1:
+        if mask or (opacity < 1 and node.children):
             self.context.push_group()
 
         self.context.move_to(
@@ -308,6 +311,9 @@ class Surface(object):
         # Get stroke and fill opacity
         stroke_opacity = float(node.get("stroke-opacity", 1))
         fill_opacity = float(node.get("fill-opacity", 1))
+        if opacity < 1 and not node.children:
+            stroke_opacity *= opacity
+            fill_opacity *= opacity
 
         # Manage display and visibility
         display = node.get("display", "inline") != "none"
@@ -343,7 +349,7 @@ class Surface(object):
             for child in node.children:
                 self.draw(child)
 
-        if mask or opacity < 1:
+        if mask or (opacity < 1 and node.children):
             self.context.pop_group_to_source()
             if mask and mask in self.masks:
                 paint_mask(self, node, mask, opacity)
