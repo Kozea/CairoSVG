@@ -287,7 +287,9 @@ class Tree(Node):
                     url = parent.url
             self.url = url
             if url:
-                if urlparse.urlparse(url).scheme:
+                if url[1:3] == ":\\":
+                    input_ = url  # win absolute filename
+                elif urlparse.urlparse(url).scheme:
                     input_ = urlopen(url)
                 else:
                     input_ = url  # filename
