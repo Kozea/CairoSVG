@@ -43,6 +43,8 @@ REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
 TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
 
+os.chdir(TEST_FOLDER) # relative image urls
+
 if os.environ.get("CAIROSVG_TEST_FILES"):
     ALL_FILES = os.environ["CAIROSVG_TEST_FILES"].split(",")
 else:
