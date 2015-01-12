@@ -43,8 +43,9 @@ for _output_format, _surface_type in SURFACES.items():
             surface_type.convert(*args, **kwargs))(_surface_type)
     _name = 'svg2%s' % _output_format.lower()
     _function.__name__ = _name
-    _function.__doc__ = surface.Surface.convert.__doc__.replace(
-        'the format for this class', _output_format)
+    if _function.__doc__:
+        _function.__doc__ = surface.Surface.convert.__doc__.replace(
+            'the format for this class', _output_format)
     setattr(sys.modules[__name__], _name, _function)
 
 
