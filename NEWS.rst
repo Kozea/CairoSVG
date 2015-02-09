@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.10, released on 2015-02-09
+======================================
+
+* Allow quotes around font names
+
+
 Version 1.0.9, released on 2014-08-12
 =====================================
 

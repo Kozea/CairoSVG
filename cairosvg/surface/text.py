@@ -75,7 +75,9 @@ def text(surface, node):
         node["fill"] = "#000000"
 
     font_size = size(surface, node.get("font-size", "12pt"))
-    font_family = (node.get("font-family") or "sans-serif").split(",")[0]
+    font_family = (
+        (node.get("font-family") or "sans-serif")
+        .split(",")[0].strip("\"' "))
     font_style = getattr(
         cairo, ("font_slant_%s" % node.get("font-style")).upper(),
         cairo.FONT_SLANT_NORMAL)
