@@ -70,6 +70,9 @@ def node_format(surface, node):
     height = size(surface, node.get("height"), "y")
     viewbox = node.get("viewBox")
     if viewbox:
+        viewbox = viewbox.replace(",", " ")
+        while "  " in viewbox:
+            viewbox = viewbox.replace("  ", " ")
         viewbox = tuple(float(position) for position in viewbox.split())
         width = width or viewbox[2]
         height = height or viewbox[3]

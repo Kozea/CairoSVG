@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.11, released on 2015-02-11
+======================================
+
+* Allow commas in viewboxes
+
+
 Version 1.0.10, released on 2015-02-09
 ======================================
 
