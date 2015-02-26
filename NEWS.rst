@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.13, released on 2015-02-26
+======================================
+
+* Fix end markers
+
+
 Version 1.0.12, released on 2015-02-26
 ======================================
 
