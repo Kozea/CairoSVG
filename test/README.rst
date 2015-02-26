@@ -28,7 +28,7 @@ generated for you in the ``resources`` folder. There's also a script called
 FontForge installed on your system.
 
 The version of cairo needed to make these tests work perfectly is
->=1.12.12. You also need freetype with infinality and Adobe's CFF engine.
+>=1.14.0. You also need freetype with infinality and Adobe's CFF engine.
 
 You need these fonts to be installed to get pixel-by-pixel equivalent images in
 the tests:
