@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.12, released on 2015-02-26
+======================================
+
+* Don't crash when paths with markers end with a move_to action
+
+
 Version 1.0.11, released on 2015-02-11
 ======================================
 

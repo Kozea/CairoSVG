@@ -321,4 +321,5 @@ def path(surface, node):
     if node.tangents != [None]:
         # node.tangents == [None] means empty path
         node.tangents.append(node.tangents[-1])
-        draw_marker(surface, node, "end")
+        if string and letter not in "mM":
+            draw_marker(surface, node, "end")
