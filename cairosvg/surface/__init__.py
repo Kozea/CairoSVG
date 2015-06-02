@@ -319,6 +319,14 @@ class Surface(object):
         display = node.get("display", "inline") != "none"
         visible = display and (node.get("visibility", "visible") != "hidden")
 
+        # Set antialias
+        antialias = {
+            "optimizeSpeed": cairo.ANTIALIAS_FAST,
+            "crispEdges": cairo.ANTIALIAS_NONE,
+            "geometricPrecision": cairo.ANTIALIAS_BEST}.get(
+                node.get("shape-rendering"), cairo.ANTIALIAS_DEFAULT)
+        self.context.set_antialias(antialias)
+
         if self.stroke_and_fill and visible and node.tag in TAGS:
             # Fill
             self.context.save()
