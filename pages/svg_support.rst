@@ -389,7 +389,7 @@ Color and Painting properties:
 - marker-end: basically supported
 - marker-mid: basically supported
 - marker-start: basically supported
-- shape-rendering: not supported
+- shape-rendering: supported
 - stroke: supported
 - stroke-dasharray: supported
 - stroke-dashoffset: supported
