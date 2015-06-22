@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.15, released on 2015-06-22
+======================================
+
+* Use xMidYMid as default preserveAspectRatio value
+
+
 Version 1.0.14, released on 2015-06-02
 ======================================
 
