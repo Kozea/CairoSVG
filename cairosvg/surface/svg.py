@@ -39,7 +39,7 @@ def svg(surface, node):
     if node.parent is None:
         return
 
-    if node.get("preserveAspectRatio", "none") != "none":
+    if node.get("preserveAspectRatio", "xMidYMid") != "none":
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, node)
         rect_width, rect_height = width, height
