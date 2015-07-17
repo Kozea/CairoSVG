@@ -9,7 +9,7 @@ python:
 
 install:
   - pip install cairocffi
-  - pip install nosetests
+  - pip install nose
   - pip install tinycss
   - pip install cssselect
   - pip install lxml
