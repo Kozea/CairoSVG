@@ -9,7 +9,8 @@ Version 2.0, not released yet
 * Fix markers
 * Fix URL/id handling
 
-Version 1.0.15, not released yet
+
+Version 1.0.16, not released yet
 ================================
 
 * Test CairoSVG with Travis
