@@ -22,10 +22,6 @@ Text drawers.
 
 from math import cos, sin, radians
 
-# Python 2/3 management
-# pylint: disable=E0611
-# pylint: enable=E0611
-
 from . import cairo
 from .helpers import distance, normalize, point_angle, zip_letters
 from .units import size

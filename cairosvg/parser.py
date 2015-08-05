@@ -21,7 +21,6 @@ SVG Parser.
 """
 
 # Fallbacks for Python 2/3 and lxml/ElementTree
-# pylint: disable=E0611,F0401,W0611
 try:
     import lxml.etree as ElementTree
     from lxml.etree import XMLSyntaxError as ParseError
@@ -30,9 +29,7 @@ except ImportError:
     from xml.etree import ElementTree
     from xml.parsers import expat
     # ElementTree's API changed between 2.6 and 2.7
-    # pylint: disable=C0103
     ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
-    # pylint: enable=C0103
     HAS_LXML = False
 
 try:
@@ -41,7 +38,6 @@ try:
 except ImportError:
     from urllib.request import urlopen
     from urllib import parse as urlparse  # Python 3
-# pylint: enable=E0611,F0401,W0611
 
 
 import re
@@ -55,12 +51,10 @@ from .surface.helpers import urls, rotations, pop_rotation, flatten
 
 
 # Python 2/3 compat
-# pylint: disable=C0103,W0622
 try:
     basestring
 except NameError:
     basestring = str
-# pylint: enable=C0103,W0622
 
 
 def remove_svg_namespace(tree):

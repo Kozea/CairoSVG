@@ -170,10 +170,7 @@ class Surface(object):
 
     def _create_surface(self, width, height):
         """Create and return ``(cairo_surface, width, height)``."""
-        # self.surface_class should not be None when called here
-        # pylint: disable=E1102
         cairo_surface = self.surface_class(self.output, width, height)
-        # pylint: enable=E1102
         return cairo_surface, width, height
 
     def set_context_size(self, width, height, viewbox):

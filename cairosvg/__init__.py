@@ -39,7 +39,7 @@ SURFACES = {
 for _output_format, _surface_type in SURFACES.items():
     _function = (
         # Two lambdas needed for the closure
-        lambda surface_type: lambda *args, **kwargs:  # pylint: disable=W0108
+        lambda surface_type: lambda *args, **kwargs:
             surface_type.convert(*args, **kwargs))(_surface_type)
     _name = 'svg2%s' % _output_format.lower()
     _function.__name__ = _name

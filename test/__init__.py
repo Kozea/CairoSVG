@@ -30,7 +30,7 @@ import tempfile
 import shutil
 import subprocess
 
-from nose.tools import assert_raises, eq_  # pylint: disable=E0611
+from nose.tools import assert_raises, eq_
 
 import cairosvg.parser
 import cairosvg.surface

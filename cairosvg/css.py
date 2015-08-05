@@ -24,18 +24,16 @@ import os
 from .parser import HAS_LXML
 
 # Detect optional depedencies
-# pylint: disable=W0611
 try:
     import tinycss
     import cssselect
     CSS_CAPABLE = HAS_LXML
 except ImportError:
     CSS_CAPABLE = False
-# pylint: enable=W0611
 
 
 # Python 2/3 compat
-iteritems = getattr(dict, "iteritems", dict.items)  # pylint: disable=C0103
+iteritems = getattr(dict, "iteritems", dict.items)
 
 
 def find_stylesheets(tree, url):

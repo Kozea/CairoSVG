@@ -26,12 +26,10 @@ from . import cairo
 from .units import size
 
 # Python 2/3 management
-# pylint: disable=C0103
 try:
     Error = cairo.Error
 except AttributeError:
     Error = SystemError
-# pylint: enable=C0103
 
 
 class PointError(Exception):
