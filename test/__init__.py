@@ -29,12 +29,13 @@ import io
 import tempfile
 import shutil
 import subprocess
+
 from nose.tools import assert_raises, eq_  # pylint: disable=E0611
 
-from cairosvg.surface import cairo
-from cairosvg import main, features
 import cairosvg.parser
 import cairosvg.surface
+from cairosvg import main, features
+from cairosvg.surface import cairo
 
 
 features.LOCALE = "en_US"
@@ -67,6 +68,13 @@ if not os.path.exists(OUTPUT_FOLDER):
     os.mkdir(OUTPUT_FOLDER)
 
 PYTHON_3 = sys.version_info[0] >= 3
+
+
+# Force antialias and hinting to be able to trust the rendering
+cairosvg.surface.SHAPE_ANTIALIAS[None] = cairo.ANTIALIAS_FAST
+cairosvg.surface.TEXT_ANTIALIAS[None] = cairo.ANTIALIAS_FAST
+cairosvg.surface.TEXT_HINT_STYLE[None] = cairo.HINT_STYLE_NONE
+cairosvg.surface.TEXT_HINT_METRICS[None] = cairo.HINT_METRICS_OFF
 
 
 def generate_function(description):
@@ -140,6 +148,12 @@ MAGIC_NUMBERS = {
     'PDF': b'%PDF',
     'PS': b'%!'}
 SAMPLE_SVG = os.path.join(REFERENCE_FOLDER, 'arcs01.svg')
+
+# Reset antialias and hinting
+cairosvg.surface.SHAPE_ANTIALIAS.pop(None)
+cairosvg.surface.TEXT_ANTIALIAS.pop(None)
+cairosvg.surface.TEXT_HINT_STYLE.pop(None)
+cairosvg.surface.TEXT_HINT_METRICS.pop(None)
 
 
 def test_formats():
