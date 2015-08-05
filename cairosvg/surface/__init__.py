@@ -43,6 +43,25 @@ from .units import size
 from . import units
 
 
+SHAPE_ANTIALIAS = {
+    "optimizeSpeed": cairo.ANTIALIAS_FAST,
+    "crispEdges": cairo.ANTIALIAS_NONE,
+    "geometricPrecision": cairo.ANTIALIAS_BEST}
+
+TEXT_ANTIALIAS = {
+    "optimizeSpeed": cairo.ANTIALIAS_FAST,
+    "optimizeLegibility": cairo.ANTIALIAS_GOOD,
+    "geometricPrecision": cairo.ANTIALIAS_BEST}
+
+TEXT_HINT_STYLE = {
+    "geometricPrecision": cairo.HINT_STYLE_NONE,
+    "optimizeLegibility": cairo.HINT_STYLE_FULL}
+
+TEXT_HINT_METRICS = {
+    "geometricPrecision": cairo.HINT_METRICS_OFF,
+    "optimizeLegibility": cairo.HINT_METRICS_ON}
+
+
 class Surface(object):
     """Abstract base class for CairoSVG surfaces.
 
@@ -320,12 +339,17 @@ class Surface(object):
         visible = display and (node.get("visibility", "visible") != "hidden")
 
         # Set antialias
-        antialias = {
-            "optimizeSpeed": cairo.ANTIALIAS_FAST,
-            "crispEdges": cairo.ANTIALIAS_NONE,
-            "geometricPrecision": cairo.ANTIALIAS_BEST}.get(
-                node.get("shape-rendering"), cairo.ANTIALIAS_DEFAULT)
-        self.context.set_antialias(antialias)
+        self.context.set_antialias(SHAPE_ANTIALIAS.get(
+            node.get("shape-rendering"), cairo.ANTIALIAS_DEFAULT))
+
+        font_options = self.context.get_font_options()
+        font_options.set_antialias(TEXT_ANTIALIAS.get(
+            node.get("text-rendering"), cairo.ANTIALIAS_DEFAULT))
+        font_options.set_hint_style(TEXT_HINT_STYLE.get(
+            node.get("text-rendering"), cairo.HINT_STYLE_DEFAULT))
+        font_options.set_hint_metrics(TEXT_HINT_METRICS.get(
+            node.get("text-rendering"), cairo.HINT_METRICS_DEFAULT))
+        self.context.set_font_options(font_options)
 
         if self.stroke_and_fill and visible and node.tag in TAGS:
             # Fill
