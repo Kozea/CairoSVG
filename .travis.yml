@@ -15,6 +15,11 @@ install:
   - pip install lxml
   - pip install pillow
 
+before_script:
+  - mkdir ~/.fonts
+  - cp ./test/resources/*.ttf ~/.fonts
+  - fc-cache --force
+
 script: nosetests
 
 sudo: false
