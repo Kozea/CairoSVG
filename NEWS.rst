@@ -8,7 +8,13 @@ Version 2.0, not released yet
 
 * Fix markers
 * Fix URL/id handling
-* Test CairoSVG with Travis
+
+
+Version 1.1, not released yet
+=============================
+
+* Try to test CairoSVG with Travis
+* Remove pycairo support
 
 
 Version 1.0.16, released on 2015-08-05

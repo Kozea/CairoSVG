@@ -21,13 +21,7 @@ Cairo surface creators.
 """
 
 import io
-try:
-    import cairocffi as cairo
-# OSError means cairocffi is installed,
-# but could not load a cairo dynamic library.
-# pycairo may still be available with a statically-linked cairo.
-except (ImportError, OSError):
-    import cairo  # pycairo
+import cairocffi as cairo
 
 from ..parser import Tree
 from .colors import color
