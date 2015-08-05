@@ -10,6 +10,12 @@ Version 2.0, not released yet
 * Fix URL/id handling
 
 
+Version 1.0.16, released on 2015-08-05
+======================================
+
+* Support the text-rendering property
+
+
 Version 1.0.15, released on 2015-06-22
 ======================================
 
