@@ -316,6 +316,9 @@ def draw_marker(surface, node, position="mid"):
                     viewbox_width = width or 0
                     viewbox_height = height or 0
 
+                if 0 in (viewbox_width, viewbox_height):
+                    continue
+
                 surface.context.new_path()
                 for child in marker_node.children:
                     surface.context.save()
