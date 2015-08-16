@@ -21,19 +21,9 @@ Optionally handle CSS stylesheets.
 """
 
 import os
-from .parser import HAS_LXML
 
-# Detect optional depedencies
-try:
-    import tinycss
-    import cssselect
-    CSS_CAPABLE = HAS_LXML
-except ImportError:
-    CSS_CAPABLE = False
-
-
-# Python 2/3 compat
-iteritems = getattr(dict, "iteritems", dict.items)
+import tinycss
+import cssselect
 
 
 def find_stylesheets(tree, url):
@@ -112,9 +102,6 @@ def match_selector(rule, tree):
 
 def apply_stylesheets(tree):
     """Apply the stylesheet in ``tree`` to ``tree``."""
-    if not CSS_CAPABLE:
-        # TODO: warn?
-        return
     style_by_element = {}
     for rule in find_style_rules(tree):
         declarations = list(get_declarations(rule))
@@ -128,7 +115,8 @@ def apply_stylesheets(tree):
                         continue
                 style[name] = value, weight
 
-    for element, style in iteritems(style_by_element):
-        values = ["%s: %s" % (name, value)
-                  for name, (value, weight) in iteritems(style)]
+    for element, style in style_by_element.items():
+        values = [
+            "%s: %s" % (name, value)
+            for name, (value, weight) in style.items()]
         element.set("_style", ";".join(values))

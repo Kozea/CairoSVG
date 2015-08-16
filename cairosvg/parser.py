@@ -20,41 +20,18 @@ SVG Parser.
 
 """
 
-# Fallbacks for Python 2/3 and lxml/ElementTree
-try:
-    import lxml.etree as ElementTree
-    from lxml.etree import XMLSyntaxError as ParseError
-    HAS_LXML = True
-except ImportError:
-    from xml.etree import ElementTree
-    from xml.parsers import expat
-    # ElementTree's API changed between 2.6 and 2.7
-    ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
-    HAS_LXML = False
-
-try:
-    from urllib import urlopen
-    import urlparse
-except ImportError:
-    from urllib.request import urlopen
-    from urllib import parse as urlparse  # Python 3
-
-
 import re
 import gzip
 import uuid
 import os.path
+from urllib.request import urlopen
+from urllib import parse as urlparse
+
+import lxml.etree as ElementTree
 
 from .css import apply_stylesheets
 from .features import match_features
 from .surface.helpers import urls, rotations, pop_rotation, flatten
-
-
-# Python 2/3 compat
-try:
-    basestring
-except NameError:
-    basestring = str
 
 
 def remove_svg_namespace(tree):
@@ -159,7 +136,7 @@ class Node(dict):
         elif not self.children:
             self.children = []
             for child in node:
-                if isinstance(child.tag, basestring):
+                if isinstance(child.tag, str):
                     if match_features(child):
                         self.children.append(Node(child, self))
                         if self.tag == "switch":

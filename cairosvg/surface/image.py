@@ -23,15 +23,9 @@ Images manager.
 import base64
 import gzip
 from io import BytesIO
-try:
-    from urllib import urlopen, unquote
-    import urlparse
-    unquote_to_bytes = lambda data: unquote(
-        data.encode('ascii') if isinstance(data, unicode) else data)
-except ImportError:
-    from urllib.request import urlopen
-    from urllib import parse as urlparse  # Python 3
-    from urllib.parse import unquote_to_bytes
+from urllib.request import urlopen
+from urllib import parse as urlparse
+from urllib.parse import unquote_to_bytes
 
 from . import cairo
 from .helpers import node_format, size, preserve_ratio
@@ -39,12 +33,7 @@ from ..parser import Tree
 
 
 def open_data_url(url):
-    """Decode URLs with the 'data' scheme. urllib can handle them
-    in Python 2, but that is broken in Python 3.
-
-    Inspired from Python 2.7.2’s urllib.py.
-
-    """
+    """Decode URLs with the 'data' scheme."""
     # syntax of data URLs:
     # dataurl   := "data:" [ mediatype ] [ ";base64" ] "," data
     # mediatype := [ type "/" subtype ] *( ";" parameter )

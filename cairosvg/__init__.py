@@ -71,17 +71,13 @@ def main():
     kwargs = {'dpi': float(options.dpi)}
 
     if not options.output or options.output == '-':
-        # Python 2/3 hack
-        bytes_stdout = getattr(sys.stdout, "buffer", sys.stdout)
-        kwargs['write_to'] = bytes_stdout
+        kwargs['write_to'] = sys.stdout
     else:
         kwargs['write_to'] = options.output
 
     url = args[0]
     if url == "-":
-        # Python 2/3 hack
-        bytes_stdin = getattr(sys.stdin, "buffer", sys.stdin)
-        kwargs['file_obj'] = bytes_stdin
+        kwargs['file_obj'] = sys.stdin
     else:
         kwargs['url'] = url
 

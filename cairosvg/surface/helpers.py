@@ -25,12 +25,6 @@ from math import cos, sin, tan, atan2, radians
 from . import cairo
 from .units import size
 
-# Python 2/3 management
-try:
-    Error = cairo.Error
-except AttributeError:
-    Error = SystemError
-
 
 class PointError(Exception):
     """Exception raised when parsing a point fails."""
@@ -231,7 +225,7 @@ def transform(surface, string):
 def apply_matrix_transform(surface, matrix):
     try:
         matrix.invert()
-    except Error:
+    except cairo.Error:
         # Matrix not invertible, clip the surface to an empty path
         active_path = surface.context.copy_path()
         surface.context.new_path()
