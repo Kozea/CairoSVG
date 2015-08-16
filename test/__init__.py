@@ -222,14 +222,12 @@ def test_script():
         old_stdin, old_stdout = sys.stdin, sys.stdout
 
         output_buffer = io.BytesIO()
-        if sys.version_info[0] >= 3:
-            sys.stdout = io.TextIOWrapper(output_buffer)
-        else:
-            sys.stdout = output_buffer
+        sys.stdout = io.TextIOWrapper(output_buffer)
 
         if input_:
             kwargs = {'stdin': open(input_, 'rb')}
             sys.stdin = open(input_, 'rb')
+            sys.stdin.buffer = sys.stdin
         else:
             kwargs = {}
 
