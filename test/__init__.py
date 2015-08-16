@@ -19,13 +19,14 @@
 """
 Cairo test suite.
 
-This test suite compares the CairoSVG output with the reference output.
+This test suite compares the CairoSVG output with a reference version output.
 
 """
 
 import os
 import sys
 import io
+import imp
 import tempfile
 import shutil
 import subprocess
@@ -37,12 +38,15 @@ import cairosvg.surface
 from cairosvg import main, features
 from cairosvg.surface import cairo
 
+reference_surface = imp.load_source(
+    "cairosvg.surface", os.path.join(
+        os.path.dirname(__file__), "cairosvg_reference", "cairosvg",
+        "__init__.py"))
+
 
 features.LOCALE = "en_US"
 
-REFERENCE_FOLDER = os.path.join(os.path.dirname(__file__), "png")
 TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
-OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), "output")
 
 os.chdir(TEST_FOLDER) # relative image urls
 
@@ -52,88 +56,30 @@ else:
     ALL_FILES = os.listdir(TEST_FOLDER)
 
 ALL_FILES.sort(key=lambda name: name.lower())
-FILES = [(
-    os.path.join(
-        os.path.dirname(REFERENCE_FOLDER) if name.startswith("fail")
-        else REFERENCE_FOLDER, "%s.png" % os.path.splitext(name)[0]),
+FILES = [
     os.path.join(
         os.path.dirname(TEST_FOLDER) if name.startswith("fail")
-        else TEST_FOLDER, name))
+        else TEST_FOLDER, name)
     for name in ALL_FILES]
-PIXEL_TOLERANCE = 65
-SIZE_TOLERANCE = 1
-
-
-if not os.path.exists(OUTPUT_FOLDER):
-    os.mkdir(OUTPUT_FOLDER)
-
-PYTHON_3 = sys.version_info[0] >= 3
 
 
 def generate_function(description):
     """Return a testing function with the given ``description``."""
-    def check_image(png_filename, svg_filename):
+    def check_image(svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
-        image1 = cairo.ImageSurface.create_from_png(png_filename)
-        width1 = image1.get_width()
-        height1 = image1.get_height()
-        pixels1 = image1.get_data()[:]
-        assert image1.get_stride() == width1 * 4
+        surface = cairosvg.surface.PNGSurface(
+            cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
+        image = surface.cairo
+        pixels = image.get_data()[:]
+        surface.finish()
 
-        # Force antialias and hinting to be able to trust the rendering
-        cairosvg.surface.SHAPE_ANTIALIAS[None] = cairo.ANTIALIAS_NONE
-        cairosvg.surface.TEXT_ANTIALIAS[None] = cairo.ANTIALIAS_NONE
-        cairosvg.surface.TEXT_HINT_STYLE[None] = cairo.HINT_STYLE_NONE
-        cairosvg.surface.TEXT_HINT_METRICS[None] = cairo.HINT_METRICS_OFF
+        surface = reference_surface.PNGSurface(
+            cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
+        image = surface.cairo
+        reference_pixels = image.get_data()[:]
+        surface.finish()
 
-        png_filename = os.path.join(
-            OUTPUT_FOLDER, os.path.basename(png_filename))
-        cairosvg_surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), png_filename, dpi=72)
-
-        # Reset antialias and hinting
-        cairosvg.surface.SHAPE_ANTIALIAS.pop(None)
-        cairosvg.surface.TEXT_ANTIALIAS.pop(None)
-        cairosvg.surface.TEXT_HINT_STYLE.pop(None)
-        cairosvg.surface.TEXT_HINT_METRICS.pop(None)
-
-        image2 = cairosvg_surface.cairo
-        width2 = image2.get_width()
-        height2 = image2.get_height()
-        pixels2 = image2.get_data()[:]
-        assert image2.get_stride() == width2 * 4
-        cairosvg_surface.finish()
-
-        # Test size
-        assert abs(width1 - width2) <= SIZE_TOLERANCE, \
-            "Bad width (%s != %s)" % (width1, width2)
-        assert abs(height1 - height2) <= SIZE_TOLERANCE, \
-            "Bad height (%s != %s)" % (height1, height2)
-
-        # Test pixels
-        if pixels1 == pixels2:
-            return
-        width = min(width1, width2)
-        height = min(height1, height2)
-        if PYTHON_3:  # Iterating on bytes gives ints on Python 3
-            pixels1 = list(pixels1)
-            pixels2 = list(pixels2)
-        else:  # Iterating on bytes gives bytes on Python 2. Get ints.
-            pixels1 = map(ord, pixels1)
-            pixels2 = map(ord, pixels2)
-        stride = 4 * width
-        for j in range(0, stride * height, stride):
-            if pixels1[j:j + stride] == pixels2[j:j + stride]:
-                continue
-            for i in range(j, j + stride, 4):
-                # ImageSurface.get_data is already pre-multiplied.
-                pixel1 = pixels1[i:i + 4]
-                pixel2 = pixels2[i:i + 4]
-                assert pixel1 == pixel2 or all(
-                    abs(value1 - value2) <= PIXEL_TOLERANCE
-                    for value1, value2 in zip(pixel1, pixel2)
-                ), "Bad pixel %i, %i (%s != %s)" % (
-                    (i // 4) % width, (i // 4) // width, pixel1, pixel2)
+        assert pixels == reference_pixels
 
     check_image.description = description
     return check_image
@@ -141,11 +87,11 @@ def generate_function(description):
 
 def test_images():
     """Yield the functions testing an image."""
-    for png_filename, svg_filename in FILES:
-        image_name = os.path.splitext(os.path.basename(png_filename))[0]
+    for svg_filename in FILES:
         yield (
-            generate_function("Test the %s image" % image_name),
-            png_filename, svg_filename)
+            generate_function(
+                "Test the %s image" % os.path.basename(svg_filename)),
+            svg_filename)
 
 
 MAGIC_NUMBERS = {
@@ -153,12 +99,11 @@ MAGIC_NUMBERS = {
     'PNG': b'\211PNG\r\n\032\n',
     'PDF': b'%PDF',
     'PS': b'%!'}
-SAMPLE_SVG = os.path.join(REFERENCE_FOLDER, 'arcs01.svg')
 
 
 def test_formats():
     """Convert to a given format and test that output looks right."""
-    _png_filename, svg_filename = FILES[0]
+    svg_filename = FILES[0]
     for format_name in MAGIC_NUMBERS:
         # Use a default parameter value to bind to the current value,
         # not to the variabl as a closure would do.
@@ -179,7 +124,7 @@ def read_file(filename):
 
 def test_api():
     """Test the Python API with various parameters."""
-    _png_filename, svg_filename = FILES[0]
+    svg_filename = FILES[0]
     expected_content = cairosvg.svg2png(url=svg_filename)
     # Already tested above: just a sanity check:
     assert expected_content.startswith(MAGIC_NUMBERS['PNG'])
@@ -224,7 +169,7 @@ def test_api():
 
 def test_low_level_api():
     """Test the low-level Python API with various parameters."""
-    _png_filename, svg_filename = FILES[0]
+    svg_filename = FILES[0]
     expected_content = cairosvg.svg2png(url=svg_filename)
 
     # Same as above, longer version
@@ -249,7 +194,7 @@ def test_low_level_api():
 
 def test_script():
     """Test the ``cairosvg`` script and the ``main`` function."""
-    _png_filename, svg_filename = FILES[0]
+    svg_filename = FILES[0]
     script = os.path.join(os.path.dirname(__file__), '..', 'cairosvg.py')
     expected_png = cairosvg.svg2png(url=svg_filename)
     expected_pdf = cairosvg.svg2pdf(url=svg_filename)
