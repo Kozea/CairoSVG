@@ -38,6 +38,9 @@ def draw_marker(surface, marker_list, point, angle, scale):
         # TODO: fix url parsing
         marker_node = surface.markers.get(marker[1:])
 
+        if not marker_node:
+            continue
+
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, marker_node)
 
@@ -49,11 +52,11 @@ def draw_marker(surface, marker_list, point, angle, scale):
             viewbox_width = width or 0
             viewbox_height = height or 0
 
-        scale_x = scale / viewbox_width * float(scale_x)
-        scale_y = scale / viewbox_width * float(scale_y)
-
         if 0 in (viewbox_width, viewbox_height):
             continue
+
+        scale_x = scale / viewbox_width * float(scale_x)
+        scale_y = scale / viewbox_width * float(scale_y)
 
         if marker_node:
             temp_path = surface.context.copy_path()
