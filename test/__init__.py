@@ -31,20 +31,17 @@ import tempfile
 import shutil
 import subprocess
 
+import cairocffi as cairo
 from nose.tools import assert_raises, eq_
 
-import cairosvg.parser
-import cairosvg.surface
-from cairosvg import main, features
-from cairosvg.surface import cairo
+import cairosvg
 
-reference_surface = imp.load_source(
-    "cairosvg.surface", os.path.join(
+reference_cairosvg = imp.load_source(
+    "cairosvg_reference", pathname=os.path.join(
         os.path.dirname(__file__), "cairosvg_reference", "cairosvg",
         "__init__.py"))
 
-
-features.LOCALE = "en_US"
+cairosvg.features.LOCALE = reference_cairosvg.features.LOCALE = "en_US"
 
 TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
 
@@ -68,15 +65,13 @@ def generate_function(description):
     def check_image(svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
         surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
-        image = surface.cairo
-        pixels = image.get_data()[:]
+            cairosvg.parser.Tree(url=svg_filename), '/tmp/ver.png', dpi=72)
+        pixels = surface.cairo.get_data()[:]
         surface.finish()
 
-        surface = reference_surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
-        image = surface.cairo
-        reference_pixels = image.get_data()[:]
+        surface = reference_cairosvg.surface.PNGSurface(
+            reference_cairosvg.parser.Tree(url=svg_filename), '/tmp/ref.png', dpi=72)
+        reference_pixels = surface.cairo.get_data()[:]
         surface.finish()
 
         assert pixels == reference_pixels
@@ -233,13 +228,13 @@ def test_script():
 
         if exit_:
             try:
-                main()
+                cairosvg.main()
             except SystemExit:
                 pass
             else:
                 raise Exception('CairoSVG did not exit')
         else:
-            main()
+            cairosvg.main()
 
         sys.stdout.flush()
         output = output_buffer.getvalue()
