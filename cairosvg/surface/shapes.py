@@ -22,7 +22,7 @@ Shapes drawers.
 
 from math import pi
 
-from .helpers import normalize, point, size
+from .helpers import normalize, point, size, point_angle
 
 
 def circle(surface, node):
@@ -69,6 +69,8 @@ def line(surface, node):
         for position in ("x1", "y1", "x2", "y2"))
     surface.context.move_to(x1, y1)
     surface.context.line_to(x2, y2)
+    angle = point_angle(x1, y1, x2, y2)
+    node.vertices = [(x1, y1), (pi - angle, angle), (x2, y2)]
 
 
 def polygon(surface, node):
@@ -83,9 +85,14 @@ def polyline(surface, node):
     if points:
         x, y, points = point(surface, points)
         surface.context.move_to(x, y)
+        node.vertices = [(x, y)]
         while points:
+            x_old, y_old = x, y
             x, y, points = point(surface, points)
+            angle = point_angle(x_old, y_old, x, y)
+            node.vertices.append((pi - angle, angle))
             surface.context.line_to(x, y)
+            node.vertices.append((x, y))
 
 
 def rect(surface, node):
