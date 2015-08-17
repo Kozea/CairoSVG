@@ -22,11 +22,9 @@ This module handles gradients and patterns.
 
 """
 
-from math import radians
-
 from . import cairo
 from .colors import color
-from .helpers import node_format, preserve_ratio, paint, urls, transform
+from .helpers import node_format, paint, urls, transform
 from .shapes import rect
 from .units import size
 from ..parser import Tree
@@ -253,87 +251,6 @@ def draw_pattern(surface, node, name):
         pattern_surface.height / pattern_height, -x, -y))
     surface.context.set_source(pattern_pattern)
     return True
-
-
-def draw_marker(surface, node, position="mid"):
-    """Draw a marker."""
-    if position == "start":
-        node.markers = {
-            "start": list(urls(node.get("marker-start", ""))),
-            "mid": list(urls(node.get("marker-mid", ""))),
-            "end": list(urls(node.get("marker-end", "")))}
-        all_markers = list(urls(node.get("marker", "")))
-        for markers_list in node.markers.values():
-            markers_list.extend(all_markers)
-    pending_marker = (
-        surface.context.get_current_point(), node.markers[position])
-
-    if position == "start":
-        node.pending_markers.append(pending_marker)
-        return
-    elif position == "end":
-        node.pending_markers.append(pending_marker)
-
-    while node.pending_markers:
-        next_point, markers = node.pending_markers.pop(0)
-        angle1 = node.tangents.pop(0)
-        angle2 = node.tangents.pop(0)
-
-        if angle1 is None:
-            angle1 = angle2
-
-        for active_marker in markers:
-            if not active_marker.startswith("#"):
-                continue
-            active_marker = active_marker[1:]
-            if active_marker in surface.markers:
-                marker_node = surface.markers[active_marker]
-
-                angle = marker_node.get("orient", "0")
-                if angle == "auto":
-                    angle = float(angle1 + angle2) / 2
-                else:
-                    angle = radians(float(angle))
-
-                temp_path = surface.context.copy_path()
-                current_x, current_y = next_point
-
-                if node.get("markerUnits") == "userSpaceOnUse":
-                    base_scale = 1
-                else:
-                    base_scale = size(
-                        surface, surface.parent_node.get("stroke-width"))
-
-                # Returns 4 values
-                scale_x, scale_y, translate_x, translate_y = \
-                    preserve_ratio(surface, marker_node)
-
-                width, height, viewbox = node_format(surface, marker_node)
-                if viewbox:
-                    viewbox_width = viewbox[2]
-                    viewbox_height = viewbox[3]
-                else:
-                    viewbox_width = width or 0
-                    viewbox_height = height or 0
-
-                if 0 in (viewbox_width, viewbox_height):
-                    continue
-
-                surface.context.new_path()
-                for child in marker_node.children:
-                    surface.context.save()
-                    surface.context.translate(current_x, current_y)
-                    surface.context.rotate(angle)
-                    surface.context.scale(
-                        base_scale / viewbox_width * float(scale_x),
-                        base_scale / viewbox_height * float(scale_y))
-                    surface.context.translate(translate_x, translate_y)
-                    surface.draw(child)
-                    surface.context.restore()
-                surface.context.append_path(temp_path)
-
-    if position == "mid":
-        node.pending_markers.append(pending_marker)
 
 
 def apply_filter_before(surface, node):

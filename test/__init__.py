@@ -65,12 +65,12 @@ def generate_function(description):
     def check_image(svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
         surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), '/tmp/ver.png', dpi=72)
+            cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
         pixels = surface.cairo.get_data()[:]
         surface.finish()
 
         surface = reference_cairosvg.surface.PNGSurface(
-            reference_cairosvg.parser.Tree(url=svg_filename), '/tmp/ref.png', dpi=72)
+            reference_cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
         reference_pixels = surface.cairo.get_data()[:]
         surface.finish()
 

@@ -31,7 +31,7 @@ from .defs import (
 from .helpers import (
     node_format, transform, normalize, paint, urls, apply_matrix_transform,
     PointError, rect)
-from .path import PATH_TAGS
+from .path import PATH_TAGS, draw_markers
 from .tags import TAGS
 from .units import size
 from . import units
@@ -364,6 +364,8 @@ class Surface(object):
             self.context.restore()
         elif not visible:
             self.context.new_path()
+
+        draw_markers(self, node)
 
         # Draw children
         if display and node.tag not in (
