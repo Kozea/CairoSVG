@@ -64,17 +64,29 @@ def generate_function(description):
     """Return a testing function with the given ``description``."""
     def check_image(svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
-        surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
-        pixels = surface.cairo.get_data()[:]
-        surface.finish()
+        test_png = tempfile.NamedTemporaryFile(
+            prefix="test-", suffix=".png", delete=False)
+        test_surface = cairosvg.surface.PNGSurface(
+            cairosvg.parser.Tree(url=svg_filename), test_png, dpi=72)
+        test_pixels = test_surface.cairo.get_data()[:]
 
-        surface = reference_cairosvg.surface.PNGSurface(
-            reference_cairosvg.parser.Tree(url=svg_filename), None, dpi=72)
-        reference_pixels = surface.cairo.get_data()[:]
-        surface.finish()
+        ref_png = tempfile.NamedTemporaryFile(
+            prefix="reference-", suffix=".png", delete=False)
+        ref_surface = reference_cairosvg.surface.PNGSurface(
+            reference_cairosvg.parser.Tree(url=svg_filename), ref_png, dpi=72)
+        ref_pixels = ref_surface.cairo.get_data()[:]
 
-        assert pixels == reference_pixels
+        if test_pixels == ref_pixels:
+            # Test is passing
+            os.remove(ref_png.name)
+            os.remove(test_png.name)
+            return
+
+        ref_surface.finish()
+        test_surface.finish()
+
+        raise AssertionError(
+            'Images are different: {} {}'.format(ref_png.name, test_png.name))
 
     check_image.description = description
     return check_image
