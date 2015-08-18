@@ -35,3 +35,11 @@ Styling
 - ``styling-pres-*``
 
 These tests have empty PNG references.
+
+
+Markers
+=======
+
+- ``painting-marker-properties-01-f``
+
+This test seems to be broken, polygons have wrong properties.
