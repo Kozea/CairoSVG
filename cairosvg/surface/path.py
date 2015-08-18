@@ -53,10 +53,10 @@ def draw_marker(surface, marker_list, point, angle, scale):
             viewbox_height = height or 0
 
         if 0 in (viewbox_width, viewbox_height):
-            continue
-
-        scale_x = scale / viewbox_width * float(scale_x)
-        scale_y = scale / viewbox_width * float(scale_y)
+            scale_x = scale_y = 1
+        else:
+            scale_x = scale / viewbox_width * float(scale_x)
+            scale_y = scale / viewbox_width * float(scale_y)
 
         if marker_node:
             temp_path = surface.context.copy_path()
