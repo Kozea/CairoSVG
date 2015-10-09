@@ -116,8 +116,10 @@ def point_angle(cx, cy, px, py):
 def preserve_ratio(surface, node):
     """Manage the ratio preservation."""
     if node.tag == "marker":
-        scale_x = size(surface, node.get("markerWidth", "3"), "x")
-        scale_y = size(surface, node.get("markerHeight", "3"), "y")
+        width = size(surface, node.get("markerWidth", "3"), "x")
+        height = size(surface, node.get("markerHeight", "3"), "y")
+        scale_x = 1
+        scale_y = 1
         translate_x = -size(surface, node.get("refX"))
         translate_y = -size(surface, node.get("refY"))
     elif node.tag in ("svg", "image"):

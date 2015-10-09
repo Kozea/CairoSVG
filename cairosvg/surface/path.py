@@ -33,7 +33,7 @@ PATH_TAGS = (
     "circle", "ellipse", "line", "path", "polygon", "polyline", "rect")
 
 
-def draw_marker(surface, marker_list, point, angle, scale):
+def draw_marker(surface, marker_list, point, angle):
     for marker in marker_list:
         # TODO: fix url parsing
         marker_node = surface.markers.get(marker[1:])
@@ -41,22 +41,28 @@ def draw_marker(surface, marker_list, point, angle, scale):
         if not marker_node:
             continue
 
+        if marker_node.get("markerUnits") == "userSpaceOnUse":
+            scale = 1
+        else:
+            scale = size(
+                surface, surface.parent_node.get("stroke-width"))
+
         scale_x, scale_y, translate_x, translate_y = \
             preserve_ratio(surface, marker_node)
 
-        width, height, viewbox = node_format(surface, marker_node)
+        viewbox = node_format(surface, marker_node)[2]
+        width = scale * size(surface, marker_node.get("markerWidth", "3"), "x")
+        height = scale * size(
+            surface, marker_node.get("markerHeight", "3"), "y")
         if viewbox:
             viewbox_width = viewbox[2]
             viewbox_height = viewbox[3]
         else:
-            viewbox_width = width or 0
-            viewbox_height = height or 0
+            viewbox_width = width
+            viewbox_height = height
 
-        if 0 in (viewbox_width, viewbox_height):
-            scale_x = scale_y = 1
-        else:
-            scale_x = scale / viewbox_width * float(scale_x)
-            scale_y = scale / viewbox_width * float(scale_y)
+        scale_x = width / viewbox_width * float(scale_x)
+        scale_y = height / viewbox_height * float(scale_y)
 
         if marker_node:
             temp_path = surface.context.copy_path()
@@ -94,12 +100,6 @@ def draw_markers(surface, node):
     angle1, angle2 = None, None
     position = "start"
 
-    if node.get("markerUnits") == "userSpaceOnUse":
-        scale = 1
-    else:
-        scale = size(
-            surface, surface.parent_node.get("stroke-width"))
-
     while node.vertices:
         point = node.vertices.pop(0)
         angles = node.vertices.pop(0) if node.vertices else None
@@ -113,7 +113,7 @@ def draw_markers(surface, node):
             angle = angle2
             position = "end"
 
-        draw_marker(surface, markers[position], point, angle, scale)
+        draw_marker(surface, markers[position], point, angle)
 
         position = "mid" if angles else "start"
 
