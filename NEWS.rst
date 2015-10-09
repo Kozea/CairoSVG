@@ -11,6 +11,12 @@ Version 2.0, not released yet
 * Test CairoSVG with Travis
 
 
+Version 1.0.17, released on 2015-10-09
+======================================
+
+* Fix scale and position of markers
+
+
 Version 1.0.16, released on 2015-08-05
 ======================================
 
