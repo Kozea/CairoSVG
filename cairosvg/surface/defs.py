@@ -308,13 +308,17 @@ def draw_marker(surface, node, position="mid"):
                 scale_x, scale_y, translate_x, translate_y = \
                     preserve_ratio(surface, marker_node)
 
-                width, height, viewbox = node_format(surface, marker_node)
+                viewbox = node_format(surface, marker_node)[2]
+                width = base_scale * size(
+                    surface, node.get("markerWidth", "3"), "x")
+                height = base_scale * size(
+                    surface, node.get("markerHeight", "3"), "y")
                 if viewbox:
                     viewbox_width = viewbox[2]
                     viewbox_height = viewbox[3]
                 else:
-                    viewbox_width = width or 0
-                    viewbox_height = height or 0
+                    viewbox_width = width
+                    viewbox_height = height
 
                 surface.context.new_path()
                 for child in marker_node.children:
@@ -322,8 +326,8 @@ def draw_marker(surface, node, position="mid"):
                     surface.context.translate(current_x, current_y)
                     surface.context.rotate(angle)
                     surface.context.scale(
-                        base_scale / viewbox_width * float(scale_x),
-                        base_scale / viewbox_height * float(scale_y))
+                        width / viewbox_width * float(scale_x),
+                        height / viewbox_height * float(scale_y))
                     surface.context.translate(translate_x, translate_y)
                     surface.draw(child)
                     surface.context.restore()

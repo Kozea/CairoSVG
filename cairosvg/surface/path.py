@@ -40,8 +40,6 @@ def path(surface, node):
         # Don't draw empty paths at all
         return
 
-    draw_marker(surface, node, "start")
-
     for letter in PATH_LETTERS:
         string = string.replace(letter, " %s " % letter)
 
@@ -310,6 +308,9 @@ def path(surface, node):
             # End of path
             node.tangents.extend((0, 0))
             surface.context.close_path()
+
+        if not last_letter:
+            draw_marker(surface, node, "start")
 
         string = string.strip()
 
