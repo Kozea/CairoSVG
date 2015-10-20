@@ -11,6 +11,12 @@ Version 2.0, not released yet
 * Test CairoSVG with Travis
 
 
+Version 1.0.18, released on 2015-10-20
+======================================
+
+* Use cairo groups to apply filters
+
+
 Version 1.0.17, released on 2015-10-09
 ======================================
 
