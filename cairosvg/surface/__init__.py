@@ -26,8 +26,8 @@ import cairocffi as cairo
 from ..parser import Tree
 from .colors import color
 from .defs import (
-    apply_filter_after, apply_filter_before, gradient_or_pattern, parse_def,
-    paint_mask)
+    apply_filter_after_painting, apply_filter_before_painting,
+    gradient_or_pattern, parse_def, paint_mask, prepare_filter)
 from .helpers import (
     node_format, transform, normalize, paint, urls, apply_matrix_transform,
     PointError, rect)
@@ -230,8 +230,16 @@ class Surface(object):
 
         masks = urls(node.get("mask"))
         mask = masks[0][1:] if masks else None
+
+        filters = urls(node.get("filter"))
+        filter_ = filters[0][1:] if filters else None
+
         opacity = float(node.get("opacity", 1))
-        if mask or (opacity < 1 and node.children):
+
+        if filter_:
+            prepare_filter(self, node, filter_)
+
+        if filter_ or mask or (opacity < 1 and node.children):
             self.context.push_group()
 
         self.context.move_to(
@@ -305,18 +313,12 @@ class Surface(object):
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
-        # Filter
-        apply_filter_before(self, node)
-
         if node.tag in TAGS:
             try:
                 TAGS[node.tag](self, node)
             except PointError:
                 # Error in point parsing, do nothing
                 pass
-
-        # Filter
-        apply_filter_after(self, node)
 
         # Get stroke and fill opacity
         stroke_opacity = float(node.get("stroke-opacity", 1))
@@ -374,12 +376,16 @@ class Surface(object):
             for child in node.children:
                 self.draw(child)
 
-        if mask or (opacity < 1 and node.children):
+        if filter_ or mask or (opacity < 1 and node.children):
             self.context.pop_group_to_source()
+            if filter_:
+                apply_filter_before_painting(self, node, filter_)
             if mask and mask in self.masks:
                 paint_mask(self, node, mask, opacity)
             else:
                 self.context.paint_with_alpha(opacity)
+            if filter_:
+                apply_filter_after_painting(self, node, filter_)
 
         # Clean cursor's position after 'text' tags
         if node.tag == "text":

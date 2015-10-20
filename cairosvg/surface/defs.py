@@ -253,12 +253,10 @@ def draw_pattern(surface, node, name):
     return True
 
 
-def apply_filter_before(surface, node):
+def prepare_filter(surface, node, name):
     if node["id"] in surface.masks:
         return
 
-    names = urls(node.get("filter"))
-    name = names[0][1:] if names else None
     if name in surface.filters:
         filter_node = surface.filters[name]
         for child in filter_node.children:
@@ -275,14 +273,10 @@ def apply_filter_before(surface, node):
                 surface.context.translate(dx, dy)
 
 
-def apply_filter_after(surface, node):
-    surface.context.set_operator(BLEND_OPERATORS["normal"])
-
+def apply_filter_before_painting(surface, node, name):
     if node["id"] in surface.masks:
         return
 
-    names = urls(node.get("filter"))
-    name = names[0][1:] if names else None
     if name in surface.filters:
         filter_node = surface.filters[name]
         for child in filter_node.children:
@@ -290,8 +284,18 @@ def apply_filter_after(surface, node):
             if child.tag == "feBlend":
                 surface.context.set_operator(BLEND_OPERATORS.get(
                     child.get("mode", "normal"), BLEND_OPERATORS["normal"]))
+
+
+def apply_filter_after_painting(surface, node, name):
+    if node["id"] in surface.masks:
+        return
+
+    if name in surface.filters:
+        filter_node = surface.filters[name]
+        for child in filter_node.children:
             # Flood
-            elif child.tag == "feFlood":
+            if child.tag == "feFlood":
+                surface.context.save()
                 surface.context.new_path()
                 if filter_node.get("primitiveUnits") == "objectBoundingBox":
                     x = size(surface, node.get("x"), "x")
@@ -309,7 +313,7 @@ def apply_filter_after(surface, node):
                     paint(child.get("flood-color"))[1],
                     float(child.get("flood-opacity", 1))))
                 surface.context.fill()
-                surface.context.new_path()
+                surface.context.restore()
 
 
 def use(surface, node):
