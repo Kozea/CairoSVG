@@ -16,13 +16,13 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-CairoSVG - A simple SVG converter for Cairo.
+CairoSVG - A simple SVG converter using Cairo.
 
 """
 
 import os
 import sys
-import optparse
+import argparse
 
 from . import surface
 
@@ -52,38 +52,30 @@ for _output_format, _surface_type in SURFACES.items():
 def main():
     """Entry-point of the executable."""
     # Get command-line options
-    option_parser = optparse.OptionParser(
-        usage="usage: %prog filename [options]", version=VERSION)
-    option_parser.add_option(
-        "-f", "--format", help="output format")
-    option_parser.add_option(
-        "-d", "--dpi", help="ratio between 1in and 1px", default=96)
-    option_parser.add_option(
-        "-o", "--output",
-        default="", help="output filename")
-    options, args = option_parser.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser.add_argument('input', default='-', help='input filename or URL')
+    parser.add_argument('-v', '--version', action='version', version=VERSION)
+    parser.add_argument(
+        '-f', '--format', help='output format',
+        choices=sorted([surface.lower() for surface in SURFACES]))
+    parser.add_argument(
+        '-d', '--dpi', default=96, type=float,
+        help='ratio between 1in and 1px')
+    parser.add_argument('-o', '--output', default='-', help='output filename')
 
-    # Print help if no argument is given
-    if not args:
-        option_parser.print_help()
-        sys.exit()
-
-    kwargs = {'dpi': float(options.dpi)}
-
-    if not options.output or options.output == '-':
-        kwargs['write_to'] = sys.stdout.buffer
-    else:
-        kwargs['write_to'] = options.output
-
-    url = args[0]
-    if url == "-":
-        kwargs['file_obj'] = sys.stdin.buffer
-    else:
-        kwargs['url'] = url
-
+    options = parser.parse_args()
+    kwargs = {'dpi': options.dpi}
+    kwargs['write_to'] = (
+        sys.stdout.buffer if options.output == '-' else options.output)
+    kwargs['file_obj'] = (
+        sys.stdin.buffer if options.input == '-' else options.input)
     output_format = (
         options.format or
-        os.path.splitext(options.output)[1].lstrip(".") or
-        "pdf")
+        os.path.splitext(options.output)[1].lstrip('.') or
+        'pdf').upper()
 
-    SURFACES[output_format.upper()].convert(**kwargs)
+    if output_format in SURFACES:
+        SURFACES[output_format.upper()].convert(**kwargs)
+    else:
+        raise TypeError(
+            'Unknown output format "{}"'.format(output_format.lower()))
