@@ -15,7 +15,7 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Optionally handle CSS stylesheets.
+Handle CSS stylesheets.
 
 """
 
@@ -28,13 +28,13 @@ import cssselect
 def find_stylesheets(tree, url):
     """Find the stylesheets included in ``tree``."""
     # TODO: support contentStyleType on <svg>
-    default_type = "text/css"
+    default_type = 'text/css'
     process = tree.getprevious()
     while process is not None:
-        if (getattr(process, "target", None) == "xml-stylesheet" and
-                process.attrib.get("type", default_type) == "text/css"):
+        if (getattr(process, 'target', None) == 'xml-stylesheet' and
+                process.attrib.get('type', default_type) == 'text/css'):
             # TODO: handle web URLs
-            filename = process.attrib.get("href")
+            filename = process.attrib.get('href')
             if filename:
                 path = os.path.join(os.path.dirname(url), filename)
                 if os.path.isfile(path):
@@ -42,8 +42,8 @@ def find_stylesheets(tree, url):
         process = process.getprevious()
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
-        if (element.tag == "style"
-                and element.get("type", default_type) == "text/css"
+        if (element.tag == 'style'
+                and element.get('type', default_type) == 'text/css'
                 and element.text):
             # TODO: pass href for relative URLs
             # TODO: support media types
@@ -78,7 +78,7 @@ def find_style_rules(tree):
 def get_declarations(rule):
     """Get the declarations in ``rule``."""
     for declaration in rule.declarations:
-        if declaration.name.startswith("-"):
+        if declaration.name.startswith('-'):
             # Ignore properties prefixed by "-"
             continue
         # TODO: filter out invalid values
@@ -116,6 +116,6 @@ def apply_stylesheets(tree):
 
     for element, style in style_by_element.items():
         values = [
-            "%s: %s" % (name, value)
+            '%s: %s' % (name, value)
             for name, (value, weight) in style.items()]
-        element.set("_style", ";".join(values))
+        element.set('_style', ';'.join(values))
