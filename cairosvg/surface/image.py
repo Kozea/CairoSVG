@@ -21,10 +21,10 @@ Images manager.
 
 import base64
 import gzip
+import os.path
 from io import BytesIO
 from urllib.request import urlopen
-from urllib import parse as urlparse
-from urllib.parse import unquote_to_bytes
+from urllib.parse import urljoin, urlparse, unquote_to_bytes
 
 from . import cairo
 from .helpers import node_format, size, preserve_ratio
@@ -69,15 +69,24 @@ def image(surface, node):
     if url.startswith("data:"):
         image_bytes = open_data_url(url)
     else:
+        # TODO: urljoin is unable to deal with relative paths since Python 3.5,
+        # we should find a smart strategy and put it in a separate module
+        # dealing with paths, URIs and downloads
         base_url = node.get("{http://www.w3.org/XML/1998/namespace}base")
         if base_url:
-            url = urlparse.urljoin(base_url, url)
+            if urlparse(base_url).scheme:
+                url = urljoin(base_url, url)
+            else:
+                url = os.path.join(base_url, url)
         if node.url:
-            url = urlparse.urljoin(node.url, url)
-        if urlparse.urlparse(url).scheme:
+            if urlparse(node.url).scheme:
+                url = urljoin(node.url, url)
+            else:
+                url = os.path.join(os.path.dirname(node.url), url)
+        if urlparse(url).scheme:
             input_ = urlopen(url)
         else:
-            input_ = open(url, 'rb')  # filename
+            input_ = open(url, 'rb')
         image_bytes = input_.read()
 
     if len(image_bytes) < 5:
