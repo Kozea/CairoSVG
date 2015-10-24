@@ -66,18 +66,17 @@ def point_following_path(path, width):
 def text(surface, node):
     """Draw a text ``node``."""
     # Set black as default text color
-    if not node.get("fill"):
-        node["fill"] = "#000000"
+    if not node.get('fill'):
+        node['fill'] = '#000000'
 
-    font_size = size(surface, node.get("font-size", "12pt"))
+    font_size = size(surface, node.get('font-size', '12pt'))
     font_family = (
-        (node.get("font-family") or "sans-serif")
-        .split(",")[0].strip("\"' "))
+        (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
     font_style = getattr(
-        cairo, ("font_slant_%s" % node.get("font-style")).upper(),
+        cairo, ('font_slant_%s' % node.get('font-style')).upper(),
         cairo.FONT_SLANT_NORMAL)
     font_weight = getattr(
-        cairo, ("font_weight_%s" % node.get("font-weight")).upper(),
+        cairo, ('font_weight_%s' % node.get('font-weight')).upper(),
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(font_size)
@@ -85,73 +84,70 @@ def text(surface, node):
         surface.context.font_extents())
 
     text_path_href = (
-        node.get("{http://www.w3.org/1999/xlink}href", "") or
-        node.parent.get("{http://www.w3.org/1999/xlink}href", ""))
-    text_path = surface.paths.get(text_path_href.lstrip("#"))
-    letter_spacing = size(surface, node.get("letter-spacing"))
+        node.get('{http://www.w3.org/1999/xlink}href', '') or
+        node.parent.get('{http://www.w3.org/1999/xlink}href', ''))
+    text_path = surface.paths.get(text_path_href.lstrip('#'))
+    letter_spacing = size(surface, node.get('letter-spacing'))
     x_bearing, y_bearing, width, height = (
         surface.context.text_extents(node.text)[:4])
 
     x, y, dx, dy, rotate = [], [], [], [], [0]
-    if "x" in node:
-        x = [size(surface, i, "x")
-             for i in normalize(node["x"]).strip().split(" ")]
-    if "y" in node:
-        y = [size(surface, i, "y")
-             for i in normalize(node["y"]).strip().split(" ")]
-    if "dx" in node:
-        dx = [size(surface, i, "x")
-              for i in normalize(node["dx"]).strip().split(" ")]
-    if "dy" in node:
-        dy = [size(surface, i, "y")
-              for i in normalize(node["dy"]).strip().split(" ")]
-    if "rotate" in node:
+    if 'x' in node:
+        x = [size(surface, i, 'x')
+             for i in normalize(node['x']).strip().split(' ')]
+    if 'y' in node:
+        y = [size(surface, i, 'y')
+             for i in normalize(node['y']).strip().split(' ')]
+    if 'dx' in node:
+        dx = [size(surface, i, 'x')
+              for i in normalize(node['dx']).strip().split(' ')]
+    if 'dy' in node:
+        dy = [size(surface, i, 'y')
+              for i in normalize(node['dy']).strip().split(' ')]
+    if 'rotate' in node:
         rotate = [radians(float(i)) if i else 0
-                  for i in normalize(node["rotate"]).strip().split(" ")]
+                  for i in normalize(node['rotate']).strip().split(' ')]
     last_r = rotate[-1]
     letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
 
-    text_anchor = node.get("text-anchor")
-    if text_anchor == "middle":
+    text_anchor = node.get('text-anchor')
+    if text_anchor == 'middle':
         x_align = width / 2. + x_bearing
-    elif text_anchor == "end":
+    elif text_anchor == 'end':
         x_align = width + x_bearing
     else:
         x_align = 0
 
-    # XXX This is a hack. The rest of the baseline alignment
-    # tags of the SVG 1.1 spec (section 10.9.2) are
-    # not supported. We only try to align things
+    # TODO: This is a hack. The rest of the baseline alignment tags of the SVG
+    # 1.1 spec (section 10.9.2) are not supported. We only try to align things
     # that look like Western horizontal fonts.
-    # Finally, we add a "display-anchor" attribute
-    # for aligning the specific text rather than the
-    # font baseline.
-    # Nonetheless, there are times when one needs to align
-    # text vertically, and this will at least make that
-    # possible.
+    # Finally, we add a "display-anchor" attribute for aligning the specific
+    # text rather than the font baseline.
+    # Nonetheless, there are times when one needs to align text vertically, and
+    # this will at least make that possible.
     if max_x_advance > 0 and max_y_advance == 0:
-        display_anchor = node.get("display-anchor")
-        alignment_baseline = node.get("alignment-baseline")
-        if display_anchor == "middle":
+        display_anchor = node.get('display-anchor')
+        alignment_baseline = node.get('alignment-baseline')
+        if display_anchor == 'middle':
             y_align = -height / 2.0 - y_bearing
-        elif display_anchor == "top":
+        elif display_anchor == 'top':
             y_align = -y_bearing
-        elif display_anchor == "bottom":
+        elif display_anchor == 'bottom':
             y_align = -height - y_bearing
-        elif (alignment_baseline == "central" or
-              alignment_baseline == "middle"):
-            # XXX This is wrong--Cairo gives no reasonable access
-            # to x-height information, so we use font top-to-bottom
+        elif (alignment_baseline == 'central' or
+              alignment_baseline == 'middle'):
+            # TODO: This is wrong, Cairo gives no reasonable access to x-height
+            # information, so we use font top-to-bottom
             y_align = (ascent + descent) / 2.0 - descent
-        elif (alignment_baseline == "text-before-edge" or
-              alignment_baseline == "before_edge" or
-              alignment_baseline == "top" or
-              alignment_baseline == "text-top"):
+        elif (alignment_baseline == 'text-before-edge' or
+              alignment_baseline == 'before_edge' or
+              alignment_baseline == 'top' or
+              alignment_baseline == 'text-top'):
             y_align = ascent
-        elif (alignment_baseline == "text-after-edge" or
-              alignment_baseline == "after_edge" or
-              alignment_baseline == "bottom" or
-              alignment_baseline == "text-bottom"):
+        elif (alignment_baseline == 'text-after-edge' or
+              alignment_baseline == 'after_edge' or
+              alignment_baseline == 'bottom' or
+              alignment_baseline == 'text-bottom'):
             y_align = -descent
         else:
             y_align = 0
@@ -163,7 +159,7 @@ def text(surface, node):
         cairo_path = surface.context.copy_path_flat()
         surface.context.new_path()
         start_offset = size(
-            surface, node.get("startOffset", 0), path_length(cairo_path))
+            surface, node.get('startOffset', 0), path_length(cairo_path))
         surface.text_path_width += start_offset
         x1, y1 = point_following_path(cairo_path, surface.text_path_width)
 

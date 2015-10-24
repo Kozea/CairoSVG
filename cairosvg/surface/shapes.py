@@ -26,15 +26,15 @@ from .helpers import normalize, point, size, point_angle
 
 def circle(surface, node):
     """Draw a circle ``node`` on ``surface``."""
-    r = size(surface, node.get("r"))
+    r = size(surface, node.get('r'))
     if not r:
         return
-    cx = size(surface, node.get("cx"), "x")
-    cy = size(surface, node.get("cy"), "y")
+    cx = size(surface, node.get('cx'), 'x')
+    cy = size(surface, node.get('cy'), 'y')
 
-    # Set "standard" values that may be used by gradients
-    node["width"], node["height"] = str(r * 2), str(r * 2)
-    node["x"], node["y"] = str(cx - r), str(cy - r)
+    # Set 'standard' values that may be used by gradients
+    node['width'], node['height'] = str(r * 2), str(r * 2)
+    node['x'], node['y'] = str(cx - r), str(cy - r)
 
     surface.context.new_sub_path()
     surface.context.arc(cx, cy, r, 0, 2 * pi)
@@ -42,16 +42,16 @@ def circle(surface, node):
 
 def ellipse(surface, node):
     """Draw an ellipse ``node`` on ``surface``."""
-    rx = size(surface, node.get("rx"), "x")
-    ry = size(surface, node.get("ry"), "y")
+    rx = size(surface, node.get('rx'), 'x')
+    ry = size(surface, node.get('ry'), 'y')
     if not rx or not ry:
         return
-    cx = size(surface, node.get("cx"), "x")
-    cy = size(surface, node.get("cy"), "y")
+    cx = size(surface, node.get('cx'), 'x')
+    cy = size(surface, node.get('cy'), 'y')
 
-    # Set "standard" values that may be used by gradients
-    node["width"], node["height"] = str(rx * 2), str(ry * 2)
-    node["x"], node["y"] = str(cx - rx), str(cy - ry)
+    # Set 'standard' values that may be used by gradients
+    node['width'], node['height'] = str(rx * 2), str(ry * 2)
+    node['x'], node['y'] = str(cx - rx), str(cy - ry)
 
     ratio = ry / rx
     surface.context.new_sub_path()
@@ -65,7 +65,7 @@ def line(surface, node):
     """Draw a line ``node``."""
     x1, y1, x2, y2 = tuple(
         size(surface, node.get(position), position[0])
-        for position in ("x1", "y1", "x2", "y2"))
+        for position in ('x1', 'y1', 'x2', 'y2'))
     surface.context.move_to(x1, y1)
     surface.context.line_to(x2, y2)
     angle = point_angle(x1, y1, x2, y2)
@@ -80,7 +80,7 @@ def polygon(surface, node):
 
 def polyline(surface, node):
     """Draw a polyline ``node``."""
-    points = normalize(node.get("points"))
+    points = normalize(node.get('points'))
     if points:
         x, y, points = point(surface, points)
         surface.context.move_to(x, y)
@@ -96,17 +96,17 @@ def polyline(surface, node):
 
 def rect(surface, node):
     """Draw a rect ``node`` on ``surface``."""
-    x, y = size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
-    width = size(surface, node.get("width"), "x")
-    height = size(surface, node.get("height"), "y")
-    rx = node.get("rx")
-    ry = node.get("ry")
+    x, y = size(surface, node.get('x'), 'x'), size(surface, node.get('y'), 'y')
+    width = size(surface, node.get('width'), 'x')
+    height = size(surface, node.get('height'), 'y')
+    rx = node.get('rx')
+    ry = node.get('ry')
     if rx and ry is None:
         ry = rx
     elif ry and rx is None:
         rx = ry
-    rx = size(surface, rx, "x")
-    ry = size(surface, ry, "y")
+    rx = size(surface, rx, 'x')
+    ry = size(surface, ry, 'y')
 
     if rx == 0 or ry == 0:
         surface.context.rectangle(x, y, width, height)
