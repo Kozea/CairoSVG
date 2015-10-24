@@ -26,6 +26,8 @@ from io import BytesIO
 from urllib.request import urlopen
 from urllib.parse import urljoin, urlparse, unquote_to_bytes
 
+from PIL import Image
+
 from . import cairo
 from .helpers import node_format, size, preserve_ratio
 from ..parser import Tree
@@ -39,24 +41,24 @@ def open_data_url(url):
     # data      := *urlchar
     # parameter := attribute "=" value
     try:
-        header, data = url.split(",", 1)
+        header, data = url.split(',', 1)
     except ValueError:
-        raise IOError("bad data URL")
-    header = header[5:]  # len("data:") == 5
+        raise IOError('Bad data URL')
+    header = header[5:]  # len('data:') == 5
     if header:
-        semi = header.rfind(";")
-        if semi >= 0 and "=" not in header[semi:]:
+        semi = header.rfind(';')
+        if semi >= 0 and '=' not in header[semi:]:
             encoding = header[semi+1:]
         else:
-            encoding = ""
+            encoding = ''
     else:
-        encoding = ""
+        encoding = ''
 
     data = unquote_to_bytes(data)
-    if encoding == "base64":
+    if encoding == 'base64':
         missing_padding = 4 - len(data) % 4
         if missing_padding:
-            data += b"=" * missing_padding
+            data += b'=' * missing_padding
         return base64.decodestring(data)
     return data
 
@@ -66,13 +68,13 @@ def image(surface, node):
     url = node.get("{http://www.w3.org/1999/xlink}href")
     if not url:
         return
-    if url.startswith("data:"):
+    if url.startswith('data:'):
         image_bytes = open_data_url(url)
     else:
         # TODO: urljoin is unable to deal with relative paths since Python 3.5,
         # we should find a smart strategy and put it in a separate module
         # dealing with paths, URIs and downloads
-        base_url = node.get("{http://www.w3.org/XML/1998/namespace}base")
+        base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
         if base_url:
             if urlparse(base_url).scheme:
                 url = urljoin(base_url, url)
@@ -92,32 +94,32 @@ def image(surface, node):
     if len(image_bytes) < 5:
         return
 
-    x, y = size(surface, node.get("x"), "x"), size(surface, node.get("y"), "y")
-    width = size(surface, node.get("width"), "x")
-    height = size(surface, node.get("height"), "y")
+    x, y = size(surface, node.get('x'), 'x'), size(surface, node.get('y'), 'y')
+    width = size(surface, node.get('width'), 'x')
+    height = size(surface, node.get('height'), 'y')
     surface.context.rectangle(x, y, width, height)
     surface.context.clip()
 
-    if image_bytes[:4] == b"\x89PNG":
+    if image_bytes[:4] == b'\x89PNG':
         png_file = BytesIO(image_bytes)
-    elif (image_bytes[:5] in (b"<svg ", b"<?xml", b"<!DOC") or
-            image_bytes[:2] == b"\x1f\x8b"):
-        if image_bytes[:2] == b"\x1f\x8b":
+    elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
+            image_bytes[:2] == b'\x1f\x8b'):
+        if image_bytes[:2] == b'\x1f\x8b':
             image_bytes = gzip.GzipFile(fileobj=BytesIO(image_bytes)).read()
         surface.context.save()
         surface.context.translate(x, y)
-        if "x" in node:
-            del node["x"]
-        if "y" in node:
-            del node["y"]
-        if "viewBox" in node:
-            del node["viewBox"]
+        if 'x' in node:
+            del node['x']
+        if 'y' in node:
+            del node['y']
+        if 'viewBox' in node:
+            del node['viewBox']
         tree = Tree(
             url=url, bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(surface, tree)
         if not tree_width or not tree_height:
-            tree_width = tree["width"] = width
-            tree_height = tree["height"] = height
+            tree_width = tree['width'] = width
+            tree_height = tree['height'] = height
         node.image_width = tree_width or width
         node.image_height = tree_height or height
         scale_x, scale_y, translate_x, translate_y = \
@@ -132,14 +134,9 @@ def image(surface, node):
         surface.context.restore()
         return
     else:
-        try:
-            from PIL import Image
-            png_file = BytesIO()
-            Image.open(BytesIO(image_bytes)).save(png_file, 'PNG')
-            png_file.seek(0)
-        except:
-            # No way to handle the image
-            return
+        png_file = BytesIO()
+        Image.open(BytesIO(image_bytes)).save(png_file, 'PNG')
+        png_file.seek(0)
 
     image_surface = cairo.ImageSurface.create_from_png(png_file)
 
