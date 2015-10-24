@@ -116,6 +116,6 @@ def apply_stylesheets(tree):
 
     for element, style in style_by_element.items():
         values = [
-            '%s: %s' % (name, value)
+            '{}: {}'.format(name, value)
             for name, (value, weight) in style.items()]
         element.set('_style', ';'.join(values))

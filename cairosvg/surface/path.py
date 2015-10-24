@@ -168,7 +168,7 @@ def path(surface, node):
 
             # rx=0 or ry=0 means straight line
             if not rx or not ry:
-                string = 'l {!f} {!f} {}'.format(x3, y3, string)
+                string = 'l {} {} {}'.format(x3, y3, string)
                 continue
 
             radii_ratio = ry / rx

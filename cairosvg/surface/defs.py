@@ -135,7 +135,7 @@ def paint_mask(surface, node, name, opacity):
         height = size(surface, node.get('height'), 'y')
         width_ref = width
         height_ref = height
-        mask_node['transform'] = '%s scale(%f, %f)' % (
+        mask_node['transform'] = '{} scale({}, {})'.format(
             mask_node.get('transform', ''), width, height)
 
     mask_node['x'] = size(surface, mask_node.get('x', '-10%'), width_ref)
@@ -148,7 +148,7 @@ def paint_mask(surface, node, name, opacity):
     if mask_node.get('maskUnits') == 'userSpaceOnUse':
         x = mask_node['x']
         y = mask_node['y']
-        mask_node['viewBox'] = '%f %f %f %f' % (
+        mask_node['viewBox'] = '{} {} {} {}'.format(
             mask_node['x'], mask_node['y'],
             mask_node['width'], mask_node['height'])
 
@@ -248,7 +248,8 @@ def draw_pattern(surface, node, name):
             pattern_node['width'] = pattern_width
             pattern_node['height'] = pattern_height
             if pattern_node.get('patternContentUnits') == 'objectBoundingBox':
-                pattern_node['transform'] = 'scale(%s, %s)' % (width, height)
+                pattern_node['transform'] = 'scale({}, {})'.format(
+                    width, height)
     from . import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)

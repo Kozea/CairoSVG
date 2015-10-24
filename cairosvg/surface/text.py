@@ -73,10 +73,10 @@ def text(surface, node):
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
     font_style = getattr(
-        cairo, ('font_slant_%s' % node.get('font-style')).upper(),
+        cairo, ('font_slant_{}'.format(node.get('font-style')).upper()),
         cairo.FONT_SLANT_NORMAL)
     font_weight = getattr(
-        cairo, ('font_weight_%s' % node.get('font-weight')).upper(),
+        cairo, ('font_weight_{}'.format(node.get('font-weight')).upper()),
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(font_size)

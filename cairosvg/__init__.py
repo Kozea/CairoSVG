@@ -40,7 +40,7 @@ for _output_format, _surface_type in SURFACES.items():
         # Two lambdas needed for the closure
         lambda surface_type: lambda *args, **kwargs:
             surface_type.convert(*args, **kwargs))(_surface_type)
-    _name = 'svg2%s' % _output_format.lower()
+    _name = 'svg2{}'.format(_output_format.lower())
     _function.__name__ = _name
     if surface.Surface.convert.__doc__:
         _function.__doc__ = surface.Surface.convert.__doc__.replace(

@@ -36,25 +36,25 @@ from nose.tools import assert_raises, eq_
 import cairosvg
 
 reference_cairosvg = imp.load_source(
-    "cairosvg_reference", pathname=os.path.join(
-        os.path.dirname(__file__), "cairosvg_reference", "cairosvg",
-        "__init__.py"))
+    'cairosvg_reference', pathname=os.path.join(
+        os.path.dirname(__file__), 'cairosvg_reference', 'cairosvg',
+        '__init__.py'))
 
-cairosvg.features.LOCALE = reference_cairosvg.features.LOCALE = "en_US"
+cairosvg.features.LOCALE = reference_cairosvg.features.LOCALE = 'en_US'
 
-TEST_FOLDER = os.path.join(os.path.dirname(__file__), "svg")
+TEST_FOLDER = os.path.join(os.path.dirname(__file__), 'svg')
 
 os.chdir(TEST_FOLDER) # relative image urls
 
-if os.environ.get("CAIROSVG_TEST_FILES"):
-    ALL_FILES = os.environ["CAIROSVG_TEST_FILES"].split(",")
+if os.environ.get('CAIROSVG_TEST_FILES'):
+    ALL_FILES = os.environ['CAIROSVG_TEST_FILES'].split(',')
 else:
     ALL_FILES = os.listdir(TEST_FOLDER)
 
 ALL_FILES.sort(key=lambda name: name.lower())
 FILES = [
     os.path.join(
-        os.path.dirname(TEST_FOLDER) if name.startswith("fail")
+        os.path.dirname(TEST_FOLDER) if name.startswith('fail')
         else TEST_FOLDER, name)
     for name in ALL_FILES]
 
@@ -64,13 +64,13 @@ def generate_function(description):
     def check_image(svg_filename):
         """Check that the pixels match between ``svg`` and ``png``."""
         test_png = tempfile.NamedTemporaryFile(
-            prefix="test-", suffix=".png", delete=False)
+            prefix='test-', suffix='.png', delete=False)
         test_surface = cairosvg.surface.PNGSurface(
             cairosvg.parser.Tree(url=svg_filename), test_png, dpi=72)
         test_pixels = test_surface.cairo.get_data()[:]
 
         ref_png = tempfile.NamedTemporaryFile(
-            prefix="reference-", suffix=".png", delete=False)
+            prefix='reference-', suffix='.png', delete=False)
         ref_surface = reference_cairosvg.surface.PNGSurface(
             reference_cairosvg.parser.Tree(url=svg_filename), ref_png, dpi=72)
         ref_pixels = ref_surface.cairo.get_data()[:]
@@ -96,7 +96,7 @@ def test_images():
     for svg_filename in FILES:
         yield (
             generate_function(
-                "Test the %s image" % os.path.basename(svg_filename)),
+                'Test the {} image'.format(os.path.basename(svg_filename))),
             svg_filename)
 
 
@@ -104,7 +104,8 @@ MAGIC_NUMBERS = {
     'SVG': b'<?xml',
     'PNG': b'\211PNG\r\n\032\n',
     'PDF': b'%PDF',
-    'PS': b'%!'}
+    'PS': b'%!',
+}
 
 
 def test_formats():
@@ -117,8 +118,9 @@ def test_formats():
             """Test the generation of ``format_name`` images."""
             content = cairosvg.SURFACES[format_name].convert(url=svg_filename)
             assert content.startswith(MAGIC_NUMBERS[format_name])
-        test.description = 'Test that the output from svg2%s looks like %s' % (
-            format_name.lower(), format_name)
+        test.description = (
+            'Test that the output from svg2{} looks like {}'.format(
+                format_name.lower(), format_name))
         yield test
 
 
