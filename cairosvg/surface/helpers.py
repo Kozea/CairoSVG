@@ -209,12 +209,12 @@ def transform(surface, string):
                     matrix.translate(-x, -y)
                 elif ttype == 'skewX':
                     tangent = tan(radians(float(values[0])))
-                    matrix = \
-                        cairo.Matrix(1, 0, tangent, 1, 0, 0).multiply(matrix)
+                    matrix = (
+                        cairo.Matrix(1, 0, tangent, 1, 0, 0).multiply(matrix))
                 elif ttype == 'skewY':
                     tangent = tan(radians(float(values[0])))
-                    matrix = \
-                        cairo.Matrix(1, tangent, 0, 1, 0, 0).multiply(matrix)
+                    matrix = (
+                        cairo.Matrix(1, tangent, 0, 1, 0, 0).multiply(matrix))
                 elif ttype == 'translate':
                     if len(values) == 1:
                         values += (0,)

@@ -196,8 +196,8 @@ def path(surface, node):
                 yc = -yc
 
             # Define the arc sweep
-            arc = \
-                surface.context.arc if sweep else surface.context.arc_negative
+            arc = (
+                surface.context.arc if sweep else surface.context.arc_negative)
 
             # Put the second point and the center back to their positions
             xe, ye = rotate(xe, 0, angle)
