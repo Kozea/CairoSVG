@@ -20,6 +20,7 @@ Surface helpers.
 """
 
 from math import cos, sin, tan, atan2, radians
+import re
 
 from . import cairo
 from .units import size
@@ -61,9 +62,7 @@ def node_format(surface, node):
     height = size(surface, node.get('height'), 'y')
     viewbox = node.get('viewBox')
     if viewbox:
-        viewbox = viewbox.replace(',', ' ')
-        while '  ' in viewbox:
-            viewbox = viewbox.replace('  ', ' ')
+        viewbox = re.sub('[ \n\r\t,]+', ' ', viewbox)
         viewbox = tuple(float(position) for position in viewbox.split())
         width = width or viewbox[2]
         height = height or viewbox[3]
@@ -72,26 +71,13 @@ def node_format(surface, node):
 
 def normalize(string=None):
     """Normalize a string corresponding to an array of various values."""
-    # TODO: use regular expressions
-    string = string.replace('-', ' -')
-    string = string.replace(',', ' ')
+    if not string:
+        return ''
 
-    while '  ' in string:
-        string = string.replace('  ', ' ')
-
-    string = string.replace('e -', 'e-')
-    string = string.replace('E -', 'E-')
-
-    values = string.split(' ')
-    string = ''
-    for value in values:
-        if value.count('.') > 1:
-            numbers = value.split('.')
-            string += '{}.{} '.format(numbers.pop(0), numbers.pop(0))
-            string += '.{} '.format(' .'.join(numbers))
-        else:
-            string += value + ' '
-
+    string = string.replace('E', 'e')
+    string = re.sub('(?<!e)-', ' -', string)
+    string = re.sub('[ \n\r\t,]+', ' ', string)
+    string = re.sub(r'(\.[0-9-]+)(?=\.)', r'\1 ', string)
     return string.strip()
 
 
@@ -227,6 +213,12 @@ def transform(surface, string):
 
 
 def apply_matrix_transform(surface, matrix):
+    """Apply a ``matrix`` to ``surface``.
+
+    When the matrix is not invertible, this function clips the context to an
+    empty path instead of raising an exception.
+
+    """
     try:
         matrix.invert()
     except cairo.Error:

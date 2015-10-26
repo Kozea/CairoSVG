@@ -9,7 +9,8 @@ http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview
 
 You'll find in this folder:
 
-- ``svg`` with the source SVG files
+- ``*.py`` with various tests inside
+- ``svg`` with the source SVG files for non-regression tests
 - ``resources`` and ``images`` with various resources for the SVG files
 - ``fail`` with the failing tests
 
@@ -22,11 +23,8 @@ You can test CairoSVG by launching ``nosetests`` in the root folder of the
 repository. You can launch the tests only on one image (or more than one,
 separated by a comma) using::
 
-  CAIROSVG_TEST_FILES=image.svg nosetests --match=test_images test
+  CAIROSVG_TEST_FILES=image.svg nosetests --match=test_images test/test_non_regression.py
 
 As CairoSVG does not handle SVG fonts, you can install the corresponding OTF
 fonts in order to test CairoSVG with the right fonts. They have already been
 generated for you in the ``resources`` folder.
-
-You also need Arial to be aliased by Liberation Sans (may already be done by
-your distribution).
