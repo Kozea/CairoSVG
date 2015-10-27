@@ -123,6 +123,8 @@ class Surface(object):
         self.cursor_position = [0, 0]
         self.cursor_d_position = [0, 0]
         self.text_path_width = 0
+        self.simple_text = True
+        self.text_position = None
         self.tree_cache = {(tree.url, tree["id"]): tree}
         if parent_surface:
             self.markers = parent_surface.markers
@@ -361,7 +363,14 @@ class Surface(object):
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(*color(paint_color, fill_opacity))
-            self.context.fill_preserve()
+
+            if TAGS[node.tag] is TAGS["text"] \
+                    and self.simple_text \
+                    and self.text_position:
+                self.context.move_to(*self.context.device_to_user(*self.text_position))
+                self.context.show_text(node.text)
+            else:
+                self.context.fill_preserve()
             self.context.restore()
 
             # Stroke
@@ -399,6 +408,8 @@ class Surface(object):
             self.cursor_position = [0, 0]
             self.cursor_d_position = [0, 0]
             self.text_path_width = 0
+            self.simple_text = True
+            self.text_position = None
 
         if not node.root:
             # Restoring context is useless if we are in the root tag, it may
