@@ -94,6 +94,9 @@ def text(surface, node):
         node.parent.get("{http://www.w3.org/1999/xlink}href", ""))
     text_path = surface.paths.get(text_path_href.lstrip("#"))
     letter_spacing = size(surface, node.get("letter-spacing"))
+    if letter_spacing:
+        surface.simple_text = False
+
     x_bearing, y_bearing, width, height = (
         surface.context.text_extents(node.text)[:4])
 
@@ -183,6 +186,7 @@ def text(surface, node):
             extents = surface.context.text_extents(letter)[4]
             surface.context.save()
             if text_path:
+                surface.simple_text = False
                 surface.text_path_width += extents + letter_spacing
                 point_on_path = point_following_path(
                     cairo_path,
@@ -197,6 +201,10 @@ def text(surface, node):
                 surface.context.move_to(0, 0)
                 x1, y1 = x2, y2
             else:
+                if x is not None or y is not None:
+                    if surface.text_position is not None:
+                        surface.simple_text = False
+
                 x = surface.cursor_position[0] if x is None else x
                 y = surface.cursor_position[1] if y is None else y
                 surface.context.move_to(x + letter_spacing, y)
@@ -205,6 +213,9 @@ def text(surface, node):
                 surface.context.rel_move_to(-x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
 
+            if surface.text_position is None:
+                cp = surface.context.get_current_point()
+                surface.text_position = surface.context.user_to_device(*cp)
             surface.context.text_path(letter)
             surface.context.restore()
             if not text_path:
