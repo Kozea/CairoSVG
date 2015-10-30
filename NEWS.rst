@@ -11,6 +11,12 @@ Version 2.0, not released yet
 * Test CairoSVG with Travis
 
 
+Version 1.0.19, released on 2015-10-30
+======================================
+
+* Drastically improve the performance of ``Node()``
+
+
 Version 1.0.18, released on 2015-10-20
 ======================================
 
