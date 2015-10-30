@@ -19,6 +19,8 @@ CairoSVG - A simple SVG converter using Cairo.
 
 """
 
+VERSION = '1.0.19'
+
 import os
 import sys
 import argparse
@@ -26,7 +28,6 @@ import argparse
 from . import surface
 
 
-VERSION = '1.0.19'
 SURFACES = {
     'SVG': surface.SVGSurface,  # Tell us if you actually use this one!
     'PNG': surface.PNGSurface,

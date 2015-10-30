@@ -23,8 +23,9 @@ from math import pi, radians
 
 from .helpers import (
     node_format, normalize, point, point_angle, preserve_ratio,
-    quadratic_points, rotate, urls)
+    quadratic_points, rotate)
 from .units import size
+from ..url import urls
 
 
 PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'

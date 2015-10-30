@@ -23,11 +23,12 @@ This module handles clips, gradients, masks, patterns and external nodes.
 
 from . import cairo
 from .colors import color
-from .helpers import node_format, paint, urls, transform
+from .helpers import node_format, paint, transform
 from .shapes import rect
 from .units import size
-from ..parser import Tree
 from ..features import match_features
+from ..parser import Tree
+from ..url import urls
 
 
 BLEND_OPERATORS = {

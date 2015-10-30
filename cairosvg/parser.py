@@ -24,13 +24,13 @@ import gzip
 import random
 import os.path
 from urllib import parse as urlparse
-from urllib.request import urlopen
 
 import lxml.etree as ElementTree
 
 from .css import apply_stylesheets
 from .features import match_features
-from .surface.helpers import urls, rotations, pop_rotation, flatten
+from .surface.helpers import rotations, pop_rotation, flatten
+from .url import urls, urlopen
 
 
 NOT_INHERITED_ATTRIBUTES = frozenset((

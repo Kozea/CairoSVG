@@ -23,7 +23,6 @@ import base64
 import gzip
 import os.path
 from io import BytesIO
-from urllib.request import urlopen
 from urllib.parse import urljoin, urlparse, unquote_to_bytes
 
 from PIL import Image
@@ -31,6 +30,7 @@ from PIL import Image
 from . import cairo
 from .helpers import node_format, size, preserve_ratio
 from ..parser import Tree
+from ..url import urlopen
 
 
 def open_data_url(url):

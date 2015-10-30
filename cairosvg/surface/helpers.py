@@ -24,6 +24,7 @@ import re
 
 from . import cairo
 from .units import size
+from ..url import urls
 
 
 class PointError(Exception):
@@ -230,20 +231,6 @@ def apply_matrix_transform(surface, matrix):
     else:
         matrix.invert()
         surface.context.transform(matrix)
-
-
-def urls(string):
-    """Parse a comma-separated list of ``url()`` strings."""
-    if not string:
-        return []
-
-    # TODO: use a real parser and put this in a separate module
-    string = string.strip()
-    if string.startswith('url'):
-        string = string[3:]
-    return [
-        link.strip('() \'"') for link in string.rsplit(')')[0].split(',')
-        if link.strip('() \'"')]
 
 
 def rect(string):
