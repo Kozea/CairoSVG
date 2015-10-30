@@ -360,6 +360,3 @@ def use(surface, node):
     node.pop('fill', None)
     node.pop('stroke', None)
     surface.context.restore()
-    # Restore twice, because draw does not restore at the end of svg tags
-    if tree.tag != 'use':
-        surface.context.restore()

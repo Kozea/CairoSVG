@@ -116,7 +116,8 @@ def image(surface, node):
             del node['viewBox']
         tree = Tree(
             url=url, bytestring=image_bytes, tree_cache=surface.tree_cache)
-        tree_width, tree_height, viewbox = node_format(surface, tree)
+        tree_width, tree_height, viewbox = node_format(
+            surface, tree, reference=False)
         if not tree_width or not tree_height:
             tree_width = tree['width'] = width
             tree_height = tree['height'] = height
@@ -124,13 +125,11 @@ def image(surface, node):
         node.image_height = tree_height or height
         scale_x, scale_y, translate_x, translate_y = preserve_ratio(
             surface, node)
-        surface.set_context_size(*node_format(surface, tree))
+        surface.set_context_size(*node_format(surface, tree, reference=False))
         surface.context.translate(*surface.context.get_current_point())
         surface.context.scale(scale_x, scale_y)
         surface.context.translate(translate_x, translate_y)
         surface.draw(tree)
-        surface.context.restore()
-        # Restore twice, because draw does not restore at the end of svg tags
         surface.context.restore()
         return
     else:

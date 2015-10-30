@@ -396,44 +396,17 @@ class Surface(object):
             self.cursor_d_position = [0, 0]
             self.text_path_width = 0
 
-        # Restore context and related attributes
-        if not node.root:
-            # Restoring context is useless if we are in the root tag, it may
-            # raise an exception if we have multiple svg tags
-            self.context.restore()
+        self.context.restore()
         self.parent_node = old_parent_node
         self.font_size = old_font_size
 
 
-class MultipageSurface(Surface):
-    """Abstract base class for surfaces that can handle multiple pages."""
-    def draw_root(self, node):
-        self.width = None
-        self.height = None
-        svg_children = [child for child in node.children if child.tag == 'svg']
-        if svg_children:
-            # Multi-page
-            for page in svg_children:
-                width, height, viewbox = node_format(self, page)
-                self.context.save()
-                self.set_context_size(width, height, viewbox)
-                width *= self.device_units_per_user_units
-                height *= self.device_units_per_user_units
-                self.page_sizes.append((width, height))
-                self.cairo.set_size(width, height)
-                self.draw(page)
-                self.context.restore()
-                self.cairo.show_page()
-        else:
-            self.draw(node)
-
-
-class PDFSurface(MultipageSurface):
+class PDFSurface(Surface):
     """A surface that writes in PDF format."""
     surface_class = cairo.PDFSurface
 
 
-class PSSurface(MultipageSurface):
+class PSSurface(Surface):
     """A surface that writes in PostScript format."""
     surface_class = cairo.PSSurface
 

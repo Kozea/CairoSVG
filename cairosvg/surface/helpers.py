@@ -57,10 +57,16 @@ def paint(value):
     return (source, color)
 
 
-def node_format(surface, node):
-    """Return ``(width, height, viewbox)`` of ``node``."""
-    width = size(surface, node.get('width'), 'x')
-    height = size(surface, node.get('height'), 'y')
+def node_format(surface, node, reference=True):
+    """Return ``(width, height, viewbox)`` of ``node``.
+
+    If ``reference`` is ``True``, we can rely on surface size to resolve
+    percentages.
+
+    """
+    default_size = '100%' if reference else 0
+    width = size(surface, node.get('width', default_size), 'x')
+    height = size(surface, node.get('height', default_size), 'y')
     viewbox = node.get('viewBox')
     if viewbox:
         viewbox = re.sub('[ \n\r\t,]+', ' ', viewbox)

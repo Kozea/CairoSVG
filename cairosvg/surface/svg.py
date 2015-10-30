@@ -20,7 +20,6 @@ Root tag drawer.
 """
 
 from .helpers import preserve_ratio, node_format
-from .units import size
 
 
 def svg(surface, node):
@@ -32,8 +31,8 @@ def svg(surface, node):
         node.image_height = viewbox[3]
     else:
         rect_x, rect_y = 0, 0
-        node.image_width = size(surface, node.get('width'), 'x')
-        node.image_height = size(surface, node.get('height'), 'y')
+        node.image_width = width
+        node.image_height = height
 
     if node.parent is None:
         return
