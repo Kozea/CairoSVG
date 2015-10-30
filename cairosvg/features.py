@@ -24,8 +24,8 @@ import locale
 
 ROOT = 'http://www.w3.org/TR/SVG11/feature'
 LOCALE = locale.getdefaultlocale()[0] or ''
-SUPPORTED_FEATURES = set(
-    ROOT + '#' + feature for feature in [
+SUPPORTED_FEATURES = frozenset((
+    ROOT + '#' + feature for feature in (
         'SVG',
         'SVG-static',
         'CoreAttribute',
@@ -46,7 +46,7 @@ SUPPORTED_FEATURES = set(
         'Clip',
         'BasicClip',
         'Mask'
-    ])
+    )))
 
 
 def has_features(features):

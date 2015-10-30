@@ -117,7 +117,7 @@ def pattern(surface, node):
 
 def clip_path(surface, node):
     """Store a clip path definition."""
-    surface.paths[node["id"]] = node
+    surface.paths[node['id']] = node
 
 
 def paint_mask(surface, node, name, opacity):

@@ -17,6 +17,18 @@ Version 1.1, not released yet
 * Remove pycairo support
 
 
+Version 1.0.18, released on 2015-10-20
+======================================
+
+* Use cairo groups to apply filters
+
+
+Version 1.0.17, released on 2015-10-09
+======================================
+
+* Fix scale and position of markers
+
+
 Version 1.0.16, released on 2015-08-05
 ======================================
 
