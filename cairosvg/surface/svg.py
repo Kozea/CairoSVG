@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 # This file is part of CairoSVG
-# Copyright © 2010-2012 Kozea
+# Copyright © 2010-2015 Kozea
 #
 # This library is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -33,15 +32,15 @@ def svg(surface, node):
         node.image_height = viewbox[3]
     else:
         rect_x, rect_y = 0, 0
-        node.image_width = size(surface, node.get("width"), "x")
-        node.image_height = size(surface, node.get("height"), "y")
+        node.image_width = size(surface, node.get('width'), 'x')
+        node.image_height = size(surface, node.get('height'), 'y')
 
     if node.parent is None:
         return
 
-    if node.get("preserveAspectRatio", "xMidYMid") != "none":
-        scale_x, scale_y, translate_x, translate_y = \
-            preserve_ratio(surface, node)
+    if node.get('preserveAspectRatio', 'xMidYMid') != 'none':
+        scale_x, scale_y, translate_x, translate_y = preserve_ratio(
+            surface, node)
         rect_width, rect_height = width, height
     else:
         scale_x, scale_y, translate_x, translate_y = (1, 1, 0, 0)

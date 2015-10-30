@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 # This file is part of CairoSVG
-# Copyright © 2010-2012 Kozea
+# Copyright © 2010-2015 Kozea
 #
 # This library is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -16,13 +15,13 @@
 # along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-CairoSVG - A simple SVG converter for Cairo.
+CairoSVG - A simple SVG converter using Cairo.
 
 """
 
 import os
 import sys
-import optparse
+import argparse
 
 from . import surface
 
@@ -39,9 +38,9 @@ SURFACES = {
 for _output_format, _surface_type in SURFACES.items():
     _function = (
         # Two lambdas needed for the closure
-        lambda surface_type: lambda *args, **kwargs:  # pylint: disable=W0108
+        lambda surface_type: lambda *args, **kwargs:
             surface_type.convert(*args, **kwargs))(_surface_type)
-    _name = 'svg2%s' % _output_format.lower()
+    _name = 'svg2{}'.format(_output_format.lower())
     _function.__name__ = _name
     if surface.Surface.convert.__doc__:
         _function.__doc__ = surface.Surface.convert.__doc__.replace(
@@ -52,42 +51,30 @@ for _output_format, _surface_type in SURFACES.items():
 def main():
     """Entry-point of the executable."""
     # Get command-line options
-    option_parser = optparse.OptionParser(
-        usage="usage: %prog filename [options]", version=VERSION)
-    option_parser.add_option(
-        "-f", "--format", help="output format")
-    option_parser.add_option(
-        "-d", "--dpi", help="ratio between 1in and 1px", default=96)
-    option_parser.add_option(
-        "-o", "--output",
-        default="", help="output filename")
-    options, args = option_parser.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser.add_argument('input', default='-', help='input filename or URL')
+    parser.add_argument('-v', '--version', action='version', version=VERSION)
+    parser.add_argument(
+        '-f', '--format', help='output format',
+        choices=sorted([surface.lower() for surface in SURFACES]))
+    parser.add_argument(
+        '-d', '--dpi', default=96, type=float,
+        help='ratio between 1in and 1px')
+    parser.add_argument('-o', '--output', default='-', help='output filename')
 
-    # Print help if no argument is given
-    if not args:
-        option_parser.print_help()
-        sys.exit()
-
-    kwargs = {'dpi': float(options.dpi)}
-
-    if not options.output or options.output == '-':
-        # Python 2/3 hack
-        bytes_stdout = getattr(sys.stdout, "buffer", sys.stdout)
-        kwargs['write_to'] = bytes_stdout
-    else:
-        kwargs['write_to'] = options.output
-
-    url = args[0]
-    if url == "-":
-        # Python 2/3 hack
-        bytes_stdin = getattr(sys.stdin, "buffer", sys.stdin)
-        kwargs['file_obj'] = bytes_stdin
-    else:
-        kwargs['url'] = url
-
+    options = parser.parse_args()
+    kwargs = {'dpi': options.dpi}
+    kwargs['write_to'] = (
+        sys.stdout.buffer if options.output == '-' else options.output)
+    kwargs['file_obj'] = (
+        sys.stdin.buffer if options.input == '-' else options.input)
     output_format = (
         options.format or
-        os.path.splitext(options.output)[1].lstrip(".") or
-        "pdf")
+        os.path.splitext(options.output)[1].lstrip('.') or
+        'pdf').upper()
 
-    SURFACES[output_format.upper()].convert(**kwargs)
+    if output_format in SURFACES:
+        SURFACES[output_format.upper()].convert(**kwargs)
+    else:
+        raise TypeError(
+            'Unknown output format "{}"'.format(output_format.lower()))

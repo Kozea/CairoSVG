@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 # This file is part of CairoSVG
-# Copyright © 2010-2012 Kozea
+# Copyright © 2010-2015 Kozea
 #
 # This library is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -22,15 +21,16 @@ Units functions.
 
 
 UNITS = {
-    "mm": 1 / 25.4,
-    "cm": 1 / 2.54,
-    "in": 1,
-    "pt": 1 / 72.,
-    "pc": 1 / 6.,
-    "px": None}
+    'mm': 1 / 25.4,
+    'cm': 1 / 2.54,
+    'in': 1,
+    'pt': 1 / 72.,
+    'pc': 1 / 6.,
+    'px': None,
+}
 
 
-def size(surface, string, reference="xy"):
+def size(surface, string, reference='xy'):
     """Replace a ``string`` with units by a float value.
 
     If ``reference`` is a float, it is used as reference for percentages. If it
@@ -49,30 +49,31 @@ def size(surface, string, reference="xy"):
         # Not a float, try something else
         pass
 
-    if "%" in string:
-        if reference == "x":
+    # TODO: use a real parser
+    if '%' in string:
+        if reference == 'x':
             reference = surface.context_width or 0
-        elif reference == "y":
+        elif reference == 'y':
             reference = surface.context_height or 0
-        elif reference == "xy":
+        elif reference == 'xy':
             reference = (
                 (surface.context_width ** 2 + surface.context_height ** 2)
                 ** .5 / 2 ** .5)
-        return float(string.strip(" %")) * reference / 100
-    elif "em" in string:
-        return surface.font_size * float(string.strip(" em"))
-    elif "ex" in string:
+        return float(string.strip(' %')) * reference / 100
+    elif 'em' in string:
+        return surface.font_size * float(string.strip(' em'))
+    elif 'ex' in string:
         # Assume that 1em == 2ex
-        return surface.font_size * float(string.strip(" ex")) / 2
+        return surface.font_size * float(string.strip(' ex')) / 2
 
     for unit, coefficient in UNITS.items():
         if unit in string:
-            number = float(string.strip(" " + unit))
+            number = float(string.strip(' ' + unit))
             return number * (surface.dpi * coefficient if coefficient else 1)
 
     # Try to return the number at the beginning of the string
-    return_string = ""
-    while string and (string[0].isdigit() or string[0] in "+-."):
+    return_string = ''
+    while string and (string[0].isdigit() or string[0] in '+-.'):
         return_string += string[0]
         string = string[1:]
 

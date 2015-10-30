@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 # This file is part of CairoSVG
-# Copyright © 2010-2012 Kozea
+# Copyright © 2010-2015 Kozea
 #
 # This library is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -20,47 +19,49 @@ SVG Parser.
 
 """
 
-# Fallbacks for Python 2/3 and lxml/ElementTree
-# pylint: disable=E0611,F0401,W0611
-try:
-    import lxml.etree as ElementTree
-    from lxml.etree import XMLSyntaxError as ParseError
-    HAS_LXML = True
-except ImportError:
-    from xml.etree import ElementTree
-    from xml.parsers import expat
-    # ElementTree's API changed between 2.6 and 2.7
-    # pylint: disable=C0103
-    ParseError = getattr(ElementTree, 'ParseError', expat.ExpatError)
-    # pylint: enable=C0103
-    HAS_LXML = False
-
-try:
-    from urllib import urlopen
-    import urlparse
-except ImportError:
-    from urllib.request import urlopen
-    from urllib import parse as urlparse  # Python 3
-# pylint: enable=E0611,F0401,W0611
-
-
 import re
 import gzip
 import random
 import os.path
+from urllib import parse as urlparse
+from urllib.request import urlopen
+
+import lxml.etree as ElementTree
 
 from .css import apply_stylesheets
 from .features import match_features
 from .surface.helpers import urls, rotations, pop_rotation, flatten
 
 
-# Python 2/3 compat
-# pylint: disable=C0103,W0622
-try:
-    basestring
-except NameError:
-    basestring = str
-# pylint: enable=C0103,W0622
+NOT_INHERITED_ATTRIBUTES = frozenset((
+    'clip',
+    'clip-path',
+    'filter',
+    'height',
+    'id',
+    'mask',
+    'opacity',
+    'overflow',
+    'rotate',
+    'stop-color',
+    'stop-opacity',
+    'style',
+    'transform',
+    'viewBox',
+    'width',
+    'x',
+    'y',
+    '{http://www.w3.org/1999/xlink}href',
+))
+
+COLOR_ATTRIBUTES = frozenset((
+    'fill',
+    'flood-color',
+    'lighting-color',
+    'stop-color',
+    'stroke',
+))
+
 
 
 def remove_svg_namespace(tree):
@@ -70,14 +71,11 @@ def remove_svg_namespace(tree):
     SVG namespace.
 
     """
-    prefix = "{http://www.w3.org/2000/svg}"
+    prefix = '{http://www.w3.org/2000/svg}'
     prefix_len = len(prefix)
-    iterator = (
-        tree.iter() if hasattr(tree, 'iter')
-        else tree.getiterator())
-    for element in iterator:
+    for element in tree.iter():
         tag = element.tag
-        if hasattr(tag, "startswith") and tag.startswith(prefix):
+        if hasattr(tag, 'startswith') and tag.startswith(prefix):
             element.tag = tag[prefix_len:]
 
 
@@ -85,28 +83,21 @@ def handle_white_spaces(string, preserve):
     """Handle white spaces in text nodes."""
     # http://www.w3.org/TR/SVG/text.html#WhiteSpace
     if not string:
-        return ""
+        return ''
     if preserve:
-        string = re.sub("[\n\r\t]", " ", string)
+        return re.sub('[\n\r\t]', ' ', string)
     else:
-        string = re.sub("[\n\r]", "", string)
-        string = re.sub("\t", " ", string)
-        string = re.sub(" +", " ", string)
-    return string
+        string = re.sub('[\n\r]', '', string)
+        string = re.sub('\t', ' ', string)
+        return re.sub(' +', ' ', string)
 
-NOT_INHERITED_ATTRS = frozenset([
-    "transform", "opacity", "style", "viewBox", "stop-color",
-    "stop-opacity", "width", "height", "filter", "mask", "rotate",
-    "{http://www.w3.org/1999/xlink}href", "id", "x", "y",
-    "overflow", "clip", "clip-path",
-])
 
 class Node(dict):
     """SVG node with dict-like properties and children."""
 
-    def __init__(self, node, parent=None, parent_children=False, url=None,
-                __not_inherited_attrs=NOT_INHERITED_ATTRS):
+    def __init__(self, node, parent=None, parent_children=False, url=None):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
+        super().__init__()
         self.children = ()
 
         self.root = False
@@ -117,77 +108,75 @@ class Node(dict):
         # Inherits from parent properties
         if parent is not None:
             self.update([
-                (a, parent[a]) for a in parent
-                if a not in __not_inherited_attrs
-            ])
+                (attribute, parent[attribute]) for attribute in parent
+                if attribute not in NOT_INHERITED_ATTRIBUTES])
             self.url = url or parent.url
             self.parent = parent
         else:
-            self.url = getattr(self, "url", None)
-            self.parent = getattr(self, "parent", None)
+            self.url = getattr(self, 'url', None)
+            self.parent = getattr(self, 'parent', None)
 
         self.update(self.node.attrib)
 
         # Give an id for nodes that don't have one
-        if "id" not in self:
-            self["id"] = "node_%s_%x" %(id(self), random.getrandbits(32))
+        if 'id' not in self:
+            self['id'] = 'node_{}_{}'.format(id(self), random.getrandbits(32))
 
         # Handle the CSS
-        style = self.pop("_style", "") + ";" + self.pop("style", "").lower()
-        for declaration in style.split(";"):
-            name, colon, value = declaration.partition(":")
+        style = self.pop('_style', '') + ';' + self.pop('style', '').lower()
+        for declaration in style.split(';'):
+            name, colon, value = declaration.partition(':')
             if not colon:
                 continue
             self[name.strip()] = value.strip()
 
         # Replace currentColor by a real color value
-        color_attributes = (
-            "fill", "stroke", "stop-color", "flood-color",
-            "lighting-color")
-        for attribute in color_attributes:
-            if self.get(attribute) == "currentColor":
-                self[attribute] = self.get("color", "black")
+        for attribute in COLOR_ATTRIBUTES:
+            if self.get(attribute) == 'currentColor':
+                self[attribute] = self.get('color', 'black')
 
         # Replace inherit by the parent value
-        for attribute in [k for k in self if self[k] == "inherit"]:
+        for attribute in [
+                attribute for attribute in self
+                if self[attribute] == 'inherit']:
             if parent is not None and attribute in parent:
                 self[attribute] = parent.get(attribute)
             else:
                 del self[attribute]
 
         # Manage text by creating children
-        if self.tag in ("text", "textPath", "a"):
+        if self.tag in ('text', 'textPath', 'a'):
             self.children, _ = self.text_children(node, True, True)
 
         if parent_children:
-            self.children = [Node(child.node, parent=self)
-                             for child in parent.children]
+            self.children = [
+                Node(child.node, parent=self) for child in parent.children]
         elif not self.children:
             self.children = []
             for child in node:
-                if isinstance(child.tag, basestring):
+                if isinstance(child.tag, str):
                     if match_features(child):
                         self.children.append(Node(child, self))
-                        if self.tag == "switch":
+                        if self.tag == 'switch':
                             break
 
     def text_children(self, node, trailing_space, text_root=False):
         """Create children and return them."""
         children = []
-        space = "{http://www.w3.org/XML/1998/namespace}space"
-        preserve = self.get(space) == "preserve"
+        space = '{http://www.w3.org/XML/1998/namespace}space'
+        preserve = self.get(space) == 'preserve'
         self.text = handle_white_spaces(node.text, preserve)
         if trailing_space and not preserve:
-            self.text = self.text.lstrip(" ")
+            self.text = self.text.lstrip(' ')
         original_rotate = rotations(self)
         rotate = list(original_rotate)
         if original_rotate:
             pop_rotation(self, original_rotate, rotate)
         if self.text:
-            trailing_space = self.text.endswith(" ")
+            trailing_space = self.text.endswith(' ')
         for child in node:
-            if child.tag == "tref":
-                href = child.get("{http://www.w3.org/1999/xlink}href")
+            if child.tag == 'tref':
+                href = child.get('{http://www.w3.org/1999/xlink}href')
                 tree_urls = urls(href)
                 url = tree_urls[0] if tree_urls else None
                 child_tree = Tree(url=url, parent=self)
@@ -195,34 +184,34 @@ class Node(dict):
                 child_tree.update(self)
                 child_node = Node(
                     child, parent=child_tree, parent_children=True)
-                child_node.tag = "tspan"
+                child_node.tag = 'tspan'
                 # Retrieve the referenced node and get its flattened text
                 # and remove the node children.
                 child = child_tree.xml_tree
                 child.text = flatten(child)
             else:
                 child_node = Node(child, parent=self)
-            child_preserve = child_node.get(space) == "preserve"
+            child_preserve = child_node.get(space) == 'preserve'
             child_node.text = handle_white_spaces(child.text, child_preserve)
-            child_node.children, trailing_space = \
-                child_node.text_children(child, trailing_space)
-            trailing_space = child_node.text.endswith(" ")
-            if original_rotate and "rotate" not in child_node:
+            child_node.children, trailing_space = child_node.text_children(
+                child, trailing_space)
+            trailing_space = child_node.text.endswith(' ')
+            if original_rotate and 'rotate' not in child_node:
                 pop_rotation(child_node, original_rotate, rotate)
             children.append(child_node)
             if child.tail:
-                anonymous = Node(ElementTree.Element("tspan"), parent=self)
+                anonymous = Node(ElementTree.Element('tspan'), parent=self)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
                 if original_rotate:
                     pop_rotation(anonymous, original_rotate, rotate)
                 if trailing_space and not preserve:
-                    anonymous.text = anonymous.text.lstrip(" ")
+                    anonymous.text = anonymous.text.lstrip(' ')
                 if anonymous.text:
-                    trailing_space = anonymous.text.endswith(" ")
+                    trailing_space = anonymous.text.endswith(' ')
                 children.append(anonymous)
 
         if text_root and not children and not preserve:
-            self.text = self.text.rstrip(" ")
+            self.text = self.text.rstrip(' ')
 
         return children, trailing_space
 
@@ -230,15 +219,15 @@ class Node(dict):
 class Tree(Node):
     """SVG tree."""
     def __new__(cls, **kwargs):
-        tree_cache = kwargs.get("tree_cache")
+        tree_cache = kwargs.get('tree_cache')
         if tree_cache:
-            if "url" in kwargs:
-                url_parts = kwargs["url"].split("#", 1)
+            if 'url' in kwargs:
+                url_parts = kwargs['url'].split('#', 1)
                 if len(url_parts) == 2:
                     url, element_id = url_parts
                 else:
                     url, element_id = url_parts[0], None
-                parent = kwargs.get("parent")
+                parent = kwargs.get('parent')
                 if parent and not url:
                     url = parent.url
                 if (url, element_id) in tree_cache:
@@ -253,17 +242,17 @@ class Tree(Node):
 
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
-        if getattr(self, "xml_tree", None) is not None:
+        if getattr(self, 'xml_tree', None) is not None:
             # The tree has already been parsed
             return
 
         # Make the parameters keyword-only:
-        bytestring = kwargs.pop("bytestring", None)
-        file_obj = kwargs.pop("file_obj", None)
-        url = kwargs.pop("url", None)
-        parent = kwargs.pop("parent", None)
-        parent_children = kwargs.pop("parent_children", None)
-        tree_cache = kwargs.pop("tree_cache", None)
+        bytestring = kwargs.pop('bytestring', None)
+        file_obj = kwargs.pop('file_obj', None)
+        url = kwargs.pop('url', None)
+        parent = kwargs.pop('parent', None)
+        parent_children = kwargs.pop('parent_children', None)
+        tree_cache = kwargs.pop('tree_cache', None)
         element_id = None
 
         if bytestring is not None:
@@ -274,10 +263,10 @@ class Tree(Node):
             if url:
                 self.url = url
             else:
-                self.url = getattr(file_obj, "name", None)
+                self.url = getattr(file_obj, 'name', None)
         elif url is not None:
-            if "#" in url:
-                url, element_id = url.split("#", 1)
+            if '#' in url:
+                url, element_id = url.split('#', 1)
             else:
                 element_id = None
             if parent and parent.url:
@@ -287,13 +276,13 @@ class Tree(Node):
                     url = parent.url
             self.url = url
             if url:
-                if url[1:3] == ":\\":
+                if url[1:3] == ':\\':
                     input_ = url  # win absolute filename
                 elif urlparse.urlparse(url).scheme:
                     input_ = urlopen(url)
                 else:
                     input_ = url  # filename
-                if os.path.splitext(url)[1].lower() == "svgz":
+                if os.path.splitext(url)[1].lower() == 'svgz':
                     input_ = gzip.open(url)
                 tree = ElementTree.parse(input_).getroot()
             else:
@@ -303,22 +292,19 @@ class Tree(Node):
                 tree = root_parent.xml_tree
         else:
             raise TypeError(
-                "No input. Use one of bytestring, file_obj or url.")
+                'No input. Use one of bytestring, file_obj or url.')
         remove_svg_namespace(tree)
         self.xml_tree = tree
         apply_stylesheets(self)
         if element_id:
-            iterator = (
-                tree.iter() if hasattr(tree, "iter")
-                else tree.getiterator())
-            for element in iterator:
-                if element.get("id") == element_id:
+            for element in tree.iter():
+                if element.get('id') == element_id:
                     self.xml_tree = element
                     break
             else:
                 raise TypeError(
-                    'No tag with id="%s" found.' % element_id)
-        super(Tree, self).__init__(self.xml_tree, parent, parent_children, url)
+                    'No tag with id="{}" found.'.format(element_id))
+        super().__init__(self.xml_tree, parent, parent_children, url)
         self.root = True
         if tree_cache is not None and url is not None:
-            tree_cache[(self.url, self["id"])] = self
+            tree_cache[(self.url, self['id'])] = self
