@@ -18,7 +18,7 @@ For further information, please visit the `CairoSVG Website
 import re
 from os import path
 
-from distutils.core import setup
+from setuptools import setup
 
 init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
 with open(init_path, 'r', encoding='utf-8') as fd:
@@ -40,8 +40,8 @@ setup(
     packages=['cairosvg', 'cairosvg.surface'],
     provides=['cairosvg'],
     install_requires=['cairocffi', 'lxml', 'cssselect', 'pillow', 'tinycss'],
-    scripts=['bin/cairosvg'],
     keywords=['svg', 'cairo', 'pdf', 'png', 'postscript'],
+    entry_points={'console_scripts': 'cairosvg=cairosvg:main'},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
