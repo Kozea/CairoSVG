@@ -46,7 +46,7 @@ except ImportError:
 
 import re
 import gzip
-import uuid
+import random
 import os.path
 
 from .css import apply_stylesheets
@@ -94,12 +94,19 @@ def handle_white_spaces(string, preserve):
         string = re.sub(" +", " ", string)
     return string
 
+NOT_INHERITED_ATTRS = frozenset([
+    "transform", "opacity", "style", "viewBox", "stop-color",
+    "stop-opacity", "width", "height", "filter", "mask", "rotate",
+    "{http://www.w3.org/1999/xlink}href", "id", "x", "y",
+    "overflow", "clip", "clip-path",
+])
 
 class Node(dict):
     """SVG node with dict-like properties and children."""
-    def __init__(self, node, parent=None, parent_children=False, url=None):
+
+    def __init__(self, node, parent=None, parent_children=False, url=None,
+                __not_inherited_attrs=NOT_INHERITED_ATTRS):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
-        super(Node, self).__init__()
         self.children = ()
 
         self.root = False
@@ -109,35 +116,29 @@ class Node(dict):
 
         # Inherits from parent properties
         if parent is not None:
-            items = parent.copy()
-            not_inherited = (
-                "transform", "opacity", "style", "viewBox", "stop-color",
-                "stop-opacity", "width", "height", "filter", "mask", "rotate",
-                "{http://www.w3.org/1999/xlink}href", "id", "x", "y",
-                "overflow", "clip", "clip-path")
-            for attribute in not_inherited:
-                if attribute in items:
-                    del items[attribute]
-
-            self.update(items)
+            self.update([
+                (a, parent[a]) for a in parent
+                if a not in __not_inherited_attrs
+            ])
             self.url = url or parent.url
             self.parent = parent
         else:
             self.url = getattr(self, "url", None)
             self.parent = getattr(self, "parent", None)
 
-        self.update(dict(self.node.attrib.items()))
+        self.update(self.node.attrib)
 
         # Give an id for nodes that don't have one
         if "id" not in self:
-            self["id"] = uuid.uuid4().hex
+            self["id"] = "node_%s_%x" %(id(self), random.getrandbits(32))
 
         # Handle the CSS
         style = self.pop("_style", "") + ";" + self.pop("style", "").lower()
         for declaration in style.split(";"):
-            if ":" in declaration:
-                name, value = declaration.split(":", 1)
-                self[name.strip()] = value.strip()
+            name, colon, value = declaration.partition(":")
+            if not colon:
+                continue
+            self[name.strip()] = value.strip()
 
         # Replace currentColor by a real color value
         color_attributes = (
@@ -148,12 +149,11 @@ class Node(dict):
                 self[attribute] = self.get("color", "black")
 
         # Replace inherit by the parent value
-        for attribute, value in dict(self).items():
-            if value == "inherit":
-                if parent is not None and attribute in parent:
-                    self[attribute] = parent.get(attribute)
-                else:
-                    del self[attribute]
+        for attribute in [k for k in self if self[k] == "inherit"]:
+            if parent is not None and attribute in parent:
+                self[attribute] = parent.get(attribute)
+            else:
+                del self[attribute]
 
         # Manage text by creating children
         if self.tag in ("text", "textPath", "a"):
