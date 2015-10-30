@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Public Domain
 
 """
-CairoSVG - A Simple SVG Converter for Cairo
-===========================================
+CairoSVG - A Simple SVG Converter based on Cairo
+================================================
 
-CairoSVG is a SVG converter based on Cairo. It can export SVG files to PDF,
+CairoSVG is a SVG converter based on Cairo. It can convert SVG files into PDF,
 PostScript and PNG files.
 
 For further information, please visit the `CairoSVG Website
@@ -30,7 +29,7 @@ with open(init_path, 'r', encoding='utf-8') as fd:
 setup(
     name='CairoSVG',
     version=VERSION,
-    description='A Simple SVG Converter for Cairo',
+    description='A Simple SVG Converter based on Cairo',
     long_description=__doc__,
     author='Kozea',
     author_email='guillaume.ayoub@kozea.fr',
