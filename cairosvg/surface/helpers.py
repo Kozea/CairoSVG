@@ -24,7 +24,7 @@ import re
 
 from . import cairo
 from .units import size
-from ..url import urls
+from ..url import url
 
 
 class PointError(Exception):
@@ -48,7 +48,7 @@ def paint(value):
     value = value.strip()
 
     if value.startswith('url'):
-        source = urls(value.split(')')[0])[0][1:]
+        source = url(value.split(')')[0] + ')')[1:]
         color = value.split(')', 1)[-1].strip() or None
     else:
         source = None

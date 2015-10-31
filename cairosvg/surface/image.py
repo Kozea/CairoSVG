@@ -30,7 +30,7 @@ from PIL import Image
 from . import cairo
 from .helpers import node_format, size, preserve_ratio
 from ..parser import Tree
-from ..url import urlopen
+from ..url import url, urlopen
 
 
 def open_data_url(url):
@@ -65,11 +65,11 @@ def open_data_url(url):
 
 def image(surface, node):
     """Draw an image ``node``."""
-    url = node.get("{http://www.w3.org/1999/xlink}href")
-    if not url:
+    href = url(node.get("{http://www.w3.org/1999/xlink}href"))
+    if not href:
         return
-    if url.startswith('data:'):
-        image_bytes = open_data_url(url)
+    if href.startswith('data:'):
+        image_bytes = open_data_url(href)
     else:
         # TODO: urljoin is unable to deal with relative paths since Python 3.5,
         # we should find a smart strategy and put it in a separate module
@@ -77,18 +77,18 @@ def image(surface, node):
         base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
         if base_url:
             if urlparse(base_url).scheme:
-                url = urljoin(base_url, url)
+                href = urljoin(base_url, href)
             else:
-                url = os.path.join(base_url, url)
+                href = os.path.join(base_url, href)
         if node.url:
             if urlparse(node.url).scheme:
-                url = urljoin(node.url, url)
+                href = urljoin(node.url, href)
             else:
-                url = os.path.join(os.path.dirname(node.url), url)
-        if urlparse(url).scheme:
-            input_ = urlopen(url)
+                href = os.path.join(os.path.dirname(node.url), href)
+        if urlparse(href).scheme:
+            input_ = urlopen(href)
         else:
-            input_ = open(url, 'rb')
+            input_ = open(href, 'rb')
         image_bytes = input_.read()
 
     if len(image_bytes) < 5:
@@ -115,7 +115,7 @@ def image(surface, node):
         if 'viewBox' in node:
             del node['viewBox']
         tree = Tree(
-            url=url, bytestring=image_bytes, tree_cache=surface.tree_cache)
+            url=href, bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
         if not tree_width or not tree_height:

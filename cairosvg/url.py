@@ -19,6 +19,7 @@ Utils dealing with URLs.
 
 """
 
+import re
 import urllib.request
 
 from . import VERSION
@@ -30,18 +31,14 @@ HTTP_HEADERS = {
 }
 
 
-def urls(string):
-    """Parse a comma-separated list of ``url()`` strings."""
-    if not string:
-        return []
-
-    # TODO: use a real parser
-    string = string.strip()
-    if string.startswith('url'):
-        string = string[3:]
-    return [
-        link.strip('() \'"') for link in string.rsplit(')')[0].split(',')
-        if link.strip('() \'"')]
+def url(string):
+    """Parse a ``url()`` string."""
+    if string:
+        match = re.search(r'url\((.+)\)', string)
+        if match:
+            return match.group(1)
+        else:
+            return string
 
 
 def urlopen(url):

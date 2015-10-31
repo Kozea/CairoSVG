@@ -25,7 +25,7 @@ from .helpers import (
     node_format, normalize, point, point_angle, preserve_ratio,
     quadratic_points, rotate)
 from .units import size
-from ..url import urls
+from ..url import url
 
 
 PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'
@@ -39,13 +39,13 @@ def draw_markers(surface, node):
         return
 
     markers = {}
-    common_markers = list(urls(node.get('marker', '')))
+    common_marker = url(node.get('marker', ''))
     for position in ('start', 'mid', 'end'):
         attribute = 'marker-{}'.format(position)
         if attribute in node:
-            markers[position] = list(urls(node[attribute]))
+            markers[position] = url(node[attribute])
         else:
-            markers[position] = common_markers
+            markers[position] = common_marker
 
     angle1, angle2 = None, None
     position = 'start'
@@ -63,7 +63,8 @@ def draw_markers(surface, node):
             angle = angle2
             position = 'end'
 
-        for marker in markers[position]:
+        marker = markers[position]
+        if marker:
             # TODO: fix url parsing
             marker_node = surface.markers.get(marker[1:])
 

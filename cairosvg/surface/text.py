@@ -24,6 +24,7 @@ from math import cos, sin, radians
 from . import cairo
 from .helpers import distance, normalize, point_angle, zip_letters
 from .units import size
+from ..url import url
 
 
 def path_length(path):
@@ -83,10 +84,13 @@ def text(surface, node):
     ascent, descent, _, max_x_advance, max_y_advance = (
         surface.context.font_extents())
 
-    text_path_href = (
+    text_path_href = url(
         node.get('{http://www.w3.org/1999/xlink}href', '') or
         node.parent.get('{http://www.w3.org/1999/xlink}href', ''))
-    text_path = surface.paths.get(text_path_href.lstrip('#'))
+    if text_path_href:
+        text_path = surface.paths.get(text_path_href.lstrip('#'))
+    else:
+        text_path = None
     letter_spacing = size(surface, node.get('letter-spacing'))
     x_bearing, y_bearing, width, height = (
         surface.context.text_extents(node.text)[:4])

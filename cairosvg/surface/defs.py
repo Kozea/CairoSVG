@@ -28,7 +28,7 @@ from .shapes import rect
 from .units import size
 from ..features import match_features
 from ..parser import Tree
-from ..url import urls
+from ..url import url
 
 
 BLEND_OPERATORS = {
@@ -50,22 +50,18 @@ EXTEND_OPERATORS = {
 def update_def_href(surface, def_name, def_dict):
     """Update the attributes of the def according to its href attribute."""
     def_node = def_dict[def_name]
-    href = def_node.get('{http://www.w3.org/1999/xlink}href')
+    href = url(def_node.get('{http://www.w3.org/1999/xlink}href'))
     if href and href[0] == '#' and href[1:] in def_dict:
-        href_urls = urls(href)
-        href_url = href_urls[0] if href_urls else None
-        href_name = href_url[1:]
-        if href_name in def_dict:
-            update_def_href(surface, href_name, def_dict)
-            href_node = def_dict[href_name]
-            def_dict[def_name] = Tree(
-                url='#{}'.format(def_name), parent=href_node,
-                parent_children=(not def_node.children),
-                tree_cache=surface.tree_cache)
-            # Inherit attributes generally not inherited
-            for key, value in href_node.items():
-                if key not in def_dict[def_name]:
-                    def_dict[def_name][key] = value
+        update_def_href(surface, href[1:], def_dict)
+        href_node = def_dict[href[1:]]
+        def_dict[def_name] = Tree(
+            url='#{}'.format(def_name), parent=href_node,
+            parent_children=(not def_node.children),
+            tree_cache=surface.tree_cache)
+        # Inherit attributes generally not inherited
+        for key, value in href_node.items():
+            if key not in def_dict[def_name]:
+                def_dict[def_name][key] = value
 
 
 def parse_def(surface, node):
@@ -341,10 +337,8 @@ def use(surface, node):
         del node['viewBox']
     if 'mask' in node:
         del node['mask']
-    href = node.get('{http://www.w3.org/1999/xlink}href')
-    tree_urls = urls(href)
-    url = tree_urls[0] if tree_urls else None
-    tree = Tree(url=url, parent=node, tree_cache=surface.tree_cache)
+    href = url(node.get('{http://www.w3.org/1999/xlink}href'))
+    tree = Tree(url=href, parent=node, tree_cache=surface.tree_cache)
 
     if not match_features(tree.xml_tree):
         return

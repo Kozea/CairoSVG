@@ -34,7 +34,7 @@ from .path import PATH_TAGS, draw_markers
 from .tags import TAGS
 from .units import UNITS, size
 from ..parser import Tree
-from ..url import urls
+from ..url import url
 
 
 SHAPE_ANTIALIAS = {
@@ -228,14 +228,12 @@ class Surface(object):
         transform(self, node.get('transform'))
 
         # Find and prepare opacity, masks and filters
-        masks = urls(node.get('mask'))
-        mask = masks[0][1:] if masks else None
-        filters = urls(node.get('filter'))
-        filter_ = filters[0][1:] if filters else None
+        mask = url(node.get('mask'))
+        filter_ = url(node.get('filter'))
         opacity = float(node.get('opacity', 1))
 
         if filter_:
-            prepare_filter(self, node, filter_)
+            prepare_filter(self, node, filter_[1:])
 
         if filter_ or mask or (opacity < 1 and node.children):
             self.context.push_group()
@@ -290,9 +288,9 @@ class Surface(object):
                 left, top, width - left - right, height - top - bottom)
             self.context.restore()
             self.context.clip()
-        clip_paths = urls(node.get('clip-path'))
-        if clip_paths:
-            path = self.paths.get(clip_paths[0][1:])
+        clip_path = url(node.get('clip-path'))
+        if clip_path:
+            path = self.paths.get(clip_path[1:])
             if path:
                 self.context.save()
                 if path.get('clipPathUnits') == 'objectBoundingBox':
@@ -382,13 +380,13 @@ class Surface(object):
         if filter_ or mask or (opacity < 1 and node.children):
             self.context.pop_group_to_source()
             if filter_:
-                apply_filter_before_painting(self, node, filter_)
-            if mask and mask in self.masks:
-                paint_mask(self, node, mask, opacity)
+                apply_filter_before_painting(self, node, filter_[1:])
+            if mask and mask[1:] in self.masks:
+                paint_mask(self, node, mask[1:], opacity)
             else:
                 self.context.paint_with_alpha(opacity)
             if filter_:
-                apply_filter_after_painting(self, node, filter_)
+                apply_filter_after_painting(self, node, filter_[1:])
 
         # Clean cursor's position after 'text' tags
         if node.tag == 'text':

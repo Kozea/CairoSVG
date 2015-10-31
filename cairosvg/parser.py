@@ -30,7 +30,7 @@ import lxml.etree as ElementTree
 from .css import apply_stylesheets
 from .features import match_features
 from .surface.helpers import rotations, pop_rotation, flatten
-from .url import urls, urlopen
+from .url import url, urlopen
 
 
 NOT_INHERITED_ATTRIBUTES = frozenset((
@@ -176,10 +176,8 @@ class Node(dict):
             trailing_space = self.text.endswith(' ')
         for child in node:
             if child.tag == 'tref':
-                href = child.get('{http://www.w3.org/1999/xlink}href')
-                tree_urls = urls(href)
-                url = tree_urls[0] if tree_urls else None
-                child_tree = Tree(url=url, parent=self)
+                href = url(child.get('{http://www.w3.org/1999/xlink}href'))
+                child_tree = Tree(url=href, parent=self)
                 child_tree.clear()
                 child_tree.update(self)
                 child_node = Node(
@@ -220,24 +218,23 @@ class Tree(Node):
     """SVG tree."""
     def __new__(cls, **kwargs):
         tree_cache = kwargs.get('tree_cache')
-        if tree_cache:
-            if 'url' in kwargs:
-                url_parts = kwargs['url'].split('#', 1)
-                if len(url_parts) == 2:
-                    url, element_id = url_parts
-                else:
-                    url, element_id = url_parts[0], None
-                parent = kwargs.get('parent')
-                if parent and not url:
-                    url = parent.url
-                if (url, element_id) in tree_cache:
-                    cached_tree = tree_cache[(url, element_id)]
-                    new_tree = Node(cached_tree.xml_tree, parent)
-                    new_tree.xml_tree = cached_tree.xml_tree
-                    new_tree.url = url
-                    new_tree.tag = cached_tree.tag
-                    new_tree.root = True
-                    return new_tree
+        if tree_cache and kwargs.get('url'):
+            url_parts = kwargs['url'].split('#', 1)
+            if len(url_parts) == 2:
+                url, element_id = url_parts
+            else:
+                url, element_id = url_parts[0], None
+            parent = kwargs.get('parent')
+            if parent and not url:
+                url = parent.url
+            if (url, element_id) in tree_cache:
+                cached_tree = tree_cache[(url, element_id)]
+                new_tree = Node(cached_tree.xml_tree, parent)
+                new_tree.xml_tree = cached_tree.xml_tree
+                new_tree.url = url
+                new_tree.tag = cached_tree.tag
+                new_tree.root = True
+                return new_tree
         return dict.__new__(cls)
 
     def __init__(self, **kwargs):
