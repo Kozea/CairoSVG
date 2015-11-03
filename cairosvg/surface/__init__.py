@@ -228,12 +228,13 @@ class Surface(object):
         transform(self, node.get('transform'))
 
         # Find and prepare opacity, masks and filters
-        mask = url(node.get('mask'))
-        filter_ = url(node.get('filter'))
+        # TODO: accept external masks and filters
+        mask = url(node.get('mask')).fragment
+        filter_ = url(node.get('filter')).fragment
         opacity = float(node.get('opacity', 1))
 
         if filter_:
-            prepare_filter(self, node, filter_[1:])
+            prepare_filter(self, node, filter_)
 
         if filter_ or mask or (opacity < 1 and node.children):
             self.context.push_group()
@@ -288,9 +289,10 @@ class Surface(object):
                 left, top, width - left - right, height - top - bottom)
             self.context.restore()
             self.context.clip()
-        clip_path = url(node.get('clip-path'))
+        # TODO: accept external clip-paths
+        clip_path = url(node.get('clip-path')).fragment
         if clip_path:
-            path = self.paths.get(clip_path[1:])
+            path = self.paths.get(clip_path)
             if path:
                 self.context.save()
                 if path.get('clipPathUnits') == 'objectBoundingBox':
@@ -380,13 +382,13 @@ class Surface(object):
         if filter_ or mask or (opacity < 1 and node.children):
             self.context.pop_group_to_source()
             if filter_:
-                apply_filter_before_painting(self, node, filter_[1:])
-            if mask and mask[1:] in self.masks:
-                paint_mask(self, node, mask[1:], opacity)
+                apply_filter_before_painting(self, node, filter_)
+            if mask in self.masks:
+                paint_mask(self, node, mask, opacity)
             else:
                 self.context.paint_with_alpha(opacity)
             if filter_:
-                apply_filter_after_painting(self, node, filter_[1:])
+                apply_filter_after_painting(self, node, filter_)
 
         # Clean cursor's position after 'text' tags
         if node.tag == 'text':

@@ -20,7 +20,7 @@ Utils dealing with URLs.
 """
 
 import re
-import urllib.request
+from urllib import parse, request
 
 from . import VERSION
 
@@ -36,12 +36,10 @@ def url(string):
     if string:
         match = re.search(r'url\((.+)\)', string)
         if match:
-            return match.group(1)
-        else:
-            return string
+            string = match.group(1)
+    return parse.urlparse(string or '')
 
 
 def urlopen(url):
     """Get a file-like object corresponding to the given ``url``."""
-    return urllib.request.urlopen(
-        urllib.request.Request(url, headers=HTTP_HEADERS))
+    return request.urlopen(request.Request(url, headers=HTTP_HEADERS))

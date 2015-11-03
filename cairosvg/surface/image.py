@@ -65,10 +65,11 @@ def open_data_url(url):
 
 def image(surface, node):
     """Draw an image ``node``."""
-    href = url(node.get("{http://www.w3.org/1999/xlink}href"))
+    parsed_href = url(node.get("{http://www.w3.org/1999/xlink}href"))
+    href = parsed_href.geturl()
     if not href:
         return
-    if href.startswith('data:'):
+    if parsed_href.scheme == 'data':
         image_bytes = open_data_url(href)
     else:
         # TODO: urljoin is unable to deal with relative paths since Python 3.5,

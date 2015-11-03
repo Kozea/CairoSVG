@@ -84,11 +84,12 @@ def text(surface, node):
     ascent, descent, _, max_x_advance, max_y_advance = (
         surface.context.font_extents())
 
+    # TODO: accept external hrefs
     text_path_href = url(
         node.get('{http://www.w3.org/1999/xlink}href', '') or
         node.parent.get('{http://www.w3.org/1999/xlink}href', ''))
-    if text_path_href:
-        text_path = surface.paths.get(text_path_href.lstrip('#'))
+    if text_path_href.fragment:
+        text_path = surface.paths.get(text_path_href.fragment)
     else:
         text_path = None
     letter_spacing = size(surface, node.get('letter-spacing'))

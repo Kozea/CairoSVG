@@ -176,7 +176,7 @@ class Node(dict):
             trailing_space = self.text.endswith(' ')
         for child in node:
             if child.tag == 'tref':
-                href = url(child.get('{http://www.w3.org/1999/xlink}href'))
+                href = url(child.get('{http://www.w3.org/1999/xlink}href')).geturl()
                 child_tree = Tree(url=href, parent=self)
                 child_tree.clear()
                 child_tree.update(self)
@@ -219,6 +219,8 @@ class Tree(Node):
     def __new__(cls, **kwargs):
         tree_cache = kwargs.get('tree_cache')
         if tree_cache and kwargs.get('url'):
+            # TODO: accept urllib.parse.ParseResult objects and use url.url()
+            # to parse URLs
             url_parts = kwargs['url'].split('#', 1)
             if len(url_parts) == 2:
                 url, element_id = url_parts

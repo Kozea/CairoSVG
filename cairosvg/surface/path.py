@@ -39,11 +39,12 @@ def draw_markers(surface, node):
         return
 
     markers = {}
-    common_marker = url(node.get('marker', ''))
+    # TODO: accept external markers
+    common_marker = url(node.get('marker', '')).fragment
     for position in ('start', 'mid', 'end'):
         attribute = 'marker-{}'.format(position)
         if attribute in node:
-            markers[position] = url(node[attribute])
+            markers[position] = url(node[attribute]).fragment
         else:
             markers[position] = common_marker
 
@@ -65,8 +66,7 @@ def draw_markers(surface, node):
 
         marker = markers[position]
         if marker:
-            # TODO: fix url parsing
-            marker_node = surface.markers.get(marker[1:])
+            marker_node = surface.markers.get(marker)
 
             if not marker_node:
                 continue

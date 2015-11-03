@@ -48,7 +48,7 @@ def paint(value):
     value = value.strip()
 
     if value.startswith('url'):
-        source = url(value.split(')')[0] + ')')[1:]
+        source = url(value.split(')')[0] + ')').fragment
         color = value.split(')', 1)[-1].strip() or None
     else:
         source = None
