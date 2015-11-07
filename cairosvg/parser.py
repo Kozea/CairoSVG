@@ -30,7 +30,7 @@ import lxml.etree as ElementTree
 from .css import apply_stylesheets
 from .features import match_features
 from .surface.helpers import rotations, pop_rotation, flatten
-from .url import url, urlopen
+from .url import parse_url, read_url
 
 
 NOT_INHERITED_ATTRIBUTES = frozenset((
@@ -176,8 +176,9 @@ class Node(dict):
             trailing_space = self.text.endswith(' ')
         for child in node:
             if child.tag == 'tref':
-                href = url(child.get('{http://www.w3.org/1999/xlink}href')).geturl()
-                child_tree = Tree(url=href, parent=self)
+                url = parse_url(child.get(
+                    '{http://www.w3.org/1999/xlink}href')).geturl()
+                child_tree = Tree(url=url, parent=self)
                 child_tree.clear()
                 child_tree.update(self)
                 child_node = Node(
@@ -219,8 +220,8 @@ class Tree(Node):
     def __new__(cls, **kwargs):
         tree_cache = kwargs.get('tree_cache')
         if tree_cache and kwargs.get('url'):
-            # TODO: accept urllib.parse.ParseResult objects and use url.url()
-            # to parse URLs
+            # TODO: accept urllib.parse.ParseResult objects and use
+            # url.parse_url() to parse URLs
             url_parts = kwargs['url'].split('#', 1)
             if len(url_parts) == 2:
                 url, element_id = url_parts
@@ -276,11 +277,11 @@ class Tree(Node):
             self.url = url
             if url:
                 if url[1:3] == ':\\':
-                    input_ = url  # win absolute filename
+                    input_ = url  # Windows absolute filename
                 elif urlparse.urlparse(url).scheme:
-                    input_ = urlopen(url)
+                    input_ = read_url(url)
                 else:
-                    input_ = url  # filename
+                    input_ = url  # Unix filename
                 if os.path.splitext(url)[1].lower() == 'svgz':
                     input_ = gzip.open(url)
                 tree = ElementTree.parse(input_).getroot()

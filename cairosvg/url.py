@@ -19,27 +19,43 @@ Utils dealing with URLs.
 
 """
 
+import os
 import re
-from urllib import parse, request
+from urllib.parse import urlparse, urljoin
+from urllib.request import urlopen, Request
 
 from . import VERSION
 
 
-HTTP_HEADERS = {
-    'User-Agent': 'CairoSVG {}'.format(VERSION),
-    'Accept-Encoding': 'gzip, deflate',
-}
+HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(VERSION)}
 
 
-def url(string):
-    """Parse a ``url()`` string."""
-    if string:
-        match = re.search(r'url\((.+)\)', string)
+def parse_url(url, base=None):
+    """Parse an URL.
+
+    The URL can be surrounded by a ``url()`` string. If ``base`` is not `None`,
+    it is prepended to the URL.
+
+    """
+    if url:
+        match = re.search(r'url\((.+)\)', url)
         if match:
-            string = match.group(1)
-    return parse.urlparse(string or '')
+            url = match.group(1)
+        if base:
+            base_scheme = urlparse(base).scheme
+            url_scheme = urlparse(url).scheme
+            if base_scheme in ('', 'file'):
+                if url_scheme in ('', 'file'):
+                    url = os.path.join(base, url)
+            elif base_scheme == url_scheme:
+                url = urljoin(base, url)
+    return urlparse(url or '')
 
 
-def urlopen(url):
-    """Get a file-like object corresponding to the given ``url``."""
-    return request.urlopen(request.Request(url, headers=HTTP_HEADERS))
+def read_url(url):
+    """Get bytes in a parsed ``url``."""
+    if url.scheme:
+        url = url.geturl()
+    else:
+        url = 'file://{}'.format(os.path.abspath(url.geturl()))
+    return urlopen(Request(url, headers=HTTP_HEADERS)).read()

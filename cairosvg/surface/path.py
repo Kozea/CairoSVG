@@ -25,7 +25,7 @@ from .helpers import (
     node_format, normalize, point, point_angle, preserve_ratio,
     quadratic_points, rotate)
 from .units import size
-from ..url import url
+from ..url import parse_url
 
 
 PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'
@@ -40,11 +40,11 @@ def draw_markers(surface, node):
 
     markers = {}
     # TODO: accept external markers
-    common_marker = url(node.get('marker', '')).fragment
+    common_marker = parse_url(node.get('marker', '')).fragment
     for position in ('start', 'mid', 'end'):
         attribute = 'marker-{}'.format(position)
         if attribute in node:
-            markers[position] = url(node[attribute]).fragment
+            markers[position] = parse_url(node[attribute]).fragment
         else:
             markers[position] = common_marker
 

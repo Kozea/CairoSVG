@@ -24,7 +24,7 @@ from math import cos, sin, radians
 from . import cairo
 from .helpers import distance, normalize, point_angle, zip_letters
 from .units import size
-from ..url import url
+from ..url import parse_url
 
 
 def path_length(path):
@@ -85,7 +85,7 @@ def text(surface, node):
         surface.context.font_extents())
 
     # TODO: accept external hrefs
-    text_path_href = url(
+    text_path_href = parse_url(
         node.get('{http://www.w3.org/1999/xlink}href', '') or
         node.parent.get('{http://www.w3.org/1999/xlink}href', ''))
     if text_path_href.fragment:

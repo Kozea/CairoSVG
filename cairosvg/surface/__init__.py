@@ -34,7 +34,7 @@ from .path import PATH_TAGS, draw_markers
 from .tags import TAGS
 from .units import UNITS, size
 from ..parser import Tree
-from ..url import url
+from ..url import parse_url
 
 
 SHAPE_ANTIALIAS = {
@@ -229,8 +229,8 @@ class Surface(object):
 
         # Find and prepare opacity, masks and filters
         # TODO: accept external masks and filters
-        mask = url(node.get('mask')).fragment
-        filter_ = url(node.get('filter')).fragment
+        mask = parse_url(node.get('mask')).fragment
+        filter_ = parse_url(node.get('filter')).fragment
         opacity = float(node.get('opacity', 1))
 
         if filter_:
@@ -290,7 +290,7 @@ class Surface(object):
             self.context.restore()
             self.context.clip()
         # TODO: accept external clip-paths
-        clip_path = url(node.get('clip-path')).fragment
+        clip_path = parse_url(node.get('clip-path')).fragment
         if clip_path:
             path = self.paths.get(clip_path)
             if path:

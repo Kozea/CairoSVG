@@ -19,78 +19,25 @@ Images manager.
 
 """
 
-import base64
 import gzip
 import os.path
 from io import BytesIO
-from urllib.parse import urljoin, urlparse, unquote_to_bytes
 
 from PIL import Image
 
 from . import cairo
 from .helpers import node_format, size, preserve_ratio
 from ..parser import Tree
-from ..url import url, urlopen
-
-
-def open_data_url(url):
-    """Decode URLs with the 'data' scheme."""
-    # syntax of data URLs:
-    # dataurl   := "data:" [ mediatype ] [ ";base64" ] "," data
-    # mediatype := [ type "/" subtype ] *( ";" parameter )
-    # data      := *urlchar
-    # parameter := attribute "=" value
-    try:
-        header, data = url.split(',', 1)
-    except ValueError:
-        raise IOError('Bad data URL')
-    header = header[5:]  # len('data:') == 5
-    if header:
-        semi = header.rfind(';')
-        if semi >= 0 and '=' not in header[semi:]:
-            encoding = header[semi+1:]
-        else:
-            encoding = ''
-    else:
-        encoding = ''
-
-    data = unquote_to_bytes(data)
-    if encoding == 'base64':
-        missing_padding = 4 - len(data) % 4
-        if missing_padding:
-            data += b'=' * missing_padding
-        return base64.decodestring(data)
-    return data
+from ..url import parse_url, read_url
 
 
 def image(surface, node):
     """Draw an image ``node``."""
-    parsed_href = url(node.get("{http://www.w3.org/1999/xlink}href"))
-    href = parsed_href.geturl()
-    if not href:
-        return
-    if parsed_href.scheme == 'data':
-        image_bytes = open_data_url(href)
-    else:
-        # TODO: urljoin is unable to deal with relative paths since Python 3.5,
-        # we should find a smart strategy and put it in a separate module
-        # dealing with paths, URIs and downloads
-        base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
-        if base_url:
-            if urlparse(base_url).scheme:
-                href = urljoin(base_url, href)
-            else:
-                href = os.path.join(base_url, href)
-        if node.url:
-            if urlparse(node.url).scheme:
-                href = urljoin(node.url, href)
-            else:
-                href = os.path.join(os.path.dirname(node.url), href)
-        if urlparse(href).scheme:
-            input_ = urlopen(href)
-        else:
-            input_ = open(href, 'rb')
-        image_bytes = input_.read()
+    base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
+    if not base_url and node.url:
+        base_url = os.path.dirname(node.url)
+    url = parse_url(node.get("{http://www.w3.org/1999/xlink}href"), base_url)
+    image_bytes = read_url(url)
 
     if len(image_bytes) < 5:
         return
@@ -116,7 +63,7 @@ def image(surface, node):
         if 'viewBox' in node:
             del node['viewBox']
         tree = Tree(
-            url=href, bytestring=image_bytes, tree_cache=surface.tree_cache)
+            url=url.geturl(), bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
         if not tree_width or not tree_height:

@@ -28,7 +28,7 @@ from .shapes import rect
 from .units import size
 from ..features import match_features
 from ..parser import Tree
-from ..url import url
+from ..url import parse_url
 
 
 BLEND_OPERATORS = {
@@ -51,7 +51,8 @@ def update_def_href(surface, def_name, def_dict):
     """Update the attributes of the def according to its href attribute."""
     def_node = def_dict[def_name]
     # TODO: accept external hrefs
-    href = url(def_node.get('{http://www.w3.org/1999/xlink}href')).fragment
+    href = parse_url(
+        def_node.get('{http://www.w3.org/1999/xlink}href')).fragment
     if href in def_dict:
         update_def_href(surface, href, def_dict)
         href_node = def_dict[href]
@@ -338,7 +339,7 @@ def use(surface, node):
         del node['viewBox']
     if 'mask' in node:
         del node['mask']
-    href = url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
+    href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
     tree = Tree(url=href, parent=node, tree_cache=surface.tree_cache)
 
     if not match_features(tree.xml_tree):
