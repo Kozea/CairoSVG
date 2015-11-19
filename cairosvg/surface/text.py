@@ -22,8 +22,7 @@ Text drawers.
 from math import cos, sin, radians
 
 from . import cairo
-from .helpers import distance, normalize, point_angle, zip_letters
-from .units import size
+from .helpers import distance, normalize, point_angle, size, zip_letters
 from ..url import parse_url
 
 

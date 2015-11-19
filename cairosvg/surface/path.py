@@ -23,8 +23,7 @@ from math import pi, radians
 
 from .helpers import (
     node_format, normalize, point, point_angle, preserve_ratio,
-    quadratic_points, rotate)
-from .units import size
+    quadratic_points, rotate, size)
 from ..url import parse_url
 
 

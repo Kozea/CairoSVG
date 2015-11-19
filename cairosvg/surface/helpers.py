@@ -23,8 +23,17 @@ from math import cos, sin, tan, atan2, radians
 import re
 
 from . import cairo
-from .units import size
 from ..url import parse_url
+
+
+UNITS = {
+    'mm': 1 / 25.4,
+    'cm': 1 / 2.54,
+    'in': 1,
+    'pt': 1 / 72.,
+    'pc': 1 / 6.,
+    'px': None,
+}
 
 
 class PointError(Exception):
@@ -269,3 +278,48 @@ def flatten(node):
         flattened_text.append(child.tail or '')
         node.remove(child)
     return ''.join(flattened_text)
+
+
+def size(surface, string, reference='xy'):
+    """Replace a ``string`` with units by a float value.
+
+    If ``reference`` is a float, it is used as reference for percentages. If it
+    is ``'x'``, we use the viewport width as reference. If it is ``'y'``, we
+    use the viewport height as reference. If it is ``'xy'``, we use
+    ``(viewport_width ** 2 + viewport_height ** 2) ** .5 / 2 ** .5`` as
+    reference.
+
+    """
+    if not string:
+        return 0
+
+    try:
+        return float(string)
+    except ValueError:
+        # Not a float, try something else
+        pass
+
+    string = normalize(string).split(' ', 1)[0]
+    if string.endswith('%'):
+        if reference == 'x':
+            reference = surface.context_width or 0
+        elif reference == 'y':
+            reference = surface.context_height or 0
+        elif reference == 'xy':
+            reference = (
+                (surface.context_width ** 2 + surface.context_height ** 2)
+                ** .5 / 2 ** .5)
+        return float(string[:-1]) * reference / 100
+    elif string.endswith('em'):
+        return surface.font_size * float(string[:-2])
+    elif string.endswith('ex'):
+        # Assume that 1em == 2ex
+        return surface.font_size * float(string[:-2]) / 2
+
+    for unit, coefficient in UNITS.items():
+        if string.endswith(unit):
+            number = float(string[:-len(unit)])
+            return number * (surface.dpi * coefficient if coefficient else 1)
+
+    # Unknown size
+    return 0

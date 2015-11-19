@@ -28,11 +28,10 @@ from .defs import (
     apply_filter_after_painting, apply_filter_before_painting,
     gradient_or_pattern, parse_def, paint_mask, prepare_filter)
 from .helpers import (
-    node_format, transform, normalize, paint, apply_matrix_transform,
-    PointError, rect)
+    PointError, UNITS, apply_matrix_transform, node_format, normalize, paint,
+    rect, size, transform)
 from .path import PATH_TAGS, draw_markers
 from .tags import TAGS
-from .units import UNITS, size
 from ..parser import Tree
 from ..url import parse_url
 
