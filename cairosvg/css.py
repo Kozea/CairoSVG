@@ -21,8 +21,10 @@ Handle CSS stylesheets.
 
 import os
 
-import tinycss
 import cssselect
+import tinycss
+
+from .url import parse_url, read_url
 
 
 def find_stylesheets(tree, url):
@@ -33,12 +35,10 @@ def find_stylesheets(tree, url):
     while process is not None:
         if (getattr(process, 'target', None) == 'xml-stylesheet' and
                 process.attrib.get('type', default_type) == 'text/css'):
-            # TODO: handle web URLs
-            filename = process.attrib.get('href')
-            if filename:
-                path = os.path.join(os.path.dirname(url), filename)
-                if os.path.isfile(path):
-                    yield tinycss.make_parser().parse_stylesheet_file(path)
+            href = parse_url(process.attrib.get('href'), url)
+            if href:
+                yield tinycss.make_parser().parse_stylesheet_bytes(
+                    read_url(href))
         process = process.getprevious()
     for element in tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
