@@ -24,10 +24,10 @@ import re
 from urllib.parse import urlparse, urljoin
 from urllib.request import urlopen, Request
 
-from . import VERSION
+from . import __version__
 
 
-HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(VERSION)}
+HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 
 
 def parse_url(url, base=None):

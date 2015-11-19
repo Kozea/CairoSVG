@@ -19,7 +19,8 @@ CairoSVG - A simple SVG converter using Cairo.
 
 """
 
-VERSION = '1.0.19'
+__version__ = '2.0.0a1'
+
 
 import os
 import sys
@@ -54,7 +55,8 @@ def main():
     # Get command-line options
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('input', default='-', help='input filename or URL')
-    parser.add_argument('-v', '--version', action='version', version=VERSION)
+    parser.add_argument(
+        '-v', '--version', action='version', version=__version__)
     parser.add_argument(
         '-f', '--format', help='output format',
         choices=sorted([surface.lower() for surface in SURFACES]))

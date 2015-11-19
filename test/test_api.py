@@ -182,7 +182,7 @@ def test_script():
     #assert test_main([], exit_=True).startswith(b'Usage: ')
     assert test_main(['--help'], exit_=True).startswith(b'usage: ')
     assert test_main(['--version'], exit_=True).strip() == (
-         cairosvg.VERSION.encode('ascii'))
+         cairosvg.__version__.encode('ascii'))
     assert test_main([svg_filename]) == expected_pdf
     assert test_main([svg_filename, '-d', '72', '-f', 'pdf']) == expected_pdf
     assert test_main([svg_filename, '-f', 'png']) == expected_png

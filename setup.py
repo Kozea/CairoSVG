@@ -21,14 +21,14 @@ from setuptools import setup
 
 init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
 with open(init_path, 'r', encoding='utf-8') as fd:
-    VERSION = re.search("VERSION = '([^']+)'", fd.read().strip()).group(1)
+    version = re.search("__version__ = '([^']+)'", fd.read().strip()).group(1)
 
 
 # When the version is updated, ``cairosvg.VERSION`` must be modified.
 # A new section in the ``NEWS`` file must be added too.
 setup(
     name='CairoSVG',
-    version=VERSION,
+    version=version,
     description='A Simple SVG Converter based on Cairo',
     long_description=__doc__,
     author='Kozea',
