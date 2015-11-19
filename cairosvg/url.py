@@ -34,20 +34,31 @@ def parse_url(url, base=None):
     """Parse an URL.
 
     The URL can be surrounded by a ``url()`` string. If ``base`` is not `None`,
-    it is prepended to the URL.
+    the "folder" part of it is prepended to the URL.
 
     """
+    # TODO: force the base argument
     if url:
         match = re.search(r'url\((.+)\)', url)
         if match:
             url = match.group(1)
         if base:
-            base_scheme = urlparse(base).scheme
-            url_scheme = urlparse(url).scheme
-            if base_scheme in ('', 'file'):
-                if url_scheme in ('', 'file'):
-                    url = os.path.join(base, url)
-            elif base_scheme == url_scheme:
+            parsed_base = urlparse(base)
+            parsed_url = urlparse(url)
+            if parsed_base.scheme in ('', 'file'):
+                if parsed_url.scheme in ('', 'file'):
+                    # We are sure that `url` and `base` are both file-like URLs
+                    if os.path.isfile(parsed_base.path):
+                        # Take the "folder" part of `base`, as `os.path.join`
+                        # doesn't strip the file name
+                        url = os.path.join(
+                            os.path.dirname(parsed_base.path), parsed_url.path)
+                    elif os.path.isdir(parsed_base.path):
+                        url = os.path.join(parsed_base.path, parsed_url.path)
+                    else:
+                        url = ''
+            elif parsed_base.scheme == parsed_url.scheme:
+                # `urljoin` automatically uses the "folder" part of `base`
                 url = urljoin(base, url)
     return urlparse(url or '')
 
