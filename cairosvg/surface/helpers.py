@@ -46,14 +46,13 @@ def paint(value):
         return None, None
 
     value = value.strip()
-
-    if value.startswith('url'):
-        # TODO: use a real parser
-        source = parse_url(value.split(')')[0] + ')').fragment
-        color = value.split(')', 1)[-1].strip() or None
+    match = re.search(r'(url\(.+\)) *(.*)', value)
+    if match:
+        source = parse_url(match.group(1)).fragment
+        color = match.group(2) or None
     else:
         source = None
-        color = value.strip() or None
+        color = value or None
 
     return (source, color)
 
@@ -77,11 +76,8 @@ def node_format(surface, node, reference=True):
     return width, height, viewbox
 
 
-def normalize(string=None):
+def normalize(string):
     """Normalize a string corresponding to an array of various values."""
-    if not string:
-        return ''
-
     string = string.replace('E', 'e')
     string = re.sub('(?<!e)-', ' -', string)
     string = re.sub('[ \n\r\t,]+', ' ', string)
@@ -89,18 +85,15 @@ def normalize(string=None):
     return string.strip()
 
 
-def point(surface, string=None):
+def point(surface, string):
     """Return ``(x, y, trailing_text)`` from ``string``."""
-    if not string:
-        return (0, 0, '')
-
-    try:
-        x, y, string = (string.strip() + ' ').split(' ', 2)
-    except ValueError:
-        raise PointError(
-            'The point cannot be found in string {}'.format(string))
-
-    return size(surface, x, 'x'), size(surface, y, 'y'), string
+    match = re.match('(.*?) (.*?)(?: |$)', string)
+    if match:
+        x, y = match.group(1, 2)
+        string = string[match.end():]
+        return (size(surface, x, 'x'), size(surface, y, 'y'), string)
+    else:
+        raise PointError
 
 
 def point_angle(cx, cy, px, py):
@@ -174,49 +167,40 @@ def rotate(x, y, angle):
 
 
 def transform(surface, string):
-    """Update ``surface`` matrix according to transformation ``string``."""
+    """Update ``surface`` matrix according to transformation ``string``.
+
+    See http://www.w3.org/TR/SVG/coords.html#TransformAttribute
+
+    """
     if not string:
         return
 
-    # TODO: use a real parser
-    transformations = string.split(')')
+    transformations = re.findall(r'(\w+) ?\( ?(.*?) ?\)', normalize(string))
     matrix = cairo.Matrix()
-    for transformation in transformations:
-        for ttype in (
-                'scale', 'translate', 'matrix', 'rotate', 'skewX', 'skewY'):
-            if ttype in transformation:
-                transformation = transformation.replace(ttype, '')
-                transformation = transformation.replace('(', '')
-                transformation = normalize(transformation).strip() + ' '
-                values = []
-                while transformation:
-                    value, transformation = transformation.split(' ', 1)
-                    # TODO: manage the x/y sizes here
-                    values.append(size(surface, value))
-                if ttype == 'matrix':
-                    matrix = cairo.Matrix(*values).multiply(matrix)
-                elif ttype == 'rotate':
-                    angle = radians(float(values.pop(0)))
-                    x, y = values or (0, 0)
-                    matrix.translate(x, y)
-                    matrix.rotate(angle)
-                    matrix.translate(-x, -y)
-                elif ttype == 'skewX':
-                    tangent = tan(radians(float(values[0])))
-                    matrix = (
-                        cairo.Matrix(1, 0, tangent, 1, 0, 0).multiply(matrix))
-                elif ttype == 'skewY':
-                    tangent = tan(radians(float(values[0])))
-                    matrix = (
-                        cairo.Matrix(1, tangent, 0, 1, 0, 0).multiply(matrix))
-                elif ttype == 'translate':
-                    if len(values) == 1:
-                        values += (0,)
-                    matrix.translate(*values)
-                elif ttype == 'scale':
-                    if len(values) == 1:
-                        values = 2 * values
-                    matrix.scale(*values)
+    for transformation_type, transformation in transformations:
+        values = [size(surface, value) for value in transformation.split(' ')]
+        if transformation_type == 'matrix':
+            matrix = cairo.Matrix(*values).multiply(matrix)
+        elif transformation_type == 'rotate':
+            angle = radians(float(values.pop(0)))
+            x, y = values or (0, 0)
+            matrix.translate(x, y)
+            matrix.rotate(angle)
+            matrix.translate(-x, -y)
+        elif transformation_type == 'skewX':
+            tangent = tan(radians(float(values[0])))
+            matrix = cairo.Matrix(1, 0, tangent, 1, 0, 0).multiply(matrix)
+        elif transformation_type == 'skewY':
+            tangent = tan(radians(float(values[0])))
+            matrix = cairo.Matrix(1, tangent, 0, 1, 0, 0).multiply(matrix)
+        elif transformation_type == 'translate':
+            if len(values) == 1:
+                values += (0,)
+            matrix.translate(*values)
+        elif transformation_type == 'scale':
+            if len(values) == 1:
+                values = 2 * values
+            matrix.scale(*values)
     apply_matrix_transform(surface, matrix)
 
 
@@ -242,15 +226,8 @@ def apply_matrix_transform(surface, matrix):
 
 def rect(string):
     """Parse the rect value of a clip."""
-    if not string:
-        return []
-
-    # TODO: use a real parser
-    string = string.strip()
-    if string.startswith('rect'):
-        return string[4:].strip('() ').split(',')
-    else:
-        return []
+    match = re.search(r'rect\( ?(.+?) ?\)', normalize(string or ''))
+    return match.group(1).split(' ') if match else []
 
 
 def rotations(node):

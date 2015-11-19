@@ -36,8 +36,6 @@ def test_distance():
 
 def test_normalize():
     """Test ``helpers.normalize``."""
-    eq_(helpers.normalize(), '')
-    eq_(helpers.normalize(None), '')
     eq_(helpers.normalize(''), '')
     eq_(helpers.normalize('1'), '1')
     eq_(helpers.normalize('1.1 2'), '1.1 2')
