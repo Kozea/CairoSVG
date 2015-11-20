@@ -22,8 +22,8 @@ Surface helpers.
 from math import cos, sin, tan, atan2, radians
 import re
 
-from . import cairo
-from ..url import parse_url
+from .surface import cairo
+from .url import parse_url
 
 
 UNITS = {

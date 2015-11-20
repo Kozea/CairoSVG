@@ -21,13 +21,13 @@ This module handles clips, gradients, masks, patterns and external nodes.
 
 """
 
-from . import cairo
 from .colors import color
+from .features import match_features
 from .helpers import node_format, paint, size, transform
+from .parser import Tree
 from .shapes import rect
-from ..features import match_features
-from ..parser import Tree
-from ..url import parse_url
+from .surface import cairo
+from .url import parse_url
 
 
 BLEND_OPERATORS = {
@@ -150,7 +150,7 @@ def paint_mask(surface, node, name, opacity):
             mask_node['x'], mask_node['y'],
             mask_node['width'], mask_node['height'])
 
-    from . import SVGSurface  # circular import
+    from .surface import SVGSurface  # circular import
     mask_surface = SVGSurface(mask_node, None, surface.dpi, surface)
     surface.context.save()
     surface.context.translate(x, y)
@@ -248,7 +248,8 @@ def draw_pattern(surface, node, name):
             if pattern_node.get('patternContentUnits') == 'objectBoundingBox':
                 pattern_node['transform'] = 'scale({}, {})'.format(
                     width, height)
-    from . import SVGSurface  # circular import
+
+    from .surface import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
     pattern_pattern.set_extend(cairo.EXTEND_REPEAT)

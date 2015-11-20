@@ -24,7 +24,7 @@ from nose.tools import eq_
 from . import cairosvg
 
 
-helpers = cairosvg.surface.helpers
+helpers = cairosvg.helpers
 
 
 def test_distance():

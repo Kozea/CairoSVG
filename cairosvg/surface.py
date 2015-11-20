@@ -32,8 +32,8 @@ from .helpers import (
     rect, size, transform)
 from .path import PATH_TAGS, draw_markers
 from .tags import TAGS
-from ..parser import Tree
-from ..url import parse_url
+from .parser import Tree
+from .url import parse_url
 
 
 SHAPE_ANTIALIAS = {

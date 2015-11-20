@@ -29,7 +29,7 @@ import lxml.etree as ElementTree
 
 from .css import apply_stylesheets
 from .features import match_features
-from .surface.helpers import rotations, pop_rotation, flatten
+from .helpers import rotations, pop_rotation, flatten
 from .url import parse_url, read_url
 
 

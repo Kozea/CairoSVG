@@ -36,7 +36,7 @@ setup(
     url='http://www.cairosvg.org/',
     license='GNU LGPL v3+',
     platforms='Any',
-    packages=['cairosvg', 'cairosvg.surface'],
+    packages=['cairosvg'],
     provides=['cairosvg'],
     install_requires=['cairocffi', 'lxml', 'cssselect', 'pillow', 'tinycss'],
     keywords=['svg', 'cairo', 'pdf', 'png', 'postscript'],

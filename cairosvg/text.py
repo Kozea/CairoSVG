@@ -21,9 +21,9 @@ Text drawers.
 
 from math import cos, sin, radians
 
-from . import cairo
 from .helpers import distance, normalize, point_angle, size, zip_letters
-from ..url import parse_url
+from .surface import cairo
+from .url import parse_url
 
 
 def path_length(path):

@@ -25,10 +25,10 @@ from io import BytesIO
 
 from PIL import Image
 
-from . import cairo
 from .helpers import node_format, size, preserve_ratio
-from ..parser import Tree
-from ..url import parse_url, read_url
+from .parser import Tree
+from .surface import cairo
+from .url import parse_url, read_url
 
 
 def image(surface, node):
