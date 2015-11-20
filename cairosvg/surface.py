@@ -25,34 +25,70 @@ import cairocffi as cairo
 
 from .colors import color
 from .defs import (
-    apply_filter_after_painting, apply_filter_before_painting,
-    gradient_or_pattern, parse_def, paint_mask, prepare_filter)
+    apply_filter_after_painting, apply_filter_before_painting, clip_path,
+    filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
+    parse_def, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
-    PointError, UNITS, apply_matrix_transform, node_format, normalize, paint,
-    rect, size, transform)
-from .path import PATH_TAGS, draw_markers
-from .tags import TAGS
+    PointError, UNITS, apply_matrix_transform, clip_rect, node_format,
+    normalize, paint, size, transform)
+from .image import image
+from .path import draw_markers, path
 from .parser import Tree
+from .shapes import circle, ellipse, line, polygon, polyline, rect
+from .svg import svg
+from .text import text
 from .url import parse_url
 
 
 SHAPE_ANTIALIAS = {
     'optimizeSpeed': cairo.ANTIALIAS_FAST,
     'crispEdges': cairo.ANTIALIAS_NONE,
-    'geometricPrecision': cairo.ANTIALIAS_BEST}
+    'geometricPrecision': cairo.ANTIALIAS_BEST,
+}
 
 TEXT_ANTIALIAS = {
     'optimizeSpeed': cairo.ANTIALIAS_FAST,
     'optimizeLegibility': cairo.ANTIALIAS_GOOD,
-    'geometricPrecision': cairo.ANTIALIAS_BEST}
+    'geometricPrecision': cairo.ANTIALIAS_BEST,
+}
 
 TEXT_HINT_STYLE = {
     'geometricPrecision': cairo.HINT_STYLE_NONE,
-    'optimizeLegibility': cairo.HINT_STYLE_FULL}
+    'optimizeLegibility': cairo.HINT_STYLE_FULL,
+}
 
 TEXT_HINT_METRICS = {
     'geometricPrecision': cairo.HINT_METRICS_OFF,
-    'optimizeLegibility': cairo.HINT_METRICS_ON}
+    'optimizeLegibility': cairo.HINT_METRICS_ON,
+}
+
+TAGS = {
+    'a': text,
+    'circle': circle,
+    'clipPath': clip_path,
+    'ellipse': ellipse,
+    'filter': filter_,
+    'image': image,
+    'line': line,
+    'linearGradient': linear_gradient,
+    'marker': marker,
+    'mask': mask,
+    'path': path,
+    'pattern': pattern,
+    'polyline': polyline,
+    'polygon': polygon,
+    'radialGradient': radial_gradient,
+    'rect': rect,
+    'svg': svg,
+    'text': text,
+    'textPath': text,
+    'tspan': text,
+    'use': use,
+}
+
+PATH_TAGS = frozenset((
+    'circle', 'ellipse', 'line', 'path', 'polygon', 'polyline', 'rect'))
+
 
 
 class Surface(object):
@@ -272,7 +308,7 @@ class Surface(object):
         self.context.set_miter_limit(miter_limit)
 
         # Clip
-        rect_values = rect(node.get('clip'))
+        rect_values = clip_rect(node.get('clip'))
         if len(rect_values) == 4:
             top = size(self, rect_values[0], 'y')
             right = size(self, rect_values[1], 'x')
@@ -425,7 +461,7 @@ class PNGSurface(Surface):
         """Read the PNG surface content."""
         if self.output is not None:
             self.cairo.write_to_png(self.output)
-        return super(PNGSurface, self).finish()
+        return super().finish()
 
 
 class SVGSurface(Surface):

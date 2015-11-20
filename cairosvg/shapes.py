@@ -111,10 +111,10 @@ def rect(surface, node):
     if rx == 0 or ry == 0:
         surface.context.rectangle(x, y, width, height)
     else:
-        if rx > width / 2.:
-            rx = width / 2.
-        if ry > height / 2.:
-            ry = height / 2.
+        if rx > width / 2:
+            rx = width / 2
+        if ry > height / 2:
+            ry = height / 2
 
         # Inspired by Cairo Cookbook
         # http://cairographics.org/cookbook/roundedrectangles/

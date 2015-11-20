@@ -67,7 +67,7 @@ def text(surface, node):
     """Draw a text ``node``."""
     # Set black as default text color
     if not node.get('fill'):
-        node['fill'] = '#000000'
+        node['fill'] = 'black'
 
     font_size = size(surface, node.get('font-size', '12pt'))
     font_family = (

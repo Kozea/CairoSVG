@@ -80,8 +80,11 @@ def remove_svg_namespace(tree):
 
 
 def handle_white_spaces(string, preserve):
-    """Handle white spaces in text nodes."""
-    # http://www.w3.org/TR/SVG/text.html#WhiteSpace
+    """Handle white spaces in text nodes.
+
+    See http://www.w3.org/TR/SVG/text.html#WhiteSpace
+
+    """
     if not string:
         return ''
     if preserve:

@@ -28,8 +28,6 @@ from .url import parse_url
 
 
 PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'
-PATH_TAGS = (
-    'circle', 'ellipse', 'line', 'path', 'polygon', 'polyline', 'rect')
 
 
 def draw_markers(surface, node):

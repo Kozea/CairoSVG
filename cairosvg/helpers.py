@@ -233,7 +233,7 @@ def apply_matrix_transform(surface, matrix):
         surface.context.transform(matrix)
 
 
-def rect(string):
+def clip_rect(string):
     """Parse the rect value of a clip."""
     match = re.search(r'rect\( ?(.+?) ?\)', normalize(string or ''))
     return match.group(1).split(' ') if match else []
