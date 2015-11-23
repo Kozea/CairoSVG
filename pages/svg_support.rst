@@ -137,14 +137,14 @@ How groups are rendered
 -----------------------
 
 Opacity values of groups are applied to the rendered inner elements. Simple
-masks and clips are supported. Filter effects are not supported.
+masks, clips and filters are supported.
 
 
 How elements are rendered
 -------------------------
 
-Opacity values of elements are applied. Simple masks and clips are
-supported. Filter effects are not supported.
+Opacity values of elements are applied. Simple masks, clips and filters are
+supported.
 
 
 Types of graphics elements
@@ -159,13 +159,18 @@ simple gradients and simple patterns, with or without opacity.
 Painting raster images
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Included raster images are supported by the Pystacia package.
+Included raster images are supported by the `Pillow
+<http://python-pillow.github.io/>`_ package.
 
 
 Filtering painted regions
 -------------------------
 
-Filter effects are not supported.
+3 filter effects are supported:
+
+- feBlend,
+- feFlood,
+- feOffset.
 
 
 Clipping, masking and object opacity
@@ -201,8 +206,7 @@ Basic data types
 Angles are only supported when given in degrees, without explicit unit.
 
 Colors are supported with ``rgb()``, ``rgba()``, ``#RGB``, and ``#RRGGBB``
-forms. The non standard ``#RGBA`` and ``#RRGGBBAA`` forms are also
-supported. Color keyword names are supported.
+forms. Color keyword names are supported.
 
 Frequencies are not supported.
 
@@ -361,7 +365,7 @@ Clipping, Masking and Compositing properties:
 Filter Effects properties:
 
 - enable-background: not supported
-- filter: not supported
+- filter: feBlend, feFlood and feOffset supported
 - flood-color: not supported
 - flood-opacity: not supported
 - lighting-color: not supported
@@ -398,11 +402,11 @@ Color and Painting properties:
 - stroke-miterlimit: supported
 - stroke-opacity: supported
 - stroke-width: supported
-- text-rendering: not supported
+- text-rendering: supported
 
 Text properties:
 
-- alignment-baseline: not supported
+- alignment-baseline: basically supported
 - baseline-shift: not supported
 - dominant-baseline: not supported
 - glyph-orientation-horizontal: not supported
@@ -421,9 +425,7 @@ Introduction
 ------------
 
 CairoSVG renders its output on finite rectangular regions called viewport in
-the W3 recommendation, and Cairo surfaces in the application. For multi-pages
-formats, multiple surfaces can be used by the ``svg`` tags that are the direct
-children of the root ``svg`` element. These pages can have different sizes.
+the W3 recommendation, and Cairo surfaces in the application.
 
 The viewport size must be given in the tag, as no negotiation process can be
 realized with the parent surface.
@@ -528,28 +530,268 @@ The DOM interfaces are not supported.
 Paths
 =====
 
-*Coming soon*
+Introduction
+------------
+
+Paths are supported, including subpaths.
+
+
+The `path` element
+------------------
+
+The main path attributes are supported.
+
+
+Path data
+---------
+
+The ``moveto``, ``closepath``, ``lineto``, ``curveto``, quadratic Bézier
+``curveto`` and ``arcto`` commands are supported.
+
+
+Distance along a path
+---------------------
+
+Distance is calculated for text on a path.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
 
 
 
 Basic Shapes
 ============
 
-*Coming soon*
+Introduction
+------------
+
+Basic shapes (rectangles, circles, ellipses, lines, polylines and polygons) are
+supported.
+
+
+The ``rect`` element
+--------------------
+
+Rectangles, including rounded corners, are supported.
+
+
+The ``circle`` element
+----------------------
+
+Circles are supported.
+
+
+The ``ellipse`` element
+--------------------
+
+Ellipses are supported.
+
+
+The ``line`` element
+--------------------
+
+Lines are supported.
+
+
+The ``polyline`` element
+------------------------
+
+Polylines are supported.
+
+
+The ``polygon`` element
+-----------------------
+
+Polygons are supported.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
 
 
 
 Text
 ====
 
-*Coming soon*
+Introduction
+------------
+
+The main features of text rendering are supported. The ``text`` and ``tspan``
+tags are supported.
+
+
+Characters and their corresponding glyphs
+-----------------------------------------
+
+Characters are rendered by Cairo, text rendering relies on its simple rendering
+engine. There should be no ligatures, composite characters or glyph
+supstitutions.
+
+
+Fonts, font tables and baselines
+--------------------------------
+
+There's no real baseline management with Cairo. The really simple vertical
+management doesn't rely on the baseline.
+
+
+The ``text`` element
+--------------------
+
+The ``text`` element is supported, including its ``rotate`` attribute.
+
+
+The ``tspan`` element
+---------------------
+
+The ``tspan`` element is supported, including its ``rotate`` attribute.
+
+
+The ``tref`` element
+--------------------
+
+The ``tref`` element is supported.
+
+
+Text layout
+-----------
+
+Simple text layout is managed for latin scripts, but not for bidirectional and
+vertical scripts.
+
+
+Text rendering order
+--------------------
+
+The glyphs are not rendered independently.
+
+
+Alignment properties
+--------------------
+
+Horizontal text alignment is supported for latin scripts.
+
+Vertical text alignment is basically supported, but does no rely on the
+baseline and is only capable of top, middle or bottom alignment.
+
+
+Font selection properties
+-------------------------
+
+The ``font-family``, ``font-size``, ``font-style`` and ``font-weight`` are
+basically supported, and should work as expected for common cases. The other
+attributes, including the ``font`` shorthand, are not supported.
+
+
+Spacing properties
+------------------
+
+The spacing properties are not supported.
+
+
+Text decoration
+---------------
+
+Text decoration is not supported.
+
+
+Text on a path
+--------------
+
+Text on a path is supported, including the ``startOffset`` attribute.
+
+
+Alternate glyphs
+----------------
+
+Alternate glyphs are not supported.
+
+
+White space handling
+--------------------
+
+White space are correctly handled and follow the rules given by the
+``xml:space`` attribute.
+
+
+Text selection and clipboard operations
+---------------------------------------
+
+Text selection is possible for PDF documents generated by CairoSVG, when the
+text is rendered with no extra effects including stroke and transformations.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
 
 
 
 Painting: Filling, Stroking and Marker Symbols
 ==============================================
 
-*Coming soon*
+Introduction
+------------
+
+Filling and stroking operations are supported for paths, texts and basic
+shapes. Markers are supported for paths, polylines, polygons and lines.
+
+
+Specifying paint
+----------------
+
+Painting values are supported, with no ICC support. Gradients ant patterns are
+supported.
+
+
+Fill properties
+---------------
+
+Filling operations are supported, including the ``fill-rule`` property.
+
+
+Stroke properties
+-----------------
+
+Stroking operations are supported, including all the ``stroke-*`` properties.
+
+
+Controlling visibility
+----------------------
+
+The ``display`` and ``visibility`` properties are supported.
+
+
+Markers
+-------
+
+Simple markers are supported, including the ``marker-*`` and ``orient``
+attributes. Clipping thanks to the ``overflow`` property is not supported.
+
+
+Rendering properties
+--------------------
+
+Color interpolation and rendering properties are not supported. Shape, text and
+image rendering options are supported.
+
+
+Inheritance of painting properties
+----------------------------------
+
+Painting properties are supported.
+
+
+DOM interfaces
+--------------
+
+The DOM interfaces are not supported.
 
 
 
@@ -657,7 +899,11 @@ The DOM interfaces are not supported.
 Filter Effects
 ==============
 
-Filters are not handled at all.
+3 filter effects are supported:
+
+- feBlend,
+- feFlood,
+- feOffset.
 
 
 
