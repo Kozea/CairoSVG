@@ -279,15 +279,10 @@ class Tree(Node):
                     url = parent.url
             self.url = url
             if url:
-                if url[1:3] == ':\\':
-                    input_ = url  # Windows absolute filename
-                elif urlparse.urlparse(url).scheme:
-                    input_ = read_url(url)
-                else:
-                    input_ = url  # Unix filename
-                if os.path.splitext(url)[1].lower() == 'svgz':
-                    input_ = gzip.open(url)
-                tree = ElementTree.parse(input_).getroot()
+                bytestring = read_url(parse_url(url))
+                if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
+                    bytestring = gzip.decompress(bytestring)
+                tree = ElementTree.fromstring(bytestring)
             else:
                 root_parent = parent
                 while root_parent.parent:

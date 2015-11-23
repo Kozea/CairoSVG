@@ -30,10 +30,11 @@ from . import surface
 
 
 SURFACES = {
-    'SVG': surface.SVGSurface,  # Tell us if you actually use this one!
-    'PNG': surface.PNGSurface,
     'PDF': surface.PDFSurface,
-    'PS': surface.PSSurface}
+    'PNG': surface.PNGSurface,
+    'PS': surface.PSSurface,
+    'SVG': surface.SVGSurface,
+}
 
 
 # Generate the svg2* functions from SURFACES

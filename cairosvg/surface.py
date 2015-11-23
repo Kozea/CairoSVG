@@ -120,7 +120,7 @@ class Surface(object):
         :param write_to: The filename of file-like object where to write the
                          output. If None or not provided, return a byte string.
 
-        Only ``source`` can be passed as a positional argument, other
+        Only ``bytestring`` can be passed as a positional argument, other
         parameters are keyword-only.
 
         """
