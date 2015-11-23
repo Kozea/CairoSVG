@@ -17,7 +17,7 @@
 """
 CairoSVG API test suite.
 
-These tests can be used as integration tests.
+These tests can be used as deployment tests.
 
 """
 

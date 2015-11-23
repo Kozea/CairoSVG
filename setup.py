@@ -17,7 +17,7 @@ For further information, please visit the `CairoSVG Website
 import re
 from os import path
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
 with open(init_path, 'r', encoding='utf-8') as fd:
@@ -39,7 +39,7 @@ setup(
     packages=['cairosvg'],
     provides=['cairosvg'],
     install_requires=['cairocffi', 'lxml', 'cssselect', 'pillow', 'tinycss'],
-    keywords=['svg', 'cairo', 'pdf', 'png', 'postscript'],
+    keywords=['svg', 'convert', 'cairo', 'pdf', 'png', 'postscript'],
     entry_points={'console_scripts': 'cairosvg=cairosvg:main'},
     classifiers=[
         'Development Status :: 5 - Production/Stable',

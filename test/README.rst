@@ -16,12 +16,14 @@ You'll find in this folder:
 
 Most of the tests are regression tests: they generate reference images using an
 old version on CairoSVG and compare them to the current version. These tests
-are really useful if you changed the code, but they can also be launched to
-check that CairoSVG works on your computer.
+are really useful if you changed the code.
 
-You can test CairoSVG by launching ``nosetests`` in the root folder of the
-repository. You can launch the tests only on one image (or more than one,
-separated by a comma) using::
+If you want to check that CairoSVG works on your computer, you should launch
+tests in ``cairosvg/test_api.py``.
+
+You can test CairoSVG by launching ``nosetests`` or ``py.test`` in the root
+folder of the repository. You can launch the tests only on one image (or more
+than one, separated by a comma) using::
 
   CAIROSVG_TEST_FILES=image.svg nosetests --match=test_images test/test_non_regression.py
 
