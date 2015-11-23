@@ -585,7 +585,7 @@ Circles are supported.
 
 
 The ``ellipse`` element
---------------------
+-----------------------
 
 Ellipses are supported.
 
