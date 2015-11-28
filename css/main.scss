@@ -107,7 +107,7 @@ section {
   }
 }
 
-article:not(:first-of-type):before {
+article:before {
   border-top: 0.05em solid;
   content: '';
   display: block;
