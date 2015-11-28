@@ -55,13 +55,15 @@ layout: default
 
 <section>
   <h2>What's new?</h2>
+  {% assign releases = site.github.releases | where:"draft",false %}
+  {% assign latest_release = releases[0] %}
   <p>
-    Latest version of CairoSVG is {{ site.github.releases.name }},
-    released on {{ site.github.releases.created_at | date: "%B %-d, %Y" }}
+    Latest version of CairoSVG is {{ latest_release.name }},
+    released on {{ latest_release.created_at | date: "%B %-d, %Y" }}
     (<a href="https://github.com/Kozea/CairoSVG/blob/master/NEWS.rst">changelog</a>).
   </p>
-  <h3>{{ site.posts.title }}</h3>
-  <aside>{{ site.posts.date | date: "%B %-d, %Y" }}</aside>
-  {{ site.posts.content }}
+  <h3>{{ site.posts[0].title }}</h3>
+  <aside>{{ site.posts[0].date | date: "%B %-d, %Y" }}</aside>
+  {{ site.posts[0].content }}
   <aside><a href="/news/">Read more news…</a></aside>
 </section>
