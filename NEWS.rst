@@ -8,12 +8,7 @@ Version 2.0, not released yet
 
 * Fix markers
 * Fix URL/id handling
-
-
-Version 1.1, not released yet
-=============================
-
-* Try to test CairoSVG with Travis
+* Test CairoSVG with Travis
 * Remove pycairo support
 
 
