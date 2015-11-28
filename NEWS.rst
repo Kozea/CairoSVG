@@ -6,10 +6,13 @@
 Version 2.0, not released yet
 =============================
 
+* Drop Python 2 support
+* Drop pycairo support
+* Rely on cairocffi, lxml, cssselect, pillow and tinycss
 * Fix markers
 * Fix URL/id handling
+* Split deployment and development tests
 * Test CairoSVG with Travis
-* Remove pycairo support
 
 
 Version 1.0.19, released on 2015-10-30
