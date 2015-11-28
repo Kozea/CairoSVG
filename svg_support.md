@@ -1,7 +1,7 @@
 ---
 layout: page
 title: SVG 1.1 Support
-permalink: /svg_support
+permalink: /svg_support/
 ---
 
 Here is the support status of the different elements of SVG 1.1. The different

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Documentation
-permalink: /documentation
+permalink: /documentation/
 ---
 
 ## What is CairoSVG?
@@ -80,4 +80,4 @@ output is written there. Otherwise, the function returns a byte string.
 
 CairoSVG is generally good at supporting the widely used features of
 SVG. You'll find a full list of supported features on
-[the SVG 1.1 support page](/svg_support).
+[the SVG 1.1 support page](/svg_support/).
