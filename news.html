@@ -1,0 +1,13 @@
+---
+layout: page
+title: News
+permalink: /news/
+---
+
+{% for post in site.posts %}
+<article>
+  <h2>{{ post.title }}</h2>
+  <aside>{{ post.date | date: "%B %-d, %Y" }}</aside>
+  {{ post.content }}
+</article>
+{% endfor %}

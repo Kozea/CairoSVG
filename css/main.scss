@@ -1,0 +1,139 @@
+---
+# Scss for CairoSVG
+---
+
+@charset "utf-8";
+@import url(https:\/\/fonts.googleapis.com/css?family=Asap);
+
+body {
+  background: #e4e9f6;
+  color: #424247;
+  font-family: Asap, sans;
+  font-size: 14pt;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+nav, footer {
+  color: #ddd;
+  padding: 0 20%;
+
+  ul {
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: inline-block;
+      padding: 0 1em 0 0;
+
+      a {
+        color: inherit;
+        display: block;
+        padding: 1em 0.5em;
+        text-decoration: inherit;
+        transition: 0.2s;
+
+        &:hover,
+        &:focus {
+          outline: none;
+          text-shadow: 0 0 0.2em rgba(220, 220, 220, 0.9);
+        }
+      }
+    }
+  }
+}
+
+nav {
+  background: rgba(30, 30, 35, 0.7);
+  left: 0;
+  position: absolute;
+  right: 0;
+
+  ul:before {
+    content: '٭ CairoSVG ٭';
+    margin-right: 1em;
+    opacity: 0.5;
+  }
+}
+
+footer {
+  background: rgba(30, 30, 35, 1);
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+}
+
+header {
+  background: linear-gradient(to bottom right, rgba(0, 40, 30, 1), rgba(0, 0, 0, 0)), url(circle.svg), #202854;
+  background-size: cover;
+  color: #efdddd;
+  font-size: 1.5em;
+  text-shadow: 0.2em 0.2em 0.2em rgba(0, 0, 0, 0.5);
+  padding: 3em 20%;
+
+  h1 {
+    font-size: 2.5em;
+    font-weight: lighter;
+    margin: 1em 0 0.5em 0;
+  }
+}
+
+section {
+  padding: 2em 20% 3em;
+
+  &:nth-of-type(odd) {
+    background: linear-gradient(to bottom right, rgba(200, 220, 230, 0.3), rgba(200, 230, 220, 0.1));
+    box-shadow: 0 0 2em -1em rgba(0, 0, 0, 0.5) inset;
+  }
+
+  &:nth-of-type(even) {
+    background: linear-gradient(to bottom right, rgba(230, 245, 250, 0.6), rgba(240, 245, 250, 0.4)), url(circle.svg), #eef;
+    background-size: cover;
+  }
+
+  h1 {
+    background: linear-gradient(to bottom right, rgba(0, 40, 30, 1), rgba(0, 0, 0, 0)), #202854;
+    box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+    color: #e5dddd;
+    font-size: 2.5em;
+    font-weight: lighter;
+    margin: -0.8em -33.33% 2em;
+    padding: 2.5em 33.33% 1.5em;
+  }
+
+  h2, h3, h4 {
+    margin: 1.5em 0 1em;
+  }
+}
+
+article:not(:first-of-type):before {
+  border-top: 0.05em solid;
+  content: '';
+  display: block;
+  font-size: 2em;
+  margin: 2em auto;
+  text-align: center;
+  width: 10%;
+}
+
+pre {
+  border: 1px solid black;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #d3d5db;
+  margin: 0 1em;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+@media (max-width: 800px) {
+  body {
+    font-size: 12pt;
+  }
+
+  header, section, nav, footer {
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+}

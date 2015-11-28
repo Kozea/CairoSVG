@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="100" viewBox="0 0 500 100">
+  <g id="g" opacity="0.4">
+     <circle opacity="0.2" cx="50" cy="50" r="20" fill="#888" />
+     <circle opacity="0.2" cx="300" cy="20" r="25" fill="#888" />
+     <circle opacity="0.3" cx="20" cy="40" r="15" fill="#888" />
+     <circle opacity="0.2" cx="150" cy="40" r="20" fill="#888" />
+     <circle opacity="0.1" cx="360" cy="30" r="25" fill="#888" />
+     <circle opacity="0.2" cx="120" cy="40" r="15" fill="#888" />
+     <circle opacity="0.3" cx="50" cy="70" r="20" fill="#888" />
+     <circle opacity="0.25" cx="460" cy="60" r="25" fill="#888" />
+     <circle opacity="0.12" cx="420" cy="40" r="15" fill="#888" />
+  </g>
+  <use xlink:href="#g" transform="translate(200 -50) rotate(50)" />
+  <use xlink:href="#g" transform="translate(450 80) rotate(170)" />
+  <use xlink:href="#g" transform="translate(50 -50) rotate(20)" />
+  <use xlink:href="#g" transform="translate(550 140) rotate(190)" />
+  <use xlink:href="#g" transform="translate(100 10) rotate(10)" />
+</svg>

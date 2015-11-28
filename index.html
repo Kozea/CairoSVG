@@ -1,0 +1,67 @@
+---
+layout: default
+---
+
+<header>
+  <h1>{{ site.title }}</h1>
+  <p>{{ site.description }}</p>
+</header>
+
+<section>
+  <h2>About CairoSVG</h2>
+  <p>CairoSVG is:</p>
+  <ul>
+    <li>a SVG 1.1 to PNG, PDF, PS and SVG converter;</li>
+    <li>a command-line interface;</li>
+    <li>a Python 3.4+ library;</li>
+    <li>known to work at least on Linux, OS X, and Windows;</li>
+    <li>based on the Cairo 2D graphics library;</li>
+    <li>tested using the W3C test suite;</li>
+    <li>LGPLv3-licensed free software.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Let's go!</h2>
+
+  <h3>Install</h3>
+  <p>
+    CairoSVG is available
+    on <a href="https://pypi.python.org/pypi/CairoSVG/">PyPI</a>, you can
+    install it with pip:
+  </p>
+  <pre>$ pip install cairosvg</pre>
+
+  <h3>Convert</h3>
+  <p>
+    You can use CairoSVG as a standalone command-line program:
+  </p>
+  <pre>$ cairosvg image.svg -o image.png</pre>
+
+  <h3>Embed</h3>
+  <p>
+    You can also use CairoSVG as a Python 3 library:
+  </p>
+  <pre>$ python3
+>>> import cairosvg
+>>> cairosvg.svg2pdf(url='image.svg', write_to='image.pdf')</pre>
+
+  <h3>Want more?</h3>
+  <p>
+    Please read the <a href="/documentation/">documentation</a> to learn more
+    about how to use CairoSVG.
+  </p>
+</section>
+
+<section>
+  <h2>What's new?</h2>
+  <p>
+    Latest version of CairoSVG is {{ site.releasess[0].name }},
+    released on {{ site.releasess[0].created_at | date: "%B %-d, %Y" }}
+    (<a href="https://github.com/Kozea/CairoSVG/blob/master/NEWS.rst">changelog</a>).
+  </p>
+  <h3>{{ site.posts[0].title }}</h3>
+  <aside>{{ site.posts[0].date | date: "%B %-d, %Y" }}</aside>
+  {{ site.posts[0].content }}
+  <aside><a href="/news/">Read more news…</a></aside>
+</section>
