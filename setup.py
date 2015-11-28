@@ -3,21 +3,21 @@
 # Public Domain
 
 """
-CairoSVG - A Simple SVG Converter based on Cairo
+CairoSVG - A Simple SVG Converter Based on Cairo
 ================================================
 
-CairoSVG is a SVG converter based on Cairo. It can convert SVG files into PDF,
+CairoSVG is a SVG converter based on Cairo. It can convert SVG files to PDF,
 PostScript and PNG files.
 
 For further information, please visit the `CairoSVG Website
-<http://www.cairosvg.org/>`_.
+<http://cairosvg.org/>`_.
 
 """
 
 import re
 from os import path
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 init_path = path.join(path.dirname(__file__), 'cairosvg', '__init__.py')
 with open(init_path, 'r', encoding='utf-8') as fd:
