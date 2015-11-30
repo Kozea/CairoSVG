@@ -22,7 +22,6 @@ SVG Parser.
 import re
 import gzip
 import random
-import os.path
 from urllib import parse as urlparse
 
 import lxml.etree as ElementTree
