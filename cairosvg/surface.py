@@ -263,7 +263,6 @@ class Surface(object):
         transform(self, node.get('transform'))
 
         # Find and prepare opacity, masks and filters
-        # TODO: accept external masks and filters
         mask = parse_url(node.get('mask')).fragment
         filter_ = parse_url(node.get('filter')).fragment
         opacity = float(node.get('opacity', 1))
@@ -324,7 +323,6 @@ class Surface(object):
                 left, top, width - left - right, height - top - bottom)
             self.context.restore()
             self.context.clip()
-        # TODO: accept external clip-paths
         clip_path = parse_url(node.get('clip-path')).fragment
         if clip_path:
             path = self.paths.get(clip_path)

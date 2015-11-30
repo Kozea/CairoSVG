@@ -49,7 +49,6 @@ EXTEND_OPERATORS = {
 def update_def_href(surface, def_name, def_dict):
     """Update the attributes of the def according to its href attribute."""
     def_node = def_dict[def_name]
-    # TODO: accept external hrefs
     href = parse_url(
         def_node.get('{http://www.w3.org/1999/xlink}href')).fragment
     if href in def_dict:

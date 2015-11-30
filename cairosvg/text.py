@@ -83,7 +83,6 @@ def text(surface, node):
     ascent, descent, _, max_x_advance, max_y_advance = (
         surface.context.font_extents())
 
-    # TODO: accept external hrefs
     text_path_href = parse_url(
         node.get('{http://www.w3.org/1999/xlink}href', '') or
         node.parent.get('{http://www.w3.org/1999/xlink}href', ''))

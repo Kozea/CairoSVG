@@ -36,7 +36,6 @@ def draw_markers(surface, node):
         return
 
     markers = {}
-    # TODO: accept external markers
     common_marker = parse_url(node.get('marker', '')).fragment
     for position in ('start', 'mid', 'end'):
         attribute = 'marker-{}'.format(position)
