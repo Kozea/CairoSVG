@@ -59,6 +59,12 @@ def main():
     option_parser.add_option(
         "-d", "--dpi", help="ratio between 1in and 1px", default=96)
     option_parser.add_option(
+        '-W', '--width', default=None, type="float",
+        help='width of the parent container in pixels')
+    option_parser.add_option(
+        '-H', '--height', default=None, type="float",
+        help='height of the parent container in pixels')
+    option_parser.add_option(
         "-o", "--output",
         default="", help="output filename")
     options, args = option_parser.parse_args()
@@ -68,7 +74,9 @@ def main():
         option_parser.print_help()
         sys.exit()
 
-    kwargs = {'dpi': float(options.dpi)}
+    kwargs = {
+        'parent_width': options.width, 'parent_height': options.height,
+        'dpi': float(options.dpi)}
 
     if not options.output or options.output == '-':
         # Python 2/3 hack
