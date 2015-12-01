@@ -64,9 +64,6 @@ def draw_markers(surface, node):
         if marker:
             marker_node = surface.markers.get(marker)
 
-            if not marker_node:
-                continue
-
             if marker_node.get('markerUnits') == 'userSpaceOnUse':
                 scale = 1
             else:
@@ -117,10 +114,6 @@ def path(surface, node):
     string = node.get('d', '')
 
     node.vertices = []
-
-    if not string.strip():
-        # Don't draw empty paths at all
-        return
 
     for letter in PATH_LETTERS:
         string = string.replace(letter, ' {} '.format(letter))

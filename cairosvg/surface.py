@@ -341,8 +341,9 @@ class Surface(object):
                 self.draw(path)
                 self.stroke_and_fill = True
                 self.context.restore()
-                if node.get('clip-rule') == 'evenodd':
-                    self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
+                # TODO: fill rules are not handled by cairo for clips
+                # if node.get('clip-rule') == 'evenodd':
+                #     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 

@@ -60,8 +60,6 @@ def image(surface, node):
             del node['x']
         if 'y' in node:
             del node['y']
-        if 'viewBox' in node:
-            del node['viewBox']
         tree = Tree(
             url=url.geturl(), bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(

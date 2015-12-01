@@ -85,8 +85,4 @@ def main():
         os.path.splitext(options.output)[1].lstrip('.') or
         'pdf').upper()
 
-    if output_format in SURFACES:
-        SURFACES[output_format.upper()].convert(**kwargs)
-    else:
-        raise TypeError(
-            'Unknown output format "{}"'.format(output_format.lower()))
+    SURFACES[output_format.upper()].convert(**kwargs)

@@ -78,9 +78,6 @@ def find_style_rules(tree):
 def get_declarations(rule):
     """Get the declarations in ``rule``."""
     for declaration in rule.declarations:
-        if declaration.name.startswith('-'):
-            # Ignore properties prefixed by "-"
-            continue
         # TODO: filter out invalid values
         yield (
             declaration.name,

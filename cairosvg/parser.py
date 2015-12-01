@@ -244,10 +244,6 @@ class Tree(Node):
 
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
-        if getattr(self, 'xml_tree', None) is not None:
-            # The tree has already been parsed
-            return
-
         # Make the parameters keyword-only:
         bytestring = kwargs.pop('bytestring', None)
         file_obj = kwargs.pop('file_obj', None)
