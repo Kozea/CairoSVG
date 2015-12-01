@@ -73,9 +73,9 @@ def node_format(surface, node, reference=True):
     percentages.
 
     """
-    default_size = '100%' if reference else 0
-    width = size(surface, node.get('width', default_size), 'x')
-    height = size(surface, node.get('height', default_size), 'y')
+    reference_size = 'xy' if reference else (0, 0)
+    width = size(surface, node.get('width', '100%'), reference_size[0])
+    height = size(surface, node.get('height', '100%'), reference_size[1])
     viewbox = node.get('viewBox')
     if viewbox:
         viewbox = re.sub('[ \n\r\t,]+', ' ', viewbox)
