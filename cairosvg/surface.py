@@ -125,6 +125,8 @@ class Surface(object):
 
         """
         dpi = kwargs.pop('dpi', 96)
+        parent_width = kwargs.pop('parent_width', None)
+        parent_height = kwargs.pop('parent_height', None)
         write_to = kwargs.pop('write_to', None)
         kwargs['bytestring'] = bytestring
         tree = Tree(**kwargs)
@@ -132,11 +134,12 @@ class Surface(object):
             output = io.BytesIO()
         else:
             output = write_to
-        cls(tree, output, dpi).finish()
+        cls(tree, output, dpi, None, parent_width, parent_height).finish()
         if write_to is None:
             return output.getvalue()
 
-    def __init__(self, tree, output, dpi, parent_surface=None):
+    def __init__(self, tree, output, dpi, parent_surface=None,
+                 parent_width=None, parent_height=None):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -148,7 +151,7 @@ class Surface(object):
 
         """
         self.cairo = None
-        self.context_width, self.context_height = None, None
+        self.context_width, self.context_height = parent_width, parent_height
         self.cursor_position = [0, 0]
         self.cursor_d_position = [0, 0]
         self.text_path_width = 0
@@ -167,7 +170,6 @@ class Surface(object):
             self.masks = {}
             self.paths = {}
             self.filters = {}
-        self.page_sizes = []
         self._old_parent_node = self.parent_node = None
         self.output = output
         self.dpi = dpi
@@ -178,7 +180,6 @@ class Surface(object):
         self.cairo, self.width, self.height = self._create_surface(
             width * self.device_units_per_user_units,
             height * self.device_units_per_user_units)
-        self.page_sizes.append((self.width, self.height))
         self.context = cairo.Context(self.cairo)
         # We must scale the context as the surface size is using physical units
         self.context.scale(

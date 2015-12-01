@@ -63,11 +63,19 @@ def main():
         choices=sorted([surface.lower() for surface in SURFACES]))
     parser.add_argument(
         '-d', '--dpi', default=96, type=float,
-        help='ratio between 1in and 1px')
+        help='ratio between 1 inch and 1 pixel')
+    parser.add_argument(
+        '-W', '--width', default=None, type=float,
+        help='width of the parent container in pixels')
+    parser.add_argument(
+        '-H', '--height', default=None, type=float,
+        help='height of the parent container in pixels')
     parser.add_argument('-o', '--output', default='-', help='output filename')
 
     options = parser.parse_args()
-    kwargs = {'dpi': options.dpi}
+    kwargs = {
+        'parent_width': options.width, 'parent_height': options.height,
+        'dpi': options.dpi}
     kwargs['write_to'] = (
         sys.stdout.buffer if options.output == '-' else options.output)
     kwargs['file_obj'] = (
