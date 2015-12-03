@@ -64,7 +64,7 @@ def image(surface, node):
             url=url.geturl(), bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
-        if not tree_width or not tree_height:
+        if not viewbox:
             tree_width = tree['width'] = width
             tree_height = tree['height'] = height
         node.image_width = tree_width or width
