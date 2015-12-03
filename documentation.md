@@ -88,33 +88,32 @@ output is written there. Otherwise, the function returns a byte string.
 ## How good is CairoSVG at following the specification?
 
 CairoSVG is generally good at supporting the widely used features of the SVG
-specification, you'll find here some general information and tips about
+specification, and you'll find here some general information and tips about
 that. If you're interested in an exhaustive list of the supported features,
-you'll find a full list of supported features on
-[the SVG 1.1 support page](/svg_support/), whose sections are the same as the
-sections of the specification.
+you'll find a full list on [the SVG 1.1 support page](/svg_support/), whose
+sections are the same as the ones of the specification.
 
 ### Philosophy
 
-CairoSVG is designed to parse well-formed SVG and draw them on a
+CairoSVG is designed to parse well-formed SVG files, and draw them on a
 [Cairo](http://cairographics.org/) surface. Cairo is then able to export them
-to PDF, PS, PNG and even SVG files.
+to PDF, PS, PNG, and even SVG files.
 
-The software tries to focus on real-life features. It's not known to be good at
-handling erratic SVG files, for example with unknown syntaxes or unavailable
+The software tries to focus on "real-life features". It's not known to be good
+at handling erratic SVG files, with for example unknown syntaxes or unavailable
 external resources.
 
 CairoSVG is pretty small, and quite fast once the Python interpreter is
 launched. When [Travis](https://travis-ci.org/Kozea/CairoSVG/) launches our
 tests, it is able to render more than 250 reference images twice in less than
-15 seconds (that's about 35 simple images per second).
+15 seconds (yes, that's about 35 simple images per second).
 
 ### Rendering model, document structure, coordinate systems, transformations and units
 
 CairoSVG knows each tag, transformation and unit defined in the specification,
 as long as they're not related to interactivity, linking, scripting or
 animation. SVG files are parsed with an external XML parser called
-(lxml)[http://lxml.de].
+[lxml](http://lxml.de).
 
 There should be no real problems with these base features.
 
@@ -129,25 +128,27 @@ advanced features (overflow and relative units for example) are not supported.
 Styling is possible thanks to both dedicated XML attributes and CSS.
 
 Stylesheets are parsed with an external parser called
-[tinycss](http://packages.python.org/tinycss/) and applied with an external
-selectors matcher called [cssselect](http://packages.python.org/cssselect/):
-styling is thus pretty solid. Nevertheless, some minor priority bugs are known
-(such as `!important` CSS properties being less important than the ones defined
-in XML attributes, for example).
+[tinycss](http://packages.python.org/tinycss/) and applied using an external
+selector-to-XPath converter called
+[cssselect](http://packages.python.org/cssselect/): styling is thus pretty
+solid. Nevertheless, some minor priority bugs are known (such as `!important`
+CSS properties being less important than the ones defined in XML attributes,
+for example).
 
 ### Colors, gradients, patterns, clipping, masking, filtering, compositing
 
 Colors are generally well supported. The biggest missing features related to
-colors are the lack of support for ICC color schemes, and gamma correction for
-external raster images.
+colors are the lack of support for ICC color schemes, missing color
+interpolation, and missing gamma correction for external raster images.
 
 Gradients, patterns and clipping are well supported.
 
 Masking is correctly supported, except from odd-even rules, luminance-based
 masks and intersections.
 
-Except from simple uses of `feOffset`, `feBlend` and `feFlood`, filters are not
-supported. This problem is mainly due to the lack of raster filters in Cairo.
+Only `feOffset`, `feBlend` and `feFlood` filters are supported. The other
+filters are really hard to support, mainly due to the lack of raster filters in
+Cairo.
 
 Compositing rules as described in the specification are generally correctly
 followed by CairoSVG, meaning that alpha groups are created when needed before
@@ -157,25 +158,25 @@ compositing.
 
 Raster images (including PNG and JPEG) can be included using the
 [Pillow](http://python-imaging.github.io/) library. SVG images can be included
-using … CairSVG!
+using … CairoSVG!
 
 ### Text and fonts
 
 Text and features related to fonts are poorly supported.
 
-Simple texts based on Latin or Cyrillic alphabets are generally well
-displayed. Horizontal alignment is quite well supported, really simple vertical
+Simple text based on Latin or Cyrillic alphabets is generally displayed
+correctly. Horizontal alignment is quite well supported, really simple vertical
 alignment (top, middle, bottom) is supported too.
 
 Other languages, and particularly those based on right-to-left or top-to-bottom
 directions are not supported at all.
 
-Nested texts (with `tspan` tags) are very well supported.
+Nested text (with `tspan` tags) is very well supported.
 
 Individual letter rotation is supported.
 
-Text on path is supported, as long as it's not mixed with too complicated
-alignment properties.
+Text on path is supported (even with nested, translated `tspan` text), as long
+as it's not mixed with too complicated alignment properties.
 
 Fonts are managed by Cairo, which is known to be bad at managing advanced font
 features. Font family, size, weight and style are supported for common simple
