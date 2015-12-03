@@ -1,2 +1,2 @@
 # Deployment tests are already bundled in the cairosvg module
-exclude test/*.py
+exclude test/*.py cairosvg.py
