@@ -89,6 +89,9 @@ TAGS = {
 PATH_TAGS = frozenset((
     'circle', 'ellipse', 'line', 'path', 'polygon', 'polyline', 'rect'))
 
+INVISIBLE_TAGS = frozenset((
+    'clipPath', 'filter', 'linearGradient', 'marker', 'mask', 'pattern',
+    'radialGradient', 'symbol'))
 
 
 class Surface(object):
@@ -407,9 +410,7 @@ class Surface(object):
         draw_markers(self, node)
 
         # Draw children
-        if display and node.tag not in (
-                'linearGradient', 'radialGradient', 'marker', 'pattern',
-                'mask', 'clipPath', 'filter', 'symbol'):
+        if display and node.tag not in INVISIBLE_TAGS:
             for child in node.children:
                 self.draw(child)
 
