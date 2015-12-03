@@ -6,7 +6,8 @@ permalink: /svg_support/
 
 Here is the support status of the different elements of SVG 1.1. The different
 sections correspond to those from
-[the specification](http://www.w3.org/TR/SVG11/).
+[the specification](http://www.w3.org/TR/SVG11/). You'll find more simple
+information and tips on the [documentation page](/documentation/).
 
 
 ## Introduction
