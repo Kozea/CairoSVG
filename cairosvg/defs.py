@@ -23,7 +23,7 @@ This module handles clips, gradients, masks, patterns and external nodes.
 
 from .colors import color
 from .features import match_features
-from .helpers import node_format, paint, size, transform
+from .helpers import paint, size, transform
 from .parser import Tree
 from .shapes import rect
 from .surface import cairo
