@@ -344,13 +344,13 @@ def use(surface, node):
     if not match_features(tree.xml_tree):
         return
 
-    if tree.tag == 'svg':
+    if tree.tag in ('svg', 'symbol'):
         # Explicitely specified
         # http://www.w3.org/TR/SVG11/struct.html#UseElement
+        tree.tag = 'svg'
         if 'width' in node and 'height' in node:
             tree['width'], tree['height'] = node['width'], node['height']
 
-    surface.set_context_size(*node_format(surface, tree))
     surface.draw(tree)
     node.pop('fill', None)
     node.pop('stroke', None)

@@ -409,7 +409,7 @@ class Surface(object):
         # Draw children
         if display and node.tag not in (
                 'linearGradient', 'radialGradient', 'marker', 'pattern',
-                'mask', 'clipPath', 'filter'):
+                'mask', 'clipPath', 'filter', 'symbol'):
             for child in node.children:
                 self.draw(child)
 

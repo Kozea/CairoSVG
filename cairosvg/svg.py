@@ -37,15 +37,11 @@ def svg(surface, node):
     if node.parent is None:
         return
 
-    if node.get('preserveAspectRatio', 'xMidYMid') != 'none':
-        scale_x, scale_y, translate_x, translate_y = preserve_ratio(
-            surface, node)
-        rect_width, rect_height = width, height
-    else:
-        scale_x, scale_y, translate_x, translate_y = (1, 1, 0, 0)
-        rect_width, rect_height = node.image_width, node.image_height
+    scale_x, scale_y, translate_x, translate_y = preserve_ratio(surface, node)
+    rect_width, rect_height = width, height
     surface.context.translate(*surface.context.get_current_point())
-    surface.context.rectangle(rect_x, rect_y, rect_width, rect_height)
-    surface.context.clip()
+    if node.get('overflow', 'hidden') != 'visible':
+        surface.context.rectangle(rect_x, rect_y, rect_width, rect_height)
+        surface.context.clip()
     surface.context.scale(scale_x, scale_y)
     surface.context.translate(translate_x, translate_y)
