@@ -161,10 +161,9 @@ def text(surface, node):
         surface.stroke_and_fill = True
         cairo_path = surface.context.copy_path_flat()
         surface.context.new_path()
-        start_offset = size(
-            surface, node.get('startOffset', 0), path_length(cairo_path))
+        length = path_length(cairo_path)
+        start_offset = size(surface, node.get('startOffset', 0), length)
         surface.text_path_width += start_offset
-        x1, y1 = point_following_path(cairo_path, surface.text_path_width)
 
     if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
@@ -175,22 +174,25 @@ def text(surface, node):
             surface.cursor_d_position[0] += dx or 0
             surface.cursor_d_position[1] += dy or 0
             extents = surface.context.text_extents(letter)[4]
-            surface.context.save()
             if text_path:
+                start = surface.text_path_width + surface.cursor_d_position[0]
+                start_point = point_following_path(cairo_path, start)
+                middle = start + extents / 2
+                middle_point = point_following_path(cairo_path, middle)
+                end = start + extents
+                end_point = point_following_path(cairo_path, end)
                 surface.text_path_width += extents + letter_spacing
-                point_on_path = point_following_path(
-                    cairo_path,
-                    surface.text_path_width + surface.cursor_d_position[0])
-                if point_on_path:
-                    x2, y2 = point_on_path
-                else:
+                if not all((start_point, middle_point, end_point)):
                     continue
-                surface.context.translate(x1, y1)
-                surface.context.rotate(point_angle(x1, y1, x2, y2))
+                if not 0 <= middle <= length:
+                    continue
+                surface.context.save()
+                surface.context.translate(*start_point)
+                surface.context.rotate(point_angle(*(start_point + end_point)))
                 surface.context.translate(0, surface.cursor_d_position[1])
                 surface.context.move_to(0, 0)
-                x1, y1 = x2, y2
             else:
+                surface.context.save()
                 x = surface.cursor_position[0] if x is None else x
                 y = surface.cursor_position[1] if y is None else y
                 surface.context.move_to(x + letter_spacing, y)
