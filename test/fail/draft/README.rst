@@ -29,14 +29,6 @@ This (draft) test looks at the case-(in)sensitivity of the units. As the
 reference PNG is broken, there's no need to dig this right now.
 
 
-Styling
-=======
-
-- ``styling-pres-*``
-
-These tests have empty PNG references.
-
-
 Markers
 =======
 

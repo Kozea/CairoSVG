@@ -56,7 +56,7 @@ def find_stylesheets_rules(stylesheet, url):
     for rule in stylesheet.rules:
         if isinstance(rule, tinycss.css21.ImportRule):
             css_path = os.path.normpath(
-                os.path.join(os.path.dirname(url), rule.uri))
+                os.path.join(os.path.dirname(url or ''), rule.uri))
             if not os.path.exists(css_path):
                 continue
             with open(css_path) as f:
