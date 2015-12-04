@@ -175,8 +175,7 @@ Nested text (with `tspan` tags) is very well supported.
 
 Individual letter rotation is supported.
 
-Text on path is supported (even with nested, translated `tspan` text), as long
-as it's not mixed with too complicated alignment properties.
+Text on path is supported, even with nested, translated `tspan` text.
 
 Fonts are managed by Cairo, which is known to be bad at managing advanced font
 features. Font family, size, weight and style are supported for common simple
