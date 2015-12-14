@@ -22,7 +22,7 @@ SVG Parser.
 import re
 import gzip
 import random
-from urllib import parse as urlparse
+from urllib.parse import urljoin, urlunparse
 
 import lxml.etree as ElementTree
 
@@ -222,29 +222,28 @@ class Tree(Node):
     def __new__(cls, **kwargs):
         tree_cache = kwargs.get('tree_cache')
         if tree_cache and kwargs.get('url'):
-            # TODO: accept urllib.parse.ParseResult objects and use
-            # url.parse_url() to parse URLs
-            url_parts = kwargs['url'].split('#', 1)
-            if len(url_parts) == 2:
-                url, element_id = url_parts
-            else:
-                url, element_id = url_parts[0], None
-            parent = kwargs.get('parent')
-            if parent and not url:
-                url = parent.url
-            if (url, element_id) in tree_cache:
-                cached_tree = tree_cache[(url, element_id)]
-                new_tree = Node(cached_tree.xml_tree, parent)
-                new_tree.xml_tree = cached_tree.xml_tree
-                new_tree.url = url
-                new_tree.tag = cached_tree.tag
-                new_tree.root = True
-                return new_tree
+            parsed_url = parse_url(kwargs['url'])
+            if parsed_url.fragment:
+                element_id = parsed_url.fragment
+                parent = kwargs.get('parent')
+                if any(parsed_url[:-1]):
+                    url = urlunparse(parsed_url[:-1] + ('',))
+                elif parent:
+                    url = parent.url
+                else:
+                    url = None
+                if url and (url, element_id) in tree_cache:
+                    cached_tree = tree_cache[(url, element_id)]
+                    new_tree = Node(cached_tree.xml_tree, parent)
+                    new_tree.xml_tree = cached_tree.xml_tree
+                    new_tree.url = url
+                    new_tree.tag = cached_tree.tag
+                    new_tree.root = True
+                    return new_tree
         return dict.__new__(cls)
 
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
-        # Make the parameters keyword-only:
         bytestring = kwargs.get('bytestring')
         file_obj = kwargs.get('file_obj')
         url = kwargs.get('url')
@@ -263,26 +262,24 @@ class Tree(Node):
             else:
                 self.url = getattr(file_obj, 'name', None)
         elif url is not None:
-            if '#' in url:
-                url, element_id = url.split('#', 1)
+            parent_url = parent.url if parent else None
+            parsed_url = parse_url(url, parent_url)
+            if parsed_url.fragment:
+                self.url = urlunparse(parsed_url[:-1] + ('',))
+                element_id = parsed_url.fragment
             else:
+                self.url = parsed_url.geturl()
                 element_id = None
-            if parent and parent.url:
-                if url:
-                    url = urlparse.urljoin(parent.url, url)
-                elif element_id:
-                    url = parent.url
-            self.url = url
-            if url:
-                bytestring = read_url(parse_url(url))
-                if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
-                    bytestring = gzip.decompress(bytestring)
-                tree = ElementTree.fromstring(bytestring)
-            else:
+            if parent and self.url == parent.url:
                 root_parent = parent
                 while root_parent.parent:
                     root_parent = root_parent.parent
                 tree = root_parent.xml_tree
+            else:
+                bytestring = read_url(parse_url(self.url))
+                if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
+                    bytestring = gzip.decompress(bytestring)
+                tree = ElementTree.fromstring(bytestring)
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
@@ -290,14 +287,11 @@ class Tree(Node):
         self.xml_tree = tree
         apply_stylesheets(self)
         if element_id:
-            for element in tree.iter():
-                if element.get('id') == element_id:
-                    self.xml_tree = element
-                    break
-            else:
+            self.xml_tree = tree.find(".//*[@id='{}']".format(element_id))
+            if self.xml_tree is None:
                 raise TypeError(
                     'No tag with id="{}" found.'.format(element_id))
-        super().__init__(self.xml_tree, parent, parent_children, url)
+        super().__init__(self.xml_tree, parent, parent_children, self.url)
         self.root = True
-        if tree_cache is not None and url is not None:
+        if tree_cache is not None and self.url is not None:
             tree_cache[(self.url, self['id'])] = self
