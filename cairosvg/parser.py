@@ -245,12 +245,12 @@ class Tree(Node):
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""
         # Make the parameters keyword-only:
-        bytestring = kwargs.pop('bytestring', None)
-        file_obj = kwargs.pop('file_obj', None)
-        url = kwargs.pop('url', None)
-        parent = kwargs.pop('parent', None)
-        parent_children = kwargs.pop('parent_children', None)
-        tree_cache = kwargs.pop('tree_cache', None)
+        bytestring = kwargs.get('bytestring')
+        file_obj = kwargs.get('file_obj')
+        url = kwargs.get('url')
+        parent = kwargs.get('parent')
+        parent_children = kwargs.get('parent_children')
+        tree_cache = kwargs.get('tree_cache')
         element_id = None
 
         if bytestring is not None:
