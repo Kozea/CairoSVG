@@ -253,14 +253,10 @@ class Tree(Node):
         element_id = None
 
         if bytestring is not None:
-            tree = ElementTree.fromstring(bytestring)
             self.url = url
         elif file_obj is not None:
-            tree = ElementTree.parse(file_obj).getroot()
-            if url:
-                self.url = url
-            else:
-                self.url = getattr(file_obj, 'name', None)
+            bytestring = file_obj.read()
+            self.url = getattr(file_obj, 'name', None)
         elif url is not None:
             parent_url = parent.url if parent else None
             parsed_url = parse_url(url, parent_url)
@@ -270,19 +266,19 @@ class Tree(Node):
             else:
                 self.url = parsed_url.geturl()
                 element_id = None
-            if parent and self.url == parent.url:
-                root_parent = parent
-                while root_parent.parent:
-                    root_parent = root_parent.parent
-                tree = root_parent.xml_tree
-            else:
-                bytestring = read_url(parse_url(self.url))
-                if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
-                    bytestring = gzip.decompress(bytestring)
-                tree = ElementTree.fromstring(bytestring)
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
+        if parent and self.url and self.url == parent.url:
+            root_parent = parent
+            while root_parent.parent:
+                root_parent = root_parent.parent
+            tree = root_parent.xml_tree
+        else:
+            bytestring = bytestring or read_url(parse_url(self.url))
+            if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
+                bytestring = gzip.decompress(bytestring)
+            tree = ElementTree.fromstring(bytestring)
         remove_svg_namespace(tree)
         self.xml_tree = tree
         apply_stylesheets(self)

@@ -78,8 +78,10 @@ def main():
         'dpi': options.dpi}
     kwargs['write_to'] = (
         sys.stdout.buffer if options.output == '-' else options.output)
-    kwargs['file_obj'] = (
-        sys.stdin.buffer if options.input == '-' else options.input)
+    if options.input == '-':
+        kwargs['file_obj'] = sys.stdin.buffer
+    else:
+        kwargs['url'] = options.input
     output_format = (
         options.format or
         os.path.splitext(options.output)[1].lstrip('.') or
