@@ -240,7 +240,7 @@ class Tree(Node):
                     new_tree.tag = cached_tree.tag
                     new_tree.root = True
                     return new_tree
-        return dict.__new__(cls)
+        return super().__new__(cls)
 
     def __init__(self, **kwargs):
         """Create the Tree from SVG ``text``."""

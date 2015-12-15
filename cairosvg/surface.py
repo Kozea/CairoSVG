@@ -190,7 +190,7 @@ class Surface(object):
         # Initial, non-rounded dimensions
         self.set_context_size(width, height, viewbox)
         self.context.move_to(0, 0)
-        self.draw_root(tree)
+        self.draw(tree)
 
     @property
     def points_per_pixel(self):
@@ -237,10 +237,6 @@ class Surface(object):
     def finish(self):
         """Read the surface content."""
         self.cairo.finish()
-
-    def draw_root(self, node):
-        """Draw the root ``node``."""
-        self.draw(node)
 
     def draw(self, node):
         """Draw ``node`` and its children."""
