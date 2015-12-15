@@ -105,8 +105,8 @@ external resources.
 
 CairoSVG is pretty small, and quite fast once the Python interpreter is
 launched. When [Travis](https://travis-ci.org/Kozea/CairoSVG/) launches our
-tests, it is able to render more than 250 reference images twice in less than
-15 seconds (yes, that's about 35 simple images per second).
+tests, it is able to render more than 270 reference images twice in less than
+7.5 seconds (yes, that's about 75 simple images per second).
 
 ### Rendering model, document structure, coordinate systems, transformations and units
 
