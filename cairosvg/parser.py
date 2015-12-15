@@ -21,8 +21,7 @@ SVG Parser.
 
 import re
 import gzip
-import random
-from urllib.parse import urljoin, urlunparse
+from urllib.parse import urlunparse
 
 import lxml.etree as ElementTree
 
@@ -119,10 +118,6 @@ class Node(dict):
             self.parent = getattr(self, 'parent', None)
 
         self.update(self.node.attrib)
-
-        # Give an id for nodes that don't have one
-        if 'id' not in self:
-            self['id'] = 'node_{}_{}'.format(id(self), random.getrandbits(32))
 
         # Handle the CSS
         style = self.pop('_style', '') + ';' + self.pop('style', '').lower()
@@ -223,23 +218,22 @@ class Tree(Node):
         tree_cache = kwargs.get('tree_cache')
         if tree_cache and kwargs.get('url'):
             parsed_url = parse_url(kwargs['url'])
-            if parsed_url.fragment:
-                element_id = parsed_url.fragment
-                parent = kwargs.get('parent')
-                if any(parsed_url[:-1]):
-                    url = urlunparse(parsed_url[:-1] + ('',))
-                elif parent:
-                    url = parent.url
-                else:
-                    url = None
-                if url and (url, element_id) in tree_cache:
-                    cached_tree = tree_cache[(url, element_id)]
-                    new_tree = Node(cached_tree.xml_tree, parent)
-                    new_tree.xml_tree = cached_tree.xml_tree
-                    new_tree.url = url
-                    new_tree.tag = cached_tree.tag
-                    new_tree.root = True
-                    return new_tree
+            element_id = parsed_url.fragment
+            parent = kwargs.get('parent')
+            if any(parsed_url[:-1]):
+                url = urlunparse(parsed_url[:-1] + ('',))
+            elif parent:
+                url = parent.url
+            else:
+                url = None
+            if url and (url, element_id) in tree_cache:
+                cached_tree = tree_cache[(url, element_id)]
+                new_tree = Node(cached_tree.xml_tree, parent)
+                new_tree.xml_tree = cached_tree.xml_tree
+                new_tree.url = url
+                new_tree.tag = cached_tree.tag
+                new_tree.root = True
+                return new_tree
         return super().__new__(cls)
 
     def __init__(self, **kwargs):
@@ -289,5 +283,5 @@ class Tree(Node):
                     'No tag with id="{}" found.'.format(element_id))
         super().__init__(self.xml_tree, parent, parent_children, self.url)
         self.root = True
-        if tree_cache is not None and self.url is not None:
-            tree_cache[(self.url, self['id'])] = self
+        if tree_cache is not None and self.url:
+            tree_cache[(self.url, self.get('id'))] = self

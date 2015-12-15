@@ -155,7 +155,7 @@ class Surface(object):
         self.cursor_position = [0, 0]
         self.cursor_d_position = [0, 0]
         self.text_path_width = 0
-        self.tree_cache = {(tree.url, tree['id']): tree}
+        self.tree_cache = {(tree.url, tree.get('id')): tree}
         if parent_surface:
             self.markers = parent_surface.markers
             self.gradients = parent_surface.gradients

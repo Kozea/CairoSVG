@@ -68,7 +68,7 @@ def parse_def(surface, node):
     """Parse the SVG definitions."""
     for def_type in (
             'marker', 'gradient', 'pattern', 'path', 'mask', 'filter'):
-        if def_type in node.tag.lower():
+        if def_type in node.tag.lower() and 'id' in node:
             getattr(surface, '{}s'.format(def_type))[node['id']] = node
 
 
@@ -114,7 +114,8 @@ def pattern(surface, node):
 
 def clip_path(surface, node):
     """Store a clip path definition."""
-    surface.paths[node['id']] = node
+    if 'id' in node:
+        surface.paths[node['id']] = node
 
 
 def paint_mask(surface, node, name, opacity):
@@ -261,7 +262,7 @@ def draw_pattern(surface, node, name):
 
 def prepare_filter(surface, node, name):
     """Apply a filter transforming the context."""
-    if node['id'] in surface.masks:
+    if 'id' in node and node['id'] in surface.masks:
         return
 
     if name in surface.filters:
@@ -282,7 +283,7 @@ def prepare_filter(surface, node, name):
 
 def apply_filter_before_painting(surface, node, name):
     """Apply a filter transforming the painting operations."""
-    if node['id'] in surface.masks:
+    if 'id' in node and node['id'] in surface.masks:
         return
 
     if name in surface.filters:
@@ -296,7 +297,7 @@ def apply_filter_before_painting(surface, node, name):
 
 def apply_filter_after_painting(surface, node, name):
     """Apply a filter using the painted surface to transform the image."""
-    if node['id'] in surface.masks:
+    if 'id' in node and node['id'] in surface.masks:
         return
 
     if name in surface.filters:
