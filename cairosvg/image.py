@@ -19,7 +19,6 @@ Images manager.
 
 """
 
-import gzip
 import os.path
 from io import BytesIO
 
