@@ -52,8 +52,6 @@ def image(surface, node):
         png_file = BytesIO(image_bytes)
     elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
             image_bytes[:2] == b'\x1f\x8b'):
-        if image_bytes[:2] == b'\x1f\x8b':
-            image_bytes = gzip.GzipFile(fileobj=BytesIO(image_bytes)).read()
         surface.context.save()
         surface.context.translate(x, y)
         if 'x' in node:
@@ -61,7 +59,8 @@ def image(surface, node):
         if 'y' in node:
             del node['y']
         tree = Tree(
-            url=url.geturl(), bytestring=image_bytes, tree_cache=surface.tree_cache)
+            url=url.geturl(), bytestring=image_bytes,
+            tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
         if not viewbox:
