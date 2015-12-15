@@ -133,10 +133,7 @@ class Surface(object):
         write_to = kwargs.pop('write_to', None)
         kwargs['bytestring'] = bytestring
         tree = Tree(**kwargs)
-        if write_to is None:
-            output = io.BytesIO()
-        else:
-            output = write_to
+        output = write_to or io.BytesIO()
         cls(tree, output, dpi, None, parent_width, parent_height).finish()
         if write_to is None:
             return output.getvalue()
