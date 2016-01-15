@@ -220,6 +220,13 @@ def color(string, opacity=1):
         r, g, b, a = COLORS[string]
         return (r, g, b, a * opacity)
 
+    match = re.search(r'rgba\([ \n\r\t]*(.+?)[ \n\r\t]*\)', string)
+    if match:
+        r, g, b, a = tuple(
+            float(i.strip(' %')) / 100 if '%' in i else float(i) / 255
+            for i in match.group(1).split(','))
+        return (r, g, b, a * 255 * opacity)
+
     match = re.search(r'rgb\([ \n\r\t]*(.+?)[ \n\r\t]*\)', string)
     if match:
         r, g, b = tuple(
