@@ -35,6 +35,9 @@ UNITS = {
     'px': None,
 }
 
+PAINT_URL = re.compile(r'(url\(.+\)) *(.*)')
+RECT = re.compile(r'rect\( ?(.+?) ?\)')
+
 
 class PointError(Exception):
     """Exception raised when parsing a point fails."""
@@ -55,7 +58,7 @@ def paint(value):
         return None, None
 
     value = value.strip()
-    match = re.search(r'(url\(.+\)) *(.*)', value)
+    match = PAINT_URL.search(value)
     if match:
         source = parse_url(match.group(1)).fragment
         color = match.group(2) or None
@@ -235,7 +238,7 @@ def apply_matrix_transform(surface, matrix):
 
 def clip_rect(string):
     """Parse the rect value of a clip."""
-    match = re.search(r'rect\( ?(.+?) ?\)', normalize(string or ''))
+    match = RECT.search(normalize(string or ''))
     return match.group(1).split(' ') if match else []
 
 

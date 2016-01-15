@@ -29,6 +29,8 @@ from . import __version__
 
 HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 
+URL = re.compile(r'url\((.+)\)')
+
 
 def parse_url(url, base=None):
     """Parse an URL.
@@ -38,7 +40,7 @@ def parse_url(url, base=None):
 
     """
     if url:
-        match = re.search(r'url\((.+)\)', url)
+        match = URL.search(url)
         if match:
             url = match.group(1)
         if base:

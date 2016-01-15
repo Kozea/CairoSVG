@@ -204,6 +204,11 @@ COLORS = {
     'transparent': (0, 0, 0, 0),
 }
 
+RGBA = re.compile(r'rgba\([ \n\r\t]*(.+?)[ \n\r\t]*\)')
+RGB = re.compile(r'rgb\([ \n\r\t]*(.+?)[ \n\r\t]*\)')
+HEX_RRGGBB = re.compile('#[0-9a-f]{6}')
+HEX_RGB = re.compile('#[0-9a-f]{3}')
+
 
 def color(string, opacity=1):
     """Replace ``string`` representing a color by a RGBA tuple.
@@ -220,28 +225,28 @@ def color(string, opacity=1):
         r, g, b, a = COLORS[string]
         return (r, g, b, a * opacity)
 
-    match = re.search(r'rgba\([ \n\r\t]*(.+?)[ \n\r\t]*\)', string)
+    match = RGBA.search(string)
     if match:
         r, g, b, a = tuple(
             float(i.strip(' %')) / 100 if '%' in i else float(i) / 255
             for i in match.group(1).split(','))
         return (r, g, b, a * 255 * opacity)
 
-    match = re.search(r'rgb\([ \n\r\t]*(.+?)[ \n\r\t]*\)', string)
+    match = RGB.search(string)
     if match:
         r, g, b = tuple(
             float(i.strip(' %')) / 100 if '%' in i else float(i) / 255
             for i in match.group(1).split(','))
         return (r, g, b, opacity)
 
-    match = re.search('#[0-9a-f]{6}', string)
+    match = HEX_RRGGBB.search(string)
     if match:
         plain_color = tuple(
             int(value, 16) / 255 for value in (
                 string[1:3], string[3:5], string[5:7]))
         return plain_color + (opacity,)
 
-    match = re.search('#[0-9a-f]{3}', string)
+    match = HEX_RGB.search(string)
     if match:
         plain_color = tuple(
             int(value, 16) / 15 for value in (
