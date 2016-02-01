@@ -55,8 +55,10 @@ layout: default
 
 <section>
   <h2>What's new?</h2>
-  {% assign releases = site.github.releases | where:"draft",false | sort:"created_at" | reverse %}
-  {% assign latest_release = releases[0] %}
+  {% if site.github.releases %}
+    {% assign releases = site.github.releases | where:"draft",false | sort:"created_at" | reverse %}
+    {% assign latest_release = releases[0] %}
+  {% endif %}
   <p>
     Latest version of CairoSVG is {{ latest_release.tag_name }},
     released on {{ latest_release.created_at | date: "%B %-d, %Y" }}
