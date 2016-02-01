@@ -8,8 +8,8 @@ layout: default
 </header>
 
 <section>
-  <h2>About CairoSVG</h2>
-  <p>CairoSVG is:</p>
+  <h2>About {{ site.title }}</h2>
+  <p>{{ site.title }} is:</p>
   <ul>
     <li>a SVG 1.1 to PNG, PDF, PS and SVG converter;</li>
     <li>a command-line interface;</li>
@@ -26,21 +26,21 @@ layout: default
 
   <h3>Install</h3>
   <p>
-    CairoSVG is available
-    on <a href="https://pypi.python.org/pypi/CairoSVG/">PyPI</a>, you can
+    {{ site.title }} is available
+    on <a href="https://pypi.python.org/pypi/{{ site.title }}/">PyPI</a>, you can
     install it with pip:
   </p>
   <pre>$ pip install cairosvg</pre>
 
   <h3>Convert</h3>
   <p>
-    You can use CairoSVG as a standalone command-line program:
+    You can use {{ site.title }} as a standalone command-line program:
   </p>
   <pre>$ cairosvg image.svg -o image.png</pre>
 
   <h3>Embed</h3>
   <p>
-    You can also use CairoSVG as a Python 3 library:
+    You can also use {{ site.title }} as a Python 3 library:
   </p>
   <pre>$ python3
 >>> import cairosvg
@@ -49,7 +49,7 @@ layout: default
   <h3>Want more?</h3>
   <p>
     Please read the <a href="/documentation/">documentation</a> to learn more
-    about how to use CairoSVG.
+    about how to use {{ site.title }}.
   </p>
 </section>
 
@@ -60,9 +60,9 @@ layout: default
     {% assign latest_release = releases[0] %}
   {% endif %}
   <p>
-    Latest version of CairoSVG is {{ latest_release.tag_name }},
+    Latest version of {{ site.title }} is {{ latest_release.tag_name }},
     released on {{ latest_release.created_at | date: "%B %-d, %Y" }}
-    (<a href="https://github.com/Kozea/CairoSVG/blob/master/NEWS.rst">changelog</a>).
+    (<a href="https://github.com/Kozea/{{ site.title }}/blob/master/NEWS.rst">changelog</a>).
   </p>
   <h3>{{ site.posts[0].title }}</h3>
   <aside>{{ site.posts[0].date | date: "%B %-d, %Y" }}</aside>
