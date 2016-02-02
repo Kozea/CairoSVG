@@ -132,6 +132,16 @@ pre {
     font-size: 12pt;
   }
 
+  section h1 {
+    margin-left: -0.8em;
+    margin-right: -0.8em;
+    padding: 2em 0.8em 1em;
+  }
+
+  article:before {
+    margin: 1em auto;
+  }
+
   header, section, nav, footer {
     padding-left: 2em;
     padding-right: 2em;
