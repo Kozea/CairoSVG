@@ -67,7 +67,7 @@ def parse_url(url, base=None):
                         url = ''
                     if parsed_url.fragment:
                         url = '{}#{}'.format(url, parsed_url.fragment)
-            elif parsed_base.scheme == parsed_url.scheme:
+            elif parsed_url.scheme in ('', parsed_base.scheme):
                 # `urljoin` automatically uses the "folder" part of `base`
                 url = urljoin(base, url)
     return urlparse(url or '')
