@@ -6,6 +6,7 @@ Luminance Masks
 ===============
 
 - ``masking-intro-01-f``
+- ``masking-path-10-b``
 - ``masking-path-11-b``
 
 SVG relies on the luminance and the alpha channel to apply masks, whereas Cairo

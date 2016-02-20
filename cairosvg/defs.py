@@ -131,10 +131,8 @@ def paint_mask(surface, node, name, opacity):
         y = size(surface, node.get('y'), 'y')
         width = size(surface, node.get('width'), 'x')
         height = size(surface, node.get('height'), 'y')
-        width_ref = width
-        height_ref = height
-        mask_node['transform'] = '{} scale({}, {})'.format(
-            mask_node.get('transform', ''), width, height)
+        width_ref = width or surface.width
+        height_ref = height or surface.height
 
     mask_node['x'] = size(surface, mask_node.get('x', '-10%'), width_ref)
     mask_node['y'] = size(surface, mask_node.get('y', '-10%'), height_ref)
