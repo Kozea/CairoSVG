@@ -69,7 +69,9 @@ def image(surface, node):
         node.image_height = tree_height or height
         scale_x, scale_y, translate_x, translate_y = preserve_ratio(
             surface, node)
-        surface.set_context_size(*node_format(surface, tree, reference=False))
+        surface.set_context_size(
+            *node_format(surface, tree, reference=False),
+            preserved_ratio=(scale_x == scale_y))
         surface.context.translate(*surface.context.get_current_point())
         surface.context.scale(scale_x, scale_y)
         surface.context.translate(translate_x, translate_y)

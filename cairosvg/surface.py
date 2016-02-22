@@ -30,7 +30,7 @@ from .defs import (
     parse_def, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
     PointError, UNITS, apply_matrix_transform, clip_rect, node_format,
-    normalize, paint, size, transform)
+    normalize, paint, preserved_ratio, size, transform)
 from .image import image
 from .path import draw_markers, path
 from .parser import Tree
@@ -185,7 +185,7 @@ class Surface(object):
         self.context.scale(
             self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        self.set_context_size(width, height, viewbox)
+        self.set_context_size(width, height, viewbox, preserved_ratio(tree))
         self.context.move_to(0, 0)
         self.draw(tree)
 
@@ -209,18 +209,18 @@ class Surface(object):
         cairo_surface = self.surface_class(self.output, width, height)
         return cairo_surface, width, height
 
-    def set_context_size(self, width, height, viewbox):
+    def set_context_size(self, width, height, viewbox, preserved_ratio):
         """Set the Cairo context size, set the SVG viewport size."""
         if viewbox:
             x, y, x_size, y_size = viewbox
             self.context_width, self.context_height = x_size, y_size
             x_ratio, y_ratio = width / x_size, height / y_size
             matrix = cairo.Matrix()
-            if x_ratio > y_ratio:
+            if preserved_ratio and x_ratio > y_ratio:
                 matrix.translate((width - x_size * y_ratio) / 2, 0)
                 matrix.scale(y_ratio, y_ratio)
                 matrix.translate(-x / x_ratio * y_ratio, -y)
-            elif x_ratio < y_ratio:
+            elif preserved_ratio and x_ratio < y_ratio:
                 matrix.translate(0, (height - y_size * x_ratio) / 2)
                 matrix.scale(x_ratio, x_ratio)
                 matrix.translate(-x, -y / y_ratio * x_ratio)

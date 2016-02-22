@@ -113,6 +113,11 @@ def point_angle(cx, cy, px, py):
     return atan2(py - cy, px - cx)
 
 
+def preserved_ratio(node):
+    """Return whether we must preserve the ratio."""
+    return node.get('preserveAspectRatio', 'xMidYMid').split(' ')[0] != 'none'
+
+
 def preserve_ratio(surface, node):
     """Manage the ratio preservation."""
     if node.tag == 'marker':
