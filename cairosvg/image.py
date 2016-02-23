@@ -71,7 +71,7 @@ def image(surface, node):
             surface, node)
         surface.set_context_size(
             *node_format(surface, tree, reference=False),
-            preserved_ratio=preserved_ratio(surface, tree))
+            preserved_ratio=preserved_ratio(tree))
         surface.context.translate(*surface.context.get_current_point())
         surface.context.scale(scale_x, scale_y)
         surface.context.translate(translate_x, translate_y)
