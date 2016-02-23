@@ -11,6 +11,12 @@ Version 2.0, not released yet
 * Test CairoSVG with Travis
 
 
+Version 1.0.20, released on 2016-02-23
+======================================
+
+* Allow the user to give parent size
+
+
 Version 1.0.19, released on 2015-10-30
 ======================================
 
