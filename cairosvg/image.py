@@ -24,7 +24,7 @@ from io import BytesIO
 
 from PIL import Image
 
-from .helpers import node_format, size, preserve_ratio
+from .helpers import node_format, size, preserve_ratio, preserved_ratio
 from .parser import Tree
 from .surface import cairo
 from .url import parse_url, read_url
@@ -71,7 +71,7 @@ def image(surface, node):
             surface, node)
         surface.set_context_size(
             *node_format(surface, tree, reference=False),
-            preserved_ratio=(scale_x == scale_y))
+            preserved_ratio=preserved_ratio(surface, tree))
         surface.context.translate(*surface.context.get_current_point())
         surface.context.scale(scale_x, scale_y)
         surface.context.translate(translate_x, translate_y)
