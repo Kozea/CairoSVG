@@ -120,7 +120,7 @@ class Node(dict):
         self.update(self.node.attrib)
 
         # Handle the CSS
-        style = self.pop('_style', '') + ';' + self.pop('style', '').lower()
+        style = self.pop('_style', '') + ';' + self.pop('style', '')
         for declaration in style.split(';'):
             name, colon, value = declaration.partition(':')
             if not colon:
