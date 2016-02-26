@@ -168,7 +168,7 @@ def text(surface, node):
         surface.text_path_width += start_offset
         extend_bounding_box(bounding_box, start_offset, 0)
 
-    if node.text and not node.text.isspace():
+    if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
             if x:
                 surface.cursor_d_position[0] = 0

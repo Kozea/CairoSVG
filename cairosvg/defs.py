@@ -239,9 +239,9 @@ def draw_pattern(surface, node, name):
         x = size(surface, pattern_node.get('x'), 1) * width
         y = size(surface, pattern_node.get('y'), 1) * height
         pattern_width = (
-            size(surface, pattern_node.pop('width', '0'), 1) * width)
+            size(surface, pattern_node.pop('width', '1'), 1) * width)
         pattern_height = (
-            size(surface, pattern_node.pop('height', '0'), 1) * height)
+            size(surface, pattern_node.pop('height', '1'), 1) * height)
         if 'viewBox' not in pattern_node:
             pattern_node['width'] = pattern_width
             pattern_node['height'] = pattern_height
