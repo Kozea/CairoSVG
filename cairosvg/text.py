@@ -24,6 +24,7 @@ from math import cos, sin, radians
 from .helpers import distance, normalize, point_angle, size, zip_letters
 from .surface import cairo
 from .url import parse_url
+from .bounding_box import get_initial_bounding_box, extend_bounding_box, normalized_bounding_box
 
 
 def path_length(path):
@@ -155,6 +156,7 @@ def text(surface, node):
         else:
             y_align = 0
 
+    bounding_box = get_initial_bounding_box()
     if text_path:
         surface.stroke_and_fill = False
         surface.draw(text_path)
@@ -164,8 +166,9 @@ def text(surface, node):
         length = path_length(cairo_path)
         start_offset = size(surface, node.get('startOffset', 0), length)
         surface.text_path_width += start_offset
+        extend_bounding_box(bounding_box, start_offset, 0)
 
-    if node.text:
+    if node.text and not node.text.isspace():
         for [x, y, dx, dy, r], letter in letters_positions:
             if x:
                 surface.cursor_d_position[0] = 0
@@ -173,7 +176,8 @@ def text(surface, node):
                 surface.cursor_d_position[1] = 0
             surface.cursor_d_position[0] += dx or 0
             surface.cursor_d_position[1] += dy or 0
-            extents = surface.context.text_extents(letter)[4]
+            text_extents = surface.context.text_extents(letter)
+            extents = text_extents[4]
             if text_path:
                 start = surface.text_path_width + surface.cursor_d_position[0]
                 start_point = point_following_path(cairo_path, start)
@@ -191,6 +195,8 @@ def text(surface, node):
                 surface.context.rotate(point_angle(*(start_point + end_point)))
                 surface.context.translate(0, surface.cursor_d_position[1])
                 surface.context.move_to(0, 0)
+                extend_bounding_box(bounding_box,
+                                    end_point[0], text_extents[3])
             else:
                 surface.context.save()
                 x = surface.cursor_position[0] if x is None else x
@@ -200,8 +206,16 @@ def text(surface, node):
                 surface.context.rel_move_to(*surface.cursor_d_position)
                 surface.context.rel_move_to(-x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
+                extend_bounding_box(bounding_box,
+                                    cursor_position[0] + surface.cursor_d_position[0] - x_align,
+                                    cursor_position[1] + surface.cursor_d_position[1] + y_align)
+                extend_bounding_box(bounding_box,
+                                    cursor_position[0] + surface.cursor_d_position[0] - x_align + text_extents[4],
+                                    cursor_position[1] + surface.cursor_d_position[1] + y_align + text_extents[3])
 
-            surface.context.text_path(letter)
+            # Only draw characters with 'content' (workaround for bug in cairo)
+            if not letter.isspace():
+                surface.context.text_path(letter)
             surface.context.restore()
             if not text_path:
                 surface.cursor_position = cursor_position
@@ -211,3 +225,4 @@ def text(surface, node):
         dx = dx[0] if dx else 0
         dy = dy[0] if dy else 0
         surface.cursor_position = (x + dx, y + dy)
+    node["text_bounding_box"] = normalized_bounding_box(bounding_box)

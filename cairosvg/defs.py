@@ -28,6 +28,7 @@ from .parser import Tree
 from .shapes import rect
 from .surface import cairo
 from .url import parse_url
+from .bounding_box import calculate_bounding_box
 
 
 BLEND_OPERATORS = {
@@ -169,10 +170,11 @@ def draw_gradient(surface, node, name):
         width_ref, height_ref = 'x', 'y'
         diagonal_ref = 'xy'
     else:
-        x = size(surface, node.get('x'), 'x')
-        y = size(surface, node.get('y'), 'y')
-        width = size(surface, node.get('width', '1'), 'x')
-        height = size(surface, node.get('height', '1'), 'y')
+        bounding_box = calculate_bounding_box(node)
+        x = size(surface, node.get('x', bounding_box['minx']), 'x')
+        y = size(surface, node.get('y', bounding_box['miny']), 'y')
+        width = size(surface, node.get('width', bounding_box['maxx'] - bounding_box['minx']), 'x')
+        height = size(surface, node.get('height', bounding_box['maxy'] - bounding_box['miny']), 'y')
         width_ref = height_ref = diagonal_ref = 1
 
     if gradient_node.tag == 'linearGradient':

@@ -307,6 +307,10 @@ def size(surface, string, reference='xy'):
         # Not a float, try something else
         pass
 
+    # No surface (for parsing only)
+    if surface is None:
+        return 0
+
     string = normalize(string).split(' ', 1)[0]
     if string.endswith('%'):
         if reference == 'x':
