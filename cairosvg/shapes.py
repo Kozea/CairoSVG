@@ -32,10 +32,6 @@ def circle(surface, node):
     cx = size(surface, node.get('cx'), 'x')
     cy = size(surface, node.get('cy'), 'y')
 
-    # Set 'standard' values that may be used by gradients
-    node['width'], node['height'] = str(r * 2), str(r * 2)
-    node['x'], node['y'] = str(cx - r), str(cy - r)
-
     surface.context.new_sub_path()
     surface.context.arc(cx, cy, r, 0, 2 * pi)
 
@@ -48,10 +44,6 @@ def ellipse(surface, node):
         return
     cx = size(surface, node.get('cx'), 'x')
     cy = size(surface, node.get('cy'), 'y')
-
-    # Set 'standard' values that may be used by gradients
-    node['width'], node['height'] = str(rx * 2), str(ry * 2)
-    node['x'], node['y'] = str(cx - rx), str(cy - ry)
 
     ratio = ry / rx
     surface.context.new_sub_path()

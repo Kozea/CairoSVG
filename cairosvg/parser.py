@@ -34,6 +34,7 @@ from .url import parse_url, read_url
 NOT_INHERITED_ATTRIBUTES = frozenset((
     'clip',
     'clip-path',
+    'display',      # Is actually inherited but handled elsewhere (see remark below)
     'filter',
     'height',
     'id',
@@ -51,6 +52,8 @@ NOT_INHERITED_ATTRIBUTES = frozenset((
     'y',
     '{http://www.w3.org/1999/xlink}href',
 ))
+
+# 'display' is handled differently because some markers are part of a none-displaying group (see test painting-marker-07-f.svg)
 
 COLOR_ATTRIBUTES = frozenset((
     'fill',

@@ -28,6 +28,9 @@ A bounding box is a dict with fields:
 from math import isinf, fmod, pi, radians, sin, cos, tan, acos, atan, sqrt
 
 from .helpers import normalize, point
+from .defs import parse_url
+from .parser import Tree
+from .features import match_features
 from .path import PATH_LETTERS
 
 
@@ -36,13 +39,6 @@ EMPTY_BOUNDING_BOX = {
     'maxx': float('-inf'),
     'miny': float('inf'),
     'maxy': float('-inf')
-}
-
-MINIMAL_BOUND_BOX = {
-    'minx': 0.0,
-    'maxx': 1.0,
-    'miny': 0.0,
-    'maxy': 1.0
 }
 
 
@@ -61,11 +57,13 @@ def calculate_bounding_box(node):
 
     # See for explanation of bounding box:
     #   https://www.w3.org/TR/SVG/coords.html#ObjectBoundingBox
-    if node.tag in BOUNDING_BOX_METHODS:
-        return BOUNDING_BOX_METHODS[node.tag](node)
-    else:
-        # Fake bounding box to prevent division by zero in draw
-        return MINIMAL_BOUND_BOX.copy()
+    if 'bounding_box' not in node:
+        if node.tag in BOUNDING_BOX_METHODS:
+            bounding_box = BOUNDING_BOX_METHODS[node.tag](node)
+            if is_non_empty_bounding_box(bounding_box):
+                node['bounding_box'] = bounding_box
+
+    return node['bounding_box'] if 'bounding_box' in node else None
 
 
 def bounding_box_rect(node):
@@ -179,7 +177,7 @@ def bounding_box_polyline(node):
         x, y, points = point(None, points)
         extend_bounding_box(bounding_box, float(x), float(y))
 
-    return normalized_bounding_box(bounding_box)
+    return bounding_box
 
 
 def bounding_box_polygon(node):
@@ -334,11 +332,19 @@ def bounding_box_path(node):
 
         path_data = path_data.strip()
 
-    return normalized_bounding_box(bounding_box)
+    return bounding_box
 
 
 def bounding_box_text(node):
-    return node["text_bounding_box"]
+    """
+    Return the bounding box of the text
+
+    :param node:    node of type <text>
+
+    :returns: bounding box(dict)
+    """
+
+    return node['text_bounding_box'] if 'text_bounding_box' in node else None
 
 
 def angle(bx, by):
@@ -486,6 +492,40 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
     }
 
 
+def bounding_box_group(node):
+    """
+    Return the bounding box of the group
+
+    :param node:    node of type <g> or <marker>
+
+    :returns: bounding box(dict)
+    """
+
+    bounding_box = get_initial_bounding_box()
+    for child in node.children:
+        combine_bounding_box(bounding_box, calculate_bounding_box(child))
+
+    return bounding_box
+
+
+def bounding_box_use(node):
+    """
+    Return the bounding box of the use(d element)
+
+    :param node:    node of type <use>
+
+    :returns: bounding box(dict)
+    """
+
+    href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
+    tree = Tree(url=href, parent=node)
+
+    if not match_features(tree.xml_tree):
+        return None
+
+    return calculate_bounding_box(tree)
+
+
 def extend_bounding_box(bounding_box, x, y):
     """
     Extend bounding_box by coordinate
@@ -505,33 +545,46 @@ def extend_bounding_box(bounding_box, x, y):
         bounding_box['maxy'] = y
 
 
-def normalized_bounding_box(bounding_box):
+def combine_bounding_box(bounding_box, another_bounding_box):
     """
-    Return bounding_box or non empty (ie 1 pixel sized) box if bounding_box is empty
+    Combine bounding_box with another bounding box
 
-    :param bounding_box:    bounding box to return (might be empty)
-
-    :returns: bounding box(dict)
+    :param bounding_box:            current bounding box
+    :param another_bounding_box:    another bounding box
     """
 
-    if is_empty_bounding_box(bounding_box):
-        return MINIMAL_BOUND_BOX.copy()
-    return bounding_box
+    if is_valid_bounding_box(another_bounding_box):
+        extend_bounding_box(bounding_box, another_bounding_box['minx'], another_bounding_box['miny'])
+        extend_bounding_box(bounding_box, another_bounding_box['maxx'], another_bounding_box['maxy'])
 
 
-def is_empty_bounding_box(bounding_box):
+def is_valid_bounding_box(bounding_box):
     """
-    Return whether bounding box is uninitialized (has not received a value) or
-    has no horizontal or vertical size
+    Return whether bounding box is initialized (has received a value)
+
+    :param bounding_box:    bounding box to test for being valid
+
+    :returns: bool
+    """
+
+    # If 'minx' or 'miny' is set, 'maxx' and 'maxy' will also be set (resulting in a valid bounding box)
+    return bounding_box and \
+           not isinf(bounding_box['minx']) and \
+           not isinf(bounding_box['miny'])
+
+
+def is_non_empty_bounding_box(bounding_box):
+    """
+    Return whether bounding box is valid and has a size (is not a horizontal or vertical line)
 
     :param bounding_box:    bounding box to test for being empty
 
     :returns: bool
     """
 
-    return isinf(bounding_box['minx']) or \
-           bounding_box["minx"] == bounding_box["maxx"] or \
-           bounding_box["miny"] == bounding_box["maxy"]
+    return is_valid_bounding_box(bounding_box) and \
+           bounding_box["minx"] != bounding_box["maxx"] and \
+           bounding_box["miny"] != bounding_box["maxy"]
 
 
 BOUNDING_BOX_METHODS = {
@@ -544,5 +597,8 @@ BOUNDING_BOX_METHODS = {
     'path': bounding_box_path,
     'text': bounding_box_text,
     'tspan': bounding_box_text,
-    'textPath': bounding_box_text
+    'textPath': bounding_box_text,
+    'g': bounding_box_group,
+    'use': bounding_box_use,
+    'marker': bounding_box_group,
 }

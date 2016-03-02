@@ -31,7 +31,6 @@ Size
 ====
 
 - ``struct-use-06-b``
-- ``struct-use-07-b``
 
 These tests used to work but are now broken because of the width and height not
 applied to use tags.

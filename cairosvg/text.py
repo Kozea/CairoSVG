@@ -24,7 +24,7 @@ from math import cos, sin, radians
 from .helpers import distance, normalize, point_angle, size, zip_letters
 from .surface import cairo
 from .url import parse_url
-from .bounding_box import get_initial_bounding_box, extend_bounding_box, normalized_bounding_box
+from .bounding_box import get_initial_bounding_box, extend_bounding_box, is_valid_bounding_box
 
 
 def path_length(path):
@@ -66,9 +66,6 @@ def point_following_path(path, width):
 
 def text(surface, node):
     """Draw a text ``node``."""
-    # Set black as default text color
-    if not node.get('fill'):
-        node['fill'] = 'black'
 
     font_size = size(surface, node.get('font-size', '12pt'))
     font_family = (
@@ -225,4 +222,7 @@ def text(surface, node):
         dx = dx[0] if dx else 0
         dy = dy[0] if dy else 0
         surface.cursor_position = (x + dx, y + dy)
-    node["text_bounding_box"] = normalized_bounding_box(bounding_box)
+
+    # If a valid bounding box is calculated store it in the node
+    if is_valid_bounding_box(bounding_box):
+        node["text_bounding_box"] = bounding_box

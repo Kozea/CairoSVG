@@ -27,7 +27,7 @@ from .colors import color
 from .defs import (
     apply_filter_after_painting, apply_filter_before_painting, clip_path,
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
-    parse_def, pattern, prepare_filter, radial_gradient, use)
+    parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
     PointError, UNITS, apply_matrix_transform, clip_rect, node_format,
     normalize, paint, preserved_ratio, size, transform)
@@ -240,8 +240,7 @@ class Surface(object):
 
         # Do not draw defs
         if node.tag == 'defs':
-            for child in node.children:
-                parse_def(self, child)
+            parse_all_defs(self, node)
             return
 
         # Do not draw elements with width or height of 0
@@ -274,11 +273,6 @@ class Surface(object):
         self.context.move_to(
             size(self, node.get('x'), 'x'),
             size(self, node.get('y'), 'y'))
-
-        # Set stroke-width
-        if node.tag in PATH_TAGS:
-            if not node.get('stroke-width'):
-                node['stroke-width'] = '1'
 
         # Set node's drawing informations if the ``node.tag`` method exists
         line_cap = node.get('stroke-linecap')
@@ -389,7 +383,7 @@ class Surface(object):
 
             # Stroke
             self.context.save()
-            self.context.set_line_width(size(self, node.get('stroke-width')))
+            self.context.set_line_width(size(self, node.get('stroke-width', '1')))
             paint_source, paint_color = paint(node.get('stroke'))
             if not gradient_or_pattern(self, node, paint_source):
                 self.context.set_source_rgba(
