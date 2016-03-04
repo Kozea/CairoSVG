@@ -274,6 +274,10 @@ def draw_pattern(surface, node, name):
                 pattern_node['transform'] = 'scale({}, {})'.format(
                     width, height)
 
+    # Fail if pattern has an invalid size
+    if pattern_width == 0.0 or pattern_height == 0.0:
+        return False
+
     from .surface import SVGSurface  # circular import
     pattern_surface = SVGSurface(pattern_node, None, surface.dpi, surface)
     pattern_pattern = cairo.SurfacePattern(pattern_surface.cairo)
@@ -368,6 +372,7 @@ def use(surface, node):
     tree = Tree(url=href, parent=node, tree_cache=surface.tree_cache)
 
     if not match_features(tree.xml_tree):
+        surface.context.restore()
         return
 
     if tree.tag in ('svg', 'symbol'):
