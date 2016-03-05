@@ -54,7 +54,7 @@ def draw_markers(surface, node):
             if position == 'start':
                 angle = pi - angles[0]
             else:
-                angle = (angle2 + angles[0]) / 2
+                angle = (angle2 + pi - angles[0]) / 2
             angle1, angle2 = angles
         else:
             angle = angle2
@@ -68,7 +68,7 @@ def draw_markers(surface, node):
                 scale = 1
             else:
                 scale = size(
-                    surface, surface.parent_node.get('stroke-width'))
+                    surface, surface.parent_node.get('stroke-width', '1'))
 
             scale_x, scale_y, translate_x, translate_y = preserve_ratio(
                 surface, marker_node)
@@ -81,8 +81,14 @@ def draw_markers(surface, node):
                 viewbox_width = viewbox[2]
                 viewbox_height = viewbox[3]
             else:
-                viewbox_width = width
-                viewbox_height = height
+                from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box # recursive import
+                bounding_box = calculate_bounding_box(marker_node)
+                if is_non_empty_bounding_box(bounding_box):
+                    viewbox_width = bounding_box['maxx'] - bounding_box['minx']
+                    viewbox_height = bounding_box['maxy'] - bounding_box['miny']
+                else:
+                    viewbox_width = width
+                    viewbox_height = height
 
             scale_x = width / viewbox_width * float(scale_x)
             scale_y = height / viewbox_height * float(scale_y)
