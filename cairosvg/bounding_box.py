@@ -17,7 +17,7 @@
 """
 Calculate bounding box for SVG shapes and paths.
 
-A bounding box is a (minx, miny, maxx, maxy) tuple.
+A bounding box is a (minx, miny, width, height) tuple.
 
 """
 
@@ -30,7 +30,7 @@ from .features import match_features
 from .path import PATH_LETTERS
 
 
-EMPTY_BOUNDING_BOX = float('inf'), float('inf'), float('-inf'), float('-inf')
+EMPTY_BOUNDING_BOX = float('inf'), float('inf'), 0, 0
 
 
 def calculate_bounding_box(node):
@@ -52,7 +52,7 @@ def bounding_box_rect(node):
     y = float(node.get('y', '0'))
     width = max(float(node.get('width', '0')), 0)
     height = max(float(node.get('height', '0')), 0)
-    return x, y, x + width, y + height
+    return x, y, width, height
 
 
 def bounding_box_circle(node):
@@ -60,9 +60,7 @@ def bounding_box_circle(node):
     center_x = float(node.get('cx', '0'))
     center_y = float(node.get('cy', '0'))
     radius = max(float(node.get('r', '0')), 0)
-    return (
-        center_x - radius, center_y - radius,
-        center_x + radius, center_y + radius)
+    return center_x - radius, center_y - radius, 2 * radius, 2 * radius
 
 
 def bounding_box_ellipse(node):
@@ -71,9 +69,7 @@ def bounding_box_ellipse(node):
     center_y = float(node.get('cy', '0'))
     radius_x = max(float(node.get('rx', '0')), 0)
     radius_y = max(float(node.get('ry', '0')), 0)
-    return (
-        center_x - radius_x, center_y - radius_y,
-        center_x + radius_x, center_y + radius_y)
+    return center_x - radius_x, center_y - radius_y, 2 * radius_x, 2 * radius_y
 
 
 def bounding_box_line(node):
@@ -82,7 +78,9 @@ def bounding_box_line(node):
     y1 = float(node.get('y1', '0'))
     x2 = float(node.get('x2', '0'))
     y2 = float(node.get('y2', '0'))
-    return min(x1, x2), min(y1, y2),max(x1, x2), max(y1, y2)
+    x, y = min(x1, x2), min(y1, y2)
+    width, height = max(x1, x2) - x, max(y1, y2) - y
+    return x, y, width, height
 
 
 def bounding_box_polyline(node):
@@ -344,14 +342,15 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
             (other_arc and not (angle1 > tmaxy or angle2 < tmaxy))):
         maxy = max(y, y1)
 
-    return minx, miny, maxx, maxy
+    return minx, miny, maxx - minx, maxy - miny
 
 
 def bounding_box_group(node):
     """Get the bounding box of a ``g`` node."""
     bounding_box = EMPTY_BOUNDING_BOX
     for child in node.children:
-        bounding_box = combine_bounding_box(bounding_box, calculate_bounding_box(child))
+        bounding_box = combine_bounding_box(
+            bounding_box, calculate_bounding_box(child))
     return bounding_box
 
 
@@ -366,18 +365,22 @@ def bounding_box_use(node):
 
 def extend_bounding_box(bounding_box, x, y):
     """Extend the ``bounding_box`` by the ``x``, ``y`` coordinates."""
-    return (
-        min(bounding_box[0], x), min(bounding_box[1], y),
-        max(bounding_box[2], x), max(bounding_box[3], y))
+    minx, miny, width, height = bounding_box
+    maxx, maxy = (
+        float('-inf') if isinf(minx) else minx + width,
+        float('-inf') if isinf(miny) else miny + height)
+    minx, miny, maxx, maxy = (
+        min(minx, x), min(miny, y), max(maxx, x), max(maxy, y))
+    return minx, miny, maxx - minx, maxy - miny
 
 
 def combine_bounding_box(bounding_box, another_bounding_box):
     """Combine the ``bounding_box`` with ``another_bounding_box``."""
     if is_valid_bounding_box(another_bounding_box):
-        bounding_box = extend_bounding_box(
-            bounding_box, another_bounding_box[0], another_bounding_box[1])
-        bounding_box = extend_bounding_box(
-            bounding_box, another_bounding_box[2], another_bounding_box[3])
+        minx, miny, width, height = another_bounding_box
+        maxx, maxy = minx + width, miny + height
+        bounding_box = extend_bounding_box(bounding_box, minx, miny)
+        bounding_box = extend_bounding_box(bounding_box, maxx, maxy)
     return bounding_box
 
 
@@ -385,18 +388,12 @@ def is_valid_bounding_box(bounding_box):
     """Know whether bounding box has been initialized."""
     # If 'minx' or 'miny' is set, 'maxx' and 'maxy' will also be set (resulting
     # in a valid bounding box)
-    return (
-        bounding_box and
-        not isinf(bounding_box[0]) and
-        not isinf(bounding_box[1]))
+    return bounding_box and not isinf(bounding_box[0] + bounding_box[1])
 
 
 def is_non_empty_bounding_box(bounding_box):
     """Know whether bounding box is valid and has a size."""
-    return (
-        is_valid_bounding_box(bounding_box) and
-        bounding_box[0] != bounding_box[2] and
-        bounding_box[1] != bounding_box[3])
+    return is_valid_bounding_box(bounding_box) and 0 not in bounding_box[2:]
 
 
 BOUNDING_BOX_METHODS = {
