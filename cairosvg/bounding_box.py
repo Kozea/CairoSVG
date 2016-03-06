@@ -34,95 +34,50 @@ EMPTY_BOUNDING_BOX = float('inf'), float('inf'), float('-inf'), float('-inf')
 
 
 def calculate_bounding_box(node):
+    """Calculate ``node``'s bounding box.
+
+    See https://www.w3.org/TR/SVG/coords.html#ObjectBoundingBox
+
     """
-    Calculate bounding box (simple case) and return it
-
-    :param node:   node from SVG file
-
-    :returns: bounding box(dict)
-    """
-
-    # See for explanation of bounding box:
-    #   https://www.w3.org/TR/SVG/coords.html#ObjectBoundingBox
-    if 'bounding_box' not in node:
-        if node.tag in BOUNDING_BOX_METHODS:
-            bounding_box = BOUNDING_BOX_METHODS[node.tag](node)
-            if is_non_empty_bounding_box(bounding_box):
-                node['bounding_box'] = bounding_box
-
-    return node['bounding_box'] if 'bounding_box' in node else None
+    if 'bounding_box' not in node and node.tag in BOUNDING_BOX_METHODS:
+        bounding_box = BOUNDING_BOX_METHODS[node.tag](node)
+        if is_non_empty_bounding_box(bounding_box):
+            node['bounding_box'] = bounding_box
+    return node.get('bounding_box')
 
 
 def bounding_box_rect(node):
-    """
-    Return the bounding box of the rectangle
-
-    :param node:   node of type <rect>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of a ``rect`` node."""
     x = float(node.get('x', '0'))
     y = float(node.get('y', '0'))
-    width = float(node.get('width', '0'))
-    if width < 0.0:
-        width = 0.0
-    height = float(node.get('height', '0'))
-    if height < 0.0:
-        height = 0.0
+    width = max(float(node.get('width', '0')), 0)
+    height = max(float(node.get('height', '0')), 0)
     return x, y, x + width, y + height
 
 
 def bounding_box_circle(node):
-    """
-    Return the bounding box of the circle
-
-    :param node:   node of type <circle>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of a ``circle`` node."""
     center_x = float(node.get('cx', '0'))
     center_y = float(node.get('cy', '0'))
-    radius = float(node.get('r', '0'))
-    if radius < 0.0:
-        radius = 0.0
+    radius = max(float(node.get('r', '0')), 0)
     return (
         center_x - radius, center_y - radius,
         center_x + radius, center_y + radius)
 
 
 def bounding_box_ellipse(node):
-    """
-    Return the bounding box of the ellipse
-
-    :param node:   node of type <ellipse>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of an ``ellipse`` node."""
     center_x = float(node.get('cx', '0'))
     center_y = float(node.get('cy', '0'))
-    radius_x = float(node.get('rx', '0'))
-    if radius_x < 0.0:
-        radius_x = 0.0
-    radius_y = float(node.get('ry', '0'))
-    if radius_y < 0.0:
-        radius_y = 0.0
+    radius_x = max(float(node.get('rx', '0')), 0)
+    radius_y = max(float(node.get('ry', '0')), 0)
     return (
         center_x - radius_x, center_y - radius_y,
         center_x + radius_x, center_y + radius_y)
 
 
 def bounding_box_line(node):
-    """
-    Return the bounding box of the line
-
-    :param node:   node of type <line>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of a ``line`` node."""
     x1 = float(node.get('x1', '0'))
     y1 = float(node.get('y1', '0'))
     x2 = float(node.get('x2', '0'))
@@ -131,48 +86,17 @@ def bounding_box_line(node):
 
 
 def bounding_box_polyline(node):
-    """
-    Return the bounding box of the polyline
-
-    :param node:   node of type <polyline>
-
-    :returns: bounding box(dict)
-    """
-
-    # Start with 'empty' bounding box
+    """Get the bounding box of a ``polyline`` or ``polygon`` node."""
     bounding_box = EMPTY_BOUNDING_BOX
-
-    # Iterate all points adjusting bounding box for every coordinate
     points = normalize(node.get('points', ''))
     while points:
         x, y, points = point(None, points)
         bounding_box = extend_bounding_box(bounding_box, float(x), float(y))
-
     return bounding_box
 
 
-def bounding_box_polygon(node):
-    """
-    Return the bounding box of the polygon
-
-    :param node:   node of type <polygon>
-
-    :returns: bounding box(dict)
-    """
-
-    # Polygon and polyline share same type of shape
-    return bounding_box_polyline(node)
-
-
 def bounding_box_path(node):
-    """
-    Return the bounding box of the path
-
-    :param node:    node of type <path>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of a ``path`` node."""
     path_data = node.get('d', '')
 
     # Normalize path data for correct parsing
@@ -180,10 +104,7 @@ def bounding_box_path(node):
         path_data = path_data.replace(letter, ' {} '.format(letter))
     path_data = normalize(path_data)
 
-    # Start with 'empty' bounding box
     bounding_box = EMPTY_BOUNDING_BOX
-
-    # Iterate all points adjusting bounding box for every coordinate
     previous_x = 0
     previous_y = 0
     letter = 'M'    # Move as default
@@ -217,9 +138,12 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Only extend bounding box with end coordinate
-            arc_bounding_box = bounding_box_elliptical_arc(previous_x, previous_y, rx, ry, rotation, large, sweep, x, y)
-            bounding_box = extend_bounding_box(bounding_box, arc_bounding_box[0], arc_bounding_box[1])
-            bounding_box = extend_bounding_box(bounding_box, arc_bounding_box[2], arc_bounding_box[3])
+            arc_bounding_box = bounding_box_elliptical_arc(
+                previous_x, previous_y, rx, ry, rotation, large, sweep, x, y)
+            bounding_box = extend_bounding_box(
+                bounding_box, arc_bounding_box[0], arc_bounding_box[1])
+            bounding_box = extend_bounding_box(
+                bounding_box, arc_bounding_box[2], arc_bounding_box[3])
             previous_x = x
             previous_y = y
 
@@ -307,74 +231,45 @@ def bounding_box_path(node):
 
 
 def bounding_box_text(node):
-    """
-    Return the bounding box of the text
-
-    :param node:    node of type <text>
-
-    :returns: bounding box(dict)
-    """
-
-    return node['text_bounding_box'] if 'text_bounding_box' in node else None
+    """Get the bounding box of a ``text`` node."""
+    return node.get('text_bounding_box')
 
 
 def angle(bx, by):
-    """
-    Return the angle between vector (1,0) and vector (bx,by)
-
-    :param bx:  x-coordinate of vector
-    :param by:  y-coordinate of vector
-
-    :returns: radians(float)
-    """
-
-    return fmod(2 * pi + (1.0 if by > 0.0 else -1.0) * acos(bx / sqrt(bx * bx + by * by)), 2 * pi)
+    """Get the angle between vector (1,0) and vector (bx,by)."""
+    return fmod(
+        2 * pi + (1 if by > 0 else -1) * acos(bx / sqrt(bx * bx + by * by)),
+        2 * pi)
 
 
 def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
-    """
-    Return the bounding box of the elliptical arc described by the parameters
+    """Get the bounding box of an elliptical arc described by the parameters.
 
     See following website for original code:
-        http://fridrich.blogspot.nl/2011/06/bounding-box-of-svg-elliptical-arc.html
+    http://fridrich.blogspot.nl/2011/06/bounding-box-of-svg-elliptical-arc.html
 
-    :param x1:      x-coordinate of start
-    :param y1:      y-coordinate of start
-    :param rx:      radius on horizontal (x) axis
-    :param ry:      radius on vertical (y) axis
-    :param phi:     rotation of arc
-    :param large:   use long side of arc (bool)
-    :param sweep:   grow in angle (bool)
-    :param x:       x-coordinate of end
-    :param y:       y-coordinate of end
-
-    :returns: bounding box(dict)
     """
-
-    if rx < 0.0:
-        rx *= -1.0
-    if ry < 0.0:
-        ry *= -1.0
-
-    if rx == 0.0 or ry == 0.0:
+    rx, ry = abs(rx), abs(ry)
+    if rx == 0 or ry == 0:
         return min(x, x1), min(y, y1), max(x, x1), max(y, y1)
 
     x1prime = cos(phi) * (x1 - x) / 2 + sin(phi) * (y1 - y) / 2
     y1prime = -sin(phi) * (x1 - x) / 2 + cos(phi) * (y1 - y) / 2
 
-    radicant = rx * rx * ry * ry - rx * rx * y1prime * y1prime - ry * ry * x1prime * x1prime
-    radicant /= rx * rx * y1prime * y1prime + ry * ry * x1prime * x1prime
-    cxprime = cyprime = 0.0
+    radicant = (
+        rx ** 2 * ry ** 2 - rx ** 2 * y1prime ** 2 - ry ** 2 * x1prime ** 2)
+    radicant /= rx ** 2 * y1prime ** 2 + ry ** 2 * x1prime ** 2
+    cxprime = cyprime = 0
 
-    if radicant < 0.0:
+    if radicant < 0:
         ratio = rx / ry
-        radicant = y1prime * y1prime + x1prime * x1prime / (ratio * ratio)
-        if radicant < 0.0:
+        radicant = y1prime ** 2 + x1prime ** 2 / ratio ** 2
+        if radicant < 0:
             return min(x, x1), min(y, y1), max(x, x1), max(y, y1)
         ry = sqrt(radicant)
         rx = ratio * ry
     else:
-        factor = (-1.0 if large == sweep else 1.0) * sqrt(radicant)
+        factor = (-1 if large == sweep else 1) * sqrt(radicant)
 
         cxprime = factor * rx * y1prime / ry
         cyprime = -factor * ry * x1prime / rx
@@ -391,7 +286,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         tminy = angle(0, -ry)
         maxy = cy + ry
         tmaxy = angle(0, ry)
-    elif phi == pi / 2.0 or phi == 3.0 * pi / 2.0:
+    elif phi == pi / 2 or phi == 3 * pi / 2:
         minx = cx - ry
         tminx = angle(-ry, 0)
         maxx = cx + ry
@@ -436,89 +331,60 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         angle1, angle2 = angle2, angle1
         other_arc = True
 
-    if (not other_arc and (angle1 > tminx or angle2 < tminx)) or (other_arc and not (angle1 > tminx or angle2 < tminx)):
-        minx = x1 if x1 < x else x
-    if (not other_arc and (angle1 > tmaxx or angle2 < tmaxx)) or (other_arc and not (angle1 > tmaxx or angle2 < tmaxx)):
-        maxx = x1 if x1 > x else x
-    if (not other_arc and (angle1 > tminy or angle2 < tminy)) or (other_arc and not (angle1 > tminy or angle2 < tminy)):
-        miny = y1 if y1 < y else y
-    if (not other_arc and (angle1 > tmaxy or angle2 < tmaxy)) or (other_arc and not (angle1 > tmaxy or angle2 < tmaxy)):
-        maxy = y1 if y1 > y else y
+    if ((not other_arc and (angle1 > tminx or angle2 < tminx)) or
+            (other_arc and not (angle1 > tminx or angle2 < tminx))):
+        minx = min(x, x1)
+    if ((not other_arc and (angle1 > tmaxx or angle2 < tmaxx)) or
+            (other_arc and not (angle1 > tmaxx or angle2 < tmaxx))):
+        maxx = max(x, x1)
+    if ((not other_arc and (angle1 > tminy or angle2 < tminy)) or
+            (other_arc and not (angle1 > tminy or angle2 < tminy))):
+        miny = min(y, y1)
+    if ((not other_arc and (angle1 > tmaxy or angle2 < tmaxy)) or
+            (other_arc and not (angle1 > tmaxy or angle2 < tmaxy))):
+        maxy = max(y, y1)
 
     return minx, miny, maxx, maxy
 
 
 def bounding_box_group(node):
-    """
-    Return the bounding box of the group
-
-    :param node:    node of type <g> or <marker>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of a ``g`` node."""
     bounding_box = EMPTY_BOUNDING_BOX
     for child in node.children:
         bounding_box = combine_bounding_box(bounding_box, calculate_bounding_box(child))
-
     return bounding_box
 
 
 def bounding_box_use(node):
-    """
-    Return the bounding box of the use(d element)
-
-    :param node:    node of type <use>
-
-    :returns: bounding box(dict)
-    """
-
+    """Get the bounding box of a ``use`` node."""
     href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
     tree = Tree(url=href, parent=node)
-
     if not match_features(tree.xml_tree):
         return None
-
     return calculate_bounding_box(tree)
 
 
 def extend_bounding_box(bounding_box, x, y):
-    """
-    Extend bounding_box by coordinate
-
-    :param bounding_box:    current bounding box
-    :param x:               x-value of coordinate
-    :param y:               y-value of coordinate
-    """
+    """Extend the ``bounding_box`` by the ``x``, ``y`` coordinates."""
     return (
         min(bounding_box[0], x), min(bounding_box[1], y),
         max(bounding_box[2], x), max(bounding_box[3], y))
 
 
 def combine_bounding_box(bounding_box, another_bounding_box):
-    """
-    Combine bounding_box with another bounding box
-
-    :param bounding_box:            current bounding box
-    :param another_bounding_box:    another bounding box
-    """
-
+    """Combine the ``bounding_box`` with ``another_bounding_box``."""
     if is_valid_bounding_box(another_bounding_box):
-        bounding_box = extend_bounding_box(bounding_box, another_bounding_box[0], another_bounding_box[1])
-        bounding_box = extend_bounding_box(bounding_box, another_bounding_box[2], another_bounding_box[3])
+        bounding_box = extend_bounding_box(
+            bounding_box, another_bounding_box[0], another_bounding_box[1])
+        bounding_box = extend_bounding_box(
+            bounding_box, another_bounding_box[2], another_bounding_box[3])
     return bounding_box
 
 
 def is_valid_bounding_box(bounding_box):
-    """
-    Return whether bounding box is initialized (has received a value)
-
-    :param bounding_box:    bounding box to test for being valid
-
-    :returns: bool
-    """
-
-    # If 'minx' or 'miny' is set, 'maxx' and 'maxy' will also be set (resulting in a valid bounding box)
+    """Know whether bounding box has been initialized."""
+    # If 'minx' or 'miny' is set, 'maxx' and 'maxy' will also be set (resulting
+    # in a valid bounding box)
     return (
         bounding_box and
         not isinf(bounding_box[0]) and
@@ -526,14 +392,7 @@ def is_valid_bounding_box(bounding_box):
 
 
 def is_non_empty_bounding_box(bounding_box):
-    """
-    Return whether bounding box is valid and has a size (is not a horizontal or vertical line)
-
-    :param bounding_box:    bounding box to test for being empty
-
-    :returns: bool
-    """
-
+    """Know whether bounding box is valid and has a size."""
     return (
         is_valid_bounding_box(bounding_box) and
         bounding_box[0] != bounding_box[2] and
@@ -546,7 +405,7 @@ BOUNDING_BOX_METHODS = {
     'ellipse': bounding_box_ellipse,
     'line': bounding_box_line,
     'polyline': bounding_box_polyline,
-    'polygon': bounding_box_polygon,
+    'polygon': bounding_box_polyline,
     'path': bounding_box_path,
     'text': bounding_box_text,
     'tspan': bounding_box_text,
