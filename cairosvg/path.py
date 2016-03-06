@@ -84,8 +84,8 @@ def draw_markers(surface, node):
                 from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box # recursive import
                 bounding_box = calculate_bounding_box(marker_node)
                 if is_non_empty_bounding_box(bounding_box):
-                    viewbox_width = bounding_box['maxx'] - bounding_box['minx']
-                    viewbox_height = bounding_box['maxy'] - bounding_box['miny']
+                    viewbox_width = bounding_box[2] - bounding_box[0]
+                    viewbox_height = bounding_box[3] - bounding_box[1]
                 else:
                     viewbox_width = width
                     viewbox_height = height

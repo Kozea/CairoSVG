@@ -24,7 +24,7 @@ from math import cos, sin, radians
 from .helpers import distance, normalize, point_angle, size, zip_letters
 from .surface import cairo
 from .url import parse_url
-from .bounding_box import get_initial_bounding_box, extend_bounding_box, is_valid_bounding_box
+from .bounding_box import EMPTY_BOUNDING_BOX, extend_bounding_box, is_valid_bounding_box
 
 
 def path_length(path):
@@ -153,7 +153,7 @@ def text(surface, node):
         else:
             y_align = 0
 
-    bounding_box = get_initial_bounding_box()
+    bounding_box = EMPTY_BOUNDING_BOX
     if text_path:
         surface.stroke_and_fill = False
         surface.draw(text_path)

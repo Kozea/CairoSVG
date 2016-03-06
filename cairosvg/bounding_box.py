@@ -17,11 +17,7 @@
 """
 Calculate bounding box for SVG shapes and paths.
 
-A bounding box is a dict with fields:
-    minx
-    maxx
-    miny
-    maxy
+A bounding box is a (minx, miny, maxx, maxy) tuple.
 
 """
 
@@ -34,16 +30,7 @@ from .features import match_features
 from .path import PATH_LETTERS
 
 
-EMPTY_BOUNDING_BOX = {
-    'minx': float('inf'),
-    'maxx': float('-inf'),
-    'miny': float('inf'),
-    'maxy': float('-inf')
-}
-
-
-def get_initial_bounding_box():
-    return EMPTY_BOUNDING_BOX.copy()
+EMPTY_BOUNDING_BOX = float('inf'), float('inf'), float('-inf'), float('-inf')
 
 
 def calculate_bounding_box(node):
@@ -83,12 +70,7 @@ def bounding_box_rect(node):
     height = float(node.get('height', '0'))
     if height < 0.0:
         height = 0.0
-    return {
-        'minx': x,
-        'maxx': x + width,
-        'miny': y,
-        'maxy': y + height
-    }
+    return x, y, x + width, y + height
 
 
 def bounding_box_circle(node):
@@ -105,12 +87,9 @@ def bounding_box_circle(node):
     radius = float(node.get('r', '0'))
     if radius < 0.0:
         radius = 0.0
-    return {
-        'minx': center_x - radius,
-        'maxx': center_x + radius,
-        'miny': center_y - radius,
-        'maxy': center_y + radius
-    }
+    return (
+        center_x - radius, center_y - radius,
+        center_x + radius, center_y + radius)
 
 
 def bounding_box_ellipse(node):
@@ -130,12 +109,9 @@ def bounding_box_ellipse(node):
     radius_y = float(node.get('ry', '0'))
     if radius_y < 0.0:
         radius_y = 0.0
-    return {
-        'minx': center_x - radius_x,
-        'maxx': center_x + radius_x,
-        'miny': center_y - radius_y,
-        'maxy': center_y + radius_y
-    }
+    return (
+        center_x - radius_x, center_y - radius_y,
+        center_x + radius_x, center_y + radius_y)
 
 
 def bounding_box_line(node):
@@ -151,12 +127,7 @@ def bounding_box_line(node):
     y1 = float(node.get('y1', '0'))
     x2 = float(node.get('x2', '0'))
     y2 = float(node.get('y2', '0'))
-    return {
-        'minx': min(x1, x2),
-        'maxx': max(x1, x2),
-        'miny': min(y1, y2),
-        'maxy': max(y1, y2)
-    }
+    return min(x1, x2), min(y1, y2),max(x1, x2), max(y1, y2)
 
 
 def bounding_box_polyline(node):
@@ -169,13 +140,13 @@ def bounding_box_polyline(node):
     """
 
     # Start with 'empty' bounding box
-    bounding_box = get_initial_bounding_box()
+    bounding_box = EMPTY_BOUNDING_BOX
 
     # Iterate all points adjusting bounding box for every coordinate
     points = normalize(node.get('points', ''))
     while points:
         x, y, points = point(None, points)
-        extend_bounding_box(bounding_box, float(x), float(y))
+        bounding_box = extend_bounding_box(bounding_box, float(x), float(y))
 
     return bounding_box
 
@@ -210,7 +181,7 @@ def bounding_box_path(node):
     path_data = normalize(path_data)
 
     # Start with 'empty' bounding box
-    bounding_box = get_initial_bounding_box()
+    bounding_box = EMPTY_BOUNDING_BOX
 
     # Iterate all points adjusting bounding box for every coordinate
     previous_x = 0
@@ -247,8 +218,8 @@ def bounding_box_path(node):
 
             # Only extend bounding box with end coordinate
             arc_bounding_box = bounding_box_elliptical_arc(previous_x, previous_y, rx, ry, rotation, large, sweep, x, y)
-            extend_bounding_box(bounding_box, arc_bounding_box['minx'], arc_bounding_box['miny'])
-            extend_bounding_box(bounding_box, arc_bounding_box['maxx'], arc_bounding_box['maxy'])
+            bounding_box = extend_bounding_box(bounding_box, arc_bounding_box[0], arc_bounding_box[1])
+            bounding_box = extend_bounding_box(bounding_box, arc_bounding_box[2], arc_bounding_box[3])
             previous_x = x
             previous_y = y
 
@@ -268,9 +239,9 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with all coordinates
-            extend_bounding_box(bounding_box, x1, y1)
-            extend_bounding_box(bounding_box, x2, y2)
-            extend_bounding_box(bounding_box, x, y)
+            bounding_box = extend_bounding_box(bounding_box, x1, y1)
+            bounding_box = extend_bounding_box(bounding_box, x2, y2)
+            bounding_box = extend_bounding_box(bounding_box, x, y)
             previous_x = x
             previous_y = y
 
@@ -283,7 +254,7 @@ def bounding_box_path(node):
                 x += previous_x
 
             # Extend bounding box with coordinate
-            extend_bounding_box(bounding_box, x, previous_y)
+            bounding_box = extend_bounding_box(bounding_box, x, previous_y)
             previous_x = x
 
         elif letter in 'lLmMtT':
@@ -296,7 +267,7 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with coordinate
-            extend_bounding_box(bounding_box, x, y)
+            bounding_box = extend_bounding_box(bounding_box, x, y)
             previous_x = x
             previous_y = y
 
@@ -313,8 +284,8 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with coordinates
-            extend_bounding_box(bounding_box, x1, y1)
-            extend_bounding_box(bounding_box, x, y)
+            bounding_box = extend_bounding_box(bounding_box, x1, y1)
+            bounding_box = extend_bounding_box(bounding_box, x, y)
             previous_x = x
             previous_y = y
 
@@ -327,7 +298,7 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with coordinate
-            extend_bounding_box(bounding_box, previous_x, y)
+            bounding_box = extend_bounding_box(bounding_box, previous_x, y)
             previous_y = y
 
         path_data = path_data.strip()
@@ -386,12 +357,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         ry *= -1.0
 
     if rx == 0.0 or ry == 0.0:
-        return {
-            'minx': x1 if x1 < x else x,
-            'maxx': x1 if x1 > x else x,
-            'miny': y1 if y1 < y else y,
-            'maxy': y1 if y1 > y else y
-        }
+        return min(x, x1), min(y, y1), max(x, x1), max(y, y1)
 
     x1prime = cos(phi) * (x1 - x) / 2 + sin(phi) * (y1 - y) / 2
     y1prime = -sin(phi) * (x1 - x) / 2 + cos(phi) * (y1 - y) / 2
@@ -404,12 +370,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         ratio = rx / ry
         radicant = y1prime * y1prime + x1prime * x1prime / (ratio * ratio)
         if radicant < 0.0:
-            return {
-                'minx': x1 if x1 < x else x,
-                'maxx': x1 if x1 > x else x,
-                'miny': y1 if y1 < y else y,
-                'maxy': y1 if y1 > y else y
-            }
+            return min(x, x1), min(y, y1), max(x, x1), max(y, y1)
         ry = sqrt(radicant)
         rx = ratio * ry
     else:
@@ -484,12 +445,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
     if (not other_arc and (angle1 > tmaxy or angle2 < tmaxy)) or (other_arc and not (angle1 > tmaxy or angle2 < tmaxy)):
         maxy = y1 if y1 > y else y
 
-    return {
-        'minx': minx,
-        'maxx': maxx,
-        'miny': miny,
-        'maxy': maxy
-    }
+    return minx, miny, maxx, maxy
 
 
 def bounding_box_group(node):
@@ -501,9 +457,9 @@ def bounding_box_group(node):
     :returns: bounding box(dict)
     """
 
-    bounding_box = get_initial_bounding_box()
+    bounding_box = EMPTY_BOUNDING_BOX
     for child in node.children:
-        combine_bounding_box(bounding_box, calculate_bounding_box(child))
+        bounding_box = combine_bounding_box(bounding_box, calculate_bounding_box(child))
 
     return bounding_box
 
@@ -534,15 +490,9 @@ def extend_bounding_box(bounding_box, x, y):
     :param x:               x-value of coordinate
     :param y:               y-value of coordinate
     """
-
-    if x < bounding_box['minx']:
-        bounding_box['minx'] = x
-    if x > bounding_box['maxx']:
-        bounding_box['maxx'] = x
-    if y < bounding_box['miny']:
-        bounding_box['miny'] = y
-    if y > bounding_box['maxy']:
-        bounding_box['maxy'] = y
+    return (
+        min(bounding_box[0], x), min(bounding_box[1], y),
+        max(bounding_box[2], x), max(bounding_box[3], y))
 
 
 def combine_bounding_box(bounding_box, another_bounding_box):
@@ -554,8 +504,9 @@ def combine_bounding_box(bounding_box, another_bounding_box):
     """
 
     if is_valid_bounding_box(another_bounding_box):
-        extend_bounding_box(bounding_box, another_bounding_box['minx'], another_bounding_box['miny'])
-        extend_bounding_box(bounding_box, another_bounding_box['maxx'], another_bounding_box['maxy'])
+        bounding_box = extend_bounding_box(bounding_box, another_bounding_box[0], another_bounding_box[1])
+        bounding_box = extend_bounding_box(bounding_box, another_bounding_box[2], another_bounding_box[3])
+    return bounding_box
 
 
 def is_valid_bounding_box(bounding_box):
@@ -568,9 +519,10 @@ def is_valid_bounding_box(bounding_box):
     """
 
     # If 'minx' or 'miny' is set, 'maxx' and 'maxy' will also be set (resulting in a valid bounding box)
-    return bounding_box and \
-           not isinf(bounding_box['minx']) and \
-           not isinf(bounding_box['miny'])
+    return (
+        bounding_box and
+        not isinf(bounding_box[0]) and
+        not isinf(bounding_box[1]))
 
 
 def is_non_empty_bounding_box(bounding_box):
@@ -582,9 +534,10 @@ def is_non_empty_bounding_box(bounding_box):
     :returns: bool
     """
 
-    return is_valid_bounding_box(bounding_box) and \
-           bounding_box["minx"] != bounding_box["maxx"] and \
-           bounding_box["miny"] != bounding_box["maxy"]
+    return (
+        is_valid_bounding_box(bounding_box) and
+        bounding_box[0] != bounding_box[2] and
+        bounding_box[1] != bounding_box[3])
 
 
 BOUNDING_BOX_METHODS = {
