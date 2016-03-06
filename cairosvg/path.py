@@ -21,13 +21,11 @@ Paths manager.
 
 from math import pi, radians
 
+from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
 from .helpers import (
-    node_format, normalize, point, point_angle, preserve_ratio,
+    PATH_LETTERS, node_format, normalize, point, point_angle, preserve_ratio,
     quadratic_points, rotate, size)
 from .url import parse_url
-
-
-PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'
 
 
 def draw_markers(surface, node):
@@ -81,8 +79,6 @@ def draw_markers(surface, node):
                 viewbox_width = viewbox[2]
                 viewbox_height = viewbox[3]
             else:
-                from .bounding_box import (
-                    calculate_bounding_box, is_non_empty_bounding_box)
                 bounding_box = calculate_bounding_box(marker_node)
                 if is_non_empty_bounding_box(bounding_box):
                     viewbox_width = bounding_box[2]

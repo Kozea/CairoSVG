@@ -36,6 +36,7 @@ UNITS = {
 }
 
 PAINT_URL = re.compile(r'(url\(.+\)) *(.*)')
+PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'
 RECT = re.compile(r'rect\( ?(.+?) ?\)')
 
 

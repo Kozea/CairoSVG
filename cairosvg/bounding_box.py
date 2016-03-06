@@ -23,11 +23,10 @@ A bounding box is a (minx, miny, width, height) tuple.
 
 from math import isinf, fmod, pi, radians, sin, cos, tan, acos, atan, sqrt
 
-from .helpers import normalize, point
+from .helpers import PATH_LETTERS, normalize, point
 from .defs import parse_url
 from .parser import Tree
 from .features import match_features
-from .path import PATH_LETTERS
 
 
 EMPTY_BOUNDING_BOX = float('inf'), float('inf'), 0, 0
@@ -86,11 +85,12 @@ def bounding_box_line(node):
 def bounding_box_polyline(node):
     """Get the bounding box of a ``polyline`` or ``polygon`` node."""
     bounding_box = EMPTY_BOUNDING_BOX
-    points = normalize(node.get('points', ''))
+    points = []
+    normalized_points = normalize(node.get('points', ''))
     while points:
-        x, y, points = point(None, points)
-        bounding_box = extend_bounding_box(bounding_box, float(x), float(y))
-    return bounding_box
+        x, y, normalized_points = point(None, normalized_points)
+        points.append((float(x), float(y)))
+    return extend_bounding_box(bounding_box, points)
 
 
 def bounding_box_path(node):
@@ -138,10 +138,8 @@ def bounding_box_path(node):
             # Only extend bounding box with end coordinate
             arc_bounding_box = bounding_box_elliptical_arc(
                 previous_x, previous_y, rx, ry, rotation, large, sweep, x, y)
-            bounding_box = extend_bounding_box(
-                bounding_box, arc_bounding_box[0], arc_bounding_box[1])
-            bounding_box = extend_bounding_box(
-                bounding_box, arc_bounding_box[2], arc_bounding_box[3])
+            points = (arc_bounding_box[0:2], arc_bounding_box[2:])
+            bounding_box = extend_bounding_box(bounding_box, points)
             previous_x = x
             previous_y = y
 
@@ -161,9 +159,8 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with all coordinates
-            bounding_box = extend_bounding_box(bounding_box, x1, y1)
-            bounding_box = extend_bounding_box(bounding_box, x2, y2)
-            bounding_box = extend_bounding_box(bounding_box, x, y)
+            bounding_box = extend_bounding_box(
+                bounding_box, ((x1, y1), (x2, y2), (x, y)))
             previous_x = x
             previous_y = y
 
@@ -176,7 +173,8 @@ def bounding_box_path(node):
                 x += previous_x
 
             # Extend bounding box with coordinate
-            bounding_box = extend_bounding_box(bounding_box, x, previous_y)
+            bounding_box = extend_bounding_box(
+                bounding_box, ((x, previous_y),))
             previous_x = x
 
         elif letter in 'lLmMtT':
@@ -189,7 +187,7 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with coordinate
-            bounding_box = extend_bounding_box(bounding_box, x, y)
+            bounding_box = extend_bounding_box(bounding_box, ((x, y),))
             previous_x = x
             previous_y = y
 
@@ -206,8 +204,8 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with coordinates
-            bounding_box = extend_bounding_box(bounding_box, x1, y1)
-            bounding_box = extend_bounding_box(bounding_box, x, y)
+            bounding_box = extend_bounding_box(
+                bounding_box, ((x1, y1), (x, y)))
             previous_x = x
             previous_y = y
 
@@ -220,7 +218,8 @@ def bounding_box_path(node):
                 y += previous_y
 
             # Extend bounding box with coordinate
-            bounding_box = extend_bounding_box(bounding_box, previous_x, y)
+            bounding_box = extend_bounding_box(
+                bounding_box, ((previous_x, y),))
             previous_y = y
 
         path_data = path_data.strip()
@@ -363,14 +362,16 @@ def bounding_box_use(node):
     return calculate_bounding_box(tree)
 
 
-def extend_bounding_box(bounding_box, x, y):
-    """Extend the ``bounding_box`` by the ``x``, ``y`` coordinates."""
+def extend_bounding_box(bounding_box, points):
+    """Extend the ``bounding_box`` by the points."""
     minx, miny, width, height = bounding_box
     maxx, maxy = (
         float('-inf') if isinf(minx) else minx + width,
         float('-inf') if isinf(miny) else miny + height)
+    x_list, y_list = zip(*points)
     minx, miny, maxx, maxy = (
-        min(minx, x), min(miny, y), max(maxx, x), max(maxy, y))
+        min(minx, *x_list), min(miny, *y_list),
+        max(maxx, *x_list), max(maxy, *y_list))
     return minx, miny, maxx - minx, maxy - miny
 
 
@@ -379,8 +380,8 @@ def combine_bounding_box(bounding_box, another_bounding_box):
     if is_valid_bounding_box(another_bounding_box):
         minx, miny, width, height = another_bounding_box
         maxx, maxy = minx + width, miny + height
-        bounding_box = extend_bounding_box(bounding_box, minx, miny)
-        bounding_box = extend_bounding_box(bounding_box, maxx, maxy)
+        bounding_box = extend_bounding_box(
+            bounding_box, ((minx, miny), (maxx, maxy)))
     return bounding_box
 
 
