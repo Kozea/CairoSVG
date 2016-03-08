@@ -66,12 +66,7 @@ def update_def_href(surface, def_name, def_dict):
 
 
 def parse_all_defs(surface, node):
-    """
-    Recursively visit all child nodes and process any definition elements (like markers and patterns)
-
-    :param surface: surface to store definitions in
-    :param node:    node to parse
-    """
+    """Recursively visit all child nodes and process definition elements."""
 
     # Handle node
     parse_def(surface, node)
@@ -185,7 +180,7 @@ def draw_gradient(surface, node, name):
         width_ref, height_ref = 'x', 'y'
         diagonal_ref = 'xy'
     else:
-        bounding_box = calculate_bounding_box(node)
+        bounding_box = calculate_bounding_box(surface, node)
         if not is_non_empty_bounding_box(bounding_box):
             return False
         x = size(surface, bounding_box[0], 'x')

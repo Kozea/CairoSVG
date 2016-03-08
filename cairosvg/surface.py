@@ -383,7 +383,8 @@ class Surface(object):
 
             # Stroke
             self.context.save()
-            self.context.set_line_width(size(self, node.get('stroke-width', '1')))
+            self.context.set_line_width(
+                size(self, node.get('stroke-width', '1')))
             paint_source, paint_color = paint(node.get('stroke'))
             if not gradient_or_pattern(self, node, paint_source):
                 self.context.set_source_rgba(

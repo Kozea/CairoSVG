@@ -23,7 +23,7 @@ A bounding box is a (minx, miny, width, height) tuple.
 
 from math import isinf, fmod, pi, radians, sin, cos, tan, acos, atan, sqrt
 
-from .helpers import PATH_LETTERS, normalize, point
+from .helpers import PATH_LETTERS, normalize, point, size
 from .defs import parse_url
 from .parser import Tree
 from .features import match_features
@@ -32,68 +32,66 @@ from .features import match_features
 EMPTY_BOUNDING_BOX = float('inf'), float('inf'), 0, 0
 
 
-def calculate_bounding_box(node):
+def calculate_bounding_box(surface, node):
     """Calculate ``node``'s bounding box.
 
     See https://www.w3.org/TR/SVG/coords.html#ObjectBoundingBox
 
     """
     if 'bounding_box' not in node and node.tag in BOUNDING_BOX_METHODS:
-        bounding_box = BOUNDING_BOX_METHODS[node.tag](node)
+        bounding_box = BOUNDING_BOX_METHODS[node.tag](surface, node)
         if is_non_empty_bounding_box(bounding_box):
             node['bounding_box'] = bounding_box
     return node.get('bounding_box')
 
 
-def bounding_box_rect(node):
+def bounding_box_rect(surface, node):
     """Get the bounding box of a ``rect`` node."""
-    x = float(node.get('x', '0'))
-    y = float(node.get('y', '0'))
-    width = max(float(node.get('width', '0')), 0)
-    height = max(float(node.get('height', '0')), 0)
+    x, y = size(surface, node.get('x'), 'x'), size(surface, node.get('y'), 'y')
+    width = size(surface, node.get('width'), 'x')
+    height = size(surface, node.get('height'), 'y')
     return x, y, width, height
 
 
-def bounding_box_circle(node):
+def bounding_box_circle(surface, node):
     """Get the bounding box of a ``circle`` node."""
-    center_x = float(node.get('cx', '0'))
-    center_y = float(node.get('cy', '0'))
-    radius = max(float(node.get('r', '0')), 0)
-    return center_x - radius, center_y - radius, 2 * radius, 2 * radius
+    cx = size(surface, node.get('cx'), 'x')
+    cy = size(surface, node.get('cy'), 'y')
+    r = size(surface, node.get('r'))
+    return cx - r, cy - r, 2 * r, 2 * r
 
 
-def bounding_box_ellipse(node):
+def bounding_box_ellipse(surface, node):
     """Get the bounding box of an ``ellipse`` node."""
-    center_x = float(node.get('cx', '0'))
-    center_y = float(node.get('cy', '0'))
-    radius_x = max(float(node.get('rx', '0')), 0)
-    radius_y = max(float(node.get('ry', '0')), 0)
-    return center_x - radius_x, center_y - radius_y, 2 * radius_x, 2 * radius_y
+    rx = size(surface, node.get('rx'), 'x')
+    ry = size(surface, node.get('ry'), 'y')
+    cx = size(surface, node.get('cx'), 'x')
+    cy = size(surface, node.get('cy'), 'y')
+    return cx - rx, cy - ry, 2 * rx, 2 * ry
 
 
-def bounding_box_line(node):
+def bounding_box_line(surface, node):
     """Get the bounding box of a ``line`` node."""
-    x1 = float(node.get('x1', '0'))
-    y1 = float(node.get('y1', '0'))
-    x2 = float(node.get('x2', '0'))
-    y2 = float(node.get('y2', '0'))
+    x1, y1, x2, y2 = tuple(
+        size(surface, node.get(position), position[0])
+        for position in ('x1', 'y1', 'x2', 'y2'))
     x, y = min(x1, x2), min(y1, y2)
     width, height = max(x1, x2) - x, max(y1, y2) - y
     return x, y, width, height
 
 
-def bounding_box_polyline(node):
+def bounding_box_polyline(surface, node):
     """Get the bounding box of a ``polyline`` or ``polygon`` node."""
     bounding_box = EMPTY_BOUNDING_BOX
     points = []
     normalized_points = normalize(node.get('points', ''))
     while points:
-        x, y, normalized_points = point(None, normalized_points)
-        points.append((float(x), float(y)))
+        x, y, normalized_points = point(surface, normalized_points)
+        points.append((x, y))
     return extend_bounding_box(bounding_box, points)
 
 
-def bounding_box_path(node):
+def bounding_box_path(surface, node):
     """Get the bounding box of a ``path`` node."""
     path_data = node.get('d', '')
 
@@ -227,7 +225,7 @@ def bounding_box_path(node):
     return bounding_box
 
 
-def bounding_box_text(node):
+def bounding_box_text(surface, node):
     """Get the bounding box of a ``text`` node."""
     return node.get('text_bounding_box')
 
@@ -344,22 +342,22 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
     return minx, miny, maxx - minx, maxy - miny
 
 
-def bounding_box_group(node):
+def bounding_box_group(surface, node):
     """Get the bounding box of a ``g`` node."""
     bounding_box = EMPTY_BOUNDING_BOX
     for child in node.children:
         bounding_box = combine_bounding_box(
-            bounding_box, calculate_bounding_box(child))
+            bounding_box, calculate_bounding_box(surface, child))
     return bounding_box
 
 
-def bounding_box_use(node):
+def bounding_box_use(surface, node):
     """Get the bounding box of a ``use`` node."""
     href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
     tree = Tree(url=href, parent=node)
     if not match_features(tree.xml_tree):
         return None
-    return calculate_bounding_box(tree)
+    return calculate_bounding_box(surface, tree)
 
 
 def extend_bounding_box(bounding_box, points):

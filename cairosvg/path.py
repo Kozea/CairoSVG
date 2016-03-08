@@ -72,14 +72,15 @@ def draw_markers(surface, node):
                 surface, marker_node)
 
             viewbox = node_format(surface, marker_node)[2]
-            width = scale * size(surface, marker_node.get('markerWidth', '3'), 'x')
+            width = scale * size(
+                surface, marker_node.get('markerWidth', '3'), 'x')
             height = scale * size(
                 surface, marker_node.get('markerHeight', '3'), 'y')
             if viewbox:
                 viewbox_width = viewbox[2]
                 viewbox_height = viewbox[3]
             else:
-                bounding_box = calculate_bounding_box(marker_node)
+                bounding_box = calculate_bounding_box(surface, marker_node)
                 if is_non_empty_bounding_box(bounding_box):
                     viewbox_width = bounding_box[2]
                     viewbox_height = bounding_box[3]
