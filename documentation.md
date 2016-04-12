@@ -75,15 +75,19 @@ The `cairosvg` module offers 4 functions:
 - `svg2ps`, and
 - `svg2svg`.
 
-These functions expect one of these parameters:
+These functions expect one of these named parameters:
 
-- `bytestring`, a byte string containing SVG, or
 - `url`, an URL or a filename, or
-- `file_obj`, a file-like object.
+- `file_obj`, a file-like object, or
+- `bytestring`, a byte string containing SVG.
 
 If the `write_to` argument is provided (filename or file-like object), the
 output is written there. Otherwise, the function returns a byte string.
 
+For example:
+- `cairosvg.svg2png(url="/path/to/input.svg", write_to="/tmp/output.png")`, or
+- `cairosvg.svg2pdf(file_obj=open("/path/to/input.svg", "rb"), write_to="/tmp/output.pdf")`, or
+- `output = cairosvg.svg2ps(bytestring=open("/path/to/input.svg").read().encode('utf-8'))`
 
 ## How good is CairoSVG at following the specification?
 
