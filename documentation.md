@@ -85,9 +85,17 @@ If the `write_to` argument is provided (filename or file-like object), the
 output is written there. Otherwise, the function returns a byte string.
 
 For example:
-- `cairosvg.svg2png(url="/path/to/input.svg", write_to="/tmp/output.png")`, or
-- `cairosvg.svg2pdf(file_obj=open("/path/to/input.svg", "rb"), write_to="/tmp/output.pdf")`, or
-- `output = cairosvg.svg2ps(bytestring=open("/path/to/input.svg").read().encode('utf-8'))`
+
+```python
+cairosvg.svg2png(
+    url="/path/to/input.svg", write_to="/tmp/output.png")
+
+cairosvg.svg2pdf(
+    file_obj=open("/path/to/input.svg", "rb"), write_to="/tmp/output.pdf")
+
+output = cairosvg.svg2ps(
+    bytestring=open("/path/to/input.svg").read().encode('utf-8'))
+```
 
 ## How good is CairoSVG at following the specification?
 
