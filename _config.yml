@@ -4,3 +4,6 @@ email: contact@kozea.fr
 description: Convert your SVG files to PDF and PNG.
 baseurl: ""
 url: "http://cairosvg.org"
+gems:
+ - jekyll-github-metadata
+repository: Kozea/CairoSVG
