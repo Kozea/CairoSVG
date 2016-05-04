@@ -51,8 +51,8 @@ def parse_url(url, base=None):
                     # We are sure that `url` and `base` are both file-like URLs
                     if os.path.isfile(parsed_base.path):
                         if parsed_url.path:
-                            # Take the "folder" part of `base`, as `os.path.join`
-                            # doesn't strip the file name
+                            # Take the "folder" part of `base`, as
+                            # `os.path.join` doesn't strip the file name
                             url = os.path.join(
                                 os.path.dirname(parsed_base.path),
                                 parsed_url.path)
@@ -60,7 +60,8 @@ def parse_url(url, base=None):
                             url = parsed_base.path
                     elif os.path.isdir(parsed_base.path):
                         if parsed_url.path:
-                            url = os.path.join(parsed_base.path, parsed_url.path)
+                            url = os.path.join(
+                                parsed_base.path, parsed_url.path)
                         else:
                             url = ''
                     else:

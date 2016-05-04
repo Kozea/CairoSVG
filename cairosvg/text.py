@@ -21,10 +21,11 @@ Text drawers.
 
 from math import cos, sin, radians
 
+from .bounding_box import (
+    EMPTY_BOUNDING_BOX, extend_bounding_box, is_valid_bounding_box)
 from .helpers import distance, normalize, point_angle, size, zip_letters
 from .surface import cairo
 from .url import parse_url
-from .bounding_box import get_initial_bounding_box, extend_bounding_box, is_valid_bounding_box
 
 
 def path_length(path):
@@ -66,7 +67,6 @@ def point_following_path(path, width):
 
 def text(surface, node):
     """Draw a text ``node``."""
-
     font_size = size(surface, node.get('font-size', '12pt'))
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
@@ -153,7 +153,7 @@ def text(surface, node):
         else:
             y_align = 0
 
-    bounding_box = get_initial_bounding_box()
+    bounding_box = EMPTY_BOUNDING_BOX
     if text_path:
         surface.stroke_and_fill = False
         surface.draw(text_path)
@@ -163,7 +163,7 @@ def text(surface, node):
         length = path_length(cairo_path)
         start_offset = size(surface, node.get('startOffset', 0), length)
         surface.text_path_width += start_offset
-        extend_bounding_box(bounding_box, start_offset, 0)
+        bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
         for [x, y, dx, dy, r], letter in letters_positions:
@@ -192,8 +192,8 @@ def text(surface, node):
                 surface.context.rotate(point_angle(*(start_point + end_point)))
                 surface.context.translate(0, surface.cursor_d_position[1])
                 surface.context.move_to(0, 0)
-                extend_bounding_box(bounding_box,
-                                    end_point[0], text_extents[3])
+                bounding_box = extend_bounding_box(
+                    bounding_box, ((end_point[0], text_extents[3]),))
             else:
                 surface.context.save()
                 x = surface.cursor_position[0] if x is None else x
@@ -203,12 +203,16 @@ def text(surface, node):
                 surface.context.rel_move_to(*surface.cursor_d_position)
                 surface.context.rel_move_to(-x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
-                extend_bounding_box(bounding_box,
-                                    cursor_position[0] + surface.cursor_d_position[0] - x_align,
-                                    cursor_position[1] + surface.cursor_d_position[1] + y_align)
-                extend_bounding_box(bounding_box,
-                                    cursor_position[0] + surface.cursor_d_position[0] - x_align + text_extents[4],
-                                    cursor_position[1] + surface.cursor_d_position[1] + y_align + text_extents[3])
+                points = (
+                    (cursor_position[0] - x_align +
+                     surface.cursor_d_position[0],
+                     cursor_position[1] + y_align +
+                     surface.cursor_d_position[1]),
+                    (cursor_position[0] - x_align + text_extents[4] +
+                     surface.cursor_d_position[0],
+                     cursor_position[1] + y_align + text_extents[3] +
+                     surface.cursor_d_position[1]))
+                bounding_box = extend_bounding_box(bounding_box, points)
 
             # Only draw characters with 'content' (workaround for bug in cairo)
             if not letter.isspace():
@@ -225,4 +229,4 @@ def text(surface, node):
 
     # If a valid bounding box is calculated store it in the node
     if is_valid_bounding_box(bounding_box):
-        node["text_bounding_box"] = bounding_box
+        node['text_bounding_box'] = bounding_box

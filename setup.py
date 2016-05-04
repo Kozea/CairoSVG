@@ -24,7 +24,7 @@ with open(init_path, 'r', encoding='utf-8') as fd:
     version = re.search("__version__ = '([^']+)'", fd.read().strip()).group(1)
 
 
-# When the version is updated, ``cairosvg.VERSION`` must be modified.
+# When the version is updated, ``cairosvg.__version__`` must be modified.
 # A new section in the ``NEWS`` file must be added too.
 setup(
     name='CairoSVG',
@@ -48,7 +48,7 @@ setup(
         'License :: OSI Approved :: '
         'GNU Lesser General Public License v3 or later (LGPLv3+)',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Topic :: Multimedia :: Graphics :: Graphics Conversion'])

@@ -30,11 +30,12 @@ from .features import match_features
 from .helpers import rotations, pop_rotation, flatten
 from .url import parse_url, read_url
 
-
+# 'display' is actually inherited but handled differently because some markers
+# are part of a none-displaying group (see test painting-marker-07-f.svg)
 NOT_INHERITED_ATTRIBUTES = frozenset((
     'clip',
     'clip-path',
-    'display',      # Is actually inherited but handled elsewhere (see remark below)
+    'display',
     'filter',
     'height',
     'id',
@@ -53,8 +54,6 @@ NOT_INHERITED_ATTRIBUTES = frozenset((
     '{http://www.w3.org/1999/xlink}href',
 ))
 
-# 'display' is handled differently because some markers are part of a none-displaying group (see test painting-marker-07-f.svg)
-
 COLOR_ATTRIBUTES = frozenset((
     'fill',
     'flood-color',
@@ -62,7 +61,6 @@ COLOR_ATTRIBUTES = frozenset((
     'stop-color',
     'stroke',
 ))
-
 
 
 def remove_svg_namespace(tree):

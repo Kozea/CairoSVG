@@ -11,8 +11,9 @@ Version 2.0, not released yet
 * Rely on cairocffi, lxml, cssselect, pillow and tinycss
 * Fix markers
 * Fix URL/id handling
+* Use bounding boxes for gradients
 * Split deployment and development tests
-* Test CairoSVG with Travis
+* Test with Travis
 
 
 Version 1.0.20, released on 2016-02-23

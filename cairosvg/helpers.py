@@ -36,6 +36,7 @@ UNITS = {
 }
 
 PAINT_URL = re.compile(r'(url\(.+\)) *(.*)')
+PATH_LETTERS = 'achlmqstvzACHLMQSTVZ'
 RECT = re.compile(r'rect\( ?(.+?) ?\)')
 
 
@@ -323,8 +324,9 @@ def size(surface, string, reference='xy'):
             reference = surface.context_height or 0
         elif reference == 'xy':
             reference = (
-                (surface.context_width ** 2 + surface.context_height ** 2)
-                ** .5 / 2 ** .5)
+                (surface.context_width ** 2 +
+                 surface.context_height ** 2) ** .5 /
+                2 ** .5)
         return float(string[:-1]) * reference / 100
     elif string.endswith('em'):
         return surface.font_size * float(string[:-2])

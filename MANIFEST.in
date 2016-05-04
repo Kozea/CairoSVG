@@ -1,2 +1,3 @@
 # Deployment tests are already bundled in the cairosvg module
+include COPYING NEWS.rst README.rst
 exclude test/*.py cairosvg.py

@@ -72,7 +72,7 @@ def polygon(surface, node):
 
 def polyline(surface, node):
     """Draw a polyline ``node``."""
-    points = normalize(node.get('points'))
+    points = normalize(node.get('points', ''))
     if points:
         x, y, points = point(surface, points)
         surface.context.move_to(x, y)

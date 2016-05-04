@@ -66,12 +66,7 @@ def update_def_href(surface, def_name, def_dict):
 
 
 def parse_all_defs(surface, node):
-    """
-    Recursively visit all child nodes and process any definition elements (like markers and patterns)
-
-    :param surface: surface to store definitions in
-    :param node:    node to parse
-    """
+    """Recursively visit all child nodes and process definition elements."""
 
     # Handle node
     parse_def(surface, node)
@@ -185,13 +180,13 @@ def draw_gradient(surface, node, name):
         width_ref, height_ref = 'x', 'y'
         diagonal_ref = 'xy'
     else:
-        bounding_box = calculate_bounding_box(node)
+        bounding_box = calculate_bounding_box(surface, node)
         if not is_non_empty_bounding_box(bounding_box):
             return False
-        x = size(surface, bounding_box['minx'], 'x')
-        y = size(surface, bounding_box['miny'], 'y')
-        width = size(surface, bounding_box['maxx'] - bounding_box['minx'], 'x')
-        height = size(surface, bounding_box['maxy'] - bounding_box['miny'], 'y')
+        x = size(surface, bounding_box[0], 'x')
+        y = size(surface, bounding_box[1], 'y')
+        width = size(surface, bounding_box[2], 'x')
+        height = size(surface, bounding_box[3], 'y')
         width_ref = height_ref = diagonal_ref = 1
 
     if gradient_node.tag == 'linearGradient':
