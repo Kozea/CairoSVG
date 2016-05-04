@@ -209,17 +209,21 @@ def draw_gradient(surface, node, name):
         fy = size(surface, gradient_node.get('fy', str(cy)), height_ref)
         gradient_pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
-    # Apply transform of gradient
-    transform(surface, gradient_node.get('gradientTransform'))
-
     # Apply matrix to set coordinate system for gradient
+    onGradient = False
     if gradient_node.get('gradientUnits') != 'userSpaceOnUse':
+        onGradient = True
         gradient_pattern.set_matrix(cairo.Matrix(
             1 / width, 0, 0, 1 / height, - x / width, - y / height))
 
+    # Apply transform of gradient
+    transform(surface, gradient_node.get('gradientTransform'), gradient_pattern if onGradient else None)
+
     # Set spread method for gradient outside target bounds
+    """
     gradient_pattern.set_extend(EXTEND_OPERATORS.get(
         node.get('spreadMethod', 'pad'), EXTEND_OPERATORS['pad']))
+    """
 
     # Apply gradient (<stop> by <stop>)
     offset = 0
@@ -235,6 +239,7 @@ def draw_gradient(surface, node, name):
         gradient_node.get('spreadMethod', 'pad'), EXTEND_OPERATORS['pad']))
 
     surface.context.set_source(gradient_pattern)
+    # Test if applying matrix/transform here works (for gradient_pattern)
     return True
 
 

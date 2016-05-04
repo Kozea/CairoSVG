@@ -183,7 +183,7 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
-def transform(surface, string):
+def transform(surface, string, gradient = None):
     """Update ``surface`` matrix according to transformation ``string``.
 
     See http://www.w3.org/TR/SVG/coords.html#TransformAttribute
@@ -218,10 +218,10 @@ def transform(surface, string):
             if len(values) == 1:
                 values = 2 * values
             matrix.scale(*values)
-    apply_matrix_transform(surface, matrix)
+    apply_matrix_transform(surface, matrix, gradient)
 
 
-def apply_matrix_transform(surface, matrix):
+def apply_matrix_transform(surface, matrix, gradient = None):
     """Apply a ``matrix`` to ``surface``.
 
     When the matrix is not invertible, this function clips the context to an
@@ -238,7 +238,11 @@ def apply_matrix_transform(surface, matrix):
         surface.context.append_path(active_path)
     else:
         matrix.invert()
-        surface.context.transform(matrix)
+        if gradient:
+            matrixNow = gradient.get_matrix()
+            gradient.set_matrix(matrixNow.multiply(matrix))
+        else:
+            surface.context.transform(matrix)
 
 
 def clip_rect(string):
