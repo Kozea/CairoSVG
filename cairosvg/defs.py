@@ -205,16 +205,16 @@ def draw_gradient(surface, node, name):
         gradient_pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
     # Apply matrix to set coordinate system for gradient
-    onGradient = False
+    apply_matrix_on_gradient = False
     if gradient_node.get('gradientUnits') != 'userSpaceOnUse':
-        onGradient = True
+        apply_matrix_on_gradient = True
         gradient_pattern.set_matrix(cairo.Matrix(
             1 / width, 0, 0, 1 / height, - x / width, - y / height))
 
     # Apply transform of gradient
     transform(surface,
               gradient_node.get('gradientTransform'),
-              gradient_pattern if onGradient else None)
+              gradient_pattern if apply_matrix_on_gradient else None)
 
     # Set spread method for gradient outside target bounds
     """
