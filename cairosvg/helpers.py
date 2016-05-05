@@ -242,7 +242,7 @@ def apply_matrix_transform(surface, matrix, gradient = None):
         matrix.invert()
         if gradient:
             matrix_now = gradient.get_matrix()
-            gradient.set_matrix(matrix_now.multiply(matrix))
+            gradient.set_matrix(matrix.multiply(matrix_now))
         else:
             surface.context.transform(matrix)
 
