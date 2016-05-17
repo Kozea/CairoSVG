@@ -239,11 +239,13 @@ def apply_matrix_transform(surface, matrix, gradient = None):
         surface.context.clip()
         surface.context.append_path(active_path)
     else:
-        matrix.invert()
         if gradient:
+            # When applied on gradient use already inverted matrix (mapping
+            # from user space to gradient space)
             matrix_now = gradient.get_matrix()
-            gradient.set_matrix(matrix.multiply(matrix_now))
+            gradient.set_matrix(matrix_now.multiply(matrix))
         else:
+            matrix.invert()
             surface.context.transform(matrix)
 
 
