@@ -94,6 +94,89 @@ def handle_white_spaces(string, preserve):
         return re.sub(' +', ' ', string)
 
 
+def normalize_style_declaration(name, value):
+    """Normalize style declaration consisting of name/value pair.
+
+    Names are always case insensitive, make all lowercase.
+    Values are case insensitive in most cases. Adapt for 'specials':
+        id - case sensitive identifier
+        class - case sensitive identifier(s)
+        font-family - case sensitive name(s)
+        font - shorthand in which font-family is case sensitive
+        any declaration with url in value - url is case sensitive
+    """
+    name = name.strip().lower()
+    value = value.strip()
+    if name in CASE_SENSITIVE_STYLE_METHODS:
+        value = CASE_SENSITIVE_STYLE_METHODS[name](value)
+    else:
+        value = value.lower()
+
+    return name, value
+
+
+def normalize_noop_style_declaration(value):
+    """No-operation for normalization where value is case sensitive.
+
+    This is actually the exception to the rule. Normally value will be made
+    lowercase (see normalize_style_declaration above).
+    """
+    return value
+
+
+def normalize_url_style_declaration(value):
+    """Normalize style declaration, but keep URL's as-is.
+
+    Lowercase everything except for the URL.
+    """
+    regex_style = re.compile(r"""
+        (.*?)                               # non-URL part (will be normalized)
+        (?:
+            url\(\s*                        # url(<whitespace>
+                (?:
+                      "(?:\\.|[^"])*"       # "<url>"
+                    | \'(?:\\.|[^\'])*\'    # '<url>'
+                    | (?:\\.|[^\)])*        # <url>
+                )
+            \s*\)                           # <whitespace>)
+            |$
+        )
+    """, re.IGNORECASE | re.VERBOSE)
+    iterator = regex_style.finditer(value)
+    for match in iterator:
+        value_start = value[:match.start()] if match.start() > 0 else ''
+        normalized_value = match.group(1).lower()
+        value_end = value[match.start() + len(normalized_value):]
+        value = value_start + normalized_value + value_end
+    return value
+
+
+def normalize_font_style_declaration(value):
+    """Make first part of font style declaration lowercase (case insensitive).
+
+    Lowercase first part of declaration. Only the font name is case sensitive.
+    The font name is at the end of the declaration and can be 'recognized'
+    by being preceded by a size or line height. There can actually be multiple
+    names. So the first part is 'calculated' by selecting everything up to and
+    including the last valid token followed by a size or line height (both
+    starting with a number). A valid token is either a size/length or an
+    identifier.
+
+    See http://www.w3.org/TR/css-fonts-3/#font-prop
+    """
+    return re.sub(r"""
+        ^(
+            (\d[^\s,]*|\w[^\s,]*)   # <size>, <length> or <identifier>
+            (\s+|\s*,\s*)           # <whitespace> and/or comma
+        )*                          # Repeat until last
+        \d[^\s,]*                   # <size> or <line-height>
+    """, lowercase_font_style_match, value, 0, re.VERBOSE)
+
+
+def lowercase_font_style_match(match):
+    return match.group().lower()
+
+
 class Node(dict):
     """SVG node with dict-like properties and children."""
 
@@ -121,12 +204,13 @@ class Node(dict):
         self.update(self.node.attrib)
 
         # Handle the CSS
-        style = self.pop('_style', '') + ';' + self.pop('style', '').lower()
+        style = self.pop('_style', '') + ';' + self.pop('style', '')
         for declaration in style.split(';'):
             name, colon, value = declaration.partition(':')
             if not colon:
                 continue
-            self[name.strip()] = value.strip()
+            name, value = normalize_style_declaration(name, value)
+            self[name] = value
 
         # Replace currentColor by a real color value
         for attribute in COLOR_ATTRIBUTES:
@@ -286,3 +370,21 @@ class Tree(Node):
         self.root = True
         if tree_cache is not None and self.url:
             tree_cache[(self.url, self.get('id'))] = self
+
+
+CASE_SENSITIVE_STYLE_METHODS = {
+    'id': normalize_noop_style_declaration,
+    'class': normalize_noop_style_declaration,
+    'font-family': normalize_noop_style_declaration,
+    'font': normalize_font_style_declaration,
+    'clip-path': normalize_url_style_declaration,
+    'color-profile': normalize_url_style_declaration,
+    'cursor': normalize_url_style_declaration,
+    'fill': normalize_url_style_declaration,
+    'filter': normalize_url_style_declaration,
+    'marker-start': normalize_url_style_declaration,
+    'marker-mid': normalize_url_style_declaration,
+    'marker-end': normalize_url_style_declaration,
+    'mask': normalize_url_style_declaration,
+    'stroke': normalize_url_style_declaration,
+}
