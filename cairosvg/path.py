@@ -144,17 +144,19 @@ def path(surface, node):
             rotation = radians(float(rotation))
 
             # The large and sweep values are not always separated from the
-            # following values, here is the crazy parser
+            # following values. These flags can only be 0 or 1, so reading a
+            # single digit suffices.
             large, string = string[0], string[1:].strip()
-            while not large[-1].isdigit():
-                large, string = large + string[0], string[1:].strip()
             sweep, string = string[0], string[1:].strip()
-            while not sweep[-1].isdigit():
-                sweep, string = sweep + string[0], string[1:].strip()
 
-            large, sweep = bool(int(large)), bool(int(sweep))
-
+            # Retrieve end point and set remainder (before checking flags)
             x3, y3, string = point(surface, string)
+
+            # Only allow 0 or 1 for flags
+            large, sweep = int(large), int(sweep)
+            if large not in (0, 1) or sweep not in (0,1):
+                continue
+            large, sweep = bool(large), bool(sweep)
 
             if letter == 'A':
                 # Absolute x3 and y3, convert to relative
