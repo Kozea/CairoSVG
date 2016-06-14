@@ -82,7 +82,8 @@ def generate_function(description):
         png_filename = os.path.join(
             OUTPUT_FOLDER, os.path.basename(png_filename))
         cairosvg_surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), png_filename, dpi=72)
+            cairosvg.parser.Tree(url=svg_filename, unsafe=True), png_filename,
+            dpi=72)
         image2 = cairosvg_surface.cairo
         width2 = image2.get_width()
         height2 = image2.get_height()

@@ -65,6 +65,9 @@ def main():
         '-H', '--height', default=None, type="float",
         help='height of the parent container in pixels')
     option_parser.add_option(
+        '-u', '--unsafe', action='store_true',
+        help='resolve XML entities (WARNING: vulnerable to XXE attacks)')
+    option_parser.add_option(
         "-o", "--output",
         default="", help="output filename")
     options, args = option_parser.parse_args()
@@ -76,7 +79,7 @@ def main():
 
     kwargs = {
         'parent_width': options.width, 'parent_height': options.height,
-        'dpi': float(options.dpi)}
+        'dpi': float(options.dpi), 'unsafe': options.unsafe}
 
     if not options.output or options.output == '-':
         # Python 2/3 hack

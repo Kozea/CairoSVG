@@ -261,16 +261,18 @@ class Tree(Node):
         bytestring = kwargs.pop("bytestring", None)
         file_obj = kwargs.pop("file_obj", None)
         url = kwargs.pop("url", None)
+        unsafe = kwargs.pop("unsafe", False)
         parent = kwargs.pop("parent", None)
         parent_children = kwargs.pop("parent_children", None)
         tree_cache = kwargs.pop("tree_cache", None)
         element_id = None
 
+        parser = ElementTree.XMLParser(resolve_entities=unsafe)
         if bytestring is not None:
-            tree = ElementTree.fromstring(bytestring)
+            tree = ElementTree.fromstring(bytestring, parser)
             self.url = url
         elif file_obj is not None:
-            tree = ElementTree.parse(file_obj).getroot()
+            tree = ElementTree.parse(file_obj, parser).getroot()
             if url:
                 self.url = url
             else:
@@ -295,7 +297,7 @@ class Tree(Node):
                     input_ = url  # filename
                 if os.path.splitext(url)[1].lower() == "svgz":
                     input_ = gzip.open(url)
-                tree = ElementTree.parse(input_).getroot()
+                tree = ElementTree.parse(input_, parser).getroot()
             else:
                 root_parent = parent
                 while root_parent.parent:
