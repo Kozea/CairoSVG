@@ -11,6 +11,19 @@ Version 2.0, not released yet
 * Test CairoSVG with Travis
 
 
+Version 1.0.21, released on 2016-06-14
+======================================
+
+**WARNING:** this is a security update.
+
+CairoSVG was vulnerable to XML eXternal Entity (XXE) attacks, this release
+fixes this vulnerability by not resolving the XML entities anymore.
+
+The ``--unsafe`` option has been added to force the resolution of XML
+entities. Obviously, this option is not safe and should only be used with
+trusted SVG files.
+
+
 Version 1.0.20, released on 2016-02-23
 ======================================
 
