@@ -85,7 +85,7 @@ def bounding_box_polyline(surface, node):
     bounding_box = EMPTY_BOUNDING_BOX
     points = []
     normalized_points = normalize(node.get('points', ''))
-    while points:
+    while normalized_points:
         x, y, normalized_points = point(surface, normalized_points)
         points.append((x, y))
     return extend_bounding_box(bounding_box, points)
