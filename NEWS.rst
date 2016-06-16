@@ -11,6 +11,12 @@ Version 2.0, not released yet
 * Test CairoSVG with Travis
 
 
+Version 1.0.22, released on 2016-06-16
+======================================
+
+* Fix crash when lxml is not installed
+
+
 Version 1.0.21, released on 2016-06-14
 ======================================
 
