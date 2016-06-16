@@ -267,7 +267,13 @@ class Tree(Node):
         tree_cache = kwargs.pop("tree_cache", None)
         element_id = None
 
-        parser = ElementTree.XMLParser(resolve_entities=unsafe)
+        if HAS_LXML:
+            parser = ElementTree.XMLParser(resolve_entities=unsafe)
+        else:
+            # xml.etree.ElementTree doesn’t expand external entities and raises
+            # a ParserError when an entity occurs.
+            # https://docs.python.org/3/library/xml.html#xml-vulnerabilities
+            parser = ElementTree.XMLParser()
         if bytestring is not None:
             tree = ElementTree.fromstring(bytestring, parser)
             self.url = url
