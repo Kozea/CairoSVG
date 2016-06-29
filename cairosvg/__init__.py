@@ -71,6 +71,9 @@ def main():
         '-H', '--height', default=None, type=float,
         help='height of the parent container in pixels')
     parser.add_argument(
+        '-s', '--scale', default=None, type=float,
+        help='output scaling factor')
+    parser.add_argument(
         '-u', '--unsafe', action='store_true',
         help='resolve XML entities (WARNING: vulnerable to XXE attacks)')
     parser.add_argument('-o', '--output', default='-', help='output filename')
@@ -78,7 +81,7 @@ def main():
     options = parser.parse_args()
     kwargs = {
         'parent_width': options.width, 'parent_height': options.height,
-        'dpi': options.dpi, 'unsafe': options.unsafe}
+        'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe}
     kwargs['write_to'] = (
         sys.stdout.buffer if options.output == '-' else options.output)
     if options.input == '-':
