@@ -35,13 +35,15 @@ def generate_function(description):
         test_png = tempfile.NamedTemporaryFile(
             prefix='test-', suffix='.png', delete=False)
         test_surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), test_png, dpi=72)
+            cairosvg.parser.Tree(url=svg_filename, unsafe=True), test_png,
+            dpi=72)
         test_pixels = test_surface.cairo.get_data()[:]
 
         ref_png = tempfile.NamedTemporaryFile(
             prefix='reference-', suffix='.png', delete=False)
         ref_surface = reference_cairosvg.surface.PNGSurface(
-            reference_cairosvg.parser.Tree(url=svg_filename), ref_png, dpi=72)
+            reference_cairosvg.parser.Tree(url=svg_filename, unsafe=True),
+            ref_png, dpi=72)
         ref_pixels = ref_surface.cairo.get_data()[:]
 
         if test_pixels == ref_pixels:

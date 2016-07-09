@@ -242,6 +242,7 @@ class Tree(Node):
         bytestring = kwargs.get('bytestring')
         file_obj = kwargs.get('file_obj')
         url = kwargs.get('url')
+        unsafe = kwargs.get('unsafe')
         parent = kwargs.get('parent')
         parent_children = kwargs.get('parent_children')
         tree_cache = kwargs.get('tree_cache')
@@ -273,7 +274,8 @@ class Tree(Node):
             bytestring = bytestring or read_url(parse_url(self.url))
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
-            tree = ElementTree.fromstring(bytestring)
+            parser = ElementTree.XMLParser(resolve_entities=unsafe)
+            tree = ElementTree.fromstring(bytestring, parser)
         remove_svg_namespace(tree)
         self.xml_tree = tree
         apply_stylesheets(self)
