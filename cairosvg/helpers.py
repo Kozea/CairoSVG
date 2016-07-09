@@ -124,50 +124,79 @@ def preserve_ratio(surface, node):
     if node.tag == 'marker':
         width = size(surface, node.get('markerWidth', '3'), 'x')
         height = size(surface, node.get('markerHeight', '3'), 'y')
-        scale_x = 1
-        scale_y = 1
-        translate_x = -size(surface, node.get('refX'))
-        translate_y = -size(surface, node.get('refY'))
+        _, _, viewbox = node_format(surface, node)
+        viewbox_width = viewbox[2]
+        viewbox_height = viewbox[3]
     elif node.tag in ('svg', 'image'):
         width, height, _ = node_format(surface, node)
-        scale_x = width / node.image_width
-        scale_y = height / node.image_height
+        viewbox_width, viewbox_height = node.image_width, node.image_height
+    else:
+        # Safety measure
+        return 1, 1, 0, 0, None
 
-        align = node.get('preserveAspectRatio', 'xMidYMid').split(' ')[0]
-        if align == 'none':
-            return scale_x, scale_y, 0, 0
+    translate_x = 0
+    translate_y = 0
+    scale_x = width / viewbox_width if viewbox_width > 0 else 1
+    scale_y = height / viewbox_height if viewbox_height > 0 else 1
+    clip_box = None
+    align = node.get('preserveAspectRatio', 'xMidYMid').split(' ')[0]
+    if align == 'none':
+        x_position = 'min'
+        y_position = 'min'
+    else:
+        mos_properties = node.get('preserveAspectRatio', '').split()
+        meet_or_slice = mos_properties[1] if len(mos_properties) > 1 else None
+        if meet_or_slice == 'slice':
+            scale_value = max(scale_x, scale_y)
         else:
-            mos_properties = node.get('preserveAspectRatio', '').split()
-            meet_or_slice = (
-                mos_properties[1] if len(mos_properties) > 1 else None)
-            if meet_or_slice == 'slice':
-                scale_value = max(scale_x, scale_y)
-            else:
-                scale_value = min(scale_x, scale_y)
-            scale_x = scale_y = scale_value
+            scale_value = min(scale_x, scale_y)
+        scale_x = scale_y = scale_value
 
-            x_position = align[1:4].lower()
-            y_position = align[5:].lower()
+        x_position = align[1:4].lower()
+        y_position = align[5:].lower()
 
-            if x_position == 'min':
-                translate_x = 0
+    if node.tag == 'marker':
+        translate_x = -size(surface, node.get('refX', '0'), 'x')
+        translate_y = -size(surface, node.get('refY', '0'), 'y')
+        if x_position == 'min':
+            clip_x = viewbox[0]
 
-            if y_position == 'min':
-                translate_y = 0
+        if y_position == 'min':
+            clip_y = viewbox[1]
 
-            if x_position == 'mid':
-                translate_x = (width / scale_x - node.image_width) / 2.
+        if x_position == 'mid':
+            clip_x = viewbox[0] + (viewbox_width - width / scale_x) / 2.
 
-            if y_position == 'mid':
-                translate_y = (height / scale_y - node.image_height) / 2.
+        if y_position == 'mid':
+            clip_y = viewbox[1] + (viewbox_height - height / scale_y) / 2.
 
-            if x_position == 'max':
-                translate_x = width / scale_x - node.image_width
+        if x_position == 'max':
+            clip_x = viewbox[0] + (viewbox_width - width / scale_x)
 
-            if y_position == 'max':
-                translate_y = height / scale_y - node.image_height
+        if y_position == 'max':
+            clip_y = viewbox[1] + (viewbox_height - height / scale_y)
 
-    return scale_x, scale_y, translate_x, translate_y
+        clip_box = (clip_x, clip_y, width / scale_x, height / scale_y)
+    else:
+        if x_position == 'min':
+            translate_x = 0
+
+        if y_position == 'min':
+            translate_y = 0
+
+        if x_position == 'mid':
+            translate_x = (width / scale_x - viewbox_width) / 2.
+
+        if y_position == 'mid':
+            translate_y = (height / scale_y - viewbox_height) / 2.
+
+        if x_position == 'max':
+            translate_x = width / scale_x - viewbox_width
+
+        if y_position == 'max':
+            translate_y = height / scale_y - viewbox_height
+
+    return scale_x, scale_y, translate_x, translate_y, clip_box
 
 
 def quadratic_points(x1, y1, x2, y2, x3, y3):

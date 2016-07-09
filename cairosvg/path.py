@@ -21,7 +21,7 @@ Paths manager.
 
 from math import pi, radians
 
-from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
+from .bounding_box import calculate_bounding_box
 from .helpers import (
     PATH_LETTERS, node_format, normalize, point, point_angle, preserve_ratio,
     quadratic_points, rotate, size)
@@ -46,6 +46,8 @@ def draw_markers(surface, node):
     position = 'start'
 
     while node.vertices:
+
+        # Calculate position and angle
         point = node.vertices.pop(0)
         angles = node.vertices.pop(0) if node.vertices else None
         if angles:
@@ -58,57 +60,73 @@ def draw_markers(surface, node):
             angle = angle2
             position = 'end'
 
+        # Draw marker (if a marker exists for 'position')
         marker = markers[position]
         if marker:
             marker_node = surface.markers.get(marker)
 
+            # Calculate scale based on current stroke (if requested)
             if marker_node.get('markerUnits') == 'userSpaceOnUse':
                 scale = 1
             else:
                 scale = size(
                     surface, surface.parent_node.get('stroke-width', '1'))
 
-            scale_x, scale_y, translate_x, translate_y = preserve_ratio(
-                surface, marker_node)
-
+            # Calculate position, (additional) scale and clipping based on
+            # marker properties
             viewbox = node_format(surface, marker_node)[2]
-            width = scale * size(
-                surface, marker_node.get('markerWidth', '3'), 'x')
-            height = scale * size(
-                surface, marker_node.get('markerHeight', '3'), 'y')
             if viewbox:
-                viewbox_width = viewbox[2]
-                viewbox_height = viewbox[3]
+                scale_x, scale_y, translate_x, translate_y, clip_rect =\
+                    preserve_ratio(surface, marker_node)
             else:
+                # Calculate sizes
+                marker_width = size(surface,
+                                    marker_node.get('markerWidth', '3'), 'x')
+                marker_height = size(surface,
+                                     marker_node.get('markerHeight', '3'), 'y')
                 bounding_box = calculate_bounding_box(surface, marker_node)
-                if is_non_empty_bounding_box(bounding_box):
-                    viewbox_width = bounding_box[2]
-                    viewbox_height = bounding_box[3]
-                else:
-                    viewbox_width = width
-                    viewbox_height = height
 
-            scale_x = width / viewbox_width * float(scale_x)
-            scale_y = height / viewbox_height * float(scale_y)
+                # Calculate position and scale (preserve aspect ratio)
+                translate_x = -size(surface, marker_node.get('refX', '0'), 'x')
+                translate_y = -size(surface, marker_node.get('refY', '0'), 'y')
+                scale_x = scale_y = min(marker_width / bounding_box[2],
+                                        marker_height / bounding_box[3])
 
-            if marker_node:
-                temp_path = surface.context.copy_path()
-                surface.context.new_path()
+                # No clipping since viewbox is not present
+                clip_rect = None
 
-                node_angle = marker_node.get('orient', '0')
-                if node_angle != 'auto':
-                    angle = radians(float(node_angle))
+            # Add extra path for marker
+            temp_path = surface.context.copy_path()
+            surface.context.new_path()
 
-                for child in marker_node.children:
+            # Override angle (if requested)
+            node_angle = marker_node.get('orient', '0')
+            if node_angle != 'auto':
+                angle = radians(float(node_angle))
+
+            # Draw marker path
+            # See http://www.w3.org/TR/SVG/painting.html#MarkerAlgorithm
+            for child in marker_node.children:
+                surface.context.save()
+                surface.context.translate(*point)
+                surface.context.rotate(angle)
+                surface.context.scale(scale)
+                surface.context.scale(scale_x, scale_y)
+                surface.context.translate(translate_x, translate_y)
+
+                # Add clipping (if present and requested)
+                if clip_rect and marker_node.get('overflow', 'hidden')\
+                        in ('hidden', 'scroll'):
                     surface.context.save()
-                    surface.context.translate(*point)
-                    surface.context.rotate(angle)
-                    surface.context.scale(scale_x, scale_y)
-                    surface.context.translate(translate_x, translate_y)
-                    surface.draw(child)
+                    surface.context.rectangle(clip_rect[0], clip_rect[1],
+                                              clip_rect[2], clip_rect[3])
                     surface.context.restore()
+                    surface.context.clip()
 
-                surface.context.append_path(temp_path)
+                surface.draw(child)
+                surface.context.restore()
+
+            surface.context.append_path(temp_path)
 
         position = 'mid' if angles else 'start'
 
