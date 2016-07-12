@@ -183,9 +183,8 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
-def transform(surface, string, gradient = None):
-    """Update ``surface`` or ``gradient`` (if supplied)
-       according to transformation ``string``.
+def transform(surface, string, gradient=None):
+    """Transform ``surface`` or ``gradient`` if supplied using ``string``.
 
     See http://www.w3.org/TR/SVG/coords.html#TransformAttribute
 
@@ -222,7 +221,7 @@ def transform(surface, string, gradient = None):
     apply_matrix_transform(surface, matrix, gradient)
 
 
-def apply_matrix_transform(surface, matrix, gradient = None):
+def apply_matrix_transform(surface, matrix, gradient=None):
     """Apply a ``matrix`` to ``surface`` or ``gradient`` if supplied.
 
     When the matrix is not invertible, this function clips the context to an
