@@ -41,8 +41,6 @@ setup(
     setup_requires=['pytest-runner'],
     install_requires=['cairocffi', 'lxml', 'cssselect', 'pillow', 'tinycss'],
     tests_require=['pytest-cov', 'pytest-flake8', 'pytest-isort', 'pytest'],
-    extra_requires={'test': (
-        'pythest-runner', 'pytest-cov', 'pytest-flake8', 'pytest-isort')},
     keywords=['svg', 'convert', 'cairo', 'pdf', 'png', 'postscript'],
     entry_points={'console_scripts': 'cairosvg=cairosvg:main'},
     classifiers=[
