@@ -154,7 +154,7 @@ def path(surface, node):
 
             # Only allow 0 or 1 for flags
             large, sweep = int(large), int(sweep)
-            if large not in (0, 1) or sweep not in (0,1):
+            if large not in (0, 1) or sweep not in (0, 1):
                 continue
             large, sweep = bool(large), bool(sweep)
 
