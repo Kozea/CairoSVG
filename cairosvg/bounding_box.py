@@ -132,10 +132,13 @@ def bounding_box_path(surface, node):
                 x += previous_x
                 y += previous_y
 
-            # Only extend bounding box with end coordinate
+            # Extend bounding box with start and end coordinates
             arc_bounding_box = bounding_box_elliptical_arc(
                 previous_x, previous_y, rx, ry, rotation, large, sweep, x, y)
-            points = (arc_bounding_box[0:2], arc_bounding_box[2:])
+            x1, y1, width, height = arc_bounding_box
+            x2 = x1 + width
+            y2 = y1 + height
+            points = (x1, y1), (x2, y2)
             bounding_box = extend_bounding_box(bounding_box, points)
             previous_x = x
             previous_y = y
@@ -245,7 +248,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
     """
     rx, ry = abs(rx), abs(ry)
     if rx == 0 or ry == 0:
-        return min(x, x1), min(y, y1), max(x, x1), max(y, y1)
+        return min(x, x1), min(y, y1), abs(x - x1), abs(y - y1)
 
     x1prime = cos(phi) * (x1 - x) / 2 + sin(phi) * (y1 - y) / 2
     y1prime = -sin(phi) * (x1 - x) / 2 + cos(phi) * (y1 - y) / 2
@@ -259,7 +262,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         ratio = rx / ry
         radicant = y1prime ** 2 + x1prime ** 2 / ratio ** 2
         if radicant < 0:
-            return min(x, x1), min(y, y1), max(x, x1), max(y, y1)
+            return min(x, x1), min(y, y1), abs(x - x1), abs(y - y1)
         ry = sqrt(radicant)
         rx = ratio * ry
     else:
