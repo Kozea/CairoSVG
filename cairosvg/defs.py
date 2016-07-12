@@ -21,6 +21,7 @@ This module handles clips, gradients, masks, patterns and external nodes.
 
 """
 
+from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
 from .colors import color
 from .features import match_features
 from .helpers import paint, size, transform
@@ -28,8 +29,6 @@ from .parser import Tree
 from .shapes import rect
 from .surface import cairo
 from .url import parse_url
-from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
-
 
 BLEND_OPERATORS = {
     'darken': cairo.OPERATOR_DARKEN,

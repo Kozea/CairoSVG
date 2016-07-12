@@ -21,13 +21,12 @@ A bounding box is a (minx, miny, width, height) tuple.
 
 """
 
-from math import isinf, fmod, pi, radians, sin, cos, tan, acos, atan, sqrt
+from math import acos, atan, cos, fmod, isinf, pi, radians, sin, sqrt, tan
 
-from .helpers import PATH_LETTERS, normalize, point, size
-from .defs import parse_url
-from .parser import Tree
 from .features import match_features
-
+from .helpers import PATH_LETTERS, normalize, point, size
+from .parser import Tree
+from .url import parse_url
 
 EMPTY_BOUNDING_BOX = float('inf'), float('inf'), 0, 0
 

@@ -24,7 +24,7 @@ from io import BytesIO
 
 from PIL import Image
 
-from .helpers import node_format, size, preserve_ratio, preserved_ratio
+from .helpers import node_format, preserve_ratio, preserved_ratio, size
 from .parser import Tree
 from .surface import cairo
 from .url import parse_url, read_url

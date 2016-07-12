@@ -19,15 +19,15 @@ SVG Parser.
 
 """
 
-import re
 import gzip
+import re
 from urllib.parse import urlunparse
 
 import lxml.etree as ElementTree
 
 from .css import apply_stylesheets
 from .features import match_features
-from .helpers import rotations, pop_rotation, flatten
+from .helpers import flatten, pop_rotation, rotations
 from .url import parse_url, read_url
 
 # 'display' is actually inherited but handled differently because some markers
@@ -274,7 +274,8 @@ class Tree(Node):
             bytestring = bytestring or read_url(parse_url(self.url))
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
-            parser = ElementTree.XMLParser(resolve_entities=unsafe, huge_tree=unsafe)
+            parser = ElementTree.XMLParser(
+                resolve_entities=unsafe, huge_tree=unsafe)
             tree = ElementTree.fromstring(bytestring, parser)
         remove_svg_namespace(tree)
         self.xml_tree = tree

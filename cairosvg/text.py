@@ -19,7 +19,7 @@ Text drawers.
 
 """
 
-from math import cos, sin, radians
+from math import cos, radians, sin
 
 from .bounding_box import (
     EMPTY_BOUNDING_BOX, extend_bounding_box, is_valid_bounding_box)

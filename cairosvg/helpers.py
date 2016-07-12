@@ -19,12 +19,11 @@ Surface helpers.
 
 """
 
-from math import cos, sin, tan, atan2, radians
 import re
+from math import atan2, cos, radians, sin, tan
 
 from .surface import cairo
 from .url import parse_url
-
 
 UNITS = {
     'mm': 1 / 25.4,

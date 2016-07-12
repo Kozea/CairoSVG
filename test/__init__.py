@@ -36,7 +36,7 @@ TEST_FOLDER = os.path.join(os.path.dirname(__file__), 'svg')
 
 os.chdir(TEST_FOLDER)  # relative image urls
 
-if os.environ.get('CAIROSVG_TEST_FILES'):
+if os.environ.get('CAIROSVG_TEST_FILES'):  # pragma: no cover
     ALL_FILES = os.environ['CAIROSVG_TEST_FILES'].split(',')
 else:
     ALL_FILES = os.listdir(TEST_FOLDER)
