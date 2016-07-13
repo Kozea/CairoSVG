@@ -67,7 +67,7 @@ def image(surface, node):
             tree_height = tree['height'] = height
         node.image_width = tree_width or width
         node.image_height = tree_height or height
-        scale_x, scale_y, translate_x, translate_y, _ = preserve_ratio(
+        scale_x, scale_y, translate_x, translate_y = preserve_ratio(
             surface, node)
         surface.set_context_size(
             *node_format(surface, tree, reference=False),
@@ -87,7 +87,7 @@ def image(surface, node):
 
     node.image_width = image_surface.get_width()
     node.image_height = image_surface.get_height()
-    scale_x, scale_y, translate_x, translate_y, _ = preserve_ratio(
+    scale_x, scale_y, translate_x, translate_y = preserve_ratio(
         surface, node)
 
     surface.context.rectangle(x, y, width, height)

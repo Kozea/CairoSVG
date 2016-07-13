@@ -23,8 +23,8 @@ from math import pi, radians
 
 from .bounding_box import calculate_bounding_box
 from .helpers import (
-    PATH_LETTERS, node_format, normalize, point, point_angle, preserve_ratio,
-    quadratic_points, rotate, size)
+    PATH_LETTERS, clip_marker_box, node_format, normalize, point, point_angle,
+    preserve_ratio, quadratic_points, rotate, size)
 from .url import parse_url
 
 
@@ -76,8 +76,10 @@ def draw_markers(surface, node):
             # marker properties
             viewbox = node_format(surface, marker_node)[2]
             if viewbox:
-                scale_x, scale_y, translate_x, translate_y, clip_rect =\
-                    preserve_ratio(surface, marker_node)
+                scale_x, scale_y, translate_x, translate_y = preserve_ratio(
+                    surface, marker_node)
+                clip_box = clip_marker_box(
+                    surface, marker_node, scale_x, scale_y)
             else:
                 # Calculate sizes
                 marker_width = size(surface,
@@ -93,7 +95,7 @@ def draw_markers(surface, node):
                                         marker_height / bounding_box[3])
 
                 # No clipping since viewbox is not present
-                clip_rect = None
+                clip_box = None
 
             # Add extra path for marker
             temp_path = surface.context.copy_path()
@@ -115,11 +117,10 @@ def draw_markers(surface, node):
                 surface.context.translate(translate_x, translate_y)
 
                 # Add clipping (if present and requested)
-                if clip_rect and marker_node.get('overflow', 'hidden')\
-                        in ('hidden', 'scroll'):
+                overflow = marker_node.get('overflow', 'hidden')
+                if clip_box and overflow in ('hidden', 'scroll'):
                     surface.context.save()
-                    surface.context.rectangle(clip_rect[0], clip_rect[1],
-                                              clip_rect[2], clip_rect[3])
+                    surface.context.rectangle(*clip_box)
                     surface.context.restore()
                     surface.context.clip()
 
