@@ -25,7 +25,7 @@ output.
 import os
 import tempfile
 
-from . import cairosvg, reference_cairosvg, FILES
+from . import FILES, cairosvg, reference_cairosvg
 
 
 def generate_function(description):
@@ -50,13 +50,13 @@ def generate_function(description):
             # Test is passing
             os.remove(ref_png.name)
             os.remove(test_png.name)
-            return
+        else:  # pragma: no cover
+            ref_surface.finish()
+            test_surface.finish()
 
-        ref_surface.finish()
-        test_surface.finish()
-
-        raise AssertionError(
-            'Images are different: {} {}'.format(ref_png.name, test_png.name))
+            raise AssertionError(
+                'Images are different: {} {}'.format(
+                    ref_png.name, test_png.name))
 
     check_image.description = description
     return check_image

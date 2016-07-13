@@ -21,13 +21,12 @@ A bounding box is a (minx, miny, width, height) tuple.
 
 """
 
-from math import isinf, fmod, pi, radians, sin, cos, tan, acos, atan, sqrt
+from math import acos, atan, cos, fmod, isinf, pi, radians, sin, sqrt, tan
 
-from .helpers import PATH_LETTERS, normalize, point, size
-from .defs import parse_url
-from .parser import Tree
 from .features import match_features
-
+from .helpers import PATH_LETTERS, normalize, point, size
+from .parser import Tree
+from .url import parse_url
 
 EMPTY_BOUNDING_BOX = float('inf'), float('inf'), 0, 0
 
@@ -136,9 +135,10 @@ def bounding_box_path(surface, node):
             # Extend bounding box with start and end coordinates
             arc_bounding_box = bounding_box_elliptical_arc(
                 previous_x, previous_y, rx, ry, rotation, large, sweep, x, y)
-            points = (arc_bounding_box[0:2],
-                      tuple(sum(value) for value in
-                            zip(arc_bounding_box[0:2], arc_bounding_box[2:])))
+            x1, y1, width, height = arc_bounding_box
+            x2 = x1 + width
+            y2 = y1 + height
+            points = (x1, y1), (x2, y2)
             bounding_box = extend_bounding_box(bounding_box, points)
             previous_x = x
             previous_y = y

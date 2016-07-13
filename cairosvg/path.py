@@ -23,8 +23,8 @@ from math import pi, radians
 
 from .bounding_box import calculate_bounding_box
 from .helpers import (
-    PATH_LETTERS, node_format, normalize, point, point_angle, preserve_ratio,
-    quadratic_points, rotate, size)
+    PATH_LETTERS, clip_marker_box, node_format, normalize, point, point_angle,
+    preserve_ratio, quadratic_points, rotate, size)
 from .url import parse_url
 
 
@@ -46,7 +46,6 @@ def draw_markers(surface, node):
     position = 'start'
 
     while node.vertices:
-
         # Calculate position and angle
         point = node.vertices.pop(0)
         angles = node.vertices.pop(0) if node.vertices else None
@@ -76,8 +75,10 @@ def draw_markers(surface, node):
             # marker properties
             viewbox = node_format(surface, marker_node)[2]
             if viewbox:
-                scale_x, scale_y, translate_x, translate_y, clip_rect =\
-                    preserve_ratio(surface, marker_node)
+                scale_x, scale_y, translate_x, translate_y = preserve_ratio(
+                    surface, marker_node)
+                clip_box = clip_marker_box(
+                    surface, marker_node, scale_x, scale_y)
             else:
                 # Calculate sizes
                 marker_width = size(surface,
@@ -89,11 +90,12 @@ def draw_markers(surface, node):
                 # Calculate position and scale (preserve aspect ratio)
                 translate_x = -size(surface, marker_node.get('refX', '0'), 'x')
                 translate_y = -size(surface, marker_node.get('refY', '0'), 'y')
-                scale_x = scale_y = min(marker_width / bounding_box[2],
-                                        marker_height / bounding_box[3])
+                scale_x = scale_y = min(
+                    marker_width / bounding_box[2],
+                    marker_height / bounding_box[3])
 
                 # No clipping since viewbox is not present
-                clip_rect = None
+                clip_box = None
 
             # Add extra path for marker
             temp_path = surface.context.copy_path()
@@ -115,11 +117,10 @@ def draw_markers(surface, node):
                 surface.context.translate(translate_x, translate_y)
 
                 # Add clipping (if present and requested)
-                if clip_rect and marker_node.get('overflow', 'hidden')\
-                        in ('hidden', 'scroll'):
+                overflow = marker_node.get('overflow', 'hidden')
+                if clip_box and overflow in ('hidden', 'scroll'):
                     surface.context.save()
-                    surface.context.rectangle(clip_rect[0], clip_rect[1],
-                                              clip_rect[2], clip_rect[3])
+                    surface.context.rectangle(*clip_box)
                     surface.context.restore()
                     surface.context.clip()
 
@@ -172,7 +173,7 @@ def path(surface, node):
 
             # Only allow 0 or 1 for flags
             large, sweep = int(large), int(sweep)
-            if large not in (0, 1) or sweep not in (0,1):
+            if large not in (0, 1) or sweep not in (0, 1):
                 continue
             large, sweep = bool(large), bool(sweep)
 

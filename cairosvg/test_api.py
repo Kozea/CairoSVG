@@ -23,14 +23,13 @@ These tests can be used as deployment tests.
 
 import io
 import os
-import sys
 import shutil
+import sys
 import tempfile
 
 import cairocffi as cairo
 
-from . import SURFACES, main, parser, surface, svg2pdf, svg2png, __version__
-
+from . import SURFACES, __version__, main, parser, surface, svg2pdf, svg2png
 
 MAGIC_NUMBERS = {
     'SVG': b'<?xml',
@@ -124,7 +123,7 @@ def test_api():
         svg2png(write_to=file_like)
     except TypeError:
         pass
-    else:
+    else:  # pragma: no cover
         raise Exception('TypeError not raised')
 
 
@@ -180,7 +179,7 @@ def test_script():
                 main()
             except SystemExit:
                 pass
-            else:
+            else:  # pragma: no cover
                 raise Exception('CairoSVG did not exit')
         else:
             main()

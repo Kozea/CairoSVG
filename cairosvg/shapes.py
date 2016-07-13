@@ -21,7 +21,7 @@ Shapes drawers.
 
 from math import pi
 
-from .helpers import normalize, point, size, point_angle
+from .helpers import normalize, point, point_angle, size
 
 
 def circle(surface, node):

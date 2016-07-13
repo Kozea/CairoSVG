@@ -21,6 +21,7 @@ This module handles clips, gradients, masks, patterns and external nodes.
 
 """
 
+from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
 from .colors import color
 from .features import match_features
 from .helpers import paint, size, transform
@@ -28,8 +29,6 @@ from .parser import Tree
 from .shapes import rect
 from .surface import cairo
 from .url import parse_url
-from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
-
 
 BLEND_OPERATORS = {
     'darken': cairo.OPERATOR_DARKEN,
@@ -210,17 +209,8 @@ def draw_gradient(surface, node, name):
             1 / width, 0, 0, 1 / height, - x / width, - y / height))
 
     # Apply transform of gradient
-    transform(surface,
-              gradient_node.get('gradientTransform'),
-              gradient_pattern)
-
-    # Set spread method for gradient outside target bounds
-    """
-    # This does not seem to do anything.
-    # Is there a test showing its functionality?
-    gradient_pattern.set_extend(EXTEND_OPERATORS.get(
-        node.get('spreadMethod', 'pad'), EXTEND_OPERATORS['pad']))
-    """
+    transform(
+        surface, gradient_node.get('gradientTransform'), gradient_pattern)
 
     # Apply gradient (<stop> by <stop>)
     offset = 0

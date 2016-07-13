@@ -72,7 +72,8 @@ def main():
         help='height of the parent container in pixels')
     parser.add_argument(
         '-u', '--unsafe', action='store_true',
-        help='resolve XML entities and allow very large files (WARNING: vulnerable to XXE attacks)')
+        help='resolve XML entities and allow very large files '
+             '(WARNING: vulnerable to XXE attacks and various DoS)')
     parser.add_argument('-o', '--output', default='-', help='output filename')
 
     options = parser.parse_args()

@@ -19,7 +19,7 @@ Root tag drawer.
 
 """
 
-from .helpers import preserve_ratio, node_format
+from .helpers import node_format, preserve_ratio
 
 
 def svg(surface, node):
@@ -37,8 +37,7 @@ def svg(surface, node):
     if node.parent is None:
         return
 
-    scale_x, scale_y, translate_x, translate_y, _ = preserve_ratio(
-        surface, node)
+    scale_x, scale_y, translate_x, translate_y = preserve_ratio(surface, node)
     rect_width, rect_height = width, height
     surface.context.translate(*surface.context.get_current_point())
     if node.get('overflow', 'hidden') != 'visible':

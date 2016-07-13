@@ -3,16 +3,6 @@
 ========
 
 
-Missing ``marker`` attributes
-=============================
-
-- ``painting-marker-02-f``
-- ``painting-marker-05-f``
-
-Many attributes such as ``overflow``, ``markerUnits``, ``ref*`` and ``marker*``
-are not handled correctly.
-
-
 Presentational ``marker`` attribute
 ===================================
 

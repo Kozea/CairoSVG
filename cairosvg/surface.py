@@ -29,16 +29,15 @@ from .defs import (
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
     parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
-    PointError, UNITS, apply_matrix_transform, clip_rect, node_format,
+    UNITS, PointError, apply_matrix_transform, clip_rect, node_format,
     normalize, paint, preserved_ratio, size, transform)
 from .image import image
-from .path import draw_markers, path
 from .parser import Tree
+from .path import draw_markers, path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
 from .svg import svg
 from .text import text
 from .url import parse_url
-
 
 SHAPE_ANTIALIAS = {
     'optimizeSpeed': cairo.ANTIALIAS_FAST,
