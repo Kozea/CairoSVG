@@ -46,7 +46,6 @@ def draw_markers(surface, node):
     position = 'start'
 
     while node.vertices:
-
         # Calculate position and angle
         point = node.vertices.pop(0)
         angles = node.vertices.pop(0) if node.vertices else None
@@ -91,8 +90,9 @@ def draw_markers(surface, node):
                 # Calculate position and scale (preserve aspect ratio)
                 translate_x = -size(surface, marker_node.get('refX', '0'), 'x')
                 translate_y = -size(surface, marker_node.get('refY', '0'), 'y')
-                scale_x = scale_y = min(marker_width / bounding_box[2],
-                                        marker_height / bounding_box[3])
+                scale_x = scale_y = min(
+                    marker_width / bounding_box[2],
+                    marker_height / bounding_box[3])
 
                 # No clipping since viewbox is not present
                 clip_box = None
