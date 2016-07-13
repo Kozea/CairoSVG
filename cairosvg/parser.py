@@ -104,6 +104,7 @@ def normalize_style_declaration(name, value):
         font-family - case sensitive name(s)
         font - shorthand in which font-family is case sensitive
         any declaration with url in value - url is case sensitive
+
     """
     name = name.strip().lower()
     value = value.strip()
@@ -120,6 +121,7 @@ def normalize_noop_style_declaration(value):
 
     This is actually the exception to the rule. Normally value will be made
     lowercase (see normalize_style_declaration above).
+
     """
     return value
 
@@ -128,6 +130,7 @@ def normalize_url_style_declaration(value):
     """Normalize style declaration, but keep URL's as-is.
 
     Lowercase everything except for the URL.
+
     """
     regex_style = re.compile(r"""
         (.*?)                               # non-URL part (will be normalized)
@@ -142,8 +145,7 @@ def normalize_url_style_declaration(value):
             |$
         )
     """, re.IGNORECASE | re.VERBOSE)
-    iterator = regex_style.finditer(value)
-    for match in iterator:
+    for match in regex_style.finditer(value):
         value_start = value[:match.start()] if match.start() > 0 else ''
         normalized_value = match.group(1).lower()
         value_end = value[match.start() + len(normalized_value):]
@@ -163,6 +165,7 @@ def normalize_font_style_declaration(value):
     identifier.
 
     See http://www.w3.org/TR/css-fonts-3/#font-prop
+
     """
     return re.sub(r"""
         ^(
@@ -170,11 +173,7 @@ def normalize_font_style_declaration(value):
             (\s+|\s*,\s*)           # <whitespace> and/or comma
         )*                          # Repeat until last
         \d[^\s,]*                   # <size> or <line-height>
-    """, lowercase_font_style_match, value, 0, re.VERBOSE)
-
-
-def lowercase_font_style_match(match):
-    return match.group().lower()
+    """, lambda match: match.group().lower(), value, 0, re.VERBOSE)
 
 
 class Node(dict):
