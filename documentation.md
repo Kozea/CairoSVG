@@ -23,6 +23,21 @@ raster images are handled by [Pillow](http://python-imaging.github.io/).
 
 ## How to use CairoSVG?
 
+### Installation
+
+CairoSVG is available on [PyPI](https://pypi.python.org/pypi/CairoSVG), you can
+install it with pip:
+
+    $ pip install cairosvg
+
+CairoSVG and its dependencies may require additional tools during the
+installation: a compiler, Python headers and FFI headers. These tools have
+different names depending on the OS you are using, but:
+
+- on Windows, you'll have to install Visual C++ compiler for Python,
+- on Linux, you'll have to install the `python-dev` and `libffi-dev` packages
+  (names may vary for your distribution).
+
 ### Command line
 
 Here is the simple CairoSVG command line usage:
