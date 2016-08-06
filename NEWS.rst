@@ -13,6 +13,8 @@ Version 2.0, not released yet
 * Fix URL/id handling
 * Use bounding boxes for gradients
 * Split deployment and development tests
+* Add a scale option
+* Add a parent size option
 * Test with Travis
 
 
