@@ -71,8 +71,7 @@ def main():
         '-H', '--height', default=None, type=float,
         help='height of the parent container in pixels')
     parser.add_argument(
-        '-s', '--scale', default=None, type=float,
-        help='output scaling factor')
+        '-s', '--scale', default=1, type=float, help='output scaling factor')
     parser.add_argument(
         '-u', '--unsafe', action='store_true',
         help='resolve XML entities and allow very large files '
