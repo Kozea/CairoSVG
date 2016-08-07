@@ -144,20 +144,35 @@ def path(surface, node):
     last_letter = None
     string = normalize(string)
 
+    # Keep the current point because Cairo's get_current_point is not accurate
+    # enough. See https://github.com/Kozea/CairoSVG/issues/111.
+    if surface.context.has_current_point():
+        current_point = surface.context.get_current_point()
+    else:
+        surface.context.move_to(0, 0)
+        current_point = 0, 0
+
     while string:
         string = string.strip()
         if string.split(' ', 1)[0] in PATH_LETTERS:
             letter, string = (string + ' ').split(' ', 1)
             if last_letter in (None, 'z', 'Z') and letter not in 'mM':
-                node.vertices.append(surface.context.get_current_point())
+                node.vertices.append(current_point)
+                first_path_point = current_point
         elif letter == 'M':
             letter = 'L'
         elif letter == 'm':
             letter = 'l'
 
+        if last_letter in (None, 'm', 'M', 'z', 'Z'):
+            first_path_point = None
+        if letter not in (None, 'm', 'M', 'z', 'Z') and first_path_point is None:
+            first_path_point = current_point
+
         if letter in 'aA':
             # Elliptic curve
-            x1, y1 = surface.context.get_current_point()
+            surface.context.set_tolerance(0.00001)
+            x1, y1 = current_point
             rx, ry, string = point(surface, string)
             rotation, string = string.split(' ', 1)
             rotation = radians(float(rotation))
@@ -233,16 +248,18 @@ def path(surface, node):
             surface.context.scale(1, radii_ratio)
             arc(xc, yc, rx, angle1, angle2)
             surface.context.restore()
+            current_point = current_point[0] + x3, current_point[1] + y3
 
         elif letter == 'c':
             # Relative curve
-            x, y = surface.context.get_current_point()
+            x, y = current_point
             x1, y1, string = point(surface, string)
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
             node.vertices.append((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+            current_point = current_point[0] + x3, current_point[1] + y3
 
             # Save absolute values for x and y, useful if next letter is s or S
             x1 += x
@@ -260,22 +277,27 @@ def path(surface, node):
             node.vertices.append((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
+            current_point = x3, y3
 
         elif letter == 'h':
             # Relative horizontal line
             x, string = (string + ' ').split(' ', 1)
-            old_x, old_y = surface.context.get_current_point()
+            old_x, old_y = current_point
             angle = 0 if size(surface, x, 'x') > 0 else pi
             node.vertices.append((pi - angle, angle))
-            surface.context.rel_line_to(size(surface, x, 'x'), 0)
+            x = size(surface, x, 'x')
+            surface.context.rel_line_to(x, 0)
+            current_point = current_point[0] + x, current_point[1]
 
         elif letter == 'H':
             # Horizontal line
             x, string = (string + ' ').split(' ', 1)
-            old_x, old_y = surface.context.get_current_point()
+            old_x, old_y = current_point
             angle = 0 if size(surface, x, 'x') > old_x else pi
             node.vertices.append((pi - angle, angle))
-            surface.context.line_to(size(surface, x, 'x'), old_y)
+            x = size(surface, x, 'x')
+            surface.context.line_to(x, old_y)
+            current_point = x, current_point[1]
 
         elif letter == 'l':
             # Relative straight line
@@ -283,27 +305,28 @@ def path(surface, node):
             angle = point_angle(0, 0, x, y)
             node.vertices.append((pi - angle, angle))
             surface.context.rel_line_to(x, y)
+            current_point = current_point[0] + x, current_point[1] + y
 
         elif letter == 'L':
             # Straight line
             x, y, string = point(surface, string)
-            old_x, old_y = surface.context.get_current_point()
+            old_x, old_y = current_point
             angle = point_angle(old_x, old_y, x, y)
             node.vertices.append((pi - angle, angle))
             surface.context.line_to(x, y)
+            current_point = x, y
 
         elif letter == 'm':
             # Current point relative move
             x, y, string = point(surface, string)
-            if surface.context.has_current_point():
-                surface.context.rel_move_to(x, y)
-            else:
-                surface.context.move_to(x, y)
+            surface.context.rel_move_to(x, y)
+            current_point = current_point[0] + x, current_point[1] + y
 
         elif letter == 'M':
             # Current point move
             x, y, string = point(surface, string)
             surface.context.move_to(x, y)
+            current_point = x, y
 
         elif letter == 'q':
             # Relative quadratic curve
@@ -314,20 +337,22 @@ def path(surface, node):
                 x1, y1, x2, y2, x3, y3)
             surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             node.vertices.append((0, 0))
+            current_point = current_point[0] + x3, current_point[1] + y3
 
         elif letter == 'Q':
             # Quadratic curve
-            x1, y1 = surface.context.get_current_point()
+            x1, y1 = current_point
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
                 x1, y1, x2, y2, x3, y3)
             surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             node.vertices.append((0, 0))
+            current_point = x3, y3
 
         elif letter == 's':
             # Relative smooth curve
-            x, y = surface.context.get_current_point()
+            x, y = current_point
             x1 = x3 - x2 if last_letter in 'csCS' else 0
             y1 = y3 - y2 if last_letter in 'csCS' else 0
             x2, y2, string = point(surface, string)
@@ -335,6 +360,7 @@ def path(surface, node):
             node.vertices.append((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
+            current_point = current_point[0] + x3, current_point[1] + y3
 
             # Save absolute values for x and y, useful if next letter is s or S
             x1 += x
@@ -346,7 +372,7 @@ def path(surface, node):
 
         elif letter == 'S':
             # Smooth curve
-            x, y = surface.context.get_current_point()
+            x, y = current_point
             x1 = x3 + (x3 - x2) if last_letter in 'csCS' else x
             y1 = y3 + (y3 - y2) if last_letter in 'csCS' else y
             x2, y2, string = point(surface, string)
@@ -354,6 +380,7 @@ def path(surface, node):
             node.vertices.append((
                 point_angle(x2, y2, x1, y1), point_angle(x2, y2, x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
+            current_point = x3, y3
 
         elif letter == 't':
             # Relative quadratic curve end
@@ -372,10 +399,11 @@ def path(surface, node):
                 x1, y1, x2, y2, x3, y3)
             node.vertices.append((0, 0))
             surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+            current_point = current_point[0] + x3, current_point[1] + y3
 
         elif letter == 'T':
             # Quadratic curve end
-            abs_x, abs_y = surface.context.get_current_point()
+            abs_x, abs_y = current_point
             if last_letter not in 'QqTt':
                 x2, y2, x3, y3 = abs_x, abs_y, abs_x, abs_y
             elif last_letter in 'qt':
@@ -389,30 +417,36 @@ def path(surface, node):
                 x1, y1, x2, y2, x3, y3)
             node.vertices.append((0, 0))
             surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
+            current_point = x3, y3
 
         elif letter == 'v':
             # Relative vertical line
             y, string = (string + ' ').split(' ', 1)
-            old_x, old_y = surface.context.get_current_point()
+            old_x, old_y = current_point
             angle = pi / 2 if size(surface, y, 'y') > 0 else -pi / 2
             node.vertices.append((-angle, angle))
-            surface.context.rel_line_to(0, size(surface, y, 'y'))
+            y = size(surface, y, 'y')
+            surface.context.rel_line_to(0, y)
+            current_point = current_point[0], current_point[1] + y
 
         elif letter == 'V':
             # Vertical line
             y, string = (string + ' ').split(' ', 1)
-            old_x, old_y = surface.context.get_current_point()
+            old_x, old_y = current_point
             angle = pi / 2 if size(surface, y, 'y') > 0 else -pi / 2
             node.vertices.append((-angle, angle))
-            surface.context.line_to(old_x, size(surface, y, 'y'))
+            y = size(surface, y, 'y')
+            surface.context.line_to(old_x, y)
+            current_point = current_point[0], y
 
         elif letter in 'zZ':
             # End of path
             node.vertices.append(None)
             surface.context.close_path()
+            current_point = first_path_point or (0, 0)
 
         if letter not in 'zZ':
-            node.vertices.append(surface.context.get_current_point())
+            node.vertices.append(current_point)
 
         string = string.strip()
         last_letter = letter
