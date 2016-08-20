@@ -1,3 +1,5 @@
 [run]
 omit =
     test/cairosvg_reference/*
+    */virtualenv/*
+    .*

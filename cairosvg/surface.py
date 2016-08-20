@@ -129,16 +129,17 @@ class Surface(object):
         dpi = kwargs.pop('dpi', 96)
         parent_width = kwargs.pop('parent_width', None)
         parent_height = kwargs.pop('parent_height', None)
+        scale = kwargs.pop('scale', 1)
         write_to = kwargs.pop('write_to', None)
         kwargs['bytestring'] = bytestring
         tree = Tree(**kwargs)
         output = write_to or io.BytesIO()
-        cls(tree, output, dpi, None, parent_width, parent_height).finish()
+        cls(tree, output, dpi, None, parent_width, parent_height, scale).finish()
         if write_to is None:
             return output.getvalue()
 
     def __init__(self, tree, output, dpi, parent_surface=None,
-                 parent_width=None, parent_height=None):
+                 parent_width=None, parent_height=None, scale=1):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -175,6 +176,8 @@ class Surface(object):
         self.font_size = size(self, '12pt')
         self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
+        width *= scale
+        height *= scale
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
             width * self.device_units_per_user_units,

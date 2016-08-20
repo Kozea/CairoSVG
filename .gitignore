@@ -6,4 +6,5 @@ __pycache__
 .coverage
 .cache
 /.idea
+.eggs
 build
