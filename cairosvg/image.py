@@ -94,9 +94,13 @@ def image(surface, node):
     scale_x, scale_y, translate_x, translate_y = preserve_ratio(
         surface, node)
 
-    # Clip image region
-    surface.context.rectangle(x, y, width, height)
-    surface.context.clip()
+    # Clip image region (if necessary)
+    if not (translate_x == 0 and
+            translate_y == 0 and
+            width == scale_x * node.image_width and
+            height == scale_y * node.image_height):
+        surface.context.rectangle(x, y, width, height)
+        surface.context.clip()
 
     # Paint raster image
     surface.context.save()
