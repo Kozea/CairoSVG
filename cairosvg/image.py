@@ -44,15 +44,11 @@ def image(surface, node):
     x, y = size(surface, node.get('x'), 'x'), size(surface, node.get('y'), 'y')
     width = size(surface, node.get('width'), 'x')
     height = size(surface, node.get('height'), 'y')
-    surface.context.rectangle(x, y, width, height)
-    surface.context.clip()
 
     if image_bytes[:4] == b'\x89PNG':
         png_file = BytesIO(image_bytes)
     elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
             image_bytes[:2] == b'\x1f\x8b'):
-        surface.context.save()
-        surface.context.translate(x, y)
         if 'x' in node:
             del node['x']
         if 'y' in node:
@@ -69,6 +65,14 @@ def image(surface, node):
         node.image_height = tree_height or height
         scale_x, scale_y, translate_x, translate_y = preserve_ratio(
             surface, node)
+
+        # Clip image region
+        surface.context.rectangle(x, y, width, height)
+        surface.context.clip()
+
+        # Draw image
+        surface.context.save()
+        surface.context.translate(x, y)
         surface.set_context_size(
             *node_format(surface, tree, reference=False),
             preserved_ratio=preserved_ratio(tree))
@@ -90,12 +94,15 @@ def image(surface, node):
     scale_x, scale_y, translate_x, translate_y = preserve_ratio(
         surface, node)
 
+    # Clip image region
     surface.context.rectangle(x, y, width, height)
-    pattern_pattern = cairo.SurfacePattern(image_surface)
+    surface.context.clip()
+
+    # Paint raster image
     surface.context.save()
-    surface.context.translate(*surface.context.get_current_point())
+    surface.context.translate(x, y)
     surface.context.scale(scale_x, scale_y)
     surface.context.translate(translate_x, translate_y)
-    surface.context.set_source(pattern_pattern)
-    surface.context.fill()
+    surface.context.set_source_surface(image_surface)
+    surface.context.paint()
     surface.context.restore()
