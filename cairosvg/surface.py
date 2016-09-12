@@ -187,7 +187,8 @@ class Surface(object):
         self.context.scale(
             self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        self.set_context_size(width, height, viewbox, preserved_ratio(tree))
+        self.set_context_size(
+            width, height, viewbox, scale, preserved_ratio(tree))
         self.context.move_to(0, 0)
         self.draw(tree)
 
@@ -211,7 +212,7 @@ class Surface(object):
         cairo_surface = self.surface_class(self.output, width, height)
         return cairo_surface, width, height
 
-    def set_context_size(self, width, height, viewbox, preserved_ratio):
+    def set_context_size(self, width, height, viewbox, scale, preserved_ratio):
         """Set the Cairo context size, set the SVG viewport size."""
         if viewbox:
             x, y, x_size, y_size = viewbox
@@ -232,6 +233,10 @@ class Surface(object):
             apply_matrix_transform(self, matrix)
         else:
             self.context_width, self.context_height = width, height
+            if scale != 1:
+                matrix = cairo.Matrix()
+                matrix.scale(scale, scale)
+                apply_matrix_transform(self, matrix)
 
     def finish(self):
         """Read the surface content."""
