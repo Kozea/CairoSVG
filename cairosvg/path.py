@@ -166,7 +166,8 @@ def path(surface, node):
 
         if last_letter in (None, 'm', 'M', 'z', 'Z'):
             first_path_point = None
-        if letter not in (None, 'm', 'M', 'z', 'Z') and first_path_point is None:
+        if letter not in (None, 'm', 'M', 'z', 'Z') and (
+                first_path_point is None):
             first_path_point = current_point
 
         if letter in 'aA':

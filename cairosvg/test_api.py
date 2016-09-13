@@ -28,6 +28,7 @@ import sys
 import tempfile
 
 import cairocffi as cairo
+import pytest
 
 from . import SURFACES, __version__, main, parser, surface, svg2pdf, svg2png
 
@@ -49,19 +50,11 @@ SVG_SAMPLE = b'''\
 '''
 
 
-def test_formats():
+@pytest.mark.parametrize('format_name', MAGIC_NUMBERS)
+def test_formats(format_name):
     """Convert to a given format and test that output looks right."""
-    for format_name in MAGIC_NUMBERS:
-        # Use a default parameter value to bind to the current value,
-        # not to the variabl as a closure would do.
-        def test(format_name=format_name):
-            """Test the generation of ``format_name`` images."""
-            content = SURFACES[format_name].convert(SVG_SAMPLE)
-            assert content.startswith(MAGIC_NUMBERS[format_name])
-        test.description = (
-            'Test that the output from svg2{} looks like {}'.format(
-                format_name.lower(), format_name))
-        yield test
+    content = SURFACES[format_name].convert(SVG_SAMPLE)
+    assert content.startswith(MAGIC_NUMBERS[format_name])
 
 
 def read_file(filename):
