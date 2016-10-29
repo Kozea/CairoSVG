@@ -149,9 +149,9 @@ def paint_mask(surface, node, name, opacity):
     mask_node['x'] = size(surface, mask_node.get('x', '-10%'), width_ref)
     mask_node['y'] = size(surface, mask_node.get('y', '-10%'), height_ref)
     mask_node['height'] = size(
-        surface, mask_node.get('height', '120%'), width_ref)
+        surface, mask_node.get('height', '120%'), height_ref)
     mask_node['width'] = size(
-        surface, mask_node.get('width', '120%'), height_ref)
+        surface, mask_node.get('width', '120%'), width_ref)
 
     if mask_node.get('maskUnits') == 'userSpaceOnUse':
         x = mask_node['x']

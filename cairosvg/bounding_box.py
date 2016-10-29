@@ -167,6 +167,7 @@ def bounding_box_path(surface, node):
         elif letter in 'hH':
             # Horizontal line
             x, path_data = (path_data + ' ').split(' ', 1)
+            x = size(surface, x, 'x')
 
             # Relative coordinate, convert to absolute
             if letter == 'h':
@@ -212,6 +213,7 @@ def bounding_box_path(surface, node):
         elif letter in 'vV':
             # Vertical line
             y, path_data = (path_data + ' ').split(' ', 1)
+            y = size(surface, y, 'y')
 
             # Relative coordinate, convert to absolute
             if letter == 'v':
