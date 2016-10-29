@@ -19,7 +19,7 @@ Handle CSS stylesheets.
 
 """
 
-import os
+import os.path
 
 import cssselect
 import tinycss
