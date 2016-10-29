@@ -25,45 +25,36 @@ output.
 import os
 import tempfile
 
-from . import cairosvg, reference_cairosvg, FILES
+import pytest
+
+from . import FILES, cairosvg, reference_cairosvg
 
 
-def generate_function(description):
-    """Return a testing function with the given ``description``."""
-    def check_image(svg_filename):
-        """Check that the pixels match between ``svg`` and ``png``."""
-        test_png = tempfile.NamedTemporaryFile(
-            prefix='test-', suffix='.png', delete=False)
-        test_surface = cairosvg.surface.PNGSurface(
-            cairosvg.parser.Tree(url=svg_filename), test_png, dpi=72)
-        test_pixels = test_surface.cairo.get_data()[:]
+@pytest.mark.parametrize('svg_filename', FILES)
+def test_image(svg_filename):
+    """Check that the pixels match between ``svg`` and ``png``."""
+    test_png = tempfile.NamedTemporaryFile(
+        prefix='test-', suffix='.png', delete=False)
+    test_surface = cairosvg.surface.PNGSurface(
+        cairosvg.parser.Tree(url=svg_filename, unsafe=True), test_png,
+        dpi=72)
+    test_pixels = test_surface.cairo.get_data()[:]
 
-        ref_png = tempfile.NamedTemporaryFile(
-            prefix='reference-', suffix='.png', delete=False)
-        ref_surface = reference_cairosvg.surface.PNGSurface(
-            reference_cairosvg.parser.Tree(url=svg_filename), ref_png, dpi=72)
-        ref_pixels = ref_surface.cairo.get_data()[:]
+    ref_png = tempfile.NamedTemporaryFile(
+        prefix='reference-', suffix='.png', delete=False)
+    ref_surface = reference_cairosvg.surface.PNGSurface(
+        reference_cairosvg.parser.Tree(url=svg_filename, unsafe=True),
+        ref_png, dpi=72)
+    ref_pixels = ref_surface.cairo.get_data()[:]
 
-        if test_pixels == ref_pixels:
-            # Test is passing
-            os.remove(ref_png.name)
-            os.remove(test_png.name)
-            return
-
+    if test_pixels == ref_pixels:
+        # Test is passing
+        os.remove(ref_png.name)
+        os.remove(test_png.name)
+    else:  # pragma: no cover
         ref_surface.finish()
         test_surface.finish()
 
         raise AssertionError(
-            'Images are different: {} {}'.format(ref_png.name, test_png.name))
-
-    check_image.description = description
-    return check_image
-
-
-def test_images():
-    """Yield the functions testing an image."""
-    for svg_filename in FILES:
-        yield (
-            generate_function(
-                'Test the {} image'.format(os.path.basename(svg_filename))),
-            svg_filename)
+            'Images are different: {} {}'.format(
+                ref_png.name, test_png.name))

@@ -19,7 +19,7 @@ Root tag drawer.
 
 """
 
-from .helpers import preserve_ratio, node_format
+from .helpers import node_format, preserve_ratio
 
 
 def svg(surface, node):

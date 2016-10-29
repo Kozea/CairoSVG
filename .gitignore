@@ -3,8 +3,8 @@ __pycache__
 /test/output
 /dist
 /MANIFEST
-/.tox
 .coverage
-.noseids
 .cache
-.idea
+/.idea
+.eggs
+build

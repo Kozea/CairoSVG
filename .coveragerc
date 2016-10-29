@@ -1,3 +1,5 @@
-[report]
-exclude_lines =
-    except ImportError
+[run]
+omit =
+    test/cairosvg_reference/*
+    */virtualenv/*
+    .*

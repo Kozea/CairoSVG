@@ -5,17 +5,14 @@ python:
   - 3.5
 
 install:
-  - pip install cairocffi
-  - pip install tinycss
-  - pip install cssselect
-  - pip install lxml
-  - pip install pillow
+  - pip install --upgrade -e.[test]
 
 before_script:
   - mkdir ~/.fonts
   - cp ./test/resources/*.*tf ~/.fonts
   - fc-cache -f -v
 
-script: nosetests
+script:
+  - python setup.py test
 
 sudo: false

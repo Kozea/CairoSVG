@@ -19,15 +19,15 @@ SVG Parser.
 
 """
 
-import re
 import gzip
+import re
 from urllib.parse import urlunparse
 
 import lxml.etree as ElementTree
 
 from .css import apply_stylesheets
 from .features import match_features
-from .helpers import rotations, pop_rotation, flatten
+from .helpers import flatten, pop_rotation, rotations
 from .url import parse_url, read_url
 
 # 'display' is actually inherited but handled differently because some markers
@@ -94,6 +94,88 @@ def handle_white_spaces(string, preserve):
         return re.sub(' +', ' ', string)
 
 
+def normalize_style_declaration(name, value):
+    """Normalize style declaration consisting of name/value pair.
+
+    Names are always case insensitive, make all lowercase.
+    Values are case insensitive in most cases. Adapt for 'specials':
+        id - case sensitive identifier
+        class - case sensitive identifier(s)
+        font-family - case sensitive name(s)
+        font - shorthand in which font-family is case sensitive
+        any declaration with url in value - url is case sensitive
+
+    """
+    name = name.strip().lower()
+    value = value.strip()
+    if name in CASE_SENSITIVE_STYLE_METHODS:
+        value = CASE_SENSITIVE_STYLE_METHODS[name](value)
+    else:
+        value = value.lower()
+
+    return name, value
+
+
+def normalize_noop_style_declaration(value):
+    """No-operation for normalization where value is case sensitive.
+
+    This is actually the exception to the rule. Normally value will be made
+    lowercase (see normalize_style_declaration above).
+
+    """
+    return value
+
+
+def normalize_url_style_declaration(value):
+    """Normalize style declaration, but keep URL's as-is.
+
+    Lowercase everything except for the URL.
+
+    """
+    regex_style = re.compile(r"""
+        (.*?)                               # non-URL part (will be normalized)
+        (?:
+            url\(\s*                        # url(<whitespace>
+                (?:
+                      "(?:\\.|[^"])*"       # "<url>"
+                    | \'(?:\\.|[^\'])*\'    # '<url>'
+                    | (?:\\.|[^\)])*        # <url>
+                )
+            \s*\)                           # <whitespace>)
+            |$
+        )
+    """, re.IGNORECASE | re.VERBOSE)
+    for match in regex_style.finditer(value):
+        value_start = value[:match.start()] if match.start() > 0 else ''
+        normalized_value = match.group(1).lower()
+        value_end = value[match.start() + len(normalized_value):]
+        value = value_start + normalized_value + value_end
+    return value
+
+
+def normalize_font_style_declaration(value):
+    """Make first part of font style declaration lowercase (case insensitive).
+
+    Lowercase first part of declaration. Only the font name is case sensitive.
+    The font name is at the end of the declaration and can be 'recognized'
+    by being preceded by a size or line height. There can actually be multiple
+    names. So the first part is 'calculated' by selecting everything up to and
+    including the last valid token followed by a size or line height (both
+    starting with a number). A valid token is either a size/length or an
+    identifier.
+
+    See http://www.w3.org/TR/css-fonts-3/#font-prop
+
+    """
+    return re.sub(r"""
+        ^(
+            (\d[^\s,]*|\w[^\s,]*)   # <size>, <length> or <identifier>
+            (\s+|\s*,\s*)           # <whitespace> and/or comma
+        )*                          # Repeat until last
+        \d[^\s,]*                   # <size> or <line-height>
+    """, lambda match: match.group().lower(), value, 0, re.VERBOSE)
+
+
 class Node(dict):
     """SVG node with dict-like properties and children."""
 
@@ -121,12 +203,13 @@ class Node(dict):
         self.update(self.node.attrib)
 
         # Handle the CSS
-        style = self.pop('_style', '') + ';' + self.pop('style', '').lower()
+        style = self.pop('_style', '') + ';' + self.pop('style', '')
         for declaration in style.split(';'):
             name, colon, value = declaration.partition(':')
             if not colon:
                 continue
-            self[name.strip()] = value.strip()
+            name, value = normalize_style_declaration(name, value)
+            self[name] = value
 
         # Replace currentColor by a real color value
         for attribute in COLOR_ATTRIBUTES:
@@ -242,6 +325,7 @@ class Tree(Node):
         bytestring = kwargs.get('bytestring')
         file_obj = kwargs.get('file_obj')
         url = kwargs.get('url')
+        unsafe = kwargs.get('unsafe')
         parent = kwargs.get('parent')
         parent_children = kwargs.get('parent_children')
         tree_cache = kwargs.get('tree_cache')
@@ -273,7 +357,9 @@ class Tree(Node):
             bytestring = bytestring or read_url(parse_url(self.url))
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
-            tree = ElementTree.fromstring(bytestring)
+            parser = ElementTree.XMLParser(
+                resolve_entities=unsafe, huge_tree=unsafe)
+            tree = ElementTree.fromstring(bytestring, parser)
         remove_svg_namespace(tree)
         self.xml_tree = tree
         apply_stylesheets(self)
@@ -286,3 +372,21 @@ class Tree(Node):
         self.root = True
         if tree_cache is not None and self.url:
             tree_cache[(self.url, self.get('id'))] = self
+
+
+CASE_SENSITIVE_STYLE_METHODS = {
+    'id': normalize_noop_style_declaration,
+    'class': normalize_noop_style_declaration,
+    'font-family': normalize_noop_style_declaration,
+    'font': normalize_font_style_declaration,
+    'clip-path': normalize_url_style_declaration,
+    'color-profile': normalize_url_style_declaration,
+    'cursor': normalize_url_style_declaration,
+    'fill': normalize_url_style_declaration,
+    'filter': normalize_url_style_declaration,
+    'marker-start': normalize_url_style_declaration,
+    'marker-mid': normalize_url_style_declaration,
+    'marker-end': normalize_url_style_declaration,
+    'mask': normalize_url_style_declaration,
+    'stroke': normalize_url_style_declaration,
+}

@@ -29,16 +29,15 @@ from .defs import (
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
     parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
-    PointError, UNITS, apply_matrix_transform, clip_rect, node_format,
+    UNITS, PointError, apply_matrix_transform, clip_rect, node_format,
     normalize, paint, preserved_ratio, size, transform)
 from .image import image
-from .path import draw_markers, path
 from .parser import Tree
+from .path import draw_markers, path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
 from .svg import svg
 from .text import text
 from .url import parse_url
-
 
 SHAPE_ANTIALIAS = {
     'optimizeSpeed': cairo.ANTIALIAS_FAST,
@@ -130,16 +129,19 @@ class Surface(object):
         dpi = kwargs.pop('dpi', 96)
         parent_width = kwargs.pop('parent_width', None)
         parent_height = kwargs.pop('parent_height', None)
+        scale = kwargs.pop('scale', 1)
         write_to = kwargs.pop('write_to', None)
         kwargs['bytestring'] = bytestring
         tree = Tree(**kwargs)
         output = write_to or io.BytesIO()
-        cls(tree, output, dpi, None, parent_width, parent_height).finish()
+        instance = cls(
+            tree, output, dpi, None, parent_width, parent_height, scale)
+        instance.finish()
         if write_to is None:
             return output.getvalue()
 
     def __init__(self, tree, output, dpi, parent_surface=None,
-                 parent_width=None, parent_height=None):
+                 parent_width=None, parent_height=None, scale=1):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -176,6 +178,8 @@ class Surface(object):
         self.font_size = size(self, '12pt')
         self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
+        width *= scale
+        height *= scale
         # Actual surface dimensions: may be rounded on raster surfaces types
         self.cairo, self.width, self.height = self._create_surface(
             width * self.device_units_per_user_units,
@@ -185,7 +189,8 @@ class Surface(object):
         self.context.scale(
             self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        self.set_context_size(width, height, viewbox, preserved_ratio(tree))
+        self.set_context_size(
+            width, height, viewbox, scale, preserved_ratio(tree))
         self.context.move_to(0, 0)
         self.draw(tree)
 
@@ -209,7 +214,7 @@ class Surface(object):
         cairo_surface = self.surface_class(self.output, width, height)
         return cairo_surface, width, height
 
-    def set_context_size(self, width, height, viewbox, preserved_ratio):
+    def set_context_size(self, width, height, viewbox, scale, preserved_ratio):
         """Set the Cairo context size, set the SVG viewport size."""
         if viewbox:
             x, y, x_size, y_size = viewbox
@@ -230,6 +235,10 @@ class Surface(object):
             apply_matrix_transform(self, matrix)
         else:
             self.context_width, self.context_height = width, height
+            if scale != 1:
+                matrix = cairo.Matrix()
+                matrix.scale(scale, scale)
+                apply_matrix_transform(self, matrix)
 
     def finish(self):
         """Read the surface content."""

@@ -21,8 +21,8 @@ Utils dealing with URLs.
 
 import os.path
 import re
-from urllib.parse import urlparse, urljoin
-from urllib.request import urlopen, Request
+from urllib.parse import urljoin, urlparse
+from urllib.request import Request, urlopen
 
 from . import __version__
 
