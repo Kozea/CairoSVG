@@ -13,7 +13,7 @@ If you want to check that CairoSVG works on your computer, you should not
 launch the tests here, you should instead launch tests in
 ``cairosvg/test_api.py``::
 
-  nosetests cairosvg/test_api.py
+  pytest cairosvg/test_api.py
 
 The tests here are regression tests: they generate reference images using an
 old version on CairoSVG and compare them to the current version. They are based
@@ -21,17 +21,17 @@ on the official SVG test suite available on the W3 website:
 
 http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview
 
-These tests are really useful if you changed the code. You can launch these
-tests by getting the submodule and launching ``nosetests`` in the root folder
-of the repository::
+These tests are really useful if you changed the code. You can launch both
+these tests and the API tests by getting the submodule and launching
+``./setup.py test`` in the root folder of the repository::
 
   git submodule update --init
-  nosetests
+  ./setup.py test
 
 You can launch the tests only on one image (or more than one, separated by a
 comma) using::
 
-  CAIROSVG_TEST_FILES=image.svg nosetests --match=test_images test/test_non_regression.py
+  env CAIROSVG_TEST_FILES=image.svg pytest test/test_non_regression.py
 
 As CairoSVG does not handle SVG fonts, you can install the corresponding OTF
 fonts in order to test CairoSVG with the right fonts. They have already been
