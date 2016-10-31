@@ -19,7 +19,7 @@ Utils dealing with URLs.
 
 """
 
-import os
+import os.path
 import re
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
