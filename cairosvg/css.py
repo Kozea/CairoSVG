@@ -19,28 +19,27 @@ Handle CSS stylesheets.
 
 """
 
-import os.path
-
 import cssselect
 import tinycss
 
-from .url import parse_url, read_url
+from .url import parse_url
 
 
 def find_stylesheets(tree, url):
     """Find the stylesheets included in ``tree``."""
     # TODO: support contentStyleType on <svg>
     default_type = 'text/css'
-    process = tree.getprevious()
+    xml_tree = tree.xml_tree
+    process = xml_tree.getprevious()
     while process is not None:
         if (getattr(process, 'target', None) == 'xml-stylesheet' and
                 process.attrib.get('type', default_type) == 'text/css'):
             href = parse_url(process.attrib.get('href'), url)
             if href:
                 yield tinycss.make_parser().parse_stylesheet_bytes(
-                    read_url(href))
+                    tree.fetch_url(href))
         process = process.getprevious()
-    for element in tree.iter():
+    for element in xml_tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
         if (element.tag == 'style' and
                 element.get('type', default_type) == 'text/css' and
@@ -51,27 +50,25 @@ def find_stylesheets(tree, url):
             yield tinycss.make_parser().parse_stylesheet(element.text)
 
 
-def find_stylesheets_rules(stylesheet, url):
+def find_stylesheets_rules(tree, stylesheet, url):
     """Find the rules in a stylesheet."""
     for rule in stylesheet.rules:
         if isinstance(rule, tinycss.css21.ImportRule):
-            css_path = os.path.normpath(
-                os.path.join(os.path.dirname(url or ''), rule.uri))
-            if not os.path.exists(css_path):
-                continue
-            with open(css_path) as f:
-                stylesheet = tinycss.make_parser().parse_stylesheet(f.read())
-                for rule in find_stylesheets_rules(stylesheet, css_path):
-                    yield rule
+            css_url = parse_url(rule.uri, url)
+            stylesheet = tinycss.make_parser().parse_stylesheet(
+                tree.fetch_url(css_url).decode('utf-8'))
+            for rule in find_stylesheets_rules(tree, stylesheet,
+                                               css_url.geturl()):
+                yield rule
         if not rule.at_keyword:
             yield rule
 
 
 def find_style_rules(tree):
     """Find the style rules in ``tree``."""
-    for stylesheet in find_stylesheets(tree.xml_tree, tree.url):
+    for stylesheet in find_stylesheets(tree, tree.url):
         # TODO: warn for each stylesheet.errors
-        for rule in find_stylesheets_rules(stylesheet, tree.url):
+        for rule in find_stylesheets_rules(tree, stylesheet, tree.url):
             yield rule
 
 
