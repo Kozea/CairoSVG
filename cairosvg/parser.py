@@ -250,12 +250,12 @@ class Node(dict):
 
     def get_url_fetcher_for(self, url):
         url_fetcher = self.get_url_fetcher()
-        return url_fetcher.fetcher_for(url) \
-            if url_fetcher is not None else None
+        return None if url_fetcher is None else url_fetcher.fetcher_for(url)
 
     def fetch_url(self, url, get_child_fetcher=True):
-        return read_url(url, self.get_url_fetcher_for(url) if get_child_fetcher
-                        else self.get_url_fetcher())
+        return read_url(
+            url, self.get_url_fetcher_for(url) if get_child_fetcher
+            else self.get_url_fetcher())
 
     def text_children(self, node, trailing_space, text_root=False):
         """Create children and return them."""
@@ -275,9 +275,9 @@ class Node(dict):
             if child.tag == 'tref':
                 url = parse_url(child.get(
                     '{http://www.w3.org/1999/xlink}href')).geturl()
-                child_tree = Tree(url=url,
-                                  url_fetcher=self.get_url_fetcher_for(url),
-                                  parent=self)
+                child_tree = Tree(
+                    url=url, url_fetcher=self.get_url_fetcher_for(url),
+                    parent=self)
                 child_tree.clear()
                 child_tree.update(self)
                 child_node = Node(
@@ -373,8 +373,8 @@ class Tree(Node):
                 root_parent = root_parent.parent
             tree = root_parent.xml_tree
         else:
-            bytestring = bytestring or \
-                self.fetch_url(parse_url(self.url), False)
+            if not bytestring:
+                bytestring = self.fetch_url(parse_url(self.url), False)
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
             parser = ElementTree.XMLParser(
