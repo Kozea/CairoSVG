@@ -360,8 +360,9 @@ def use(surface, node):
     if 'mask' in node:
         del node['mask']
     href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
-    tree = Tree(url=href, url_fetcher=node.get_url_fetcher_for(href),
-                parent=node, tree_cache=surface.tree_cache)
+    tree = Tree(
+        url=href, url_fetcher=node.get_url_fetcher_for(href), parent=node,
+        tree_cache=surface.tree_cache)
 
     if not match_features(tree.xml_tree):
         surface.context.restore()
