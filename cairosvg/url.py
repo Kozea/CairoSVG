@@ -60,7 +60,6 @@ class URLFetcher(object):
         """
         return self
 
-
     def __validate_url(self, url):
         """Validate ``url`` and raise Error if url is invalid.
 

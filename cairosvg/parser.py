@@ -253,7 +253,7 @@ class Node(dict):
         return url_fetcher.fetcher_for(url) \
             if url_fetcher is not None else None
 
-    def fetch_url(self, url, get_child_fetcher = True):
+    def fetch_url(self, url, get_child_fetcher=True):
         return read_url(url, self.get_url_fetcher_for(url) if get_child_fetcher
                         else self.get_url_fetcher())
 
@@ -374,7 +374,7 @@ class Tree(Node):
             tree = root_parent.xml_tree
         else:
             bytestring = bytestring or \
-                         self.fetch_url(parse_url(self.url), False)
+                self.fetch_url(parse_url(self.url), False)
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
             parser = ElementTree.XMLParser(
