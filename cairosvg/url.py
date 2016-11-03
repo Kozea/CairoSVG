@@ -32,29 +32,9 @@ HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 URL = re.compile(r'url\((.+)\)')
 
 
-class URLFetcher(object):
-    """Default implementation for URLFetcher.
-
-    It will retrieve many scheme's by default like ftp, http, file and data.
-    No specific restrictions (for size or location) will be applied.
-    Subclass this class to implement restrictions or implement custom schemes
-    (protocols).
-    """
-
-    def fetch(self, url):
-        """Fetch the content of ``url``."""
-        return urlopen(Request(url, headers=HTTP_HEADERS)).read()
-
-    def fetcher_for(self, url):
-        """Answer URLFetcher to handle ``url``.
-
-        Default implementation: answer self (ie all fetchers are same).
-
-        Override this method to handle specific resource types (like images or
-        CSSs) specifically. It may also be used to handle 'child' elements
-        specifically.
-        """
-        return self
+def fetch(url):
+    """Fetch the content of ``url``."""
+    return urlopen(Request(url, headers=HTTP_HEADERS)).read()
 
 
 def parse_url(url, base=None):
@@ -109,9 +89,4 @@ def read_url(url, url_fetcher):
     else:
         url = 'file://{}'.format(os.path.abspath(url.geturl()))
 
-    if url_fetcher is None:
-        if not hasattr(read_url, 'default_url_fetcher'):
-            read_url.default_url_fetcher = URLFetcher()
-        url_fetcher = read_url.default_url_fetcher
-
-    return url_fetcher.fetch(url)
+    return url_fetcher(url)

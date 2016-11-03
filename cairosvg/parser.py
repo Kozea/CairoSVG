@@ -28,7 +28,7 @@ import lxml.etree as ElementTree
 from .css import apply_stylesheets
 from .features import match_features
 from .helpers import flatten, pop_rotation, rotations
-from .url import parse_url, read_url
+from .url import fetch, parse_url, read_url
 
 # 'display' is actually inherited but handled differently because some markers
 # are part of a none-displaying group (see test painting-marker-07-f.svg)
@@ -179,7 +179,8 @@ def normalize_font_style_declaration(value):
 class Node(dict):
     """SVG node with dict-like properties and children."""
 
-    def __init__(self, node, parent=None, parent_children=False, url=None):
+    def __init__(self, node, url_fetcher, parent=None, parent_children=False,
+                 url=None):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
         super().__init__()
         self.children = ()
@@ -188,6 +189,7 @@ class Node(dict):
         self.tag = node.tag
         self.text = node.text
         self.node = node
+        self.url_fetcher = url_fetcher
 
         # Inherits from parent properties
         if parent is not None:
@@ -231,31 +233,20 @@ class Node(dict):
 
         if parent_children:
             self.children = [
-                Node(child.node, parent=self) for child in parent.children]
+                Node(child.node, self.url_fetcher, parent=self)
+                for child in parent.children]
         elif not self.children:
             self.children = []
             for child in node:
                 if isinstance(child.tag, str):
                     if match_features(child):
-                        self.children.append(Node(child, self))
+                        self.children.append(Node(
+                            child, self.url_fetcher, self))
                         if self.tag == 'switch':
                             break
 
-    def get_url_fetcher(self):
-        if getattr(self, 'url_fetcher', None) is not None:
-            return self.url_fetcher
-        if getattr(self, 'parent', None) is not None:
-            return self.parent.get_url_fetcher()
-        return None
-
-    def get_url_fetcher_for(self, url):
-        url_fetcher = self.get_url_fetcher()
-        return None if url_fetcher is None else url_fetcher.fetcher_for(url)
-
     def fetch_url(self, url, get_child_fetcher=True):
-        return read_url(
-            url, self.get_url_fetcher_for(url) if get_child_fetcher
-            else self.get_url_fetcher())
+        return read_url(url, self.url_fetcher)
 
     def text_children(self, node, trailing_space, text_root=False):
         """Create children and return them."""
@@ -276,19 +267,19 @@ class Node(dict):
                 url = parse_url(child.get(
                     '{http://www.w3.org/1999/xlink}href')).geturl()
                 child_tree = Tree(
-                    url=url, url_fetcher=self.get_url_fetcher_for(url),
-                    parent=self)
+                    url=url, url_fetcher=self.url_fetcher, parent=self)
                 child_tree.clear()
                 child_tree.update(self)
                 child_node = Node(
-                    child, parent=child_tree, parent_children=True)
+                    child, self.url_fetcher, parent=child_tree,
+                    parent_children=True)
                 child_node.tag = 'tspan'
                 # Retrieve the referenced node and get its flattened text
                 # and remove the node children.
                 child = child_tree.xml_tree
                 child.text = flatten(child)
             else:
-                child_node = Node(child, parent=self)
+                child_node = Node(child, self.url_fetcher, parent=self)
             child_preserve = child_node.get(space) == 'preserve'
             child_node.text = handle_white_spaces(child.text, child_preserve)
             child_node.children, trailing_space = child_node.text_children(
@@ -298,7 +289,9 @@ class Node(dict):
                 pop_rotation(child_node, original_rotate, rotate)
             children.append(child_node)
             if child.tail:
-                anonymous = Node(ElementTree.Element('tspan'), parent=self)
+                anonymous = Node(
+                    ElementTree.Element('tspan'), self.url_fetcher,
+                    parent=self)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
                 if original_rotate:
                     pop_rotation(anonymous, original_rotate, rotate)
@@ -330,7 +323,8 @@ class Tree(Node):
                 url = None
             if url and (url, element_id) in tree_cache:
                 cached_tree = tree_cache[(url, element_id)]
-                new_tree = Node(cached_tree.xml_tree, parent)
+                new_tree = Node(
+                    cached_tree.xml_tree, cached_tree.url_fetcher, parent)
                 new_tree.xml_tree = cached_tree.xml_tree
                 new_tree.url = url
                 new_tree.tag = cached_tree.tag
@@ -343,12 +337,13 @@ class Tree(Node):
         bytestring = kwargs.get('bytestring')
         file_obj = kwargs.get('file_obj')
         url = kwargs.get('url')
-        self.url_fetcher = kwargs.get('url_fetcher')
         unsafe = kwargs.get('unsafe')
         parent = kwargs.get('parent')
         parent_children = kwargs.get('parent_children')
         tree_cache = kwargs.get('tree_cache')
         element_id = None
+
+        self.url_fetcher = kwargs.get('url_fetcher', fetch)
 
         if bytestring is not None:
             self.url = url
@@ -388,7 +383,8 @@ class Tree(Node):
             if self.xml_tree is None:
                 raise TypeError(
                     'No tag with id="{}" found.'.format(element_id))
-        super().__init__(self.xml_tree, parent, parent_children, self.url)
+        super().__init__(
+            self.xml_tree, self.url_fetcher, parent, parent_children, self.url)
         self.root = True
         if tree_cache is not None and self.url:
             tree_cache[(self.url, self.get('id'))] = self

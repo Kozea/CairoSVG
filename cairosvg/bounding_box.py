@@ -358,7 +358,7 @@ def bounding_box_group(surface, node):
 def bounding_box_use(surface, node):
     """Get the bounding box of a ``use`` node."""
     href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
-    tree = Tree(url=href, url_fetcher=node.get_url_fetcher(), parent=node)
+    tree = Tree(url=href, url_fetcher=node.url_fetcher, parent=node)
     if not match_features(tree.xml_tree):
         return None
     return calculate_bounding_box(surface, tree)

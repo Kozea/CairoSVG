@@ -54,7 +54,7 @@ def image(surface, node):
         if 'y' in node:
             del node['y']
         tree = Tree(
-            url=url.geturl(), url_fetcher=node.get_url_fetcher(),
+            url=url.geturl(), url_fetcher=node.url_fetcher,
             bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
