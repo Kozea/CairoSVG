@@ -42,12 +42,8 @@ class URLFetcher(object):
     """
 
     def fetch(self, url):
-        """Fetch the content of ``url``.
-
-        Validates the URL before fetching the content.
-        """
-        self.__validate_url(url)
-        return self.__read_url(url)
+        """Fetch the content of ``url``."""
+        return urlopen(Request(url, headers=HTTP_HEADERS)).read()
 
     def fetcher_for(self, url):
         """Answer URLFetcher to handle ``url``.
@@ -59,35 +55,6 @@ class URLFetcher(object):
         specifically.
         """
         return self
-
-    def __validate_url(self, url):
-        """Validate ``url`` and raise Error if url is invalid.
-
-        Default implementation: accept all URLs.
-
-        Override this method in a subclass for validating URLs.
-        """
-        return
-
-    def __open_url(self, url):
-        """Open ``url`` and answer instance which supports ``read()`` protocol.
-
-        Default implementation: open URL using urllib.request.urlopen.
-
-        Override this method in a subclass for opening URLs.
-        If ``__read_url()`` is also overridden, this method might not be used
-        anymore.
-        """
-        return urlopen(Request(url, headers=HTTP_HEADERS))
-
-    def __read_url(self, url):
-        """Read the content of ``url``.
-
-        Default implementation: read URL response from urllib.response.
-
-        Override this method in a subclass for reading the content of URLs.
-        """
-        return self.__open_url(url).read()
 
 
 def parse_url(url, base=None):
