@@ -204,12 +204,21 @@ class Node(dict):
 
         # Handle the CSS
         style = self.pop('_style', '') + ';' + self.pop('style', '')
-        for declaration in style.split(';'):
+        while style:
+            if ';' in style:
+                declaration, style = style.split(';', 1)
+                style = style.strip()
+            else:
+                declaration = style
+                style = ''
             name, colon, value = declaration.partition(':')
             if not colon:
                 continue
-            name, value = normalize_style_declaration(name, value)
-            self[name] = value
+            if name.strip().endswith('!'):
+                style += ';' + name.strip()[:-1] + ':' + value
+            else:
+                name, value = normalize_style_declaration(name, value)
+                self[name] = value
 
         # Replace currentColor by a real color value
         for attribute in COLOR_ATTRIBUTES:
