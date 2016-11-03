@@ -241,6 +241,22 @@ class Node(dict):
                         if self.tag == 'switch':
                             break
 
+    def get_url_fetcher(self):
+        if getattr(self, 'url_fetcher', None) is not None:
+            return self.url_fetcher
+        if getattr(self, 'parent', None) is not None:
+            return self.parent.get_url_fetcher()
+        return None
+
+    def get_url_fetcher_for(self, url):
+        url_fetcher = self.get_url_fetcher()
+        return None if url_fetcher is None else url_fetcher.fetcher_for(url)
+
+    def fetch_url(self, url, get_child_fetcher=True):
+        return read_url(
+            url, self.get_url_fetcher_for(url) if get_child_fetcher
+            else self.get_url_fetcher())
+
     def text_children(self, node, trailing_space, text_root=False):
         """Create children and return them."""
         children = []
@@ -259,7 +275,9 @@ class Node(dict):
             if child.tag == 'tref':
                 url = parse_url(child.get(
                     '{http://www.w3.org/1999/xlink}href')).geturl()
-                child_tree = Tree(url=url, parent=self)
+                child_tree = Tree(
+                    url=url, url_fetcher=self.get_url_fetcher_for(url),
+                    parent=self)
                 child_tree.clear()
                 child_tree.update(self)
                 child_node = Node(
@@ -325,6 +343,7 @@ class Tree(Node):
         bytestring = kwargs.get('bytestring')
         file_obj = kwargs.get('file_obj')
         url = kwargs.get('url')
+        self.url_fetcher = kwargs.get('url_fetcher')
         unsafe = kwargs.get('unsafe')
         parent = kwargs.get('parent')
         parent_children = kwargs.get('parent_children')
@@ -354,7 +373,8 @@ class Tree(Node):
                 root_parent = root_parent.parent
             tree = root_parent.xml_tree
         else:
-            bytestring = bytestring or read_url(parse_url(self.url))
+            if not bytestring:
+                bytestring = self.fetch_url(parse_url(self.url), False)
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
             parser = ElementTree.XMLParser(

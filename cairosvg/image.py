@@ -27,16 +27,16 @@ from PIL import Image
 from .helpers import node_format, preserve_ratio, preserved_ratio, size
 from .parser import Tree
 from .surface import cairo
-from .url import parse_url, read_url
+from .url import parse_url
 
 
 def image(surface, node):
     """Draw an image ``node``."""
     base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
     if not base_url and node.url:
-        base_url = os.path.dirname(node.url)
+        base_url = os.path.dirname(node.url) + '/'
     url = parse_url(node.get('{http://www.w3.org/1999/xlink}href'), base_url)
-    image_bytes = read_url(url)
+    image_bytes = node.fetch_url(url)
 
     if len(image_bytes) < 5:
         return
@@ -54,8 +54,8 @@ def image(surface, node):
         if 'y' in node:
             del node['y']
         tree = Tree(
-            url=url.geturl(), bytestring=image_bytes,
-            tree_cache=surface.tree_cache)
+            url=url.geturl(), url_fetcher=node.get_url_fetcher(),
+            bytestring=image_bytes, tree_cache=surface.tree_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
         if not viewbox:
