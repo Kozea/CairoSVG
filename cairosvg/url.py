@@ -32,8 +32,10 @@ HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 URL = re.compile(r'url\((.+)\)')
 
 
-def fetch(url):
-    """Fetch the content of ``url``."""
+def fetch(url, resource_type):
+    """Fetch the content of ``url``.
+    ``resource_type`` can be one of: svg, css, image
+    """
     return urlopen(Request(url, headers=HTTP_HEADERS)).read()
 
 
