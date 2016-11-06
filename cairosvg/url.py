@@ -79,7 +79,7 @@ def parse_url(url, base=None):
     return urlparse(url or '')
 
 
-def read_url(url, url_fetcher):
+def read_url(url, url_fetcher, resource_type):
     """Get bytes in a parsed ``url`` using ``url_fetcher``.
 
     If ``url_fetcher`` is None a default (no limitations) URLFetcher is used.
@@ -88,5 +88,4 @@ def read_url(url, url_fetcher):
         url = url.geturl()
     else:
         url = 'file://{}'.format(os.path.abspath(url.geturl()))
-
-    return url_fetcher(url)
+    return url_fetcher(url, resource_type)
