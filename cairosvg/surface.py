@@ -158,6 +158,8 @@ class Surface(object):
         self.cursor_d_position = [0, 0]
         self.text_path_width = 0
         self.tree_cache = {(tree.url, tree.get('id')): tree}
+        self.css_cache = tree.css_cache if parent_surface is None \
+            else parent_surface.css_cache
         if parent_surface:
             self.markers = parent_surface.markers
             self.gradients = parent_surface.gradients

@@ -36,8 +36,13 @@ def find_stylesheets(tree, url):
                 process.attrib.get('type', default_type) == 'text/css'):
             href = parse_url(process.attrib.get('href'), url)
             if href:
-                yield tinycss.make_parser().parse_stylesheet_bytes(
-                    tree.fetch_url(href))
+                href_string = href.geturl()
+                stylesheet = tree.css_cache.get(href_string, None)
+                if stylesheet is None:
+                    stylesheet = tinycss.make_parser().parse_stylesheet_bytes(
+                        tree.fetch_url(href))
+                    tree.css_cache[href_string] = stylesheet
+                yield stylesheet
         process = process.getprevious()
     for element in xml_tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
@@ -55,10 +60,18 @@ def find_stylesheets_rules(tree, stylesheet, url):
     for rule in stylesheet.rules:
         if isinstance(rule, tinycss.css21.ImportRule):
             css_url = parse_url(rule.uri, url)
-            stylesheet = tinycss.make_parser().parse_stylesheet(
-                tree.fetch_url(css_url).decode('utf-8'))
+            css_url_string = css_url.geturl()
+
+            # Check if stylesheet is already present and if not fetch it
+            stylesheet = tree.css_cache.get(css_url_string, None)
+            if stylesheet is None:
+                stylesheet = tinycss.make_parser().parse_stylesheet(
+                    tree.fetch_url(css_url).decode('utf-8'))
+                tree.css_cache[css_url_string] = stylesheet
+
+            # Find rules in stylesheet
             for rule in find_stylesheets_rules(tree, stylesheet,
-                                               css_url.geturl()):
+                                               css_url_string):
                 yield rule
         if not rule.at_keyword:
             yield rule

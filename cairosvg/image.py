@@ -55,7 +55,8 @@ def image(surface, node):
             del node['y']
         tree = Tree(
             url=url.geturl(), url_fetcher=node.url_fetcher,
-            bytestring=image_bytes, tree_cache=surface.tree_cache)
+            bytestring=image_bytes, tree_cache=surface.tree_cache,
+            css_cache=surface.css_cache)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
         if not viewbox:
