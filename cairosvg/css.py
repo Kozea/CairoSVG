@@ -41,7 +41,7 @@ def find_stylesheets(tree, url):
                 if stylesheet is None:
                     stylesheet = tinycss.make_parser().parse_stylesheet_bytes(
                         tree.fetch_url(href))
-                        # tree.fetch_url(href, 'css'))
+                    # tree.fetch_url(href, 'css'))
                     tree.css_cache[href_string] = stylesheet
                 yield stylesheet
         process = process.getprevious()
@@ -68,7 +68,7 @@ def find_stylesheets_rules(tree, stylesheet, url):
             if stylesheet is None:
                 stylesheet = tinycss.make_parser().parse_stylesheet(
                     tree.fetch_url(css_url).decode('utf-8'))
-                    # tree.fetch_url(css_url, 'css').decode('utf-8'))
+                # tree.fetch_url(css_url, 'css').decode('utf-8'))
                 tree.css_cache[css_url_string] = stylesheet
 
             # Find rules in stylesheet
