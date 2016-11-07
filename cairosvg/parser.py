@@ -266,6 +266,11 @@ class Node(dict):
             if child.tag == 'tref':
                 url = parse_url(child.get(
                     '{http://www.w3.org/1999/xlink}href')).geturl()
+                # No reference to tree or surface here to retrieve css_cache.
+                # TODO: decide whether to leave it (ie no caching here) or try
+                # to obtain css_cache from one of the parent nodes. The tref
+                # tag is not supported in SVG 1.2 or beyond, so usage might be
+                # limited.
                 child_tree = Tree(
                     url=url, url_fetcher=self.url_fetcher, parent=self)
                 child_tree.clear()
@@ -344,6 +349,7 @@ class Tree(Node):
         element_id = None
 
         self.url_fetcher = kwargs.get('url_fetcher', fetch)
+        self.css_cache = kwargs.get('css_cache', {})
 
         if bytestring is not None:
             self.url = url
