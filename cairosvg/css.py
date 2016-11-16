@@ -106,6 +106,8 @@ def apply_stylesheets(tree):
                     _old_value, old_weight = style[name]
                     if old_weight > weight:
                         continue
+                if important:
+                    name = name + '!'
                 style[name] = value, weight
 
     for element, style in style_by_element.items():
