@@ -36,7 +36,7 @@ def image(surface, node):
     if not base_url and node.url:
         base_url = os.path.dirname(node.url) + '/'
     url = parse_url(node.get('{http://www.w3.org/1999/xlink}href'), base_url)
-    image_bytes = node.fetch_url(url)
+    image_bytes = node.fetch_url(url, 'image')
 
     if len(image_bytes) < 5:
         return

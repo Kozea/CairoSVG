@@ -254,8 +254,8 @@ class Node(dict):
                         if self.tag == 'switch':
                             break
 
-    def fetch_url(self, url, get_child_fetcher=True):
-        return read_url(url, self.url_fetcher)
+    def fetch_url(self, url, resource_type):
+        return read_url(url, self.url_fetcher, resource_type)
 
     def text_children(self, node, trailing_space, text_root=False):
         """Create children and return them."""
@@ -378,7 +378,7 @@ class Tree(Node):
             tree = root_parent.xml_tree
         else:
             if not bytestring:
-                bytestring = self.fetch_url(parse_url(self.url), False)
+                bytestring = self.fetch_url(parse_url(self.url), 'svg')
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
             parser = ElementTree.XMLParser(
