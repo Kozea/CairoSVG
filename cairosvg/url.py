@@ -32,14 +32,53 @@ HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 URL = re.compile(r'url\((.+)\)')
 
 
-def fetch(url, resource_type):
-    """Fetch the content of ``url``.
+class URLFetcher(object):
 
-    ``resource_type`` is the mimetype of the resource (currently one of
-    image/*, image/svg+xml, text/css).
+    def fetch(self, url, resource_type):
+        """Fetch the content of ``url``.
 
-    """
-    return urlopen(Request(url, headers=HTTP_HEADERS)).read()
+        ``resource_type`` is the mimetype of the resource (currently one of
+        image/*, image/svg+xml, text/css).
+
+        """
+        return urlopen(Request(url, headers=HTTP_HEADERS)).read()
+
+
+class CachingURLFetcher(URLFetcher):
+
+    def __init__(self, resource_type_mask):
+        """Initialize the receiver with the specified ``resource_type_mask``"""
+        super().__init__()
+        self.cached_content, self.cached_format =\
+            resource_type_mask.split('/', 1)
+        self.cache = {}
+
+    @staticmethod
+    def is_data_url(url):
+        return url.startswith('data:')
+
+    def is_cached_type(self, resource_type):
+        """Answer whether ``resource_type`` matches the receivers cached
+        content type and format.
+        """
+        resource_content, resource_format = resource_type.split('/', 1)
+        return self.cached_content in ('*', resource_content) and \
+               self.cached_format in ('*', resource_format)
+
+    def fetch(self, url, resource_type):
+        """Fetch the content of ``url``.
+
+        If ``resource_type`` matches the cached resource types, use cache to
+        retrieve/store the content (if ``url`` does not contain data itself).
+        """
+        if not self.is_data_url(url) and self.is_cached_type(resource_type):
+            content = self.cache.get(url, None)
+            if content is None:
+                content = super().fetch(url, resource_type)
+                self.cache[url] = content
+            return content
+
+        return super().fetch(url, resource_type)
 
 
 def parse_url(url, base=None):
@@ -93,4 +132,8 @@ def read_url(url, url_fetcher, resource_type):
         url = url.geturl()
     else:
         url = 'file://{}'.format(os.path.abspath(url.geturl()))
-    return url_fetcher(url, resource_type)
+    return url_fetcher.fetch(url, resource_type)
+
+
+"""Create singleton URL fetcher which can be used as default fetcher."""
+DEFAULT_URL_FETCHER = URLFetcher()
