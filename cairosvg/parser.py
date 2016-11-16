@@ -378,7 +378,8 @@ class Tree(Node):
             tree = root_parent.xml_tree
         else:
             if not bytestring:
-                bytestring = self.fetch_url(parse_url(self.url), 'svg')
+                bytestring = self.fetch_url(
+                    parse_url(self.url), 'image/svg+xml')
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
             parser = ElementTree.XMLParser(

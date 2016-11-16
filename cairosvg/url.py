@@ -34,7 +34,10 @@ URL = re.compile(r'url\((.+)\)')
 
 def fetch(url, resource_type):
     """Fetch the content of ``url``.
-    ``resource_type`` can be one of: svg, css, image
+
+    ``resource_type`` is the mimetype of the resource (currently one of
+    image/*, image/svg+xml, text/css).
+
     """
     return urlopen(Request(url, headers=HTTP_HEADERS)).read()
 

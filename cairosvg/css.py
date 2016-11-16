@@ -37,7 +37,7 @@ def find_stylesheets(tree, url):
             href = parse_url(process.attrib.get('href'), url)
             if href:
                 yield tinycss.make_parser().parse_stylesheet_bytes(
-                    tree.fetch_url(href, 'css'))
+                    tree.fetch_url(href, 'text/css'))
         process = process.getprevious()
     for element in xml_tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
@@ -56,7 +56,7 @@ def find_stylesheets_rules(tree, stylesheet, url):
         if isinstance(rule, tinycss.css21.ImportRule):
             css_url = parse_url(rule.uri, url)
             stylesheet = tinycss.make_parser().parse_stylesheet(
-                tree.fetch_url(css_url, 'css').decode('utf-8'))
+                tree.fetch_url(css_url, 'text/css').decode('utf-8'))
             for rule in find_stylesheets_rules(tree, stylesheet,
                                                css_url.geturl()):
                 yield rule
