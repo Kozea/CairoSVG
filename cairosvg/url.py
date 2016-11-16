@@ -63,7 +63,7 @@ class CachingURLFetcher(URLFetcher):
         """
         resource_content, resource_format = resource_type.split('/', 1)
         return self.cached_content in ('*', resource_content) and \
-               self.cached_format in ('*', resource_format)
+            self.cached_format in ('*', resource_format)
 
     def fetch(self, url, resource_type):
         """Fetch the content of ``url``.

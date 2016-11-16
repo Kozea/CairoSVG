@@ -26,7 +26,7 @@ import os
 import sys
 import argparse
 
-from .url import URLFetcher, CachingURLFetcher
+from .url import CachingURLFetcher
 from . import surface
 
 
