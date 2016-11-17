@@ -260,6 +260,7 @@ class Surface(object):
         # Save context and related attributes
         old_parent_node = self.parent_node
         old_font_size = self.font_size
+        old_context_size = self.context_width, self.context_height
         self.parent_node = node
         self.font_size = size(self, node.get('font-size', '12pt'))
         self.context.save()
@@ -432,6 +433,7 @@ class Surface(object):
         self.context.restore()
         self.parent_node = old_parent_node
         self.font_size = old_font_size
+        self.context_width, self.context_height = old_context_size
 
 
 class PDFSurface(Surface):

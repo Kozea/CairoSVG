@@ -45,3 +45,4 @@ def svg(surface, node):
         surface.context.clip()
     surface.context.scale(scale_x, scale_y)
     surface.context.translate(translate_x, translate_y)
+    surface.context_width, surface.context_height = rect_width, rect_height
