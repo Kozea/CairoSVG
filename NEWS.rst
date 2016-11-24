@@ -3,8 +3,8 @@
 ======
 
 
-Version 2.0, not released yet
-=============================
+Version 2.0, released on 2016-11-24
+===================================
 
 * Drop Python 2 support
 * Drop pycairo support
