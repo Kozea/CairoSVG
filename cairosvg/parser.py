@@ -359,6 +359,8 @@ class Tree(Node):
         elif file_obj is not None:
             bytestring = file_obj.read()
             self.url = getattr(file_obj, 'name', None)
+            if self.url == '<stdin>':
+                self.url = None
         elif url is not None:
             parent_url = parent.url if parent else None
             parsed_url = parse_url(url, parent_url)
@@ -368,10 +370,11 @@ class Tree(Node):
             else:
                 self.url = parsed_url.geturl()
                 element_id = None
+            self.url = self.url or None
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
-        if parent and self.url and self.url == parent.url:
+        if parent and self.url == parent.url:
             root_parent = parent
             while root_parent.parent:
                 root_parent = root_parent.parent
