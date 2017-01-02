@@ -21,12 +21,11 @@ Utils dealing with URLs.
 
 import os.path
 import re
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
-from pathlib import Path
 
 from . import __version__
-
 
 HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 
@@ -78,8 +77,8 @@ def nt_compatible_path(path):
     if os.name == 'nt':
         if re.match(r'^/[a-z]:/.*$', path,
                     re.IGNORECASE | re.MULTILINE | re.DOTALL):
-            path = re.sub(r'^/', '', path, re.IGNORECASE | re.MULTILINE
-                          | re.DOTALL)
+            path = re.sub(r'^/', '', path,
+                          re.IGNORECASE | re.MULTILINE | re.DOTALL)
             return path
     else:
         return path
