@@ -224,4 +224,13 @@ def test_script():
         finally:
             shutil.rmtree(temp)
 
-        os.remove(svg_filename)
+        try:
+            os.remove(svg_filename)
+
+        # On Windows/NT systems, the temporary file sometimes fails to
+        # get deleted due to ``PermissionError`` exception. This is due
+        # to how Windows/NT handles the same file being opened twice at
+        # the same time.
+        except PermissionError:
+            print("[-] failed to delete temporary file: " + svg_filename)
+            pass
