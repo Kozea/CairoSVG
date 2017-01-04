@@ -3,8 +3,14 @@
 ======
 
 
-Version 2.0, released on 2016-11-24
-===================================
+Version 2.0.1, released on 2017-01-04
+=====================================
+
+* Don't crash on relative refs with no input URL
+
+
+Version 2.0.0, released on 2016-11-24
+=====================================
 
 * Drop Python 2 support
 * Drop pycairo support
