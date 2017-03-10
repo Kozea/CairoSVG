@@ -28,15 +28,24 @@ raster images are handled by [Pillow](http://python-imaging.github.io/).
 CairoSVG is available on [PyPI](https://pypi.python.org/pypi/CairoSVG), you can
 install it with pip:
 
-    $ pip install cairosvg
+    $ pip3 install cairosvg
+
+The current version of CairoSVG requires at least Python 3.4, it doesn't work
+with Python 2.x. Older versions of CairoSVG (1.x) work with Python 2.x, but
+they're not supported anymore.
 
 CairoSVG and its dependencies may require additional tools during the
-installation: a compiler, Python headers and FFI headers. These tools have
-different names depending on the OS you are using, but:
+installation: a compiler, Python headers, Cairo, lxml and FFI headers. These
+tools have different names depending on the OS you are using, but:
 
-- on Windows, you'll have to install Visual C++ compiler for Python,
-- on Linux, you'll have to install the `python-dev` and `libffi-dev` packages
-  (names may vary for your distribution).
+- on Windows, you'll have to install Visual C++ compiler for Python, Cairo and
+  lxml,
+- on Linux, you'll have to install the `cairo`, `python3-lxml`, `python3-dev`
+  and `libffi-dev` packages (names may vary for your distribution).
+
+If you don't know how to install these tools, you can follow the simple steps of
+[WeasyPrint's installation guide](http://weasyprint.readthedocs.io/en/latest/install.html):
+installing WeasyPrint will also install CairoSVG.
 
 ### Command line
 
