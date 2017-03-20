@@ -160,9 +160,9 @@ def text(surface, node):
         surface.stroke_and_fill = True
         cairo_path = surface.context.copy_path_flat()
         surface.context.new_path()
-        length = path_length(cairo_path)
+        length = path_length(cairo_path) + x_bearing
         start_offset = size(surface, node.get('startOffset', 0), length)
-        surface.text_path_width += start_offset
+        surface.text_path_width += start_offset - x_align
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
@@ -176,9 +176,7 @@ def text(surface, node):
             text_extents = surface.context.text_extents(letter)
             extents = text_extents[4]
             if text_path:
-                start = (
-                    surface.text_path_width + surface.cursor_d_position[0] -
-                    x_align)
+                start = surface.text_path_width + surface.cursor_d_position[0]
                 start_point = point_following_path(cairo_path, start)
                 middle = start + extents / 2
                 middle_point = point_following_path(cairo_path, middle)
