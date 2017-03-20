@@ -3,6 +3,13 @@
 ======
 
 
+Version 2.0.12 released on 2017-03-20
+=====================================
+
+* Handle `text-align` in textPath tags
+* Test with Python 3.6
+
+
 Version 2.0.1, released on 2017-01-04
 =====================================
 
