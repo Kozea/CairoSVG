@@ -176,7 +176,9 @@ def text(surface, node):
             text_extents = surface.context.text_extents(letter)
             extents = text_extents[4]
             if text_path:
-                start = surface.text_path_width + surface.cursor_d_position[0]
+                start = (
+                    surface.text_path_width + surface.cursor_d_position[0] -
+                    x_align)
                 start_point = point_following_path(cairo_path, start)
                 middle = start + extents / 2
                 middle_point = point_following_path(cairo_path, middle)
