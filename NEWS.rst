@@ -3,10 +3,16 @@
 ======
 
 
-Version 2.0.12 released on 2017-03-20
-=====================================
+Version 2.0.3 released on 2017-05-02
+====================================
 
-* Handle `text-align` in textPath tags
+* Add ``python_requires`` in ``setup.py``
+
+
+Version 2.0.2 released on 2017-03-20
+====================================
+
+* Handle ``text-align`` in textPath tags
 * Test with Python 3.6
 
 
