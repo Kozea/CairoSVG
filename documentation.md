@@ -28,24 +28,33 @@ raster images are handled by [Pillow](http://python-imaging.github.io/).
 CairoSVG is available on [PyPI](https://pypi.python.org/pypi/CairoSVG), you can
 install it with pip:
 
-    $ pip install cairosvg
+    $ pip3 install cairosvg
+
+The current version of CairoSVG requires at least Python 3.4, it doesn't work
+with Python 2.x. Older versions of CairoSVG (1.x) work with Python 2.x, but
+they're not supported anymore.
 
 CairoSVG and its dependencies may require additional tools during the
-installation: a compiler, Python headers and FFI headers. These tools have
-different names depending on the OS you are using, but:
+installation: a compiler, Python headers, Cairo, lxml and FFI headers. These
+tools have different names depending on the OS you are using, but:
 
-- on Windows, you'll have to install Visual C++ compiler for Python,
-- on Linux, you'll have to install the `python-dev` and `libffi-dev` packages
-  (names may vary for your distribution).
+- on Windows, you'll have to install Visual C++ compiler for Python, Cairo and
+  lxml,
+- on Linux, you'll have to install the `cairo`, `python3-lxml`, `python3-dev`
+  and `libffi-dev` packages (names may vary for your distribution).
+
+If you don't know how to install these tools, you can follow the simple steps of
+[WeasyPrint's installation guide](http://weasyprint.readthedocs.io/en/latest/install.html):
+installing WeasyPrint will also install CairoSVG.
 
 ### Command line
 
 Here is the simple CairoSVG command line usage:
 
     $ cairosvg --help
-    usage: cairosvg.py [-h] [-v] [-f {pdf,png,ps,svg}] [-d DPI] [-W WIDTH]
-                       [-H HEIGHT] [-o OUTPUT]
-                       input
+    usage: cairosvg [-h] [-v] [-f {pdf,png,ps,svg}] [-d DPI] [-W WIDTH]
+                    [-H HEIGHT] [-s SCALE] [-u] [-o OUTPUT]
+                    input
 
     CairoSVG - A simple SVG converter based on Cairo.
 
@@ -62,6 +71,10 @@ Here is the simple CairoSVG command line usage:
                             width of the parent container in pixels
       -H HEIGHT, --height HEIGHT
                             height of the parent container in pixels
+      -s SCALE, --scale SCALE
+                            output scaling factor
+      -u, --unsafe          resolve XML entities and allow very large files
+                            (WARNING: vulnerable to XXE attacks and various DoS)
       -o OUTPUT, --output OUTPUT
                             output filename
 
@@ -95,6 +108,15 @@ These functions expect one of these named parameters:
 - `url`, an URL or a filename, or
 - `file_obj`, a file-like object, or
 - `bytestring`, a byte string containing SVG.
+
+They can also receive these optional parameters corresponding to the
+command-line options:
+
+- `parent_width`,
+- `parent_height`,
+- `dpi`,
+- `scale`, and
+- `unsafe`.
 
 If the `write_to` argument is provided (filename or file-like object), the
 output is written there. Otherwise, the function returns a byte string.

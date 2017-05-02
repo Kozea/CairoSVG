@@ -208,9 +208,7 @@ CairoSVG uses ElementTree internally, and has no real DOM interface.
 
 ### Defining an SVG document fragment: the `svg` element
 
-The `svg` tag is supported. In CairoSVG, `svg` tags that are direct
-children of the root `svg` tag are considered as pages in multi-pages output
-formats (PDF and PS).
+The `svg` tag is supported.
 
 
 ### Grouping: the `g` element
@@ -242,7 +240,7 @@ external SVG files.
 
 ### The `image` element
 
-The `image` tag is supported by Pystacia.
+The `image` tag is supported by Pillow.
 
 
 ### Conditional processing
