@@ -42,6 +42,7 @@ setup(
     packages=['cairosvg'],
     provides=['cairosvg'],
     setup_requires=pytest_runner,
+    python_requires='>=3.4',
     install_requires=['cairocffi', 'lxml', 'cssselect', 'pillow', 'tinycss'],
     tests_require=[
         'pytest-cov', 'pytest-flake8', 'pytest-isort', 'pytest-runner'],
