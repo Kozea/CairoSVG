@@ -26,6 +26,7 @@ import os
 import sys
 import argparse
 
+from .url import CachingURLFetcher
 from . import surface
 
 
@@ -34,6 +35,13 @@ SURFACES = {
     'PNG': surface.PNGSurface,
     'PS': surface.PSSurface,
     'SVG': surface.SVGSurface,
+}
+
+CACHE_OPTIONS = {
+    'all': '*/*',
+    'css': '*/css',
+    'image': 'image/*',
+    'none': None
 }
 
 
@@ -62,6 +70,11 @@ def main():
         '-f', '--format', help='output format',
         choices=sorted([surface.lower() for surface in SURFACES]))
     parser.add_argument(
+        '-c', '--cache', default='none',
+        help='cache files of the specified type (or none)',
+        choices=sorted(CACHE_OPTIONS.keys())
+    )
+    parser.add_argument(
         '-d', '--dpi', default=96, type=float,
         help='ratio between 1 inch and 1 pixel')
     parser.add_argument(
@@ -88,6 +101,8 @@ def main():
         kwargs['file_obj'] = sys.stdin.buffer
     else:
         kwargs['url'] = options.input
+    if options.cache != 'none':
+        kwargs['url_fetcher'] = CachingURLFetcher(CACHE_OPTIONS[options.cache])
     output_format = (
         options.format or
         os.path.splitext(options.output)[1].lstrip('.') or

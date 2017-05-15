@@ -28,7 +28,7 @@ import lxml.etree as ElementTree
 from .css import apply_stylesheets
 from .features import match_features
 from .helpers import flatten, pop_rotation, rotations
-from .url import fetch, parse_url, read_url
+from .url import DEFAULT_URL_FETCHER, parse_url, read_url
 
 # 'display' is actually inherited but handled differently because some markers
 # are part of a none-displaying group (see test painting-marker-07-f.svg)
@@ -352,7 +352,7 @@ class Tree(Node):
         tree_cache = kwargs.get('tree_cache')
         element_id = None
 
-        self.url_fetcher = kwargs.get('url_fetcher', fetch)
+        self.url_fetcher = kwargs.get('url_fetcher', DEFAULT_URL_FETCHER)
 
         if bytestring is not None:
             self.url = url
