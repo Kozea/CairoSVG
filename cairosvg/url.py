@@ -26,7 +26,6 @@ from urllib.request import Request, urlopen
 
 from . import __version__
 
-
 HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 
 URL = re.compile(r'url\((.+)\)')

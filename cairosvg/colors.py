@@ -21,7 +21,6 @@ SVG colors.
 
 import re
 
-
 COLORS = {
     'aliceblue': (240 / 255, 248 / 255, 255 / 255, 1),
     'antiquewhite': (250 / 255, 235 / 255, 215 / 255, 1),
