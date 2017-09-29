@@ -20,7 +20,7 @@ Handle CSS stylesheets.
 """
 
 import cssselect
-import tinycss
+import tinycss2
 
 from .url import parse_url
 
@@ -36,8 +36,10 @@ def find_stylesheets(tree, url):
                 process.attrib.get('type', default_type) == 'text/css'):
             href = parse_url(process.attrib.get('href'), url)
             if href:
-                yield tinycss.make_parser().parse_stylesheet_bytes(
-                    tree.fetch_url(href, 'text/css'))
+                rules, coding = tinycss2.parse_stylesheet_bytes(
+                    tree.fetch_url(href, 'text/css'), skip_comments=True,
+                    skip_whitespace=True)
+                yield rules
         process = process.getprevious()
     for element in xml_tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
@@ -47,20 +49,27 @@ def find_stylesheets(tree, url):
             # TODO: pass href for relative URLs
             # TODO: support media types
             # TODO: what if <style> has children elements?
-            yield tinycss.make_parser().parse_stylesheet(element.text)
+            yield tinycss2.parse_stylesheet(
+                element.text, skip_comments=True, skip_whitespace=True)
 
 
 def find_stylesheets_rules(tree, stylesheet, url):
     """Find the rules in a stylesheet."""
-    for rule in stylesheet.rules:
-        if isinstance(rule, tinycss.css21.ImportRule):
-            css_url = parse_url(rule.uri, url)
-            stylesheet = tinycss.make_parser().parse_stylesheet(
-                tree.fetch_url(css_url, 'text/css').decode('utf-8'))
-            for rule in find_stylesheets_rules(tree, stylesheet,
-                                               css_url.geturl()):
-                yield rule
-        if not rule.at_keyword:
+    for rule in stylesheet:
+        if rule.type == 'at-rule' and rule.lower_at_keyword == 'import':
+            tokens = [
+                token for token in rule.prelude
+                if token.type not in ('whitespace', 'comment')]
+            if tokens and tokens[0].type in ('url', 'string'):
+                css_url = parse_url(tokens[0].value, url)
+                stylesheet = tinycss2.parse_stylesheet(
+                    tree.fetch_url(css_url, 'text/css').decode('utf-8'))
+                for rule in find_stylesheets_rules(
+                        tree, stylesheet, css_url.geturl()):
+                    yield rule
+            else:
+                continue
+        elif rule.type != 'at-rule':
             yield rule
 
 
@@ -74,17 +83,18 @@ def find_style_rules(tree):
 
 def get_declarations(rule):
     """Get the declarations in ``rule``."""
-    for declaration in rule.declarations:
-        # TODO: filter out invalid values
-        yield (
-            declaration.name,
-            declaration.value.as_css(),
-            bool(declaration.priority))
+    if rule.type == 'qualified-rule':
+        for declaration in tinycss2.parse_declaration_list(
+                rule.content, skip_comments=True, skip_whitespace=True):
+            value = ''.join(part.serialize() for part in declaration.value)
+            # TODO: filter out invalid values
+            yield declaration.lower_name, value, declaration.important
 
 
 def match_selector(rule, tree):
     """Yield the ``(element, specificity)`` in ``tree`` matching ``rule``."""
-    selector_list = cssselect.parse(rule.selector.as_css())
+    selector_list = cssselect.parse(
+        ''.join(part.serialize() for part in rule.prelude))
     translator = cssselect.GenericTranslator()
     for selector in selector_list:
         if not selector.pseudo_element:
@@ -98,6 +108,8 @@ def apply_stylesheets(tree):
     style_by_element = {}
     for rule in find_style_rules(tree):
         declarations = list(get_declarations(rule))
+        if rule.type in ('whitespace', 'comment'):
+            continue
         for element, specificity in match_selector(rule, tree.xml_tree):
             style = style_by_element.setdefault(element, {})
             for name, value, important in declarations:
