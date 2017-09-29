@@ -22,4 +22,5 @@ CairoSVG entry point.
 """
 
 import cairosvg
+
 cairosvg.main()
