@@ -3,6 +3,14 @@
 ======
 
 
+Version 2.1.0 released on 2017-09-30
+====================================
+
+* Use cssselect2 and tinycss2 instead of cssselect and tinycss
+* Don't require lxml anymore
+* Rely on defusedxml to detect unsafe SVG files
+
+
 Version 2.0.3 released on 2017-05-02
 ====================================
 
