@@ -179,7 +179,7 @@ class Node(dict):
         self.style = style
         self.tag = (
             element.local_name
-            if element.namespace_url == 'http://www.w3.org/2000/svg' else
+            if element.namespace_url in ('', 'http://www.w3.org/2000/svg') else
             '{%s}%s' % (element.namespace_url, element.local_name))
         self.text = node.text
         self.node = node
