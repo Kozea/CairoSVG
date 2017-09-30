@@ -3,6 +3,12 @@
 ======
 
 
+Version 2.1.1 released on 2017-09-30
+====================================
+
+* Use http://www.w3.org/2000/svg as default namespace
+
+
 Version 2.1.0 released on 2017-09-30
 ====================================
 
