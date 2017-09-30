@@ -19,31 +19,19 @@ Handle CSS stylesheets.
 
 """
 
-import cssselect
+import cssselect2
 import tinycss2
 
 from .url import parse_url
 
 
-def find_stylesheets(tree, url):
+def find_stylesheets(tree):
     """Find the stylesheets included in ``tree``."""
     # TODO: support contentStyleType on <svg>
     default_type = 'text/css'
-    xml_tree = tree.xml_tree
-    process = xml_tree.getprevious()
-    while process is not None:
-        if (getattr(process, 'target', None) == 'xml-stylesheet' and
-                process.attrib.get('type', default_type) == 'text/css'):
-            href = parse_url(process.attrib.get('href'), url)
-            if href:
-                rules, coding = tinycss2.parse_stylesheet_bytes(
-                    tree.fetch_url(href, 'text/css'), skip_comments=True,
-                    skip_whitespace=True)
-                yield rules
-        process = process.getprevious()
-    for element in xml_tree.iter():
+    for element in tree.xml_tree.iter():
         # http://www.w3.org/TR/SVG/styling.html#StyleElement
-        if (element.tag == 'style' and
+        if (element.tag == '{http://www.w3.org/2000/svg}style' and
                 element.get('type', default_type) == 'text/css' and
                 element.text):
             # TODO: pass href for relative URLs
@@ -53,32 +41,69 @@ def find_stylesheets(tree, url):
                 element.text, skip_comments=True, skip_whitespace=True)
 
 
-def find_stylesheets_rules(tree, stylesheet, url):
+def find_stylesheets_rules(tree, stylesheet_rules, url):
     """Find the rules in a stylesheet."""
-    for rule in stylesheet:
-        if rule.type == 'at-rule' and rule.lower_at_keyword == 'import':
-            tokens = [
-                token for token in rule.prelude
-                if token.type not in ('whitespace', 'comment')]
-            if tokens and tokens[0].type in ('url', 'string'):
-                css_url = parse_url(tokens[0].value, url)
+    for rule in stylesheet_rules:
+        if rule.type == 'at-rule':
+            if rule.lower_at_keyword == 'import' and rule.content is None:
+                # TODO: support media types in @import
+                url_token = tinycss2.parse_one_component_value(rule.prelude)
+                if url_token.type not in ('string', 'url'):
+                    continue
+                css_url = parse_url(url_token.value, url)
                 stylesheet = tinycss2.parse_stylesheet(
                     tree.fetch_url(css_url, 'text/css').decode('utf-8'))
                 for rule in find_stylesheets_rules(
                         tree, stylesheet, css_url.geturl()):
                     yield rule
-            else:
-                continue
-        elif rule.type != 'at-rule':
+            # TODO: support media types
+            # if rule.lower_at_keyword == 'media':
+        if rule.type == 'qualified-rule':
             yield rule
+        # TODO: warn on error
+        # if rule.type == 'error':
 
 
-def find_style_rules(tree):
-    """Find the style rules in ``tree``."""
-    for stylesheet in find_stylesheets(tree, tree.url):
-        # TODO: warn for each stylesheet.errors
-        for rule in find_stylesheets_rules(tree, stylesheet, tree.url):
-            yield rule
+def parse_declarations(input):
+    normal_declarations = []
+    important_declarations = []
+    for declaration in tinycss2.parse_declaration_list(input):
+        # TODO: warn on error
+        # if declaration.type == 'error':
+        if (declaration.type == 'declaration' and
+                not declaration.name.startswith('-')):
+            # Serializing perfectly good tokens just to re-parse them later :(
+            value = tinycss2.serialize(declaration.value).strip()
+            declarations = (
+                important_declarations if declaration.important
+                else normal_declarations)
+            declarations.append((declaration.lower_name, value))
+    return normal_declarations, important_declarations
+
+
+def parse_stylesheets(tree, url):
+    """Find and parse the stylesheets in ``tree``.
+
+    Return two :class:`cssselect2.Matcher` objects,
+    for normal and !important declarations.
+
+    """
+    normal_matcher = cssselect2.Matcher()
+    important_matcher = cssselect2.Matcher()
+    for stylesheet in find_stylesheets(tree):
+        for rule in find_stylesheets_rules(tree, stylesheet, url):
+            normal_declarations, important_declarations = parse_declarations(
+                rule.content)
+            for selector in cssselect2.compile_selector_list(rule.prelude):
+                if (selector.pseudo_element is None and
+                        not selector.never_matches):
+                    if normal_declarations:
+                        normal_matcher.add_selector(
+                            selector, normal_declarations)
+                    if important_declarations:
+                        important_matcher.add_selector(
+                            selector, important_declarations)
+    return normal_matcher, important_matcher
 
 
 def get_declarations(rule):
@@ -89,41 +114,3 @@ def get_declarations(rule):
             value = ''.join(part.serialize() for part in declaration.value)
             # TODO: filter out invalid values
             yield declaration.lower_name, value, declaration.important
-
-
-def match_selector(rule, tree):
-    """Yield the ``(element, specificity)`` in ``tree`` matching ``rule``."""
-    selector_list = cssselect.parse(
-        ''.join(part.serialize() for part in rule.prelude))
-    translator = cssselect.GenericTranslator()
-    for selector in selector_list:
-        if not selector.pseudo_element:
-            specificity = selector.specificity()
-            for element in tree.xpath(translator.selector_to_xpath(selector)):
-                yield element, specificity
-
-
-def apply_stylesheets(tree):
-    """Apply the stylesheet in ``tree`` to ``tree``."""
-    style_by_element = {}
-    for rule in find_style_rules(tree):
-        declarations = list(get_declarations(rule))
-        if rule.type in ('whitespace', 'comment'):
-            continue
-        for element, specificity in match_selector(rule, tree.xml_tree):
-            style = style_by_element.setdefault(element, {})
-            for name, value, important in declarations:
-                weight = important, specificity
-                if name in style:
-                    _old_value, old_weight = style[name]
-                    if old_weight > weight:
-                        continue
-                if important:
-                    name = name + '!'
-                style[name] = value, weight
-
-    for element, style in style_by_element.items():
-        values = [
-            '{}: {}'.format(name, value)
-            for name, (value, weight) in style.items()]
-        element.set('_style', ';'.join(values))

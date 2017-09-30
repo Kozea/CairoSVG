@@ -57,7 +57,7 @@ def update_def_href(surface, def_name, def_dict):
         def_dict[def_name] = Tree(
             url='#{}'.format(def_name), url_fetcher=def_node.url_fetcher,
             parent=href_node, parent_children=(not def_node.children),
-            tree_cache=surface.tree_cache)
+            tree_cache=surface.tree_cache, unsafe=def_node.unsafe)
         # Inherit attributes generally not inherited
         for key, value in href_node.items():
             if key not in def_dict[def_name]:
@@ -362,7 +362,7 @@ def use(surface, node):
     href = parse_url(node.get('{http://www.w3.org/1999/xlink}href')).geturl()
     tree = Tree(
         url=href, url_fetcher=node.url_fetcher, parent=node,
-        tree_cache=surface.tree_cache)
+        tree_cache=surface.tree_cache, unsafe=node.unsafe)
 
     if not match_features(tree.xml_tree):
         surface.context.restore()

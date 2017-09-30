@@ -22,10 +22,12 @@ SVG Parser.
 import gzip
 import re
 from urllib.parse import urlunparse
+from xml.etree.ElementTree import Element
 
-import lxml.etree as ElementTree
+import cssselect2
+from defusedxml import ElementTree
 
-from .css import apply_stylesheets
+from . import css
 from .features import match_features
 from .helpers import flatten, pop_rotation, rotations
 from .url import fetch, parse_url, read_url
@@ -61,21 +63,6 @@ COLOR_ATTRIBUTES = frozenset((
     'stop-color',
     'stroke',
 ))
-
-
-def remove_svg_namespace(tree):
-    """Remove the SVG namespace from ``tree`` tags.
-
-    ``lxml.cssselect`` does not support empty/default namespaces, so remove any
-    SVG namespace.
-
-    """
-    prefix = '{http://www.w3.org/2000/svg}'
-    prefix_len = len(prefix)
-    for element in tree.iter():
-        tag = element.tag
-        if hasattr(tag, 'startswith') and tag.startswith(prefix):
-            element.tag = tag[prefix_len:]
 
 
 def handle_white_spaces(string, preserve):
@@ -179,17 +166,25 @@ def normalize_font_style_declaration(value):
 class Node(dict):
     """SVG node with dict-like properties and children."""
 
-    def __init__(self, node, url_fetcher, parent=None, parent_children=False,
-                 url=None):
+    def __init__(self, element, style, url_fetcher, parent=None,
+                 parent_children=False, url=None, unsafe=False):
         """Create the Node from ElementTree ``node``, with ``parent`` Node."""
         super().__init__()
         self.children = ()
 
         self.root = False
-        self.tag = node.tag
+
+        node = element.etree_element
+        self.element = element
+        self.style = style
+        self.tag = (
+            element.local_name
+            if element.namespace_url == 'http://www.w3.org/2000/svg' else
+            '{%s}%s' % (element.namespace_url, element.local_name))
         self.text = node.text
         self.node = node
         self.url_fetcher = url_fetcher
+        self.unsafe = unsafe
 
         # Inherits from parent properties
         if parent is not None:
@@ -204,23 +199,21 @@ class Node(dict):
 
         self.update(self.node.attrib)
 
-        # Handle the CSS
-        style = self.pop('_style', '') + ';' + self.pop('style', '')
-        while style:
-            if ';' in style:
-                declaration, style = style.split(';', 1)
-                style = style.strip()
-            else:
-                declaration = style
-                style = ''
-            name, colon, value = declaration.partition(':')
-            if not colon:
-                continue
-            if name.strip().endswith('!'):
-                style += ';' + name.strip()[:-1] + ':' + value
-            else:
-                name, value = normalize_style_declaration(name, value)
-                self[name] = value
+        # Apply CSS rules
+        style_attr = node.get('style')
+        if style_attr:
+            normal_attr, important_attr = css.parse_declarations(style_attr)
+        else:
+            normal_attr = []
+            important_attr = []
+        normal_matcher, important_matcher = style
+        normal = [rule[-1] for rule in normal_matcher.match(element)]
+        important = [rule[-1] for rule in important_matcher.match(element)]
+        for declaration_lists in (
+                normal, [normal_attr], important, [important_attr]):
+            for declarations in declaration_lists:
+                for name, value in declarations:
+                    self[name] = value.strip()
 
         # Replace currentColor by a real color value
         for attribute in COLOR_ATTRIBUTES:
@@ -238,31 +231,33 @@ class Node(dict):
 
         # Manage text by creating children
         if self.tag in ('text', 'textPath', 'a'):
-            self.children, _ = self.text_children(node, True, True)
+            self.children, _ = self.text_children(
+                element, trailing_space=True, text_root=True)
 
         if parent_children:
             self.children = [
-                Node(child.node, self.url_fetcher, parent=self)
+                Node(child.element, style, self.url_fetcher, parent=self,
+                     unsafe=self.unsafe)
                 for child in parent.children]
         elif not self.children:
             self.children = []
-            for child in node:
-                if isinstance(child.tag, str):
-                    if match_features(child):
-                        self.children.append(Node(
-                            child, self.url_fetcher, self))
-                        if self.tag == 'switch':
-                            break
+            for child in element.iter_children():
+                if match_features(child.etree_element):
+                    self.children.append(
+                        Node(child, style, self.url_fetcher, parent=self,
+                             unsafe=self.unsafe))
+                    if self.tag == 'switch':
+                        break
 
     def fetch_url(self, url, resource_type):
         return read_url(url, self.url_fetcher, resource_type)
 
-    def text_children(self, node, trailing_space, text_root=False):
+    def text_children(self, element, trailing_space, text_root=False):
         """Create children and return them."""
         children = []
         space = '{http://www.w3.org/XML/1998/namespace}space'
         preserve = self.get(space) == 'preserve'
-        self.text = handle_white_spaces(node.text, preserve)
+        self.text = handle_white_spaces(element.etree_element.text, preserve)
         if trailing_space and not preserve:
             self.text = self.text.lstrip(' ')
         original_rotate = rotations(self)
@@ -271,36 +266,44 @@ class Node(dict):
             pop_rotation(self, original_rotate, rotate)
         if self.text:
             trailing_space = self.text.endswith(' ')
-        for child in node:
-            if child.tag == 'tref':
+        for child_element in element.iter_children():
+            child = child_element.etree_element
+            if child.tag == '{http://www.w3.org/2000/svg}tref':
                 url = parse_url(child.get(
                     '{http://www.w3.org/1999/xlink}href')).geturl()
                 child_tree = Tree(
-                    url=url, url_fetcher=self.url_fetcher, parent=self)
+                    url=url, url_fetcher=self.url_fetcher, parent=self,
+                    unsafe=self.unsafe)
                 child_tree.clear()
                 child_tree.update(self)
                 child_node = Node(
-                    child, self.url_fetcher, parent=child_tree,
-                    parent_children=True)
+                    child_element, self.style, self.url_fetcher,
+                    parent=child_tree, parent_children=True,
+                    unsafe=self.unsafe)
                 child_node.tag = 'tspan'
                 # Retrieve the referenced node and get its flattened text
                 # and remove the node children.
                 child = child_tree.xml_tree
                 child.text = flatten(child)
+                child_element = cssselect2.ElementWrapper.from_xml_root(child)
             else:
-                child_node = Node(child, self.url_fetcher, parent=self)
+                child_node = Node(
+                    child_element, self.style, self.url_fetcher, parent=self,
+                    unsafe=self.unsafe)
             child_preserve = child_node.get(space) == 'preserve'
             child_node.text = handle_white_spaces(child.text, child_preserve)
             child_node.children, trailing_space = child_node.text_children(
-                child, trailing_space)
+                child_element, trailing_space)
             trailing_space = child_node.text.endswith(' ')
             if original_rotate and 'rotate' not in child_node:
                 pop_rotation(child_node, original_rotate, rotate)
             children.append(child_node)
             if child.tail:
+                anonymous_etree = Element('{http://www.w3.org/2000/svg}tspan')
                 anonymous = Node(
-                    ElementTree.Element('tspan'), self.url_fetcher,
-                    parent=self)
+                    cssselect2.ElementWrapper.from_xml_root(anonymous_etree),
+                    self.style, self.url_fetcher, parent=self,
+                    unsafe=self.unsafe)
                 anonymous.text = handle_white_spaces(child.tail, preserve)
                 if original_rotate:
                     pop_rotation(anonymous, original_rotate, rotate)
@@ -324,6 +327,7 @@ class Tree(Node):
             parsed_url = parse_url(kwargs['url'])
             element_id = parsed_url.fragment
             parent = kwargs.get('parent')
+            unsafe = kwargs.get('unsafe')
             if any(parsed_url[:-1]):
                 url = urlunparse(parsed_url[:-1] + ('',))
             elif parent:
@@ -333,7 +337,8 @@ class Tree(Node):
             if url and (url, element_id) in tree_cache:
                 cached_tree = tree_cache[(url, element_id)]
                 new_tree = Node(
-                    cached_tree.xml_tree, cached_tree.url_fetcher, parent)
+                    cached_tree.element, cached_tree.style,
+                    cached_tree.url_fetcher, parent, unsafe=unsafe)
                 new_tree.xml_tree = cached_tree.xml_tree
                 new_tree.url = url
                 new_tree.tag = cached_tree.tag
@@ -385,19 +390,24 @@ class Tree(Node):
                     parse_url(self.url), 'image/svg+xml')
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
-            parser = ElementTree.XMLParser(
-                resolve_entities=unsafe, huge_tree=unsafe)
-            tree = ElementTree.fromstring(bytestring, parser)
-        remove_svg_namespace(tree)
+            tree = ElementTree.fromstring(
+                bytestring, forbid_entities=not unsafe,
+                forbid_external=not unsafe)
         self.xml_tree = tree
-        apply_stylesheets(self)
+        root = cssselect2.ElementWrapper.from_xml_root(tree)
+        style = parent.style if parent else css.parse_stylesheets(self, url)
         if element_id:
-            self.xml_tree = tree.find(".//*[@id='{}']".format(element_id))
-            if self.xml_tree is None:
+            for element in root.iter_subtree():
+                if element.id == element_id:
+                    root = element
+                    self.xml_tree = element.etree_element
+                    break
+            else:
                 raise TypeError(
                     'No tag with id="{}" found.'.format(element_id))
         super().__init__(
-            self.xml_tree, self.url_fetcher, parent, parent_children, self.url)
+            root, style, self.url_fetcher, parent, parent_children, self.url,
+            unsafe)
         self.root = True
         if tree_cache is not None and self.url:
             tree_cache[(self.url, self.get('id'))] = self
