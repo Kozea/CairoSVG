@@ -67,11 +67,10 @@ CairoSVG respects the scalable and vector parts of the format, when
 possible. PDF and PostScript formats allow vector graphics, and Cairo exports
 to these formats without rastering when possible.
 
-Based on ElementTree or lxml, CairoSVG needs SVG files that are XML tree, and
-is not fault-tolerent. Namespaces are well supported.
+Based on ElementTree, CairoSVG needs SVG files that are XML tree, and is not
+fault-tolerent. Namespaces are well supported.
 
-Inline CSS is supported. External stylesheets are also supported when the
-tinycss and lxml libraries are available.
+Inline CSS and external stylesheets are supported.
 
 
 ### Important SVG concepts

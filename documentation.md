@@ -15,8 +15,8 @@ CairoSVG is written in Python and based on the famous 2D graphics library
 called [Cairo](http://cairographics.org/). It is tested on SVG samples coming
 from the [W3C test
 suite](http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview). It also
-relies on [tinycss2](http://packages.python.org/tinycss2/) plus
-[cssselect2](http://packages.python.org/cssselect2/) to apply CSS, and on
+relies on [tinycss2](http://tinycss2.readthedocs.io/) plus
+[cssselect2](http://cssselect2.readthedocs.io/) to apply CSS, and on
 [defusedxml](https://pypi.python.org/pypi/defusedxml) to detect unsafe SVG
 files. Embedded raster images are handled by
 [Pillow](http://python-imaging.github.io/).
@@ -36,14 +36,13 @@ with Python 2.x. Older versions of CairoSVG (1.x) work with Python 2.x, but
 they're not supported anymore.
 
 CairoSVG and its dependencies may require additional tools during the
-installation: a compiler, Python headers, Cairo, lxml and FFI headers. These
+installation: a compiler, Python headers, Cairo, and FFI headers. These
 tools have different names depending on the OS you are using, but:
 
-- on Windows, you'll have to install Visual C++ compiler for Python, Cairo and
-  lxml;
-- on macOS, you'll have to install `cairo`, `libxml2` and `libffi`
+- on Windows, you'll have to install Visual C++ compiler for Python and Cairo;
+- on macOS, you'll have to install `cairo` and `libffi`
   (with [Homebrew](https://brew.sh/) for example);
-- on Linux, you'll have to install the `cairo`, `python3-lxml`, `python3-dev`
+- on Linux, you'll have to install the `cairo`, `python3-dev`
   and `libffi-dev` packages (names may vary for your distribution).
 
 If you don't know how to install these tools, you can follow the simple steps of
@@ -164,8 +163,10 @@ tests, it is able to render more than 270 reference images twice in less than
 
 CairoSVG knows each tag, transformation and unit defined in the specification,
 as long as they're not related to interactivity, linking, scripting or
-animation. SVG files are parsed with an external XML parser called
-[lxml](http://lxml.de).
+animation. SVG files are parsed by
+[ElementTree](https://docs.python.org/3/library/xml.etree.elementtree.html) and
+tested against common XML attacks thanks to
+[defusedxml](https://pypi.python.org/pypi/defusedxml).
 
 There should be no real problems with these base features.
 
@@ -180,9 +181,9 @@ advanced features (overflow and relative units for example) are not supported.
 Styling is possible thanks to both dedicated XML attributes and CSS.
 
 Stylesheets are parsed with an external parser called
-[tinycss](http://packages.python.org/tinycss/) and applied using an external
+[tinycss2](http://tinycss2.readthedocs.io/) and applied using an external
 selector-to-XPath converter called
-[cssselect](http://packages.python.org/cssselect/): styling is thus pretty
+[cssselect2](http://cssselect2.readthedocs.io/): styling is thus pretty
 solid. Nevertheless, some minor priority bugs are known (such as `!important`
 CSS properties being less important than the ones defined in XML attributes,
 for example).
