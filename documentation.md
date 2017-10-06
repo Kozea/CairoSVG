@@ -182,7 +182,7 @@ Styling is possible thanks to both dedicated XML attributes and CSS.
 
 Stylesheets are parsed with an external parser called
 [tinycss2](http://tinycss2.readthedocs.io/) and applied using an external
-selector-to-XPath converter called
+selector-to-python converter called
 [cssselect2](http://cssselect2.readthedocs.io/): styling is thus pretty
 solid. Nevertheless, some minor priority bugs are known (such as `!important`
 CSS properties being less important than the ones defined in XML attributes,
