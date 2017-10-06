@@ -13,12 +13,13 @@ SVG converter. It provides both a **command-line interface** and **Python
 
 CairoSVG is written in Python and based on the famous 2D graphics library
 called [Cairo](http://cairographics.org/). It is tested on SVG samples coming
-from the
-[W3C test suite](http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview). It
-also relies on [lxml](http://lxml.de/) to parse the SVG file, and
-[tinycss](http://packages.python.org/tinycss/) plus
-[cssselect](http://packages.python.org/cssselect/) to apply CSS. Embedded
-raster images are handled by [Pillow](http://python-imaging.github.io/).
+from the [W3C test
+suite](http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview). It also
+relies on [tinycss2](http://packages.python.org/tinycss2/) plus
+[cssselect2](http://packages.python.org/cssselect2/) to apply CSS, and on
+[defusedxml](https://pypi.python.org/pypi/defusedxml) to detect unsafe SVG
+files. Embedded raster images are handled by
+[Pillow](http://python-imaging.github.io/).
 
 
 ## How to use CairoSVG?
