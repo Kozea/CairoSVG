@@ -67,7 +67,6 @@ def point_following_path(path, width):
 
 def text(surface, node):
     """Draw a text ``node``."""
-    font_size = size(surface, node.get('font-size', '12pt'))
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
     font_style = getattr(
@@ -77,7 +76,7 @@ def text(surface, node):
         cairo, ('font_weight_{}'.format(node.get('font-weight')).upper()),
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
-    surface.context.set_font_size(font_size)
+    surface.context.set_font_size(surface.font_size)
     ascent, descent, _, max_x_advance, max_y_advance = (
         surface.context.font_extents())
 
