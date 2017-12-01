@@ -19,7 +19,7 @@ CairoSVG - A simple SVG converter based on Cairo.
 
 """
 
-__version__ = '2.1.1'  # noqa (version is used by relative imports)
+__version__ = '2.1.2'  # noqa (version is used by relative imports)
 
 
 import os
