@@ -3,6 +3,12 @@
 ======
 
 
+Version 2.1.3 released on 2018-01-03
+====================================
+
+* Fix T commands following q or t in paths
+
+
 Version 2.1.2 released on 2017-12-01
 ====================================
 
