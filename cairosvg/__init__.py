@@ -37,18 +37,30 @@ SURFACES = {
 }
 
 
-# Generate the svg2* functions from SURFACES
-for _output_format, _surface_type in SURFACES.items():
-    _function = (
-        # Two lambdas needed for the closure
-        lambda surface_type: lambda *args, **kwargs:
-            surface_type.convert(*args, **kwargs))(_surface_type)
-    _name = 'svg2{}'.format(_output_format.lower())
-    _function.__name__ = _name
-    if surface.Surface.convert.__doc__:
-        _function.__doc__ = surface.Surface.convert.__doc__.replace(
-            'the format for this class', _output_format)
-    setattr(sys.modules[__name__], _name, _function)
+def svg2svg(*args, **kwargs):
+    return surface.SVGSurface.convert(*args, **kwargs)
+
+
+def svg2png(*args, **kwargs):
+    return surface.PNGSurface.convert(*args, **kwargs)
+
+
+def svg2pdf(*args, **kwargs):
+    return surface.PDFSurface.convert(*args, **kwargs)
+
+
+def svg2ps(*args, **kwargs):
+    return surface.PSSurface.convert(*args, **kwargs)
+
+
+svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
+    'the format for this class', 'SVG')
+svg2png.__doc__ = surface.Surface.convert.__doc__.replace(
+    'the format for this class', 'PNG')
+svg2pdf.__doc__ = surface.Surface.convert.__doc__.replace(
+    'the format for this class', 'PDF')
+svg2ps.__doc__ = surface.Surface.convert.__doc__.replace(
+    'the format for this class', 'PS')
 
 
 def main():
