@@ -108,7 +108,9 @@ class Surface(object):
     surface_class = None
 
     @classmethod
-    def convert(cls, bytestring=None, **kwargs):
+    def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
+                parent_width=None, parent_height=None, scale=1, unsafe=False,
+                write_to=None, **kwargs):
         """Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
@@ -117,7 +119,16 @@ class Surface(object):
         :param file_obj: A file-like object.
         :param url: A filename.
 
-        And the output with:
+        Give some options:
+
+        :param dpi: The ratio between 1 inch and 1 pixel.
+        :param parent_width: The width of the parent container in pixels.
+        :param parent_height: The height of the parent container in pixels.
+        :param scale: The ouptut scaling factor.
+        :param unsafe: A boolean allowing XML entities and very large files
+                       (WARNING: vulnerable to XXE attacks and various DoS).
+
+        Specifiy the output with:
 
         :param write_to: The filename of file-like object where to write the
                          output. If None or not provided, return a byte string.
@@ -126,13 +137,9 @@ class Surface(object):
         parameters are keyword-only.
 
         """
-        dpi = kwargs.pop('dpi', 96)
-        parent_width = kwargs.pop('parent_width', None)
-        parent_height = kwargs.pop('parent_height', None)
-        scale = kwargs.pop('scale', 1)
-        write_to = kwargs.pop('write_to', None)
-        kwargs['bytestring'] = bytestring
-        tree = Tree(**kwargs)
+        tree = Tree(
+            bytestring=bytestring, file_obj=file_obj, url=url, unsafe=unsafe,
+            **kwargs)
         output = write_to or io.BytesIO()
         instance = cls(
             tree, output, dpi, None, parent_width, parent_height, scale)

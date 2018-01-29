@@ -37,20 +37,40 @@ SURFACES = {
 }
 
 
-def svg2svg(*args, **kwargs):
-    return surface.SVGSurface.convert(*args, **kwargs)
+def svg2svg(bytestring=None, *, file_obj=None, url=None, dpi=96,
+            parent_width=None, parent_height=None, scale=1, unsafe=False,
+            write_to=None):
+    return surface.SVGSurface.convert(
+        bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
+        parent_width=parent_width, parent_height=parent_height, scale=scale,
+        write_to=write_to)
 
 
-def svg2png(*args, **kwargs):
-    return surface.PNGSurface.convert(*args, **kwargs)
+def svg2png(bytestring=None, *, file_obj=None, url=None, dpi=96,
+            parent_width=None, parent_height=None, scale=1, unsafe=False,
+            write_to=None):
+    return surface.PNGSurface.convert(
+        bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
+        parent_width=parent_width, parent_height=parent_height, scale=scale,
+        write_to=write_to)
 
 
-def svg2pdf(*args, **kwargs):
-    return surface.PDFSurface.convert(*args, **kwargs)
+def svg2pdf(bytestring=None, *, file_obj=None, url=None, dpi=96,
+            parent_width=None, parent_height=None, scale=1, unsafe=False,
+            write_to=None):
+    return surface.PDFSurface.convert(
+        bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
+        parent_width=parent_width, parent_height=parent_height, scale=scale,
+        write_to=write_to)
 
 
-def svg2ps(*args, **kwargs):
-    return surface.PSSurface.convert(*args, **kwargs)
+def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
+           parent_width=None, parent_height=None, scale=1, unsafe=False,
+           write_to=None):
+    return surface.PSSurface.convert(
+        bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
+        parent_width=parent_width, parent_height=parent_height, scale=scale,
+        write_to=write_to)
 
 
 svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
