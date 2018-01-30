@@ -43,7 +43,7 @@ def svg2svg(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.SVGSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        write_to=write_to)
+        unsafe=unsafe, write_to=write_to)
 
 
 def svg2png(bytestring=None, *, file_obj=None, url=None, dpi=96,
@@ -52,7 +52,7 @@ def svg2png(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.PNGSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        write_to=write_to)
+        unsafe=unsafe, write_to=write_to)
 
 
 def svg2pdf(bytestring=None, *, file_obj=None, url=None, dpi=96,
@@ -61,7 +61,7 @@ def svg2pdf(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.PDFSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        write_to=write_to)
+        unsafe=unsafe, write_to=write_to)
 
 
 def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
