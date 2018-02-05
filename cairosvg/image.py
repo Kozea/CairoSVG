@@ -36,8 +36,8 @@ def uri2image_bytes(image_str):
     header, image_data = image_str.split(",")
     if header.endswith("base64"):
         image_binary = base64.b64decode(image_data)
-    
-    # elif (): ## FIXME: handle other bases here
+
+        # Handle other bases here
     else:
         raise Exception("unknown data uri base: %s" % (header,))
     return image_binary
