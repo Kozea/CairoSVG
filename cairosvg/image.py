@@ -21,6 +21,7 @@ Images manager.
 
 import os.path
 from io import BytesIO
+import base64
 
 from PIL import Image
 
@@ -29,6 +30,15 @@ from .parser import Tree
 from .surface import cairo
 from .url import parse_url
 
+def uri2image_bytes(image_str):
+    """Convert a 'data:...' URI to image_bytes"""
+    header, image_data = image_str.split(",")
+    if header.endswith("base64"):
+        image_binary = base64.b64decode(image_data)
+    ### elif (): ## FIXME: handle other bases here
+    else:
+        raise Exception("unknown data uri base: %s" % (header,))
+    return image_binary
 
 def image(surface, node):
     """Draw an image ``node``."""
@@ -36,7 +46,10 @@ def image(surface, node):
     if not base_url and node.url:
         base_url = os.path.dirname(node.url) + '/'
     url = parse_url(node.get('{http://www.w3.org/1999/xlink}href'), base_url)
-    image_bytes = node.fetch_url(url, 'image/*')
+    if "href" in node and node["href"].startswith("data:image/"): # gif, etc
+        image_bytes = uri2image_bytes(node["href"])
+    else:
+        image_bytes = node.fetch_url(url, 'image/*')
 
     if len(image_bytes) < 5:
         return
