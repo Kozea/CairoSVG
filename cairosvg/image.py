@@ -19,9 +19,9 @@ Images manager.
 
 """
 
+import base64
 import os.path
 from io import BytesIO
-import base64
 
 from PIL import Image
 
@@ -30,15 +30,18 @@ from .parser import Tree
 from .surface import cairo
 from .url import parse_url
 
+
 def uri2image_bytes(image_str):
     """Convert a 'data:...' URI to image_bytes"""
     header, image_data = image_str.split(",")
     if header.endswith("base64"):
         image_binary = base64.b64decode(image_data)
-    ### elif (): ## FIXME: handle other bases here
+    
+    # elif (): ## FIXME: handle other bases here
     else:
         raise Exception("unknown data uri base: %s" % (header,))
     return image_binary
+
 
 def image(surface, node):
     """Draw an image ``node``."""
