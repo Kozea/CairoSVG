@@ -412,8 +412,8 @@ def path(surface, node):
                 y2 += abs_y
                 x3 += abs_x
                 y3 += abs_y
-            x2 = x3 + (x3 - x2)
-            y2 = y3 + (y3 - y2)
+            x2 = abs_x + (x3 - x2)
+            y2 = abs_y + (y3 - y2)
             x1, y1 = abs_x, abs_y
             x3, y3, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(
