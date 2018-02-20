@@ -180,14 +180,16 @@ def test_script():
         sys.stdin, sys.stdout = old_stdin, old_stdout
         return output
 
-    with tempfile.NamedTemporaryFile() as file_object:
+    with tempfile.NamedTemporaryFile(delete=False) as file_object:
         file_object.write(SVG_SAMPLE)
         file_object.flush()
         svg_filename = file_object.name
+        file_object.close()
 
         assert test_main(['--help'], exit_=True).startswith(b'usage: ')
         assert test_main(['--version'], exit_=True).strip() == (
             __version__.encode('ascii'))
+
         assert test_main([svg_filename]) == expected_pdf
         assert test_main([svg_filename, '-d', '96', '-f', 'pdf']) == (
             expected_pdf)
@@ -219,3 +221,14 @@ def test_script():
             assert read_file(temp_3) == expected_pdf
         finally:
             shutil.rmtree(temp)
+
+        try:
+            os.remove(svg_filename)
+
+        # On Windows/NT systems, the temporary file sometimes fails to
+        # get deleted due to ``PermissionError`` exception. This is due
+        # to how Windows/NT handles the same file being opened twice at
+        # the same time.
+        except PermissionError:
+            print("[-] failed to delete temporary file: " + svg_filename)
+            pass

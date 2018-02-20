@@ -21,6 +21,7 @@ Utils dealing with URLs.
 
 import os.path
 import re
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
@@ -29,6 +30,58 @@ from . import __version__
 HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
 
 URL = re.compile(r'url\((.+)\)')
+
+
+def normalize_url(url):
+    """Normalize ``url`` for underlying NT/Unix operating systems
+
+    The input ``url`` may look like the following:
+
+        - C:\Directory\zzz.svg
+        - file://C:\Directory\zzz.svg
+        - zzz.svg
+
+    The output ``url`` on NT systems would look like below:
+
+        - file:///C:/Directory/zzz.svg
+    """
+    if url and os.name == 'nt':
+        # Match input ``url`` like the following:
+        #   - C:\Directory\zzz.svg
+        #   - Blah.svg
+        if 'file:' not in url:
+            url = os.path.abspath(url)
+            url = Path(url).resolve().as_uri()
+
+        # Match input ``url`` like the following:
+        #   - file://C:\Directory\zzz.svg
+        elif re.match(r'^file://[a-z]:.*$', url,
+                      re.IGNORECASE | re.MULTILINE | re.DOTALL):
+            url = url.replace('//', '///')
+            url = url.replace('\\', '/')
+
+    return url
+
+
+def nt_compatible_path(path):
+    """Provide compatible NT file paths for ``os.path`` functions
+
+    ``os.path`` expects NT paths with no ``/`` at the beginning. For
+    example, ``/C:/Directory/zzz.svg`` would fail ``os.path.isfile()``,
+    ``os.path.isdir()`` etc. where the expected input for `os.path`
+    functions is ``/C:/Directory/zzz.svg``.
+
+    Currently ``nt_compatible_path`` performs some basic checks and
+    eliminates the unwanted ``/`` at the beginning.
+    """
+    if os.name == 'nt':
+        if re.match(r'^/[a-z]:/.*$', path,
+                    re.IGNORECASE | re.MULTILINE | re.DOTALL):
+            path = re.sub(r'^/', '', path,
+                          re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            return path
+    else:
+        return path
 
 
 def fetch(url, resource_type):
@@ -58,19 +111,20 @@ def parse_url(url, base=None):
             if parsed_base.scheme in ('', 'file'):
                 if parsed_url.scheme in ('', 'file'):
                     # We are sure that `url` and `base` are both file-like URLs
-                    if os.path.isfile(parsed_base.path):
+                    if os.path.isfile(nt_compatible_path(parsed_base.path)):
                         if parsed_url.path:
                             # Take the "folder" part of `base`, as
                             # `os.path.join` doesn't strip the file name
-                            url = os.path.join(
-                                os.path.dirname(parsed_base.path),
-                                parsed_url.path)
+                            url = os.path.join(os.path.dirname(
+                                nt_compatible_path(parsed_base.path)),
+                                nt_compatible_path(parsed_url.path))
                         else:
-                            url = parsed_base.path
-                    elif os.path.isdir(parsed_base.path):
+                            url = nt_compatible_path(parsed_base.path)
+                    elif os.path.isdir(nt_compatible_path(parsed_base.path)):
                         if parsed_url.path:
                             url = os.path.join(
-                                parsed_base.path, parsed_url.path)
+                                nt_compatible_path(parsed_base.path),
+                                nt_compatible_path(parsed_url.path))
                         else:
                             url = ''
                     else:
@@ -80,7 +134,7 @@ def parse_url(url, base=None):
             elif parsed_url.scheme in ('', parsed_base.scheme):
                 # `urljoin` automatically uses the "folder" part of `base`
                 url = urljoin(base, url)
-        url = url.strip('\'"')
+        url = normalize_url(url.strip('\'"'))
     return urlparse(url or '')
 
 
@@ -93,4 +147,6 @@ def read_url(url, url_fetcher, resource_type):
         url = url.geturl()
     else:
         url = 'file://{}'.format(os.path.abspath(url.geturl()))
+        url = normalize_url(url)
+
     return url_fetcher(url, resource_type)
