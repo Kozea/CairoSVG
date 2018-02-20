@@ -332,7 +332,7 @@ Color and Painting properties:
 - `fill`: supported
 - `fill-opacity`: supported
 - `fill-rule`: supported
-- `image-rendering`: not supported
+- `image-rendering`: supported
 - `marker`: basically supported
 - `marker-end`: basically supported
 - `marker-mid`: basically supported
