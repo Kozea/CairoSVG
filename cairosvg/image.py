@@ -48,7 +48,7 @@ def image(surface, node):
     if image_bytes[:4] == b'\x89PNG':
         png_file = BytesIO(image_bytes)
     elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
-          image_bytes[:2] == b'\x1f\x8b') or b'<svg' in image_bytes:
+            image_bytes[:2] == b'\x1f\x8b') or b'<svg' in image_bytes:
         if 'x' in node:
             del node['x']
         if 'y' in node:

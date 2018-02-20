@@ -33,7 +33,7 @@ URL = re.compile(r'url\((.+)\)')
 
 
 def normalize_url(url):
-    """Normalize ``url`` for underlying NT/Unix operating systems
+    """Normalize ``url`` for underlying NT/Unix operating systems.
 
     The input ``url`` may look like the following:
 
@@ -44,6 +44,7 @@ def normalize_url(url):
     The output ``url`` on NT systems would look like below:
 
         - file:///C:/Directory/zzz.svg
+
     """
     if url and os.name == 'nt':
         # Match input ``url`` like the following:
@@ -55,8 +56,9 @@ def normalize_url(url):
 
         # Match input ``url`` like the following:
         #   - file://C:\Directory\zzz.svg
-        elif re.match(r'^file://[a-z]:.*$', url,
-                      re.IGNORECASE | re.MULTILINE | re.DOTALL):
+        elif re.match(
+                '^file://[a-z]:', url,
+                re.IGNORECASE | re.MULTILINE | re.DOTALL):
             url = url.replace('//', '///')
             url = url.replace('\\', '/')
 
@@ -73,13 +75,11 @@ def nt_compatible_path(path):
 
     Currently ``nt_compatible_path`` performs some basic checks and
     eliminates the unwanted ``/`` at the beginning.
+
     """
-    if os.name == 'nt':
-        if re.match(r'^/[a-z]:/.*$', path,
-                    re.IGNORECASE | re.MULTILINE | re.DOTALL):
-            path = re.sub(r'^/', '', path,
-                          re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            return path
+    if os.name == 'nt' and re.match(
+            '^/[a-z]:/', path, re.IGNORECASE | re.MULTILINE | re.DOTALL):
+        return re.sub('^/', '', path, re.IGNORECASE | re.MULTILINE | re.DOTALL)
     else:
         return path
 
@@ -110,21 +110,22 @@ def parse_url(url, base=None):
             parsed_url = urlparse(url)
             if parsed_base.scheme in ('', 'file'):
                 if parsed_url.scheme in ('', 'file'):
+                    parsed_base_path = nt_compatible_path(parsed_base.path)
+                    parsed_url_path = nt_compatible_path(parsed_url.path)
                     # We are sure that `url` and `base` are both file-like URLs
-                    if os.path.isfile(nt_compatible_path(parsed_base.path)):
-                        if parsed_url.path:
+                    if os.path.isfile(parsed_base_path):
+                        if parsed_url_path:
                             # Take the "folder" part of `base`, as
                             # `os.path.join` doesn't strip the file name
-                            url = os.path.join(os.path.dirname(
-                                nt_compatible_path(parsed_base.path)),
-                                nt_compatible_path(parsed_url.path))
-                        else:
-                            url = nt_compatible_path(parsed_base.path)
-                    elif os.path.isdir(nt_compatible_path(parsed_base.path)):
-                        if parsed_url.path:
                             url = os.path.join(
-                                nt_compatible_path(parsed_base.path),
-                                nt_compatible_path(parsed_url.path))
+                                os.path.dirname(parsed_base_path),
+                                parsed_url_path)
+                        else:
+                            url = parsed_base_path
+                    elif os.path.isdir(parsed_base_path):
+                        if parsed_url_path:
+                            url = os.path.join(
+                                parsed_base_path, parsed_url_path)
                         else:
                             url = ''
                     else:
