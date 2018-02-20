@@ -3,8 +3,53 @@
 ======
 
 
-Version 2.0, released on 2016-11-24
-===================================
+Version 2.1.3 released on 2018-01-03
+====================================
+
+* Fix T commands following q or t in paths
+
+
+Version 2.1.2 released on 2017-12-01
+====================================
+
+* Fix font-size
+
+
+Version 2.1.1 released on 2017-09-30
+====================================
+
+* Use http://www.w3.org/2000/svg as default namespace
+
+
+Version 2.1.0 released on 2017-09-30
+====================================
+
+* Use cssselect2 and tinycss2 instead of cssselect and tinycss
+* Don't require lxml anymore
+* Rely on defusedxml to detect unsafe SVG files
+
+
+Version 2.0.3 released on 2017-05-02
+====================================
+
+* Add ``python_requires`` in ``setup.py``
+
+
+Version 2.0.2 released on 2017-03-20
+====================================
+
+* Handle ``text-align`` in textPath tags
+* Test with Python 3.6
+
+
+Version 2.0.1, released on 2017-01-04
+=====================================
+
+* Don't crash on relative refs with no input URL
+
+
+Version 2.0.0, released on 2016-11-24
+=====================================
 
 * Drop Python 2 support
 * Drop pycairo support

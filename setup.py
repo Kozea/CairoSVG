@@ -42,7 +42,9 @@ setup(
     packages=['cairosvg'],
     provides=['cairosvg'],
     setup_requires=pytest_runner,
-    install_requires=['cairocffi', 'lxml', 'cssselect', 'pillow', 'tinycss'],
+    python_requires='>=3.4',
+    install_requires=[
+        'cairocffi', 'cssselect2', 'defusedxml', 'pillow', 'tinycss2'],
     tests_require=[
         'pytest-cov', 'pytest-flake8', 'pytest-isort', 'pytest-runner'],
     extras_require={'test': (
@@ -59,4 +61,5 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Multimedia :: Graphics :: Graphics Conversion'])

@@ -21,7 +21,6 @@ Helpers related to SVG conditional processing.
 
 import locale
 
-
 ROOT = 'http://www.w3.org/TR/SVG11/feature'
 LOCALE = locale.getdefaultlocale()[0] or ''
 SUPPORTED_FEATURES = frozenset((

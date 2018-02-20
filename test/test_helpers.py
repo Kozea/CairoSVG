@@ -21,7 +21,6 @@ CairoSVG helpers tests.
 
 from . import cairosvg
 
-
 helpers = cairosvg.helpers
 
 
