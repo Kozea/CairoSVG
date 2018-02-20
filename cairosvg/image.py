@@ -29,6 +29,11 @@ from .parser import Tree
 from .surface import cairo
 from .url import parse_url
 
+IMAGE_RENDERING = {
+    'optimizeQuality': cairo.FILTER_BEST,
+    'optimizeSpeed': cairo.FILTER_FAST,
+}
+
 
 def image(surface, node):
     """Draw an image ``node``."""
@@ -89,6 +94,9 @@ def image(surface, node):
         png_file.seek(0)
 
     image_surface = cairo.ImageSurface.create_from_png(png_file)
+    image_surface.pattern = cairo.SurfacePattern(image_surface)
+    image_surface.pattern.set_filter(IMAGE_RENDERING.get(
+        node.get('image-rendering'), cairo.FILTER_GOOD))
 
     node.image_width = image_surface.get_width()
     node.image_height = image_surface.get_height()
@@ -108,6 +116,6 @@ def image(surface, node):
     surface.context.translate(x, y)
     surface.context.scale(scale_x, scale_y)
     surface.context.translate(translate_x, translate_y)
-    surface.context.set_source_surface(image_surface)
+    surface.context.set_source(image_surface.pattern)
     surface.context.paint()
     surface.context.restore()
