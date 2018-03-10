@@ -67,6 +67,10 @@ def point_following_path(path, width):
 
 def text(surface, node):
     """Draw a text ``node``."""
+    
+    x_align = 0
+    y_align = 0
+    
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
     font_style = getattr(
