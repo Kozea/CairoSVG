@@ -67,10 +67,6 @@ def point_following_path(path, width):
 
 def text(surface, node):
     """Draw a text ``node``."""
-    
-    x_align = 0
-    y_align = 0
-    
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
     font_style = getattr(
@@ -114,13 +110,14 @@ def text(surface, node):
     last_r = rotate[-1]
     letters_positions = zip_letters(x, y, dx, dy, rotate, node.text)
 
+    x_align = 0
+    y_align = 0
+
     text_anchor = node.get('text-anchor')
     if text_anchor == 'middle':
         x_align = width / 2. + x_bearing
     elif text_anchor == 'end':
         x_align = width + x_bearing
-    else:
-        x_align = 0
 
     # TODO: This is a hack. The rest of the baseline alignment tags of the SVG
     # 1.1 spec (section 10.9.2) are not supported. We only try to align things
@@ -153,8 +150,6 @@ def text(surface, node):
               alignment_baseline == 'bottom' or
               alignment_baseline == 'text-bottom'):
             y_align = -descent
-        else:
-            y_align = 0
 
     bounding_box = EMPTY_BOUNDING_BOX
     if text_path:
