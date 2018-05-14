@@ -70,7 +70,7 @@ def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.PSSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        write_to=write_to)
+        unsafe=unsafe, write_to=write_to)
 
 
 svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
