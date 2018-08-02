@@ -174,7 +174,7 @@ class Surface(object):
                 instance.addPage(tree, parent_width, parent_height, scale)
 
         if instance is not None:
-           instance.finish()
+            instance.finish()
         if write_to is None:
             return output.getvalue()
 
