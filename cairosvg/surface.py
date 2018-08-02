@@ -115,10 +115,10 @@ class Surface(object):
 
         Specify the input by passing one of these:
 
-        :param bytestring: The SVG source as a byte-string or array.
-        :param file_objs: A file-like object or array.
-        :param url: A filename or array.
-        :tree_objs: A Tree object or array
+        :param bytestring: The SVG source as a byte-string or list.
+        :param file_objs: A file-like object or list.
+        :param url: A filename or list.
+        :tree_objs: A Tree object or list
 
         Give some options:
 
