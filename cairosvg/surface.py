@@ -140,22 +140,27 @@ class Surface(object):
         """
         trees = []
         if (bytestrings is not None):
-            if not isinstance(bytestrings, list): bytestrings = [bytestrings]
+            if not isinstance(bytestrings, list): 
+                bytestrings = [bytestrings]
             for bytestring in bytestrings:
-                trees.append(Tree(bytestring=bytestring, unsafe=unsafe, **kwargs))
+                trees.append(Tree(bytestring=bytestring, unsafe=unsafe, 
+                                  **kwargs))
 
         if(file_objs is not None):
-            if not isinstance(file_objs, list): file_objs = [file_objs]
+            if not isinstance(file_objs, list): 
+                file_objs = [file_objs]
             for file in file_objs:
                 trees.append(Tree(file_obj=file, unsafe=unsafe, **kwargs))
 
         if (urls is not None):
-            if not isinstance(urls, list): urls = [urls]
+            if not isinstance(urls, list): 
+                urls = [urls]
             for url in urls:
                 trees.append(Tree(url=url, unsafe=unsafe, **kwargs))
 
         if (tree_objs is not None):
-            if not isinstance(tree_objs, list): tree_objs = [tree_objs]
+            if not isinstance(tree_objs, list): 
+                tree_objs = [tree_objs]
             trees.extend(tree_objs)
 
         output = write_to or io.BytesIO()
@@ -164,8 +169,8 @@ class Surface(object):
             if 'instance' in locals():
                 instance.addPage(tree, parent_width, parent_height, scale)
             else:
-                instance = cls(
-                    tree, output, dpi, None, parent_width, parent_height, scale)
+                instance = cls(tree, output, dpi, None, parent_width, 
+                               parent_height, scale)
 
         instance.finish()
         if write_to is None:
@@ -493,8 +498,10 @@ class PDFSurface(Surface):
         width *= scale
         height *= scale
         self.cairo.show_page()
-        self.set_context_size(width, height, viewbox, scale, preserved_ratio(tree))
-        self.cairo.set_size(width * self.device_units_per_user_units, height * self.device_units_per_user_units)
+        self.set_context_size(width, height, viewbox, scale, 
+                              preserved_ratio(tree))
+        self.cairo.set_size(width * self.device_units_per_user_units,
+                            height * self.device_units_per_user_units)
         self.draw(tree)
         self.context.restore()
 
