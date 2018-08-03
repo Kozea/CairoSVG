@@ -139,23 +139,23 @@ class Surface(object):
 
         """
         trees = []
-        if (bytestring is not None):
+        if bytestring is not None:
             bss = bytestring if isinstance(bytestring, list) else [bytestring]
             for item in bss:
                 trees.append(Tree(bytestring=item, unsafe=unsafe,
                                   **kwargs))
 
-        if(file_obj is not None):
+        if file_obj is not None:
             file_objs = file_obj if isinstance(file_obj, list) else [file_obj]
             for item in file_objs:
                 trees.append(Tree(file_obj=item, unsafe=unsafe, **kwargs))
 
-        if (url is not None):
+        if url is not None:
             urls = url if isinstance(url, list) else [url]
             for item in urls:
                 trees.append(Tree(url=item, unsafe=unsafe, **kwargs))
 
-        if (tree_obj is not None):
+        if tree_obj is not None:
             tree_objs = tree_obj if isinstance(tree_obj, list) else [tree_obj]
             trees.extend(tree_objs)
 
