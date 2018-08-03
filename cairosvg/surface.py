@@ -140,9 +140,8 @@ class Surface(object):
         """
         trees = []
         if (bytestring is not None):
-            bytestrings = bytestring if isinstance(bytestring, list)\
-                                     else [bytestring]
-            for item in bytestrings:
+            bss = bytestring if isinstance(bytestring, list) else [bytestring]
+            for item in bss:
                 trees.append(Tree(bytestring=item, unsafe=unsafe,
                                   **kwargs))
 
