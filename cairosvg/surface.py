@@ -159,7 +159,7 @@ class Surface(object):
             tree_objs = tree_obj if isinstance(tree_obj, list) else [tree_obj]
             trees.extend(tree_objs)
         
-        if(not trees)
+        if not trees:
             raise TypeError
 
         output = write_to or io.BytesIO()
