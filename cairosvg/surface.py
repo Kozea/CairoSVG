@@ -108,17 +108,17 @@ class Surface(object):
     surface_class = None
 
     @classmethod
-    def convert(cls, bytestrings=None, *, file_objs=None, urls=None, dpi=96,
+    def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
                 parent_width=None, parent_height=None, scale=1, unsafe=False,
-                write_to=None, tree_objs=None, **kwargs):
+                write_to=None, tree_obj=None, **kwargs):
         """Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
 
         :param bytestring: The SVG source as a byte-string or list.
-        :param file_objs: A file-like object or list.
+        :param file_obj: A file-like object or list.
         :param url: A filename or list.
-        :tree_objs: A Tree object or list
+        :tree_obj: A Tree object or list
 
         Give some options:
 
@@ -139,28 +139,25 @@ class Surface(object):
 
         """
         trees = []
-        if (bytestrings is not None):
-            if not isinstance(bytestrings, list):
-                bytestrings = [bytestrings]
-            for bytestring in bytestrings:
-                trees.append(Tree(bytestring=bytestring, unsafe=unsafe,
+        if (bytestring is not None):
+            bytestrings = bytestring if isinstance(bytestring, list) else [bytestring]
+            for item in bytestrings:
+                trees.append(Tree(bytestring=item, unsafe=unsafe,
                                   **kwargs))
 
-        if(file_objs is not None):
-            if not isinstance(file_objs, list):
-                file_objs = [file_objs]
-            for file in file_objs:
-                trees.append(Tree(file_obj=file, unsafe=unsafe, **kwargs))
+        if(file_obj is not None):
+            file_objs = file_obj if isinstance(file_obj, list) else [file_obj]
+            for item in file_objs:
+                trees.append(Tree(file_obj=item, unsafe=unsafe, **kwargs))
 
-        if (urls is not None):
-            if not isinstance(urls, list):
-                urls = [urls]
-            for url in urls:
-                trees.append(Tree(url=url, unsafe=unsafe, **kwargs))
+        if (url is not None):
+            urls = url if isinstance(url, list) else [url]
+            for item in urls:
+                trees.append(Tree(url=item, unsafe=unsafe, **kwargs))
 
-        if (tree_objs is not None):
-            if not isinstance(tree_objs, list):
-                tree_objs = [tree_objs]
+        if (tree_obj is not None):
+            if not isinstance(tree_obj, list):
+                tree_objs = [tree_obj]
             trees.extend(tree_objs)
 
         output = write_to or io.BytesIO()
