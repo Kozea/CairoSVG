@@ -156,8 +156,7 @@ class Surface(object):
                 trees.append(Tree(url=item, unsafe=unsafe, **kwargs))
 
         if (tree_obj is not None):
-            if not isinstance(tree_obj, list):
-                tree_objs = [tree_obj]
+            tree_objs = tree_obj if isinstance(tree_obj, list) else [tree_obj]
             trees.extend(tree_objs)
 
         output = write_to or io.BytesIO()
