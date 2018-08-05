@@ -39,38 +39,42 @@ SURFACES = {
 
 def svg2svg(bytestring=None, *, file_obj=None, url=None, dpi=96,
             parent_width=None, parent_height=None, scale=1, unsafe=False,
-            write_to=None):
+            write_to=None, output_width=None, output_height=None):
     return surface.SVGSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        unsafe=unsafe, write_to=write_to)
+        unsafe=unsafe, write_to=write_to, output_width=output_width,
+        output_height=output_height)
 
 
 def svg2png(bytestring=None, *, file_obj=None, url=None, dpi=96,
             parent_width=None, parent_height=None, scale=1, unsafe=False,
-            write_to=None):
+            write_to=None, output_width=None, output_height=None):
     return surface.PNGSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        unsafe=unsafe, write_to=write_to)
+        unsafe=unsafe, write_to=write_to, output_width=output_width,
+        output_height=output_height)
 
 
 def svg2pdf(bytestring=None, *, file_obj=None, url=None, dpi=96,
             parent_width=None, parent_height=None, scale=1, unsafe=False,
-            write_to=None):
+            write_to=None, output_width=None, output_height=None):
     return surface.PDFSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        unsafe=unsafe, write_to=write_to)
+        unsafe=unsafe, write_to=write_to, output_width=output_width,
+        output_height=output_height)
 
 
 def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
            parent_width=None, parent_height=None, scale=1, unsafe=False,
-           write_to=None):
+           write_to=None, output_width=None, output_height=None):
     return surface.PSSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        unsafe=unsafe, write_to=write_to)
+        unsafe=unsafe, write_to=write_to, output_width=output_width,
+        output_height=output_height)
 
 
 svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
@@ -108,12 +112,21 @@ def main():
         '-u', '--unsafe', action='store_true',
         help='resolve XML entities and allow very large files '
              '(WARNING: vulnerable to XXE attacks and various DoS)')
+    parser.add_argument(
+        '--output-width', default=None, type=float,
+        help='desired output width in pixels')
+    parser.add_argument(
+        '--output-height', default=None, type=float,
+        help='desired output height in pixels')
+
     parser.add_argument('-o', '--output', default='-', help='output filename')
 
     options = parser.parse_args()
     kwargs = {
         'parent_width': options.width, 'parent_height': options.height,
-        'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe}
+        'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe,
+        'output_width': options.output_width,
+        'output_height': options.output_height}
     kwargs['write_to'] = (
         sys.stdout.buffer if options.output == '-' else options.output)
     if options.input == '-':
