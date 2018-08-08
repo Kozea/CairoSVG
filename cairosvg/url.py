@@ -135,7 +135,9 @@ def parse_url(url, base=None):
             elif parsed_url.scheme in ('', parsed_base.scheme):
                 # `urljoin` automatically uses the "folder" part of `base`
                 url = urljoin(base, url)
-        url = normalize_url(url.strip('\'"'))
+            url = normalize_url(url.strip('\'"'))
+        else:
+            url = url.strip('\'"')
     return urlparse(url or '')
 
 

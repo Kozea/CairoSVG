@@ -272,9 +272,12 @@ class Surface(object):
     def draw(self, node):
         """Draw ``node`` and its children."""
 
+        # parse defs first
+        if node.tag == 'svg':
+            parse_all_defs(self, node)
+
         # Do not draw defs
         if node.tag == 'defs':
-            parse_all_defs(self, node)
             return
 
         # Do not draw elements with width or height of 0
