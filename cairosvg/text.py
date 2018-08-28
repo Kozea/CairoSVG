@@ -160,7 +160,9 @@ def text(surface, node):
         surface.context.new_path()
         length = path_length(cairo_path) + x_bearing
         start_offset = size(surface, node.get('startOffset', 0), length)
-        surface.text_path_width += start_offset - x_align
+        if node.tag == 'textPath':
+            surface.text_path_width += start_offset
+        surface.text_path_width -= x_align
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
