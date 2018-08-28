@@ -5,6 +5,7 @@ __pycache__
 /MANIFEST
 .coverage
 .cache
-/.idea
 .eggs
+.idea
+.pytest_cache
 build
