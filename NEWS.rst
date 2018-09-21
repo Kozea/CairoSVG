@@ -3,6 +3,20 @@
 ======
 
 
+Version 2.2.0 released on 2018-09-21
+====================================
+
+* Fix T commands used with previous relative commands in paths
+* Use real functions for svg2* commands, improving IDE integration
+* Fix files management on Windows
+* Handle image-rendering property
+* Fix crash with some text samples
+* Fix position of embedded svg tags with a viewbox not at position (0, 0)
+* Add output-width and output-height options
+* Handle references to inner document tags defined after the anchor
+* Fix offsets for texts on paths
+
+
 Version 2.1.3 released on 2018-01-03
 ====================================
 
