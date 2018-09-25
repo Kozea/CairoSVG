@@ -30,7 +30,7 @@ import tempfile
 import cairocffi as cairo
 import pytest
 
-from . import SURFACES, __version__, main, parser, surface, svg2pdf, svg2png
+from . import SURFACES, VERSION, main, parser, surface, svg2pdf, svg2png
 
 MAGIC_NUMBERS = {
     'SVG': b'<?xml',
@@ -188,7 +188,7 @@ def test_script():
 
         assert test_main(['--help'], exit_=True).startswith(b'usage: ')
         assert test_main(['--version'], exit_=True).strip() == (
-            __version__.encode('ascii'))
+            VERSION.encode('ascii'))
 
         assert test_main([svg_filename]) == expected_pdf
         assert test_main([svg_filename, '-d', '96', '-f', 'pdf']) == (

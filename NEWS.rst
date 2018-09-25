@@ -6,6 +6,7 @@
 Version 2.2.0 released on 2018-09-21
 ====================================
 
+* Clean packaging
 * Fix T commands used with previous relative commands in paths
 * Use real functions for svg2* commands, improving IDE integration
 * Fix files management on Windows

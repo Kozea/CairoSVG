@@ -1,3 +1,0 @@
-# Deployment tests are already bundled in the cairosvg module
-prune test
-exclude cairosvg.py

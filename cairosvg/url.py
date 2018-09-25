@@ -25,9 +25,9 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
-from . import __version__
+from . import VERSION
 
-HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(__version__)}
+HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(VERSION)}
 
 URL = re.compile(r'url\((.+)\)')
 
