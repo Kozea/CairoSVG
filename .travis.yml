@@ -10,7 +10,7 @@ install:
 
 before_script:
   - mkdir ~/.fonts
-  - cp ./test/resources/*.*tf ~/.fonts
+  - cp ./test_non_regression/resources/*.*tf ~/.fonts
   - fc-cache -f -v
 
 script:
