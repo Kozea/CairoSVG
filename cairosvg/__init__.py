@@ -21,7 +21,6 @@ CairoSVG - A simple SVG converter based on Cairo.
 
 import os
 import sys
-import argparse
 
 if hasattr(sys, 'frozen'):
     if hasattr(sys, '_MEIPASS'):
@@ -98,57 +97,3 @@ svg2pdf.__doc__ = surface.Surface.convert.__doc__.replace(
     'the format for this class', 'PDF')
 svg2ps.__doc__ = surface.Surface.convert.__doc__.replace(
     'the format for this class', 'PS')
-
-
-def main():
-    """Entry-point of the executable."""
-    # Get command-line options
-    parser = argparse.ArgumentParser(description=__doc__.strip())
-    parser.add_argument('input', default='-', help='input filename or URL')
-    parser.add_argument(
-        '-v', '--version', action='version', version=__version__)
-    parser.add_argument(
-        '-f', '--format', help='output format',
-        choices=sorted([surface.lower() for surface in SURFACES]))
-    parser.add_argument(
-        '-d', '--dpi', default=96, type=float,
-        help='ratio between 1 inch and 1 pixel')
-    parser.add_argument(
-        '-W', '--width', default=None, type=float,
-        help='width of the parent container in pixels')
-    parser.add_argument(
-        '-H', '--height', default=None, type=float,
-        help='height of the parent container in pixels')
-    parser.add_argument(
-        '-s', '--scale', default=1, type=float, help='output scaling factor')
-    parser.add_argument(
-        '-u', '--unsafe', action='store_true',
-        help='resolve XML entities and allow very large files '
-             '(WARNING: vulnerable to XXE attacks and various DoS)')
-    parser.add_argument(
-        '--output-width', default=None, type=float,
-        help='desired output width in pixels')
-    parser.add_argument(
-        '--output-height', default=None, type=float,
-        help='desired output height in pixels')
-
-    parser.add_argument('-o', '--output', default='-', help='output filename')
-
-    options = parser.parse_args()
-    kwargs = {
-        'parent_width': options.width, 'parent_height': options.height,
-        'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe,
-        'output_width': options.output_width,
-        'output_height': options.output_height}
-    kwargs['write_to'] = (
-        sys.stdout.buffer if options.output == '-' else options.output)
-    if options.input == '-':
-        kwargs['file_obj'] = sys.stdin.buffer
-    else:
-        kwargs['url'] = options.input
-    output_format = (
-        options.format or
-        os.path.splitext(options.output)[1].lstrip('.') or
-        'pdf').upper()
-
-    SURFACES[output_format.upper()].convert(**kwargs)
