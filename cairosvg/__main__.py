@@ -29,7 +29,8 @@ from . import SURFACES, VERSION
 def main(argv=None, stdout=None, stdin=None):
     """Entry-point of the executable."""
     # Get command-line options
-    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser = argparse.ArgumentParser(
+        description='Convert SVG files to other formats')
     parser.add_argument('input', default='-', help='input filename or URL')
     parser.add_argument(
         '-v', '--version', action='version', version=VERSION)
