@@ -30,7 +30,8 @@ import tempfile
 import cairocffi as cairo
 import pytest
 
-from . import SURFACES, VERSION, main, parser, surface, svg2pdf, svg2png
+from . import SURFACES, VERSION, parser, surface, svg2pdf, svg2png
+from .__main__ import main
 
 MAGIC_NUMBERS = {
     'SVG': b'<?xml',
