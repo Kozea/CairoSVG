@@ -1,6 +1,6 @@
-=========
- Read Me
-=========
+==========
+ CairoSVG
+==========
 
 CairoSVG is a SVG converter based on Cairo. It can export SVG files to PDF,
 PostScript and PNG files.
