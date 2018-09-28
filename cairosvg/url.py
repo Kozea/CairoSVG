@@ -37,8 +37,8 @@ def normalize_url(url):
 
     The input ``url`` may look like the following:
 
-        - C:\Directory\zzz.svg
-        - file://C:\Directory\zzz.svg
+        - C:\\Directory\\zzz.svg
+        - file://C:\\Directory\\zzz.svg
         - zzz.svg
 
     The output ``url`` on NT systems would look like below:
