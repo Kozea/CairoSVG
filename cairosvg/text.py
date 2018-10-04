@@ -143,6 +143,7 @@ def text(surface, node):
         elif (alignment_baseline == 'text-before-edge' or
               alignment_baseline == 'before_edge' or
               alignment_baseline == 'top' or
+              alignment_baseline == 'hanging' or
               alignment_baseline == 'text-top'):
             y_align = ascent
         elif (alignment_baseline == 'text-after-edge' or
