@@ -161,7 +161,7 @@ def text(surface, node, draw_as_text=False):
         length = path_length(cairo_path) + x_bearing
         start_offset = size(surface, node.get('startOffset', 0), length)
         if node.tag == 'textPath':
-            surface.text_path_width += start_offset		
+            surface.text_path_width += start_offset
         surface.text_path_width -= x_align
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
