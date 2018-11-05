@@ -381,7 +381,7 @@ class Surface(object):
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
         # Only draw known tags
-        if node.tag in TAGS and 
+        if node.tag in TAGS and \
             not (self.draw_text_as_text and TAGS[node.tag] != text):
             try:
                 TAGS[node.tag](self, node)
