@@ -58,6 +58,9 @@ def main(argv=None, stdout=None, stdin=None):
     parser.add_argument(
         '--output-height', default=None, type=float,
         help='desired output height in pixels')
+    parser.add_argument(
+        '--text-as-text', action='store_true',
+        help='saves text in PDF as text instead of paths')
 
     parser.add_argument('-o', '--output', default='-', help='output filename')
 
@@ -66,7 +69,8 @@ def main(argv=None, stdout=None, stdin=None):
         'parent_width': options.width, 'parent_height': options.height,
         'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe,
         'output_width': options.output_width,
-        'output_height': options.output_height}
+        'output_height': options.output_height, 
+        'text-as-text':options.text_as_text}
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
     kwargs['write_to'] = (
