@@ -1,5 +1,5 @@
 # This file is part of CairoSVG
-# Copyright © 2010-2018 Kozea
+# Copyright © 2010-2015 Kozea
 #
 # This library is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -65,7 +65,7 @@ def point_following_path(path, width):
                 return x, y
 
 
-def text(surface, node):
+def text(surface, node, draw_as_text=False):
     """Draw a text ``node``."""
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
@@ -143,7 +143,6 @@ def text(surface, node):
         elif (alignment_baseline == 'text-before-edge' or
               alignment_baseline == 'before_edge' or
               alignment_baseline == 'top' or
-              alignment_baseline == 'hanging' or
               alignment_baseline == 'text-top'):
             y_align = ascent
         elif (alignment_baseline == 'text-after-edge' or
@@ -161,9 +160,7 @@ def text(surface, node):
         surface.context.new_path()
         length = path_length(cairo_path) + x_bearing
         start_offset = size(surface, node.get('startOffset', 0), length)
-        if node.tag == 'textPath':
-            surface.text_path_width += start_offset
-        surface.text_path_width -= x_align
+        surface.text_path_width += start_offset - x_align
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
@@ -217,7 +214,11 @@ def text(surface, node):
 
             # Only draw characters with 'content' (workaround for bug in cairo)
             if not letter.isspace():
-                surface.context.show_text(letter)
+                if draw_as_text:
+                    point = surface.context.get_current_point()
+                    surface.context.show_text(letter)
+                    surface.context.move_to(*point)
+                surface.context.text_path(letter)
             surface.context.restore()
             if not text_path:
                 surface.cursor_position = cursor_position
