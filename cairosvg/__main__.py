@@ -70,7 +70,7 @@ def main(argv=None, stdout=None, stdin=None):
         'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe,
         'output_width': options.output_width,
         'output_height': options.output_height, 
-        'text-as-text':options.text_as_text}
+        'draw_text_as_text':options.text_as_text}
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
     kwargs['write_to'] = (
