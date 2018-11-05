@@ -129,9 +129,9 @@ class Surface(object):
         :param unsafe: A boolean allowing XML entities and very large files
                        (WARNING: vulnerable to XXE attacks and various DoS).
         :param draw_text_as_text: Draw text as text, instead of paths, reducing
-                       the file size in PDFs and allowing text selection.May
+                       the file size in PDFs and allowing text selection. May
                        not support some path clipping operations.
-                       
+
         Specifiy the output with:
 
         :param write_to: The filename of file-like object where to write the
@@ -381,7 +381,8 @@ class Surface(object):
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
         # Only draw known tags
-        if node.tag in TAGS and not (self.draw_text_as_text and TAGS[node.tag] != text):
+        if node.tag in TAGS and 
+            not (self.draw_text_as_text and TAGS[node.tag] != text):
             try:
                 TAGS[node.tag](self, node)
             except PointError:
@@ -422,7 +423,7 @@ class Surface(object):
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(*color(paint_color, fill_opacity))
             if self.draw_text_as_text and TAGS[node.tag] == text:
-                text(self, node, draw_as_text = True)
+                text(self, node, draw_as_text=True)
             else:
                 self.context.fill_preserve()
             self.context.restore()
