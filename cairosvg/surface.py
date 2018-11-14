@@ -415,20 +415,27 @@ class Surface(object):
 
         # Fill and stroke
         if self.stroke_and_fill and visible and node.tag in TAGS:
-            for i in [1, 0] if node.get('paint-order', "fill") == "stroke" \
-                    else [0, 1]:
-                if i == 0:
+            order = [1,0] if node.get('paint-order', "fill") == "stroke" \
+                else [0,1]
+            for i in order:
+                if i==0:
                     # Fill
                     self.context.save()
                     paint_source, paint_color = \
                         paint(node.get('fill', 'black'))
                     if not gradient_or_pattern(self, node, paint_source):
                         if node.get('fill-rule') == 'evenodd':
-                            self.context.set_fill_rule( \
+                            self.context.set_fill_rule(
                                 cairo.FILL_RULE_EVEN_ODD)
-                        self.context.set_source_rgba( \
+                        self.context.set_source_rgba(
                             *color(paint_color, fill_opacity))
-                    self.context.fill_preserve()
+                    if self.draw_text_as_text and TAGS[node.tag] == text:
+                        text(self, node, draw_as_text=True)
+                    else:
+                        if i == order[1]:
+                            self.context.fill()
+                        else:
+                            self.context.fill_preserve()
                     self.context.restore()
                 else:
                     # Stroke
@@ -439,7 +446,10 @@ class Surface(object):
                     if not gradient_or_pattern(self, node, paint_source):
                         self.context.set_source_rgba(
                             *color(paint_color, stroke_opacity))
-                    self.context.stroke_preserve()
+                    if i == order[1]:
+                        self.context.stroke()
+                    else:
+                        self.context.stroke_preserve()
                     self.context.restore()
         elif not visible:
             self.context.new_path()
