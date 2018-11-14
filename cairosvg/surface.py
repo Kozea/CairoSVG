@@ -429,13 +429,10 @@ class Surface(object):
                                 cairo.FILL_RULE_EVEN_ODD)
                         self.context.set_source_rgba(
                             *color(paint_color, fill_opacity))
-                    if self.draw_text_as_text and TAGS[node.tag] == text:
-                        text(self, node, draw_as_text=True)
+                    if i == order[1]:
+                        self.context.fill()
                     else:
-                        if i == order[1]:
-                            self.context.fill()
-                        else:
-                            self.context.fill_preserve()
+                        self.context.fill_preserve()
                     self.context.restore()
                 else:
                     # Stroke
