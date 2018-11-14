@@ -290,13 +290,13 @@ class Surface(object):
         old_font_size = self.font_size
         old_context_size = self.context_width, self.context_height
         self.parent_node = node
-        
+
         if "font" in node:
             font = parse_font(node["font"])
             for att in font:
-                if not att in node:
+                if att not in node:
                     node[att] = font[att]
-                    
+
         self.font_size = size(self, node.get('font-size', '12pt'))
         self.context.save()
 
@@ -508,7 +508,7 @@ class SVGSurface(Surface):
     """
     surface_class = cairo.SVGSurface
 
-    
+
 def parse_font(value):
     ret = {"font-family": "", "font-size": "", "font-style": "normal",
            "font-variant": "normal", "font-weight": "normal",
