@@ -383,6 +383,12 @@ class Surface(object):
                 # Error in point parsing, do nothing
                 pass
 
+        # Clean cursor's position after 'text' tags
+        if node.tag == 'text':
+            self.cursor_position = [0, 0]
+            self.cursor_d_position = [0, 0]
+            self.text_path_width = 0
+
         # Get stroke and fill opacity
         stroke_opacity = float(node.get('stroke-opacity', 1))
         fill_opacity = float(node.get('fill-opacity', 1))
@@ -409,26 +415,28 @@ class Surface(object):
 
         # Fill and stroke
         if self.stroke_and_fill and visible and node.tag in TAGS:
-            # Fill
-            self.context.save()
-            paint_source, paint_color = paint(node.get('fill', 'black'))
-            if not gradient_or_pattern(self, node, paint_source):
-                if node.get('fill-rule') == 'evenodd':
-                    self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-                self.context.set_source_rgba(*color(paint_color, fill_opacity))
-            self.context.fill_preserve()
-            self.context.restore()
-
-            # Stroke
-            self.context.save()
-            self.context.set_line_width(
-                size(self, node.get('stroke-width', '1')))
-            paint_source, paint_color = paint(node.get('stroke'))
-            if not gradient_or_pattern(self, node, paint_source):
-                self.context.set_source_rgba(
-                    *color(paint_color, stroke_opacity))
-            self.context.stroke()
-            self.context.restore()
+            for i in ([1,0] if node.get('paint-order', "fill") == "stroke" else [0,1]):
+                if i==0:
+                    # Fill
+                    self.context.save()
+                    paint_source, paint_color = paint(node.get('fill', 'black'))
+                    if not gradient_or_pattern(self, node, paint_source):
+                        if node.get('fill-rule') == 'evenodd':
+                            self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
+                        self.context.set_source_rgba(*color(paint_color, fill_opacity))
+                    self.context.fill_preserve()
+                    self.context.restore()
+                else:
+                    # Stroke
+                    self.context.save()
+                    self.context.set_line_width(
+                        size(self, node.get('stroke-width', '1')))
+                    paint_source, paint_color = paint(node.get('stroke'))
+                    if not gradient_or_pattern(self, node, paint_source):
+                        self.context.set_source_rgba(
+                            *color(paint_color, stroke_opacity))
+                    self.context.stroke_preserve()
+                    self.context.restore()
         elif not visible:
             self.context.new_path()
 
@@ -451,12 +459,6 @@ class Surface(object):
                 self.context.paint_with_alpha(opacity)
             if filter_:
                 apply_filter_after_painting(self, node, filter_)
-
-        # Clean cursor's position after 'text' tags
-        if node.tag == 'text':
-            self.cursor_position = [0, 0]
-            self.cursor_d_position = [0, 0]
-            self.text_path_width = 0
 
         self.context.restore()
         self.parent_node = old_parent_node
