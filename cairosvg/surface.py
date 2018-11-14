@@ -420,7 +420,7 @@ class Surface(object):
                 if i == 0:
                     # Fill
                     self.context.save()
-                    paint_source, paint_color = \ 
+                    paint_source, paint_color = \
                         paint(node.get('fill', 'black'))
                     if not gradient_or_pattern(self, node, paint_source):
                         if node.get('fill-rule') == 'evenodd':
