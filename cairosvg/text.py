@@ -217,10 +217,9 @@ def text(surface, node, draw_as_text=False):
             # Only draw characters with 'content' (workaround for bug in cairo)
             if not letter.isspace():
                 if draw_as_text:
-                    point = surface.context.get_current_point()
                     surface.context.show_text(letter)
-                    surface.context.move_to(*point)
-                surface.context.text_path(letter)
+                else:
+                    surface.context.text_path(letter)
             surface.context.restore()
             if not text_path:
                 surface.cursor_position = cursor_position
