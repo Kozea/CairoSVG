@@ -384,8 +384,7 @@ class Surface(object):
                        self.text_path_width)
 
         # Only draw known tags
-        if node.tag in TAGS and \
-           not (self.draw_text_as_text and TAGS[node.tag] == text):
+        if node.tag in TAGS:
             try:
                 TAGS[node.tag](self, node)
             except PointError:
