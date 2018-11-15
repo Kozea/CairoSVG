@@ -424,12 +424,12 @@ class Surface(object):
                 if node.get('fill-rule') == 'evenodd':
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(*color(paint_color, fill_opacity))
-                if self.draw_text_as_text and TAGS[node.tag] == text:
-                    self.cursor_position, self.cursor_d_position, \
-                    self.text_path_width = save_cursor
-                    text(self, node, draw_as_text=True)
-                else:
-                    self.context.fill_preserve()
+            if self.draw_text_as_text and TAGS[node.tag] == text:
+                self.cursor_position, self.cursor_d_position, \
+                self.text_path_width = save_cursor
+                text(self, node, draw_as_text=True)
+            else:
+                self.context.fill_preserve()
             self.context.restore()
 
             # Stroke
