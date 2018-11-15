@@ -383,12 +383,6 @@ class Surface(object):
                 # Error in point parsing, do nothing
                 pass
 
-        # Clean cursor's position after 'text' tags
-        if node.tag == 'text':
-            self.cursor_position = [0, 0]
-            self.cursor_d_position = [0, 0]
-            self.text_path_width = 0
-
         # Get stroke and fill opacity
         stroke_opacity = float(node.get('stroke-opacity', 1))
         fill_opacity = float(node.get('fill-opacity', 1))
@@ -471,6 +465,12 @@ class Surface(object):
             if filter_:
                 apply_filter_after_painting(self, node, filter_)
 
+        # Clean cursor's position after 'text' tags
+        if node.tag == 'text':
+            self.cursor_position = [0, 0]
+            self.cursor_d_position = [0, 0]
+            self.text_path_width = 0
+            
         self.context.restore()
         self.parent_node = old_parent_node
         self.font_size = old_font_size
