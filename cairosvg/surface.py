@@ -415,10 +415,10 @@ class Surface(object):
 
         # Fill and stroke
         if self.stroke_and_fill and visible and node.tag in TAGS:
-            order = [1,0] if node.get('paint-order', "fill") == "stroke" \
-                else [0,1]
+            order = [1, 0] if node.get('paint-order', "fill") == "stroke" \
+                else [0, 1]
             for i in order:
-                if i==0:
+                if i == 0:
                     # Fill
                     self.context.save()
                     paint_source, paint_color = \
