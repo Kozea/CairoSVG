@@ -470,7 +470,7 @@ class Surface(object):
             self.cursor_position = [0, 0]
             self.cursor_d_position = [0, 0]
             self.text_path_width = 0
-            
+
         self.context.restore()
         self.parent_node = old_parent_node
         self.font_size = old_font_size
