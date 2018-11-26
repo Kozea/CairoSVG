@@ -290,6 +290,13 @@ class Surface(object):
         old_font_size = self.font_size
         old_context_size = self.context_width, self.context_height
         self.parent_node = node
+
+        if "font" in node:
+            font = parse_font(node["font"])
+            for att in font:
+                if att not in node:
+                    node[att] = font[att]
+
         self.font_size = size(self, node.get('font-size', '12pt'))
         self.context.save()
 
@@ -500,3 +507,37 @@ class SVGSurface(Surface):
 
     """
     surface_class = cairo.SVGSurface
+
+
+def parse_font(value):
+    ret = {"font-family": "", "font-size": "", "font-style": "normal",
+           "font-variant": "normal", "font-weight": "normal",
+           "line-height": "normal"}
+
+    font_styles = ["italic", "oblique"]
+    font_variants = ["small-caps"]
+    font_weights = ["bold", "bolder", "lighter", "100", "200", "300", "400",
+                    "500", "600", "700", "800", "900"]
+
+    for element in value.split():
+        if element == "normal":
+            continue
+        elif ret["font-family"]:
+            ret["font-family"] += " " + element
+        elif element in font_styles:
+            ret["font-style"] = element
+        elif element in font_variants:
+            ret["font-variant"] = element
+        elif element in font_weights:
+            ret["font-weight"] = element
+        else:
+            if not ret["font-size"]:
+                parts = element.split("/")
+                ret["font-size"] = parts[0]
+                if len(parts) > 1:
+                    ret["line-height"] = parts[1]
+                continue
+            else:
+                ret["font-family"] = element
+
+    return ret
