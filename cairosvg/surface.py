@@ -383,8 +383,8 @@ class Surface(object):
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
-        save_cursor = copy.deepcopy((self.cursor_position, self.cursor_d_position,
-                       self.text_path_width))
+        save_cursor = copy.deepcopy((self.cursor_position,
+            self.cursor_d_position, self.text_path_width))
 
         # Only draw known tags
         if node.tag in TAGS:
