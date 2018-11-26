@@ -48,14 +48,14 @@ def normalize_url(url):
     """
     if url and os.name == 'nt':
         # Match input ``url`` like the following:
-        #   - C:\Directory\zzz.svg
+        #   - C:\\Directory\\zzz.svg
         #   - Blah.svg
         if 'file:' not in url:
             url = os.path.abspath(url)
             url = Path(url).resolve().as_uri()
 
         # Match input ``url`` like the following:
-        #   - file://C:\Directory\zzz.svg
+        #   - file://C:\\Directory\\zzz.svg
         elif re.match(
                 '^file://[a-z]:', url,
                 re.IGNORECASE | re.MULTILINE | re.DOTALL):
