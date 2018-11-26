@@ -438,7 +438,7 @@ class Surface(object):
                         self.cursor_d_position = save_cursor[1]
                         self.text_path_width = save_cursor[2]
                         text(self, node, draw_as_text=True)
-                    else:                        
+                    else:
                         self.context.fill_preserve()
                     self.context.restore()
                 else:
