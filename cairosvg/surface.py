@@ -111,7 +111,7 @@ class Surface(object):
     def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
                 parent_width=None, parent_height=None, scale=1, unsafe=False,
                 write_to=None, output_width=None, output_height=None,
-                **kwargs):
+                draw_text_as_text=False, **kwargs):
         """Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
@@ -128,6 +128,9 @@ class Surface(object):
         :param scale: The ouptut scaling factor.
         :param unsafe: A boolean allowing XML entities and very large files
                        (WARNING: vulnerable to XXE attacks and various DoS).
+        :param draw_text_as_text: Draw text as text, instead of paths, reducing
+                       the file size in PDFs and allowing text selection. May
+                       not support some path clipping operations.
 
         Specifiy the output with:
 
@@ -144,14 +147,15 @@ class Surface(object):
         output = write_to or io.BytesIO()
         instance = cls(
             tree, output, dpi, None, parent_width, parent_height, scale,
-            output_width, output_height)
+            output_width, output_height, draw_text_as_text)
         instance.finish()
         if write_to is None:
             return output.getvalue()
 
     def __init__(self, tree, output, dpi, parent_surface=None,
                  parent_width=None, parent_height=None,
-                 scale=1, output_width=None, output_height=None):
+                 scale=1, output_width=None, output_height=None,
+                 draw_text_as_text=False):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -185,6 +189,7 @@ class Surface(object):
         self._old_parent_node = self.parent_node = None
         self.output = output
         self.dpi = dpi
+        self.draw_text_as_text = draw_text_as_text
         self.font_size = size(self, '12pt')
         self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
@@ -382,6 +387,9 @@ class Surface(object):
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
+        save_cursor = (self.cursor_position, self.cursor_d_position,
+                       self.text_path_width)
+
         # Only draw known tags
         if node.tag in TAGS:
             try:
@@ -423,7 +431,12 @@ class Surface(object):
                 if node.get('fill-rule') == 'evenodd':
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(*color(paint_color, fill_opacity))
-            self.context.fill_preserve()
+            if self.draw_text_as_text and TAGS[node.tag] == text:
+                self.cursor_position, self.cursor_d_position, \
+                    self.text_path_width = save_cursor
+                text(self, node, draw_as_text=True)
+            else:
+                self.context.fill_preserve()
             self.context.restore()
 
             # Stroke
