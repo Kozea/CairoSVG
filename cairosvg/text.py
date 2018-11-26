@@ -65,7 +65,7 @@ def point_following_path(path, width):
                 return x, y
 
 
-def text(surface, node):
+def text(surface, node, draw_as_text=False):
     """Draw a text ``node``."""
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
@@ -143,7 +143,6 @@ def text(surface, node):
         elif (alignment_baseline == 'text-before-edge' or
               alignment_baseline == 'before_edge' or
               alignment_baseline == 'top' or
-              alignment_baseline == 'hanging' or
               alignment_baseline == 'text-top'):
             y_align = ascent
         elif (alignment_baseline == 'text-after-edge' or
@@ -217,7 +216,10 @@ def text(surface, node):
 
             # Only draw characters with 'content' (workaround for bug in cairo)
             if not letter.isspace():
-                surface.context.text_path(letter)
+                if draw_as_text:
+                    surface.context.show_text(letter)
+                else:
+                    surface.context.text_path(letter)
             surface.context.restore()
             if not text_path:
                 surface.cursor_position = cursor_position

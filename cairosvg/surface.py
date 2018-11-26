@@ -290,6 +290,13 @@ class Surface(object):
         old_font_size = self.font_size
         old_context_size = self.context_width, self.context_height
         self.parent_node = node
+
+        if "font" in node:
+            font = parse_font(node["font"])
+            for att in font:
+                if att not in node:
+                    node[att] = font[att]
+
         self.font_size = size(self, node.get('font-size', '12pt'))
         self.context.save()
 
@@ -375,6 +382,9 @@ class Surface(object):
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
+        save_cursor = (self.cursor_position, self.cursor_d_position,
+                       self.text_path_width)
+
         # Only draw known tags
         if node.tag in TAGS:
             try:
@@ -423,9 +433,12 @@ class Surface(object):
                                 cairo.FILL_RULE_EVEN_ODD)
                         self.context.set_source_rgba(
                             *color(paint_color, fill_opacity))
-                    if i == order[1]:
-                        self.context.fill()
-                    else:
+                    if TAGS[node.tag] == text:
+                        self.cursor_position = save_cursor[0]
+                        self.cursor_d_position = save_cursor[1]
+                        self.text_path_width = save_cursor[2]
+                        text(self, node, draw_as_text=True)
+                    else:                        
                         self.context.fill_preserve()
                     self.context.restore()
                 else:
@@ -437,11 +450,9 @@ class Surface(object):
                     if not gradient_or_pattern(self, node, paint_source):
                         self.context.set_source_rgba(
                             *color(paint_color, stroke_opacity))
-                    if i == order[1]:
-                        self.context.stroke()
-                    else:
-                        self.context.stroke_preserve()
+                    self.context.stroke_preserve()
                     self.context.restore()
+            self.context.new_path()
         elif not visible:
             self.context.new_path()
 
@@ -513,3 +524,37 @@ class SVGSurface(Surface):
 
     """
     surface_class = cairo.SVGSurface
+
+
+def parse_font(value):
+    ret = {"font-family": "", "font-size": "", "font-style": "normal",
+           "font-variant": "normal", "font-weight": "normal",
+           "line-height": "normal"}
+
+    font_styles = ["italic", "oblique"]
+    font_variants = ["small-caps"]
+    font_weights = ["bold", "bolder", "lighter", "100", "200", "300", "400",
+                    "500", "600", "700", "800", "900"]
+
+    for element in value.split():
+        if element == "normal":
+            continue
+        elif ret["font-family"]:
+            ret["font-family"] += " " + element
+        elif element in font_styles:
+            ret["font-style"] = element
+        elif element in font_variants:
+            ret["font-variant"] = element
+        elif element in font_weights:
+            ret["font-weight"] = element
+        else:
+            if not ret["font-size"]:
+                parts = element.split("/")
+                ret["font-size"] = parts[0]
+                if len(parts) > 1:
+                    ret["line-height"] = parts[1]
+                continue
+            else:
+                ret["font-family"] = element
+
+    return ret

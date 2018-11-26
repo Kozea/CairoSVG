@@ -58,6 +58,9 @@ def main(argv=None, stdout=None, stdin=None):
     parser.add_argument(
         '--output-height', default=None, type=float,
         help='desired output height in pixels')
+    parser.add_argument(
+        '--text-as-text', action='store_true',
+        help='saves text in PDF as text instead of paths')
 
     parser.add_argument('-o', '--output', default='-', help='output filename')
 
