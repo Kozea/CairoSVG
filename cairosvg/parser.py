@@ -27,6 +27,12 @@ from xml.etree.ElementTree import Element
 import cssselect2
 from defusedxml import ElementTree
 
+from cachetools import cached
+
+@cached(cache={})
+def _fromstring(*args, **kwargs):
+    return ElementTree.fromstring(*args, **kwargs)
+
 from . import css
 from .features import match_features
 from .helpers import flatten, pop_rotation, rotations
@@ -394,7 +400,7 @@ class Tree(Node):
                     parse_url(self.url), 'image/svg+xml')
             if len(bytestring) >= 2 and bytestring[:2] == b'\x1f\x8b':
                 bytestring = gzip.decompress(bytestring)
-            tree = ElementTree.fromstring(
+            tree = _fromstring(
                 bytestring, forbid_entities=not unsafe,
                 forbid_external=not unsafe)
         self.xml_tree = tree
