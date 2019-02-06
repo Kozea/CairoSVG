@@ -154,6 +154,7 @@ def text(surface, node, draw_as_text=False):
 
     bounding_box = EMPTY_BOUNDING_BOX
     if text_path:
+        surface.context.new_path()
         surface.stroke_and_fill = False
         surface.draw(text_path)
         surface.stroke_and_fill = True
