@@ -21,21 +21,21 @@ CairoSVG - A simple SVG converter based on Cairo.
 
 import os
 import sys
+from pathlib import Path
 
 if hasattr(sys, 'frozen'):
     if hasattr(sys, '_MEIPASS'):
         # Frozen with PyInstaller
         # See https://github.com/Kozea/WeasyPrint/pull/540
-        ROOT = sys._MEIPASS
+        ROOT = Path(sys._MEIPASS)
     else:
         # Frozen with something else (py2exe, etc.)
         # See https://github.com/Kozea/WeasyPrint/pull/269
-        ROOT = os.path.dirname(sys.executable)
+        ROOT = Path(os.path.dirname(sys.executable))
 else:
-    ROOT = os.path.dirname(__file__)
+    ROOT = Path(os.path.dirname(__file__))
 
-with open(os.path.join(ROOT, 'VERSION')) as fp:
-    VERSION = __version__ = fp.read().strip()
+VERSION = __version__ = (ROOT / 'VERSION').read_text().strip()
 
 
 # VERSION is used in the "url" module imported by "surface"
