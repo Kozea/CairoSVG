@@ -34,7 +34,8 @@ if hasattr(sys, 'frozen'):
 else:
     ROOT = os.path.dirname(__file__)
 
-VERSION = __version__ = open(os.path.join(ROOT, 'VERSION')).read().strip()
+with open(os.path.join(ROOT, 'VERSION')) as fp:
+    VERSION = __version__ = fp.read().strip()
 
 
 # VERSION is used in the "url" module imported by "surface"
