@@ -383,9 +383,10 @@ class Tree(Node):
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
-        if parent and (
-            self.url == parent.url or
-                (url.startswith('#') and not self.url)):
+        self_is_parent = (
+            (parent and self.url == parent.url) or
+            (url and url.startswith('#') and not self.url))
+        if self_is_parent:
             root_parent = parent
             while root_parent.parent:
                 root_parent = root_parent.parent
