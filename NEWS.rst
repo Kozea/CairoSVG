@@ -3,6 +3,20 @@
 ======
 
 
+Version 2.3.0 released on 2019-02-08
+====================================
+
+* Drop Python 3.4 support
+* Make text selectable on generated PDF files
+* Don't inherit dx and dy attributes
+* Fix support of alignment-baseline="hanging"
+* Fix backslashes in docstrings and comments
+* Fix local anchors with files with no given URL
+* Close VERSION's file descriptor
+* Clean packaging
+* Include LICENSE in distributed packages
+
+
 Version 2.2.1 released on 2018-09-27
 ====================================
 
