@@ -19,11 +19,10 @@ Cairo test suite.
 
 """
 
-import os
 import imp
+import os
 
 import cairosvg
-
 
 reference_cairosvg = imp.load_source(
     'cairosvg_reference', pathname=os.path.join(
