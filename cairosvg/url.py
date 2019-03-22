@@ -46,11 +46,11 @@ def normalize_url(url):
         - file:///C:/Directory/zzz.svg
 
     """
-    if url and os.name == 'nt':
+    if url and os.name == 'nt' and not url.startswith('data:'):
         # Match input ``url`` like the following:
         #   - C:\\Directory\\zzz.svg
         #   - Blah.svg
-        if 'file:' not in url:
+        if not url.startswith('file:'):
             url = os.path.abspath(url)
             url = Path(url).resolve().as_uri()
 
