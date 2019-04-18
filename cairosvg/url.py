@@ -50,9 +50,15 @@ def normalize_url(url):
         # Match input ``url`` like the following:
         #   - C:\\Directory\\zzz.svg
         #   - Blah.svg
-        if not url.startswith('file:'):
+        if not url.startswith('file:') and os.path.isabs(url):
             url = os.path.abspath(url)
+            if '#' in url:
+                url, part = url.rsplit('#', 1)
+            else:
+                part = None
             url = Path(url).resolve().as_uri()
+            if part is not None:
+                url = url + '#' + part
 
         # Match input ``url`` like the following:
         #   - file://C:\\Directory\\zzz.svg
