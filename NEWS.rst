@@ -3,6 +3,12 @@
 ======
 
 
+Version 2.3.1 released on 2019-04-18
+====================================
+
+* Fix relative paths on Windows
+
+
 Version 2.3.0 released on 2019-02-08
 ====================================
 
