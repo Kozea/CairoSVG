@@ -21,7 +21,8 @@ Images manager.
 
 import os.path
 from io import BytesIO
-
+import re
+import base64
 from PIL import Image
 
 from .helpers import node_format, preserve_ratio, preserved_ratio, size
@@ -40,8 +41,16 @@ def image(surface, node):
     base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
     if not base_url and node.url:
         base_url = os.path.dirname(node.url) + '/'
-    url = parse_url(node.get('{http://www.w3.org/1999/xlink}href'), base_url)
-    image_bytes = node.fetch_url(url, 'image/*')
+    href_data = node.get('{http://www.w3.org/1999/xlink}href')
+
+    res = re.search('^data:(image/.+);base64,(.+)', href_data)
+    try:
+        mime = res.group(1)
+        base64data = res.group(2)
+        image_bytes = base64.b64decode(base64data)
+    except IndexError:
+        url = parse_url(href_data, base_url)
+        image_bytes = node.fetch_url(url, 'image/*')
 
     if len(image_bytes) < 5:
         return
