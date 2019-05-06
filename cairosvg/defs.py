@@ -365,6 +365,9 @@ def use(surface, node):
     href = node.get('{http://www.w3.org/1999/xlink}href') or node.get('href')
     href = parse_url(href).geturl()
 
+    if not href:
+        raise ValueError('Invalid <use> tag: {!r}'.format(node))
+
     tree = Tree(
         url=href, url_fetcher=node.url_fetcher, parent=node,
         tree_cache=surface.tree_cache, unsafe=node.unsafe)
