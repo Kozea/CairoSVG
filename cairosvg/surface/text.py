@@ -205,7 +205,12 @@ def text(surface, node):
                 surface.context.rel_move_to(-x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
 
-            surface.context.text_path(letter)
+            # Only draw characters with 'content' (workaround for bug in cairo)
+            if not letter.isspace():
+                if surface.draw_text_as_text:
+                    surface.context.show_text(letter)
+                else:
+                    surface.context.text_path(letter)
             surface.context.restore()
             if not text_path:
                 surface.cursor_position = cursor_position

@@ -70,6 +70,9 @@ def main():
     option_parser.add_option(
         "-o", "--output",
         default="", help="output filename")
+    option_parser.add_option(
+        "--text-as-text", action="store_true",
+        help="saves text in PDF as text instead of paths")
     options, args = option_parser.parse_args()
 
     # Print help if no argument is given
