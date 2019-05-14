@@ -21,6 +21,8 @@ Cairo surface creators.
 """
 
 import io
+import copy
+
 try:
     import cairocffi as cairo
 # OSError means cairocffi is installed,
@@ -75,9 +77,10 @@ class Surface(object):
 
     # Subclasses must either define this or override _create_surface()
     surface_class = None
+    draw_text_as_text = False
 
     @classmethod
-    def convert(cls, bytestring=None, **kwargs):
+    def convert(cls, bytestring=None, draw_text_as_text=None, **kwargs):
         """Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
@@ -90,6 +93,9 @@ class Surface(object):
 
         :param write_to: The filename of file-like object where to write the
                          output. If None or not provided, return a byte string.
+        :param draw_text_as_text: Draw text as text, instead of paths, reducing
+                         the file size in PDFs and allowing text selection. May
+                         not support some path clipping operations.
 
         Only ``source`` can be passed as a positional argument, other
         parameters are keyword-only.
@@ -105,12 +111,14 @@ class Surface(object):
             output = io.BytesIO()
         else:
             output = write_to
-        cls(tree, output, dpi, None, parent_width, parent_height).finish()
+        cls(tree, output, dpi, None, parent_width, parent_height,
+            draw_text_as_text).finish()
         if write_to is None:
             return output.getvalue()
 
     def __init__(self, tree, output, dpi, parent_surface=None,
-                 parent_width=None, parent_height=None):
+                 parent_width=None, parent_height=None,
+                 draw_text_as_text=None):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -144,6 +152,8 @@ class Surface(object):
         self._old_parent_node = self.parent_node = None
         self.output = output
         self.dpi = dpi
+        if draw_text_as_text is not None:
+            self.draw_text_as_text = draw_text_as_text
         self.font_size = size(self, "12pt")
         self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
@@ -323,6 +333,9 @@ class Surface(object):
                 self.context.clip()
                 self.context.set_fill_rule(cairo.FILL_RULE_WINDING)
 
+        save_cursor = copy.deepcopy((self.cursor_position, self.cursor_d_position,
+                       self.text_path_width))
+
         if node.tag in TAGS:
             try:
                 TAGS[node.tag](self, node)
@@ -362,7 +375,12 @@ class Surface(object):
                 if node.get("fill-rule") == "evenodd":
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(*color(paint_color, fill_opacity))
-            self.context.fill_preserve()
+            if self.draw_text_as_text and TAGS[node.tag] == text:
+                self.cursor_position, self.cursor_d_position, \
+                    self.text_path_width = save_cursor
+                text(self, node)
+            else:
+                self.context.fill_preserve()
             self.context.restore()
 
             # Stroke

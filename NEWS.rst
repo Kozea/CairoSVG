@@ -3,9 +3,10 @@
 ======
 
 
-Version 2.0, not released yet
-=============================
+Version 1.0.23, not released yet
+================================
 
+* Make text selectable on generated PDF files
 * Fix markers
 * Fix URL/id handling
 * Test CairoSVG with Travis
