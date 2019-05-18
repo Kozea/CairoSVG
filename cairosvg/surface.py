@@ -31,7 +31,7 @@ from .defs import (
     parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
     UNITS, PointError, apply_matrix_transform, clip_rect, node_format,
-    normalize, paint, preserved_ratio, size, transform)
+    normalize, paint, preserve_ratio, size, transform)
 from .image import image
 from .parser import Tree
 from .path import draw_markers, path
@@ -211,12 +211,7 @@ class Surface(object):
         self.context.scale(
             self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        if output_width and output_height:
-            self.set_context_size(
-                width, height, viewbox, scale, tree)
-        else:
-            self.set_context_size(
-                width, height, viewbox, scale, preserved_ratio(tree))
+        self.set_context_size(width, height, viewbox, scale, tree)
         self.context.move_to(0, 0)
         self.draw(tree)
 
@@ -240,31 +235,34 @@ class Surface(object):
         cairo_surface = self.surface_class(self.output, width, height)
         return cairo_surface, width, height
 
-    def set_context_size(self, width, height, viewbox, scale, preserved_ratio):
+    def set_context_size(self, width, height, viewbox, scale, tree):
         """Set the Cairo context size, set the SVG viewport size."""
         if viewbox:
-            x, y, x_size, y_size = viewbox
-            self.context_width, self.context_height = x_size, y_size
-            x_ratio, y_ratio = width / x_size, height / y_size
-            matrix = cairo.Matrix()
-            if preserved_ratio and x_ratio > y_ratio:
-                matrix.translate((width - x_size * y_ratio) / 2, 0)
-                matrix.scale(y_ratio, y_ratio)
-                matrix.translate(-x / x_ratio * y_ratio, -y)
-            elif preserved_ratio and x_ratio < y_ratio:
-                matrix.translate(0, (height - y_size * x_ratio) / 2)
-                matrix.scale(x_ratio, x_ratio)
-                matrix.translate(-x, -y / y_ratio * x_ratio)
-            else:
-                matrix.scale(x_ratio, y_ratio)
-                matrix.translate(-x, -y)
-            apply_matrix_transform(self, matrix)
+            rect_x, rect_y = viewbox[0:2]
+            tree.image_width = viewbox[2]
+            tree.image_height = viewbox[3]
         else:
-            self.context_width, self.context_height = width, height
-            if scale != 1:
-                matrix = cairo.Matrix()
-                matrix.scale(scale, scale)
-                apply_matrix_transform(self, matrix)
+            rect_x, rect_y = 0, 0
+            tree.image_width = width
+            tree.image_height = height
+
+        scale_x, scale_y, translate_x, translate_y = preserve_ratio(self, tree)
+        rect_x, rect_y = rect_x * scale_x, rect_y * scale_y
+        rect_width, rect_height = width, height
+        self.context.translate(*self.context.get_current_point())
+        self.context.translate(-rect_x, -rect_y)
+        if tree.get('overflow', 'hidden') != 'visible':
+            self.context.rectangle(rect_x, rect_y, rect_width, rect_height)
+            self.context.clip()
+        self.context.scale(scale_x, scale_y)
+        self.context.translate(translate_x, translate_y)
+        self.context_width = rect_width / scale_x
+        self.context_height = rect_height / scale_y
+
+        if scale != 1:
+            matrix = cairo.Matrix()
+            matrix.scale(scale, scale)
+            apply_matrix_transform(self, matrix)
 
     def finish(self):
         """Read the surface content."""

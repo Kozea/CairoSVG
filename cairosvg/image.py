@@ -24,7 +24,7 @@ from io import BytesIO
 
 from PIL import Image
 
-from .helpers import node_format, preserve_ratio, preserved_ratio, size
+from .helpers import node_format, preserve_ratio, size
 from .parser import Tree
 from .surface import cairo
 from .url import parse_url
@@ -64,9 +64,13 @@ def image(surface, node):
             unsafe=node.unsafe)
         tree_width, tree_height, viewbox = node_format(
             surface, tree, reference=False)
-        if not viewbox:
+        if viewbox:
+            tree_scale_x = tree_width / viewbox[2]
+            tree_scale_y = tree_height / viewbox[3]
+        else:
             tree_width = tree['width'] = width
             tree_height = tree['height'] = height
+            tree_scale_x = tree_scale_y = 1
         node.image_width = tree_width or width
         node.image_height = tree_height or height
         scale_x, scale_y, translate_x, translate_y = preserve_ratio(
@@ -79,11 +83,8 @@ def image(surface, node):
         # Draw image
         surface.context.save()
         surface.context.translate(x, y)
-        surface.set_context_size(
-            *node_format(surface, tree, reference=False), scale=1,
-            preserved_ratio=preserved_ratio(tree))
         surface.context.translate(*surface.context.get_current_point())
-        surface.context.scale(scale_x, scale_y)
+        surface.context.scale(scale_x * tree_scale_x, scale_y * tree_scale_y)
         surface.context.translate(translate_x, translate_y)
         surface.draw(tree)
         surface.context.restore()

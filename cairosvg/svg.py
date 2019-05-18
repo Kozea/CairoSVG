@@ -19,32 +19,11 @@ Root tag drawer.
 
 """
 
-from .helpers import node_format, preserve_ratio
+from .helpers import node_format
 
 
 def svg(surface, node):
     """Draw a svg ``node``."""
-    width, height, viewbox = node_format(surface, node)
-    if viewbox:
-        rect_x, rect_y = viewbox[0:2]
-        node.image_width = viewbox[2]
-        node.image_height = viewbox[3]
-    else:
-        rect_x, rect_y = 0, 0
-        node.image_width = width
-        node.image_height = height
-
-    if node.parent is None:
-        return
-
-    scale_x, scale_y, translate_x, translate_y = preserve_ratio(surface, node)
-    rect_x, rect_y = rect_x * scale_x, rect_y * scale_y
-    rect_width, rect_height = width, height
-    surface.context.translate(*surface.context.get_current_point())
-    surface.context.translate(-rect_x, -rect_y)
-    if node.get('overflow', 'hidden') != 'visible':
-        surface.context.rectangle(rect_x, rect_y, rect_width, rect_height)
-        surface.context.clip()
-    surface.context.scale(scale_x, scale_y)
-    surface.context.translate(translate_x, translate_y)
-    surface.context_width, surface.context_height = rect_width, rect_height
+    if node.parent is not None:
+        width, height, viewbox = node_format(surface, node)
+        surface.set_context_size(width, height, viewbox, 1, node)

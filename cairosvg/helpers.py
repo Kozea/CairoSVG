@@ -113,11 +113,6 @@ def point_angle(cx, cy, px, py):
     return atan2(py - cy, px - cx)
 
 
-def preserved_ratio(node):
-    """Return whether we must preserve the ratio."""
-    return node.get('preserveAspectRatio', 'xMidYMid').split(' ')[0] != 'none'
-
-
 def preserve_ratio(surface, node):
     """Manage the ratio preservation."""
     if node.tag == 'marker':
@@ -125,12 +120,9 @@ def preserve_ratio(surface, node):
         height = size(surface, node.get('markerHeight', '3'), 'y')
         _, _, viewbox = node_format(surface, node)
         viewbox_width, viewbox_height = viewbox[2:]
-    elif node.tag in ('svg', 'image'):
+    elif node.tag in ('svg', 'image', 'g'):
         width, height, _ = node_format(surface, node)
         viewbox_width, viewbox_height = node.image_width, node.image_height
-    else:
-        # Safety measure
-        return 1, 1, 0, 0
 
     translate_x = 0
     translate_y = 0
