@@ -3,6 +3,13 @@
 ======
 
 
+Version 2.4.0 released on 2019-05-20
+====================================
+
+* Fix aspect and position when resizing root SVG tag
+* Follow aspect and position hints when using forced output size
+
+
 Version 2.3.1 released on 2019-04-18
 ====================================
 
