@@ -190,12 +190,6 @@ class Surface(object):
         self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
 
-        # If one of output_width or output_height is set, compute the scale
-        if output_width:
-            scale = output_width / width
-        elif output_height:
-            scale = output_height / height
-
         if output_width and output_height:
             width, height = output_width, output_height
         else:
@@ -246,7 +240,8 @@ class Surface(object):
             tree.image_width = width
             tree.image_height = height
 
-        scale_x, scale_y, translate_x, translate_y = preserve_ratio(self, tree)
+        scale_x, scale_y, translate_x, translate_y = preserve_ratio(
+            self, tree, width, height)
         rect_x, rect_y = rect_x * scale_x, rect_y * scale_y
         rect_width, rect_height = width, height
         self.context.translate(*self.context.get_current_point())
