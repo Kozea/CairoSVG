@@ -240,16 +240,7 @@ def transform(surface, string, gradient=None):
             if len(values) == 1:
                 values = 2 * values
             matrix.scale(*values)
-    apply_matrix_transform(surface, matrix, gradient)
 
-
-def apply_matrix_transform(surface, matrix, gradient=None):
-    """Apply a ``matrix`` to ``surface`` or ``gradient`` if supplied.
-
-    When the matrix is not invertible, this function clips the context to an
-    empty path instead of raising an exception.
-
-    """
     try:
         matrix.invert()
     except cairo.Error:

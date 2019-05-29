@@ -30,8 +30,8 @@ from .defs import (
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
     parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
-    UNITS, PointError, apply_matrix_transform, clip_rect, node_format,
-    normalize, paint, preserve_ratio, size, transform)
+    UNITS, PointError, clip_rect, node_format, normalize, paint,
+    preserve_ratio, size, transform)
 from .image import image
 from .parser import Tree
 from .path import draw_markers, path
@@ -205,7 +205,7 @@ class Surface(object):
         self.context.scale(
             self.device_units_per_user_units, self.device_units_per_user_units)
         # Initial, non-rounded dimensions
-        self.set_context_size(width, height, viewbox, scale, tree)
+        self.set_context_size(width, height, viewbox, tree)
         self.context.move_to(0, 0)
         self.draw(tree)
 
@@ -229,7 +229,7 @@ class Surface(object):
         cairo_surface = self.surface_class(self.output, width, height)
         return cairo_surface, width, height
 
-    def set_context_size(self, width, height, viewbox, scale, tree):
+    def set_context_size(self, width, height, viewbox, tree):
         """Set the Cairo context size, set the SVG viewport size."""
         if viewbox:
             rect_x, rect_y = viewbox[0:2]
@@ -253,11 +253,6 @@ class Surface(object):
         self.context.translate(translate_x, translate_y)
         self.context_width = rect_width / scale_x
         self.context_height = rect_height / scale_y
-
-        if scale != 1:
-            matrix = cairo.Matrix()
-            matrix.scale(scale, scale)
-            apply_matrix_transform(self, matrix)
 
     def finish(self):
         """Read the surface content."""

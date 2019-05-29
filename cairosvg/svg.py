@@ -26,4 +26,4 @@ def svg(surface, node):
     """Draw a svg ``node``."""
     if node.parent is not None:
         width, height, viewbox = node_format(surface, node)
-        surface.set_context_size(width, height, viewbox, 1, node)
+        surface.set_context_size(width, height, viewbox, node)
