@@ -393,7 +393,7 @@ class Tree(Node):
             (url and url.startswith('#') and not self.url))
         if self_is_parent:
             root_parent = parent
-            while root_parent.parent:
+            while root_parent.parent is not None:
                 root_parent = root_parent.parent
             tree = root_parent.xml_tree
         else:
