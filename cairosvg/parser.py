@@ -56,6 +56,7 @@ NOT_INHERITED_ATTRIBUTES = frozenset((
     'dx',
     'dy',
     '{http://www.w3.org/1999/xlink}href',
+    'href',
 ))
 
 COLOR_ATTRIBUTES = frozenset((
@@ -272,9 +273,10 @@ class Node(dict):
             trailing_space = self.text.endswith(' ')
         for child_element in element.iter_children():
             child = child_element.etree_element
-            if child.tag == '{http://www.w3.org/2000/svg}tref':
-                url = parse_url(child.get(
-                    '{http://www.w3.org/1999/xlink}href')).geturl()
+            if child.tag in ('{http://www.w3.org/2000/svg}tref', 'tref'):
+                href = child.get(
+                    '{http://www.w3.org/1999/xlink}href', child.get('href'))
+                url = parse_url(href).geturl()
                 child_tree = Tree(
                     url=url, url_fetcher=self.url_fetcher, parent=self,
                     unsafe=self.unsafe)
@@ -321,6 +323,9 @@ class Node(dict):
             self.text = self.text.rstrip(' ')
 
         return children, trailing_space
+
+    def get_href(self):
+        return self.get('{http://www.w3.org/1999/xlink}href', self.get('href'))
 
 
 class Tree(Node):
