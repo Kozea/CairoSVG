@@ -55,10 +55,11 @@ Here is the simple CairoSVG command line usage:
 
     $ cairosvg --help
     usage: cairosvg [-h] [-v] [-f {pdf,png,ps,svg}] [-d DPI] [-W WIDTH]
-                    [-H HEIGHT] [-s SCALE] [-u] [-o OUTPUT]
+                    [-H HEIGHT] [-s SCALE] [-u] [--output-width OUTPUT_WIDTH]
+                    [--output-height OUTPUT_HEIGHT] [-o OUTPUT]
                     input
 
-    CairoSVG - A simple SVG converter based on Cairo.
+    Convert SVG files to other formats
 
     positional arguments:
       input                 input filename or URL
@@ -77,6 +78,10 @@ Here is the simple CairoSVG command line usage:
                             output scaling factor
       -u, --unsafe          resolve XML entities and allow very large files
                             (WARNING: vulnerable to XXE attacks and various DoS)
+      --output-width OUTPUT_WIDTH
+                            desired output width in pixels
+      --output-height OUTPUT_HEIGHT
+                            desired output height in pixels
       -o OUTPUT, --output OUTPUT
                             output filename
 
