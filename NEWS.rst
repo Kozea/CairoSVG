@@ -3,6 +3,14 @@
 ======
 
 
+Version 2.4.1 released on 2019-08-21
+====================================
+
+* Fix the --scale parameter
+* Allow href attributes with no namespace
+* Fix the tree root detection
+
+
 Version 2.4.0 released on 2019-05-20
 ====================================
 
