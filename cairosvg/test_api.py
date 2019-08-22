@@ -200,7 +200,6 @@ def test_script():
         # Test DPI
         output = test_main([svg_filename, '-d', '10', '-f', 'png'])
         image = cairo.ImageSurface.create_from_png(io.BytesIO(output))
-        print(image.get_width(), image.get_height())
         assert image.get_width() == 40
         assert image.get_height() == 50
 
