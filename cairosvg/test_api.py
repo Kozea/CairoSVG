@@ -144,10 +144,10 @@ def test_low_level_api():
 
 def test_script():
     """Test the ``cairosvg`` script and the ``main`` function."""
-    expected_png = svg2png(SVG_SAMPLE)
-    expected_pdf = svg2pdf(SVG_SAMPLE)
+    expected_png = svg2png(SVG_SAMPLE)[:100]
+    expected_pdf = svg2pdf(SVG_SAMPLE)[:100]
 
-    def test_main(args, exit_=False, input_=None):
+    def test_main(args, exit_=False, input_=None, full=False):
         """Test main called with given ``args``.
 
         If ``exit_`` is ``True``, check that ``SystemExit`` is raised. We then
@@ -179,7 +179,7 @@ def test_script():
         sys.stdout.flush()
         output = output_buffer.getvalue()
         sys.stdin, sys.stdout = old_stdin, old_stdout
-        return output
+        return output if full else output[:100]
 
     with tempfile.NamedTemporaryFile(delete=False) as file_object:
         file_object.write(SVG_SAMPLE)
@@ -198,7 +198,7 @@ def test_script():
         assert test_main(['-'], input_=svg_filename) == expected_pdf
 
         # Test DPI
-        output = test_main([svg_filename, '-d', '10', '-f', 'png'])
+        output = test_main([svg_filename, '-d', '10', '-f', 'png'], full=True)
         image = cairo.ImageSurface.create_from_png(io.BytesIO(output))
         assert image.get_width() == 40
         assert image.get_height() == 50
@@ -208,17 +208,17 @@ def test_script():
             temp_1 = os.path.join(temp, 'result_1')
             # Default to PDF
             assert not test_main([svg_filename, '-o', temp_1])
-            assert read_file(temp_1) == expected_pdf
+            assert read_file(temp_1)[:100] == expected_pdf
 
             temp_2 = os.path.join(temp, 'result_2.png')
             # Guess from the file extension
             assert not test_main([svg_filename, '-o', temp_2])
-            assert read_file(temp_2) == expected_png
+            assert read_file(temp_2)[:100] == expected_png
 
             temp_3 = os.path.join(temp, 'result_3.png')
             # Explicit -f wins
             assert not test_main([svg_filename, '-o', temp_3, '-f', 'pdf'])
-            assert read_file(temp_3) == expected_pdf
+            assert read_file(temp_3)[:100] == expected_pdf
         finally:
             shutil.rmtree(temp)
 
