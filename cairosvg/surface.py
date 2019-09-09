@@ -189,6 +189,8 @@ class Surface(object):
         self.font_size = size(self, '12pt')
         self.stroke_and_fill = True
         width, height, viewbox = node_format(self, tree)
+        if viewbox is None:
+            viewbox = (0, 0, width, height)
 
         if output_width and output_height:
             width, height = output_width, output_height
