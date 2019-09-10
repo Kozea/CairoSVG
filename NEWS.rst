@@ -3,6 +3,13 @@
 ======
 
 
+Version 2.4.2 released on 2019-09-10
+====================================
+
+* Fix race condition in tests
+* Fix scale for images with no viewBox
+
+
 Version 2.4.1 released on 2019-08-21
 ====================================
 
