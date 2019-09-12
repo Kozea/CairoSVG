@@ -21,13 +21,14 @@ Images manager.
 
 import os.path
 from io import BytesIO
+from urllib.parse import urlparse
 
 from PIL import Image
 
 from .helpers import node_format, preserve_ratio, size
 from .parser import Tree
 from .surface import cairo
-from .url import parse_url
+from .url import _parse_url
 
 IMAGE_RENDERING = {
     'optimizeQuality': cairo.FILTER_BEST,
@@ -40,7 +41,7 @@ def image(surface, node):
     base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
     if not base_url and node.url:
         base_url = os.path.dirname(node.url) + '/'
-    url = parse_url(node.get_href(), base_url)
+    url = _parse_url(node.get('{http://www.w3.org/1999/xlink}href'), base_url)
     image_bytes = node.fetch_url(url, 'image/*')
 
     if len(image_bytes) < 5:
@@ -59,7 +60,7 @@ def image(surface, node):
         if 'y' in node:
             del node['y']
         tree = Tree(
-            url=url.geturl(), url_fetcher=node.url_fetcher,
+            url=urlparse(url).geturl(), url_fetcher=node.url_fetcher,
             bytestring=image_bytes, tree_cache=surface.tree_cache,
             unsafe=node.unsafe)
         tree_width, tree_height, viewbox = node_format(
