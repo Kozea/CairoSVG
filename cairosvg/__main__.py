@@ -49,6 +49,14 @@ def main(argv=None, stdout=None, stdin=None):
     parser.add_argument(
         '-s', '--scale', default=1, type=float, help='output scaling factor')
     parser.add_argument(
+        '-bg', '--background', metavar='COLOR', help='output background color')
+    parser.add_argument(
+        '-n', '--negate-colors', action='store_true',
+        help='replace every vector color with its complement')
+    parser.add_argument(
+        '-i', '--invert-images', action='store_true',
+        help='replace every raster pixel with its complementary color')
+    parser.add_argument(
         '-u', '--unsafe', action='store_true',
         help='resolve XML entities and allow very large files '
              '(WARNING: vulnerable to XXE attacks and various DoS)')
@@ -65,6 +73,9 @@ def main(argv=None, stdout=None, stdin=None):
     kwargs = {
         'parent_width': options.width, 'parent_height': options.height,
         'dpi': options.dpi, 'scale': options.scale, 'unsafe': options.unsafe,
+        'background_color': options.background,
+        'negate_colors': options.negate_colors,
+        'invert_images': options.invert_images,
         'output_width': options.output_width,
         'output_height': options.output_height}
     stdin = stdin or sys.stdin

@@ -24,7 +24,7 @@ import io
 
 import cairocffi as cairo
 
-from .colors import color
+from .colors import color, negate_color
 from .defs import (
     apply_filter_after_painting, apply_filter_before_painting, clip_path,
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
@@ -32,7 +32,7 @@ from .defs import (
 from .helpers import (
     UNITS, PointError, clip_rect, node_format, normalize, paint,
     preserve_ratio, size, transform)
-from .image import image
+from .image import image, invert_image
 from .parser import Tree
 from .path import draw_markers, path
 from .shapes import circle, ellipse, line, polygon, polyline, rect
@@ -111,6 +111,7 @@ class Surface(object):
     @classmethod
     def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
                 parent_width=None, parent_height=None, scale=1, unsafe=False,
+                background_color=None, negate_colors=False, invert_images=False,
                 write_to=None, output_width=None, output_height=None,
                 **kwargs):
         """Convert a SVG document to the format for this class.
@@ -145,14 +146,17 @@ class Surface(object):
         output = write_to or io.BytesIO()
         instance = cls(
             tree, output, dpi, None, parent_width, parent_height, scale,
-            output_width, output_height)
+            output_width, output_height, background_color,
+            map_rgba=negate_color if negate_colors else None,
+            map_image=invert_image if invert_images else None)
         instance.finish()
         if write_to is None:
             return output.getvalue()
 
     def __init__(self, tree, output, dpi, parent_surface=None,
                  parent_width=None, parent_height=None,
-                 scale=1, output_width=None, output_height=None):
+                 scale=1, output_width=None, output_height=None,
+                 background_color=None, map_rgba=None, map_image=None):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -209,6 +213,13 @@ class Surface(object):
         # Initial, non-rounded dimensions
         self.set_context_size(width, height, viewbox, tree)
         self.context.move_to(0, 0)
+
+        if background_color:
+            self.context.set_source_rgba(*color(background_color))
+            self.context.paint()
+
+        self.map_rgba = map_rgba
+        self.map_image = map_image
         self.draw(tree)
 
     @property
@@ -260,6 +271,11 @@ class Surface(object):
         """Read the surface content."""
         self.cairo.finish()
 
+    def map_color(self, string, opacity=1):
+        """Parse a color ``string`` and apply ``map_rgba`` function to it."""
+        rgba = color(string, opacity)
+        return self.map_rgba(rgba) if callable(self.map_rgba) else rgba
+
     def draw(self, node):
         """Draw ``node`` and its children."""
 
@@ -273,7 +289,7 @@ class Surface(object):
 
         # Do not draw elements with width or height of 0
         if (('width' in node and size(self, node['width']) == 0) or
-           ('height' in node and size(self, node['height']) == 0)):
+                ('height' in node and size(self, node['height']) == 0)):
             return
 
         # Save context and related attributes
@@ -417,7 +433,8 @@ class Surface(object):
             if not gradient_or_pattern(self, node, paint_source):
                 if node.get('fill-rule') == 'evenodd':
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
-                self.context.set_source_rgba(*color(paint_color, fill_opacity))
+                self.context.set_source_rgba(
+                    *self.map_color(paint_color, fill_opacity))
             if TAGS[node.tag] == text:
                 self.cursor_position = save_cursor[0]
                 self.cursor_d_position = save_cursor[1]
@@ -434,7 +451,7 @@ class Surface(object):
             paint_source, paint_color = paint(node.get('stroke'))
             if not gradient_or_pattern(self, node, paint_source):
                 self.context.set_source_rgba(
-                    *color(paint_color, stroke_opacity))
+                    *self.map_color(paint_color, stroke_opacity))
             self.context.stroke()
             self.context.restore()
         elif not visible:
