@@ -49,7 +49,7 @@ def main(argv=None, stdout=None, stdin=None):
     parser.add_argument(
         '-s', '--scale', default=1, type=float, help='output scaling factor')
     parser.add_argument(
-        '-bg', '--background', metavar='COLOR', help='output background color')
+        '-b', '--background', metavar='COLOR', help='output background color')
     parser.add_argument(
         '-n', '--negate-colors', action='store_true',
         help='replace every vector color with its complement')

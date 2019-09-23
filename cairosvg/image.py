@@ -50,7 +50,7 @@ def image(surface, node):
     width = size(surface, node.get('width'), 'x')
     height = size(surface, node.get('height'), 'y')
 
-    if image_bytes[:4] == b'\x89PNG' and not callable(surface.map_image):
+    if image_bytes[:4] == b'\x89PNG' and not surface.map_image:
         png_file = BytesIO(image_bytes)
     elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
             image_bytes[:2] == b'\x1f\x8b') or b'<svg' in image_bytes:
@@ -91,12 +91,12 @@ def image(surface, node):
         return
     else:
         png_file = BytesIO()
-        img = Image.open(BytesIO(image_bytes))
+        image = Image.open(BytesIO(image_bytes))
 
-        if callable(surface.map_image):
-            img = surface.map_image(img)
+        if surface.map_image:
+            image = surface.map_image(image)
 
-        img.save(png_file, 'PNG')
+        image.save(png_file, 'PNG')
         png_file.seek(0)
 
     image_surface = cairo.ImageSurface.create_from_png(png_file)
@@ -128,6 +128,6 @@ def image(surface, node):
 
 
 def invert_image(img):
-    """Invert (negate) an image."""
+    """Invert the colors of an image."""
     *rgb, a = img.convert('RGBA').split()
     return Image.merge('RGBA', (*map(ImageOps.invert, rgb), a))

@@ -111,10 +111,9 @@ class Surface(object):
     @classmethod
     def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
                 parent_width=None, parent_height=None, scale=1, unsafe=False,
-                background_color=None,
-                negate_colors=False, invert_images=False,
-                write_to=None, output_width=None, output_height=None,
-                **kwargs):
+                background_color=None, negate_colors=False,
+                invert_images=False, write_to=None, output_width=None,
+                output_height=None, **kwargs):
         """Convert a SVG document to the format for this class.
 
         Specify the input by passing one of these:
@@ -275,7 +274,7 @@ class Surface(object):
     def map_color(self, string, opacity=1):
         """Parse a color ``string`` and apply ``map_rgba`` function to it."""
         rgba = color(string, opacity)
-        return self.map_rgba(rgba) if callable(self.map_rgba) else rgba
+        return self.map_rgba(rgba) if self.map_rgba else rgba
 
     def draw(self, node):
         """Draw ``node`` and its children."""

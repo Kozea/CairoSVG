@@ -70,10 +70,9 @@ def svg2png(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.PNGSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        background_color=background_color,
-        negate_colors=negate_colors, invert_images=invert_images,
-        unsafe=unsafe, write_to=write_to, output_width=output_width,
-        output_height=output_height)
+        background_color=background_color, negate_colors=negate_colors,
+        invert_images=invert_images, unsafe=unsafe, write_to=write_to,
+        output_width=output_width, output_height=output_height)
 
 
 def svg2pdf(bytestring=None, *, file_obj=None, url=None, dpi=96,
@@ -83,10 +82,9 @@ def svg2pdf(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.PDFSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        background_color=background_color,
-        negate_colors=negate_colors, invert_images=invert_images,
-        unsafe=unsafe, write_to=write_to, output_width=output_width,
-        output_height=output_height)
+        background_color=background_color, negate_colors=negate_colors,
+        invert_images=invert_images, unsafe=unsafe, write_to=write_to,
+        output_width=output_width, output_height=output_height)
 
 
 def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
@@ -96,10 +94,9 @@ def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
     return surface.PSSurface.convert(
         bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
         parent_width=parent_width, parent_height=parent_height, scale=scale,
-        background_color=background_color,
-        negate_colors=negate_colors, invert_images=invert_images,
-        unsafe=unsafe, write_to=write_to, output_width=output_width,
-        output_height=output_height)
+        background_color=background_color, negate_colors=negate_colors,
+        invert_images=invert_images, unsafe=unsafe, write_to=write_to,
+        output_width=output_width, output_height=output_height)
 
 
 svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
