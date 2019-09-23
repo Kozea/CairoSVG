@@ -111,7 +111,8 @@ class Surface(object):
     @classmethod
     def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
                 parent_width=None, parent_height=None, scale=1, unsafe=False,
-                background_color=None, negate_colors=False, invert_images=False,
+                background_color=None,
+                negate_colors=False, invert_images=False,
                 write_to=None, output_width=None, output_height=None,
                 **kwargs):
         """Convert a SVG document to the format for this class.
