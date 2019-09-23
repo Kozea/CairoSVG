@@ -253,3 +253,9 @@ def color(string, opacity=1):
         return plain_color + (opacity,)
 
     return (0, 0, 0, 1)
+
+
+def negate_color(rgba_tuple):
+    """Replace ``rgba_tuple`` with its complementary color."""
+    r, g, b, a = rgba_tuple
+    return (1 - r, 1 - g, 1 - b, a)

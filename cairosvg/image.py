@@ -22,7 +22,7 @@ Images manager.
 import os.path
 from io import BytesIO
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from .helpers import node_format, preserve_ratio, size
 from .parser import Tree
@@ -50,7 +50,7 @@ def image(surface, node):
     width = size(surface, node.get('width'), 'x')
     height = size(surface, node.get('height'), 'y')
 
-    if image_bytes[:4] == b'\x89PNG':
+    if image_bytes[:4] == b'\x89PNG' and not callable(surface.map_image):
         png_file = BytesIO(image_bytes)
     elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
             image_bytes[:2] == b'\x1f\x8b') or b'<svg' in image_bytes:
@@ -91,7 +91,12 @@ def image(surface, node):
         return
     else:
         png_file = BytesIO()
-        Image.open(BytesIO(image_bytes)).save(png_file, 'PNG')
+        img = Image.open(BytesIO(image_bytes))
+
+        if callable(surface.map_image):
+            img = surface.map_image(img)
+
+        img.save(png_file, 'PNG')
         png_file.seek(0)
 
     image_surface = cairo.ImageSurface.create_from_png(png_file)
@@ -120,3 +125,9 @@ def image(surface, node):
     surface.context.set_source(image_surface.pattern)
     surface.context.paint()
     surface.context.restore()
+
+
+def invert_image(img):
+    """Invert (negate) an image."""
+    *rgb, a = img.convert('RGBA').split()
+    return Image.merge('RGBA', (*map(ImageOps.invert, rgb), a))

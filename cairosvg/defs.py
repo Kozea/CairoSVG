@@ -22,7 +22,6 @@ This module handles clips, gradients, masks, patterns and external nodes.
 """
 
 from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
-from .colors import color
 from .features import match_features
 from .helpers import paint, size, transform
 from .parser import Tree
@@ -215,7 +214,7 @@ def draw_gradient(surface, node, name):
     offset = 0
     for child in gradient_node.children:
         offset = max(offset, size(surface, child.get('offset'), 1))
-        stop_color = color(
+        stop_color = surface.map_color(
             child.get('stop-color', 'black'),
             float(child.get('stop-opacity', 1)))
         gradient_pattern.add_color_stop_rgba(offset, *stop_color)
@@ -338,7 +337,7 @@ def apply_filter_after_painting(surface, node, name):
                 width *= size(surface, child.get('width', 0), 1)
                 height *= size(surface, child.get('height', 0), 1)
                 rect(surface, dict(x=x, y=y, width=width, height=height))
-                surface.context.set_source_rgba(*color(
+                surface.context.set_source_rgba(*surface.map_color(
                     paint(child.get('flood-color'))[1],
                     float(child.get('flood-opacity', 1))))
                 surface.context.fill()
