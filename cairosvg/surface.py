@@ -199,11 +199,11 @@ class Surface(object):
         if output_width and output_height:
             width, height = output_width, output_height
         elif output_width:
-            ## Keep the aspect ratio
+            # Keep the aspect ratio
             height = float(height)/float(width)*output_width
             width = output_width
         elif output_height:
-            ## Keep the aspect ratio
+            # Keep the aspect ratio
             width = float(width)/float(height)*output_height
             height = output_height
         else:
