@@ -160,7 +160,7 @@ Painting raster images
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Included raster images are supported by the `Pillow
-<http://python-pillow.github.io/>`_ package.
+<https://python-pillow.org/>`_ package.
 
 
 Filtering painted regions
