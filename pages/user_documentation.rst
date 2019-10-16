@@ -35,7 +35,7 @@ CairoSVG can use `lxml <http://lxml.de/>`_ to parse the SVG file, and `tinycss
 only be supported in the ``style`` attributes.
 
 Embedded raster images other than PNG are handled by `Pillow
-<http://python-imaging.github.io/>`_.
+<https://python-pillow.org/>`_.
 
 
 CairoSVG
