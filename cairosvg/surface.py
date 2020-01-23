@@ -206,6 +206,10 @@ class Surface(object):
         self.cairo, self.width, self.height = self._create_surface(
             width * self.device_units_per_user_units,
             height * self.device_units_per_user_units)
+
+        if 0 in (self.width, self.height):
+            raise ValueError('The SVG size is undefined')
+
         self.context = cairo.Context(self.cairo)
         # We must scale the context as the surface size is using physical units
         self.context.scale(
