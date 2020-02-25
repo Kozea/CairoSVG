@@ -72,8 +72,12 @@ def text(surface, node, draw_as_text=False):
     font_style = getattr(
         cairo, ('font_slant_{}'.format(node.get('font-style')).upper()),
         cairo.FONT_SLANT_NORMAL)
+    node_font_weight = node.get('font-weight')
+    if (node_font_weight and node_font_weight.isdigit()
+            and int(node_font_weight) >= 550):
+        node_font_weight = 'bold'
     font_weight = getattr(
-        cairo, ('font_weight_{}'.format(node.get('font-weight')).upper()),
+        cairo, ('font_weight_{}'.format(node_font_weight).upper()),
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(surface.font_size)
