@@ -113,9 +113,9 @@ def text(surface, node, draw_as_text=False):
 
     text_anchor = node.get('text-anchor')
     if text_anchor == 'middle':
-        x_align = width / 2. + x_bearing
+        x_align = - (width / 2. + x_bearing)
     elif text_anchor == 'end':
-        x_align = width + x_bearing
+        x_align = - (width + x_bearing)
 
     # TODO: This is a hack. The rest of the baseline alignment tags of the SVG
     # 1.1 spec (section 10.9.2) are not supported. We only try to align things
@@ -162,7 +162,7 @@ def text(surface, node, draw_as_text=False):
         start_offset = size(surface, node.get('startOffset', 0), length)
         if node.tag == 'textPath':
             surface.text_path_width += start_offset
-        surface.text_path_width -= x_align
+        surface.text_path_width += x_align
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
@@ -201,14 +201,14 @@ def text(surface, node, draw_as_text=False):
                 surface.context.move_to(x + letter_spacing, y)
                 cursor_position = x + letter_spacing + extents, y
                 surface.context.rel_move_to(*surface.cursor_d_position)
-                surface.context.rel_move_to(-x_align, y_align)
+                surface.context.rel_move_to(x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
                 points = (
-                    (cursor_position[0] - x_align +
+                    (cursor_position[0] + x_align +
                      surface.cursor_d_position[0],
                      cursor_position[1] + y_align +
                      surface.cursor_d_position[1]),
-                    (cursor_position[0] - x_align + text_extents[4] +
+                    (cursor_position[0] + x_align + text_extents[4] +
                      surface.cursor_d_position[0],
                      cursor_position[1] + y_align + text_extents[3] +
                      surface.cursor_d_position[1]))
