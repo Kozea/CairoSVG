@@ -114,8 +114,12 @@ def text(surface, node, draw_as_text=False):
     text_anchor = node.get('text-anchor')
     if text_anchor == 'middle':
         x_align = - (width / 2. + x_bearing)
+        if letter_spacing and node.text:
+            x_align -= (len(node.text) - 1) * letter_spacing / 2
     elif text_anchor == 'end':
         x_align = - (width + x_bearing)
+        if letter_spacing and node.text:
+            x_align -= (len(node.text) - 1) * letter_spacing
 
     # TODO: This is a hack. The rest of the baseline alignment tags of the SVG
     # 1.1 spec (section 10.9.2) are not supported. We only try to align things
