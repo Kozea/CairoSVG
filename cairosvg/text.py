@@ -166,7 +166,7 @@ def text(surface, node, draw_as_text=False):
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
-        for [x, y, dx, dy, r], letter in letters_positions:
+        for i, ((x, y, dx, dy, r), letter) in enumerate(letters_positions):
             if x:
                 surface.cursor_d_position[0] = 0
             if y:
@@ -182,7 +182,9 @@ def text(surface, node, draw_as_text=False):
                 middle_point = point_following_path(cairo_path, middle)
                 end = start + extents
                 end_point = point_following_path(cairo_path, end)
-                surface.text_path_width += extents + letter_spacing
+                if i:
+                    extents += letter_spacing
+                surface.text_path_width += extents
                 if not all((start_point, middle_point, end_point)):
                     continue
                 if not 0 <= middle <= length:
@@ -198,8 +200,10 @@ def text(surface, node, draw_as_text=False):
                 surface.context.save()
                 x = surface.cursor_position[0] if x is None else x
                 y = surface.cursor_position[1] if y is None else y
-                surface.context.move_to(x + letter_spacing, y)
-                cursor_position = x + letter_spacing + extents, y
+                if i:
+                    x += letter_spacing
+                surface.context.move_to(x, y)
+                cursor_position = x + extents, y
                 surface.context.rel_move_to(*surface.cursor_d_position)
                 surface.context.rel_move_to(x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
