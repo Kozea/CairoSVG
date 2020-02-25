@@ -286,7 +286,7 @@ Font properties:
 Text properties:
 
 - `direction`: not supported
-- `letter-spacing`: not supported
+- `letter-spacing`: supported
 - `text-decoration`: not supported
 - `unicode-bidi`: not supported
 - `word-spacing`: not supported
