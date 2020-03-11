@@ -82,14 +82,14 @@ def parse_def(surface, node):
             getattr(surface, '{}s'.format(def_type))[node['id']] = node
 
 
-def gradient_or_pattern(surface, node, name):
+def gradient_or_pattern(surface, node, name, opacity):
     """Gradient or pattern color."""
     if name in surface.gradients:
         update_def_href(surface, name, surface.gradients)
-        return draw_gradient(surface, node, name)
+        return draw_gradient(surface, node, name, opacity)
     elif name in surface.patterns:
         update_def_href(surface, name, surface.patterns)
-        return draw_pattern(surface, node, name)
+        return draw_pattern(surface, node, name, opacity)
 
 
 def marker(surface, node):
@@ -169,7 +169,7 @@ def paint_mask(surface, node, name, opacity):
     surface.context.restore()
 
 
-def draw_gradient(surface, node, name):
+def draw_gradient(surface, node, name, opacity):
     """Gradients colors."""
     gradient_node = surface.gradients[name]
 
@@ -216,7 +216,7 @@ def draw_gradient(surface, node, name):
         offset = max(offset, size(surface, child.get('offset'), 1))
         stop_color = surface.map_color(
             child.get('stop-color', 'black'),
-            float(child.get('stop-opacity', 1)))
+            float(child.get('stop-opacity', 1)) * opacity)
         gradient_pattern.add_color_stop_rgba(offset, *stop_color)
 
     # Set spread method for gradient outside target bounds
@@ -227,9 +227,10 @@ def draw_gradient(surface, node, name):
     return True
 
 
-def draw_pattern(surface, node, name):
+def draw_pattern(surface, node, name, opacity):
     """Draw a pattern image."""
     pattern_node = surface.patterns[name]
+    pattern_node['opacity'] = float(pattern_node.get('opacity', 1)) * opacity
     pattern_node.tag = 'g'
     transform(surface, pattern_node.get('patternTransform'))
 

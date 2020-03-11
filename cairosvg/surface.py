@@ -434,7 +434,7 @@ class Surface(object):
             # Fill
             self.context.save()
             paint_source, paint_color = paint(node.get('fill', 'black'))
-            if not gradient_or_pattern(self, node, paint_source):
+            if not gradient_or_pattern(self, node, paint_source, fill_opacity):
                 if node.get('fill-rule') == 'evenodd':
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(
@@ -453,7 +453,8 @@ class Surface(object):
             self.context.set_line_width(
                 size(self, node.get('stroke-width', '1')))
             paint_source, paint_color = paint(node.get('stroke'))
-            if not gradient_or_pattern(self, node, paint_source):
+            if not gradient_or_pattern(
+                    self, node, paint_source, stroke_opacity):
                 self.context.set_source_rgba(
                     *self.map_color(paint_color, stroke_opacity))
             self.context.stroke()
