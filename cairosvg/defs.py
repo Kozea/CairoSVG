@@ -201,6 +201,9 @@ def draw_gradient(surface, node, name, opacity):
         fy = size(surface, gradient_node.get('fy', str(cy)), height_ref)
         gradient_pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
+    else:
+        return False
+
     # Apply matrix to set coordinate system for gradient
     if gradient_node.get('gradientUnits') != 'userSpaceOnUse':
         gradient_pattern.set_matrix(cairo.Matrix(
