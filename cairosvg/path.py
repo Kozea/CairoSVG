@@ -103,8 +103,10 @@ def draw_markers(surface, node):
 
             # Override angle (if requested)
             node_angle = marker_node.get('orient', '0')
-            if node_angle != 'auto':
+            if node_angle not in ('auto', 'auto-start-reverse'):
                 angle = radians(float(node_angle))
+            elif node_angle == 'auto-start-reverse' and position == 'start':
+                angle += radians(180)
 
             # Draw marker path
             # See http://www.w3.org/TR/SVG/painting.html#MarkerAlgorithm
