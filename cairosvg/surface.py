@@ -180,6 +180,7 @@ class Surface(object):
             self.masks = parent_surface.masks
             self.paths = parent_surface.paths
             self.filters = parent_surface.filters
+            self.images = parent_surface.images
         else:
             self.markers = {}
             self.gradients = {}
@@ -187,6 +188,7 @@ class Surface(object):
             self.masks = {}
             self.paths = {}
             self.filters = {}
+            self.images = {}
         self._old_parent_node = self.parent_node = None
         self.output = output
         self.dpi = dpi

@@ -77,7 +77,8 @@ def parse_all_defs(surface, node):
 def parse_def(surface, node):
     """Parse the SVG definitions."""
     for def_type in (
-            'marker', 'gradient', 'pattern', 'path', 'mask', 'filter'):
+            'marker', 'gradient', 'pattern', 'path', 'mask', 'filter',
+            'image'):
         if def_type in node.tag.lower() and 'id' in node:
             getattr(surface, '{}s'.format(def_type))[node['id']] = node
 
@@ -252,8 +253,7 @@ def draw_pattern(surface, node, name, opacity):
         pattern_width = size(surface, pattern_node.get('width', 0), 1)
         pattern_height = size(surface, pattern_node.get('height', 0), 1)
     else:
-        width = size(surface, node.get('width'), 'x')
-        height = size(surface, node.get('height'), 'y')
+        _, _, width, height = calculate_bounding_box(surface, node)
         x = size(surface, pattern_node.get('x'), 1) * width
         y = size(surface, pattern_node.get('y'), 1) * height
         pattern_width = (
