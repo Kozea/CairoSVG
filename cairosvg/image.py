@@ -91,7 +91,7 @@ def image(surface, node):
         return
     else:
         png_file = BytesIO()
-        image = Image.open(BytesIO(image_bytes))
+        image = ImageOps.exif_transpose(Image.open(BytesIO(image_bytes)))
 
         if surface.map_image:
             image = surface.map_image(image)
