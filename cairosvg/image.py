@@ -23,7 +23,6 @@ import os.path
 from io import BytesIO
 
 from PIL import Image, ImageOps
-from PIL.ImageOps import exif_transpose
 
 from .helpers import node_format, preserve_ratio, size
 from .parser import Tree
@@ -92,8 +91,7 @@ def image(surface, node):
         return
     else:
         png_file = BytesIO()
-        image = Image.open(BytesIO(image_bytes))
-        image = exif_transpose(image)
+        image = ImageOps.exif_transpose(Image.open(BytesIO(image_bytes)))
 
         if surface.map_image:
             image = surface.map_image(image)
