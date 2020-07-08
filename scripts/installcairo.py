@@ -1,5 +1,4 @@
-# (Invoke-WebRequest -Uri https://gist.githubusercontent.com/naveen521kk/f53c45e52029fb2445b2870588bcadf4/raw/87bb8ee4bc2ab76cda7bcd21d8c60ae1ae21f4ec/installcairo.py -UseBasicParsing).Content | py -3
-# https://gist.githubusercontent.com/naveen521kk/f53c45e52029fb2445b2870588bcadf4/raw/87bb8ee4bc2ab76cda7bcd21d8c60ae1ae21f4ec/installcairo.py
+
 import urllib.request
 import zipfile
 import os
