@@ -1,10 +1,9 @@
-
-import urllib.request
-import zipfile
 import os
-import sys
 import platform
+import sys
+import urllib.request
 import winreg
+import zipfile
 from shutil import rmtree
 
 CAIRO_VERSION = "1.15.12"
