@@ -134,7 +134,8 @@ def text(surface, node, draw_as_text=False):
     # this will at least make that possible.
     if max_x_advance > 0 and max_y_advance == 0:
         display_anchor = node.get('display-anchor')
-        alignment_baseline = node.get('alignment-baseline')
+        alignment_baseline = (node.get('dominant-baseline') or
+                              node.get('alignment-baseline'))
         if display_anchor == 'middle':
             y_align = -height / 2.0 - y_bearing
         elif display_anchor == 'top':
