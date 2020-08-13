@@ -205,16 +205,6 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
-def transform_origin_convert(value, height, width):
-    if value in ('top', 'left'):
-        value = 0
-    elif value == 'right':
-        value = width
-    elif value == 'bottom':
-        value = height
-    return value
-
-
 def transform(surface, transform_string, gradient=None, transform_origin=None):
     """Transform ``surface`` or ``gradient`` if supplied using ``string``.
 
@@ -233,8 +223,7 @@ def transform(surface, transform_string, gradient=None, transform_origin=None):
         origin_x = origin[0]
         if len(origin) == 1:
             if origin_x in ('top', 'bottom'):
-                origin_y = transform_origin_convert(
-                    origin_x, surface.height, surface.width)
+                origin_y = origin_x
                 origin_x = surface.width / 2
             else:
                 origin_y = surface.height / 2
@@ -249,17 +238,19 @@ def transform(surface, transform_string, gradient=None, transform_origin=None):
 
         if origin_x == 'center':
             origin_x = surface.width / 2
-        elif origin_x in ('top', 'bottom', 'right', 'left'):
-            origin_x = transform_origin_convert(
-                origin_x, surface.height, surface.width)
+        elif origin_x == 'left':
+            origin_x = 0
+        elif origin_x == 'right':
+            origin_x = surface.width
         else:
             origin_x = size(surface, origin_x, 'x')
 
         if origin_y == 'center':
             origin_y = surface.height / 2
-        elif origin_y in ('top', 'bottom', 'right', 'left'):
-            origin_y = transform_origin_convert(
-                origin_y, surface.height, surface.width)
+        elif origin_y == 'top':
+            origin_y = 0
+        elif origin_y == 'bottom':
+            origin_y = surface.height
         else:
             origin_y = size(surface, origin_y, 'y')
 
