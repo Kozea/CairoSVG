@@ -49,6 +49,7 @@ NOT_INHERITED_ATTRIBUTES = frozenset((
     'stop-opacity',
     'style',
     'transform',
+    'transform-origin',
     'viewBox',
     'width',
     'x',
