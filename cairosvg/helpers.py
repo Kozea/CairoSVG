@@ -205,17 +205,61 @@ def rotate(x, y, angle):
     return x * cos(angle) - y * sin(angle), y * cos(angle) + x * sin(angle)
 
 
-def transform(surface, string, gradient=None):
+def transform_origin_convert(value, height, width):
+    if value in ('top', 'left'):
+        value = 0
+    elif value == 'right':
+        value = width
+    elif value == 'bottom':
+        value = height
+    return value
+
+
+def transform(surface, transform_string, transform_origin=None, gradient=None):
     """Transform ``surface`` or ``gradient`` if supplied using ``string``.
 
     See http://www.w3.org/TR/SVG/coords.html#TransformAttribute
 
     """
-    if not string:
+    if not transform_string:
         return
 
-    transformations = re.findall(r'(\w+) ?\( ?(.*?) ?\)', normalize(string))
+    transformations = re.findall(
+        r'(\w+) ?\( ?(.*?) ?\)', normalize(transform_string))
     matrix = cairo.Matrix()
+
+    if transform_origin:
+        origin = transform_origin.split(' ')
+        origin_x = origin[0]
+        if len(origin) == 1:
+            origin_y = surface.height / 2
+        elif len(origin) > 1:
+            origin_y = origin[1]
+        else:
+            return
+
+        if origin_x == 'center':
+            origin_x = surface.width / 2
+        elif origin_x in ('top', 'bottom', 'right', 'left'):
+            origin_x = transform_origin_convert(
+                origin_x, surface.height, surface.width)
+        elif '%' in origin_x:
+            origin_x = surface.width * origin_x / 100
+        else:
+            origin_x = origin_x.replace('px', '')
+
+        if origin_y == 'center':
+            origin_y = surface.height / 2
+        elif origin_y in ('top', 'bottom', 'right', 'left'):
+            origin_y = transform_origin_convert(
+                origin_y, surface.height, surface.width)
+        elif '%' in str(origin_y):
+            origin_y = surface.height * origin_y / 100
+        else:
+            origin_y = str(origin_y).replace('px', '')
+
+        matrix.translate(float(origin_x), float(origin_y))
+
     for transformation_type, transformation in transformations:
         values = [size(surface, value) for value in transformation.split(' ')]
         if transformation_type == 'matrix':
@@ -240,6 +284,9 @@ def transform(surface, string, gradient=None):
             if len(values) == 1:
                 values = 2 * values
             matrix.scale(*values)
+
+    if transform_origin:
+        matrix.translate(-float(origin_x), -float(origin_y))
 
     try:
         matrix.invert()

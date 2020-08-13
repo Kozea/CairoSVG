@@ -314,7 +314,7 @@ class Surface(object):
         self.context.save()
 
         # Apply transformations
-        transform(self, node.get('transform'))
+        transform(self, node.get('transform'), node.get('transform-origin'))
 
         # Find and prepare opacity, masks and filters
         mask = parse_url(node.get('mask')).fragment
