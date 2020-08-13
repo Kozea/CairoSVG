@@ -243,20 +243,16 @@ def transform(surface, transform_string, gradient=None, transform_origin=None):
         elif origin_x in ('top', 'bottom', 'right', 'left'):
             origin_x = transform_origin_convert(
                 origin_x, surface.height, surface.width)
-        elif '%' in origin_x:
-            origin_x = surface.width * origin_x / 100
         else:
-            origin_x = origin_x.replace('px', '')
+            origin_x = size(surface, origin_x, 'x')
 
         if origin_y == 'center':
             origin_y = surface.height / 2
         elif origin_y in ('top', 'bottom', 'right', 'left'):
             origin_y = transform_origin_convert(
                 origin_y, surface.height, surface.width)
-        elif '%' in str(origin_y):
-            origin_y = surface.height * origin_y / 100
         else:
-            origin_y = str(origin_y).replace('px', '')
+            origin_y = size(surface, origin_y, 'y')
 
         matrix.translate(float(origin_x), float(origin_y))
 
