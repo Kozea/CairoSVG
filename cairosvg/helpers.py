@@ -232,7 +232,12 @@ def transform(surface, transform_string, gradient=None, transform_origin=None):
         origin = transform_origin.split(' ')
         origin_x = origin[0]
         if len(origin) == 1:
-            origin_y = surface.height / 2
+            if origin_x in ('top', 'bottom'):
+                origin_y = transform_origin_convert(
+                    origin_x, surface.height, surface.width)
+                origin_x = surface.width / 2
+            else:
+                origin_y = surface.height / 2
         elif len(origin) > 1:
             origin_y = origin[1]
         else:
