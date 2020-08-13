@@ -239,7 +239,11 @@ def transform(surface, transform_string, gradient=None, transform_origin=None):
             else:
                 origin_y = surface.height / 2
         elif len(origin) > 1:
-            origin_y = origin[1]
+            if origin_x in ('top', 'bottom'):
+                origin_y = origin_x
+                origin_x = origin[1]
+            else:
+                origin_y = origin[1]
         else:
             return
 
