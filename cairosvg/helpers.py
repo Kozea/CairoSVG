@@ -215,7 +215,7 @@ def transform_origin_convert(value, height, width):
     return value
 
 
-def transform(surface, transform_string, transform_origin=None, gradient=None):
+def transform(surface, transform_string, gradient=None, transform_origin=None):
     """Transform ``surface`` or ``gradient`` if supplied using ``string``.
 
     See http://www.w3.org/TR/SVG/coords.html#TransformAttribute
