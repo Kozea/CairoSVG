@@ -23,19 +23,7 @@ import os
 import sys
 from pathlib import Path
 
-if hasattr(sys, 'frozen'):
-    if hasattr(sys, '_MEIPASS'):
-        # Frozen with PyInstaller
-        # See https://github.com/Kozea/WeasyPrint/pull/540
-        ROOT = Path(sys._MEIPASS) / 'cairosvg'
-    else:
-        # Frozen with something else (py2exe, etc.)
-        # See https://github.com/Kozea/WeasyPrint/pull/269
-        ROOT = Path(os.path.dirname(sys.executable))
-else:
-    ROOT = Path(os.path.dirname(__file__))
-
-VERSION = __version__ = (ROOT / 'VERSION').read_text().strip()
+VERSION = __version__ = '2.x'
 
 
 # VERSION is used in the "url" module imported by "surface"
