@@ -1,0 +1,28 @@
+name: CairoSVG's tests
+on: [push]
+
+jobs:
+  tests:
+    name: ${{ matrix.os }} - ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install CairoSVG
+        run: pip install --upgrade -e.[test]
+      - name: Setup fonts
+        run: |
+          mkdir ~/.fonts
+          cp ./test_non_regression/resources/*.*tf ~/.fonts
+          fc-cache -f -v
+      - name: Launch tests
+        run: python setup.py test
