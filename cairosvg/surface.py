@@ -508,6 +508,16 @@ class PSSurface(Surface):
     surface_class = cairo.PSSurface
 
 
+class EPSSurface(Surface):
+    """A surface that writes in Encapsulated PostScript format."""
+
+    def _create_surface(self, width, height):
+        """Create and return ``(cairo_surface, width, height)``."""
+        cairo_surface = cairo.PSSurface(self.output, width, height)
+        cairo_surface.set_eps(True)
+        return cairo_surface, width, height
+
+
 class PNGSurface(Surface):
     """A surface that writes in PNG format."""
     device_units_per_user_units = 1

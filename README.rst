@@ -3,7 +3,7 @@
 ==========
 
 CairoSVG is an SVG converter based on Cairo. It can export SVG files to PDF,
-PostScript and PNG files.
+EPS, PS, and PNG files.
 
 For further information, please visit the `CairoSVG Website
 <http://www.cairosvg.org/>`_.

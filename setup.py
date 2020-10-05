@@ -7,7 +7,7 @@ CairoSVG - A Simple SVG Converter Based on Cairo
 ================================================
 
 CairoSVG is an SVG converter based on Cairo. It can convert SVG files to PDF,
-PostScript and PNG files.
+EPS, PS, and PNG files.
 
 For further information, please visit the `CairoSVG Website
 <http://cairosvg.org/>`_.

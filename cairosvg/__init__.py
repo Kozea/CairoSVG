@@ -46,6 +46,7 @@ SURFACES = {
     'PDF': surface.PDFSurface,
     'PNG': surface.PNGSurface,
     'PS': surface.PSSurface,
+    'EPS': surface.EPSSurface,
     'SVG': surface.SVGSurface,
 }
 
@@ -99,6 +100,18 @@ def svg2ps(bytestring=None, *, file_obj=None, url=None, dpi=96,
         output_width=output_width, output_height=output_height)
 
 
+def svg2eps(bytestring=None, *, file_obj=None, url=None, dpi=96,
+            parent_width=None, parent_height=None, scale=1, unsafe=False,
+            background_color=None, negate_colors=False, invert_images=False,
+            write_to=None, output_width=None, output_height=None):
+    return surface.EPSSurface.convert(
+        bytestring=bytestring, file_obj=file_obj, url=url, dpi=dpi,
+        parent_width=parent_width, parent_height=parent_height, scale=scale,
+        background_color=background_color, negate_colors=negate_colors,
+        invert_images=invert_images, unsafe=unsafe, write_to=write_to,
+        output_width=output_width, output_height=output_height)
+
+
 svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
     'the format for this class', 'SVG')
 svg2png.__doc__ = surface.Surface.convert.__doc__.replace(
@@ -107,3 +120,5 @@ svg2pdf.__doc__ = surface.Surface.convert.__doc__.replace(
     'the format for this class', 'PDF')
 svg2ps.__doc__ = surface.Surface.convert.__doc__.replace(
     'the format for this class', 'PS')
+svg2eps.__doc__ = surface.Surface.convert.__doc__.replace(
+    'the format for this class', 'EPS')
