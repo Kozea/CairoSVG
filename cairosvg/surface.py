@@ -114,7 +114,7 @@ class Surface(object):
                 background_color=None, negate_colors=False,
                 invert_images=False, write_to=None, output_width=None,
                 output_height=None, **kwargs):
-        """Convert a SVG document to the format for this class.
+        """Convert an SVG document to the format for this class.
 
         Specify the input by passing one of these:
 
