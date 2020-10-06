@@ -114,7 +114,7 @@ class Surface(object):
                 background_color=None, negate_colors=False,
                 invert_images=False, write_to=None, output_width=None,
                 output_height=None, **kwargs):
-        """Convert a SVG document to the format for this class.
+        """Convert an SVG document to the format for this class.
 
         Specify the input by passing one of these:
 
@@ -506,6 +506,16 @@ class PDFSurface(Surface):
 class PSSurface(Surface):
     """A surface that writes in PostScript format."""
     surface_class = cairo.PSSurface
+
+
+class EPSSurface(Surface):
+    """A surface that writes in Encapsulated PostScript format."""
+
+    def _create_surface(self, width, height):
+        """Create and return ``(cairo_surface, width, height)``."""
+        cairo_surface = cairo.PSSurface(self.output, width, height)
+        cairo_surface.set_eps(True)
+        return cairo_surface, width, height
 
 
 class PNGSurface(Surface):
