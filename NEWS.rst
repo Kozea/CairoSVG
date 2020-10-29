@@ -3,6 +3,21 @@
 ======
 
 
+Version 2.5.0 released on 2020-10-29
+====================================
+
+* Drop support of Python 3.5, add support of Python 3.9.
+* Add EPS export
+* Add background-color, negate-colors, and invert-images options
+* Improve support for font weights
+* Fix opacity of patterns and gradients
+* Support auto-start-reverse value for orient
+* Draw images contained in defs
+* Add Exif transposition support
+* Handle dominant-baseline
+* Support transform-origin
+
+
 Version 2.4.2 released on 2019-09-10
 ====================================
 
