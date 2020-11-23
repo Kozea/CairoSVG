@@ -306,12 +306,16 @@ def path(surface, node):
         elif letter == 'm':
             # Current point relative move
             x, y, string = point(surface, string)
+            if last_letter and last_letter not in 'zZ':
+                node.vertices.append(None)
             surface.context.rel_move_to(x, y)
             current_point = current_point[0] + x, current_point[1] + y
 
         elif letter == 'M':
             # Current point move
             x, y, string = point(surface, string)
+            if last_letter and last_letter not in 'zZ':
+                node.vertices.append(None)
             surface.context.move_to(x, y)
             current_point = x, y
 
