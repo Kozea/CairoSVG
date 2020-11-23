@@ -1,19 +1,3 @@
-# This file is part of CairoSVG
-# Copyright © 2010-2018 Kozea
-#
-# This library is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-#
-# This library is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
-
 """
 Cairo surface creators.
 
@@ -114,7 +98,7 @@ class Surface(object):
                 background_color=None, negate_colors=False,
                 invert_images=False, write_to=None, output_width=None,
                 output_height=None, **kwargs):
-        """Convert a SVG document to the format for this class.
+        """Convert an SVG document to the format for this class.
 
         Specify the input by passing one of these:
 
@@ -180,6 +164,7 @@ class Surface(object):
             self.masks = parent_surface.masks
             self.paths = parent_surface.paths
             self.filters = parent_surface.filters
+            self.images = parent_surface.images
         else:
             self.markers = {}
             self.gradients = {}
@@ -187,6 +172,7 @@ class Surface(object):
             self.masks = {}
             self.paths = {}
             self.filters = {}
+            self.images = {}
         self._old_parent_node = self.parent_node = None
         self.output = output
         self.dpi = dpi
@@ -199,12 +185,14 @@ class Surface(object):
         if output_width and output_height:
             width, height = output_width, output_height
         elif output_width:
-            # Keep the aspect ratio
-            height = float(height)/float(width)*output_width
+            if width:
+                # Keep the aspect ratio
+                height *= output_width / width
             width = output_width
         elif output_height:
-            # Keep the aspect ratio
-            width = float(width)/float(height)*output_height
+            if height:
+                # Keep the aspect ratio
+                width *= output_height / height
             height = output_height
         else:
             width *= scale
@@ -214,6 +202,10 @@ class Surface(object):
         self.cairo, self.width, self.height = self._create_surface(
             width * self.device_units_per_user_units,
             height * self.device_units_per_user_units)
+
+        if 0 in (self.width, self.height):
+            raise ValueError('The SVG size is undefined')
+
         self.context = cairo.Context(self.cairo)
         # We must scale the context as the surface size is using physical units
         self.context.scale(
@@ -316,7 +308,9 @@ class Surface(object):
         self.context.save()
 
         # Apply transformations
-        transform(self, node.get('transform'))
+        transform(
+            self, node.get('transform'),
+            transform_origin=node.get('transform-origin'))
 
         # Find and prepare opacity, masks and filters
         mask = parse_url(node.get('mask')).fragment
@@ -438,7 +432,7 @@ class Surface(object):
             # Fill
             self.context.save()
             paint_source, paint_color = paint(node.get('fill', 'black'))
-            if not gradient_or_pattern(self, node, paint_source):
+            if not gradient_or_pattern(self, node, paint_source, fill_opacity):
                 if node.get('fill-rule') == 'evenodd':
                     self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(
@@ -457,7 +451,8 @@ class Surface(object):
             self.context.set_line_width(
                 size(self, node.get('stroke-width', '1')))
             paint_source, paint_color = paint(node.get('stroke'))
-            if not gradient_or_pattern(self, node, paint_source):
+            if not gradient_or_pattern(
+                    self, node, paint_source, stroke_opacity):
                 self.context.set_source_rgba(
                     *self.map_color(paint_color, stroke_opacity))
             self.context.stroke()
@@ -505,6 +500,16 @@ class PDFSurface(Surface):
 class PSSurface(Surface):
     """A surface that writes in PostScript format."""
     surface_class = cairo.PSSurface
+
+
+class EPSSurface(Surface):
+    """A surface that writes in Encapsulated PostScript format."""
+
+    def _create_surface(self, width, height):
+        """Create and return ``(cairo_surface, width, height)``."""
+        cairo_surface = cairo.PSSurface(self.output, width, height)
+        cairo_surface.set_eps(True)
+        return cairo_surface, width, height
 
 
 class PNGSurface(Surface):

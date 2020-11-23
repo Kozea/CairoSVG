@@ -1,7 +1,3 @@
-=======
- Tests
-=======
-
 You'll find in this folder:
 
 - ``*.py`` with various tests inside

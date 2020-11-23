@@ -1,19 +1,3 @@
-# This file is part of CairoSVG
-# Copyright © 2010-2018 Kozea
-#
-# This library is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-#
-# This library is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
-
 """
 Externally defined elements managers.
 
@@ -77,19 +61,20 @@ def parse_all_defs(surface, node):
 def parse_def(surface, node):
     """Parse the SVG definitions."""
     for def_type in (
-            'marker', 'gradient', 'pattern', 'path', 'mask', 'filter'):
+            'marker', 'gradient', 'pattern', 'path', 'mask', 'filter',
+            'image'):
         if def_type in node.tag.lower() and 'id' in node:
             getattr(surface, '{}s'.format(def_type))[node['id']] = node
 
 
-def gradient_or_pattern(surface, node, name):
+def gradient_or_pattern(surface, node, name, opacity):
     """Gradient or pattern color."""
     if name in surface.gradients:
         update_def_href(surface, name, surface.gradients)
-        return draw_gradient(surface, node, name)
+        return draw_gradient(surface, node, name, opacity)
     elif name in surface.patterns:
         update_def_href(surface, name, surface.patterns)
-        return draw_pattern(surface, node, name)
+        return draw_pattern(surface, node, name, opacity)
 
 
 def marker(surface, node):
@@ -169,7 +154,7 @@ def paint_mask(surface, node, name, opacity):
     surface.context.restore()
 
 
-def draw_gradient(surface, node, name):
+def draw_gradient(surface, node, name, opacity):
     """Gradients colors."""
     gradient_node = surface.gradients[name]
 
@@ -201,6 +186,9 @@ def draw_gradient(surface, node, name):
         fy = size(surface, gradient_node.get('fy', str(cy)), height_ref)
         gradient_pattern = cairo.RadialGradient(fx, fy, 0, cx, cy, r)
 
+    else:
+        return False
+
     # Apply matrix to set coordinate system for gradient
     if gradient_node.get('gradientUnits') != 'userSpaceOnUse':
         gradient_pattern.set_matrix(cairo.Matrix(
@@ -216,7 +204,7 @@ def draw_gradient(surface, node, name):
         offset = max(offset, size(surface, child.get('offset'), 1))
         stop_color = surface.map_color(
             child.get('stop-color', 'black'),
-            float(child.get('stop-opacity', 1)))
+            float(child.get('stop-opacity', 1)) * opacity)
         gradient_pattern.add_color_stop_rgba(offset, *stop_color)
 
     # Set spread method for gradient outside target bounds
@@ -227,9 +215,10 @@ def draw_gradient(surface, node, name):
     return True
 
 
-def draw_pattern(surface, node, name):
+def draw_pattern(surface, node, name, opacity):
     """Draw a pattern image."""
     pattern_node = surface.patterns[name]
+    pattern_node['opacity'] = float(pattern_node.get('opacity', 1)) * opacity
     pattern_node.tag = 'g'
     transform(surface, pattern_node.get('patternTransform'))
 
@@ -248,8 +237,7 @@ def draw_pattern(surface, node, name):
         pattern_width = size(surface, pattern_node.get('width', 0), 1)
         pattern_height = size(surface, pattern_node.get('height', 0), 1)
     else:
-        width = size(surface, node.get('width'), 'x')
-        height = size(surface, node.get('height'), 'y')
+        _, _, width, height = calculate_bounding_box(surface, node)
         x = size(surface, pattern_node.get('x'), 1) * width
         y = size(surface, pattern_node.get('y'), 1) * height
         pattern_width = (

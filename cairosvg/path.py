@@ -1,19 +1,3 @@
-# This file is part of CairoSVG
-# Copyright © 2010-2018 Kozea
-#
-# This library is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-#
-# This library is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
-
 """
 Paths manager.
 
@@ -103,8 +87,10 @@ def draw_markers(surface, node):
 
             # Override angle (if requested)
             node_angle = marker_node.get('orient', '0')
-            if node_angle != 'auto':
+            if node_angle not in ('auto', 'auto-start-reverse'):
                 angle = radians(float(node_angle))
+            elif node_angle == 'auto-start-reverse' and position == 'start':
+                angle += radians(180)
 
             # Draw marker path
             # See http://www.w3.org/TR/SVG/painting.html#MarkerAlgorithm
@@ -320,12 +306,16 @@ def path(surface, node):
         elif letter == 'm':
             # Current point relative move
             x, y, string = point(surface, string)
+            if last_letter and last_letter not in 'zZ':
+                node.vertices.append(None)
             surface.context.rel_move_to(x, y)
             current_point = current_point[0] + x, current_point[1] + y
 
         elif letter == 'M':
             # Current point move
             x, y, string = point(surface, string)
+            if last_letter and last_letter not in 'zZ':
+                node.vertices.append(None)
             surface.context.move_to(x, y)
             current_point = x, y
 
@@ -436,7 +426,7 @@ def path(surface, node):
             # Vertical line
             y, string = (string + ' ').split(' ', 1)
             old_x, old_y = current_point
-            angle = pi / 2 if size(surface, y, 'y') > 0 else -pi / 2
+            angle = pi / 2 if size(surface, y, 'y') > old_y else -pi / 2
             node.vertices.append((-angle, angle))
             y = size(surface, y, 'y')
             surface.context.line_to(old_x, y)

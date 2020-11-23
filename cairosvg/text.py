@@ -1,19 +1,3 @@
-# This file is part of CairoSVG
-# Copyright © 2010-2018 Kozea
-#
-# This library is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-#
-# This library is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with CairoSVG.  If not, see <http://www.gnu.org/licenses/>.
-
 """
 Text drawers.
 
@@ -72,8 +56,12 @@ def text(surface, node, draw_as_text=False):
     font_style = getattr(
         cairo, ('font_slant_{}'.format(node.get('font-style')).upper()),
         cairo.FONT_SLANT_NORMAL)
+    node_font_weight = node.get('font-weight')
+    if (node_font_weight and node_font_weight.isdigit()
+            and int(node_font_weight) >= 550):
+        node_font_weight = 'bold'
     font_weight = getattr(
-        cairo, ('font_weight_{}'.format(node.get('font-weight')).upper()),
+        cairo, ('font_weight_{}'.format(node_font_weight).upper()),
         cairo.FONT_WEIGHT_NORMAL)
     surface.context.select_font_face(font_family, font_style, font_weight)
     surface.context.set_font_size(surface.font_size)
@@ -113,9 +101,13 @@ def text(surface, node, draw_as_text=False):
 
     text_anchor = node.get('text-anchor')
     if text_anchor == 'middle':
-        x_align = width / 2. + x_bearing
+        x_align = - (width / 2. + x_bearing)
+        if letter_spacing and node.text:
+            x_align -= (len(node.text) - 1) * letter_spacing / 2
     elif text_anchor == 'end':
-        x_align = width + x_bearing
+        x_align = - (width + x_bearing)
+        if letter_spacing and node.text:
+            x_align -= (len(node.text) - 1) * letter_spacing
 
     # TODO: This is a hack. The rest of the baseline alignment tags of the SVG
     # 1.1 spec (section 10.9.2) are not supported. We only try to align things
@@ -126,7 +118,8 @@ def text(surface, node, draw_as_text=False):
     # this will at least make that possible.
     if max_x_advance > 0 and max_y_advance == 0:
         display_anchor = node.get('display-anchor')
-        alignment_baseline = node.get('alignment-baseline')
+        alignment_baseline = (node.get('dominant-baseline') or
+                              node.get('alignment-baseline'))
         if display_anchor == 'middle':
             y_align = -height / 2.0 - y_bearing
         elif display_anchor == 'top':
@@ -162,11 +155,11 @@ def text(surface, node, draw_as_text=False):
         start_offset = size(surface, node.get('startOffset', 0), length)
         if node.tag == 'textPath':
             surface.text_path_width += start_offset
-        surface.text_path_width -= x_align
+        surface.text_path_width += x_align
         bounding_box = extend_bounding_box(bounding_box, ((start_offset, 0),))
 
     if node.text:
-        for [x, y, dx, dy, r], letter in letters_positions:
+        for i, ((x, y, dx, dy, r), letter) in enumerate(letters_positions):
             if x:
                 surface.cursor_d_position[0] = 0
             if y:
@@ -182,7 +175,9 @@ def text(surface, node, draw_as_text=False):
                 middle_point = point_following_path(cairo_path, middle)
                 end = start + extents
                 end_point = point_following_path(cairo_path, end)
-                surface.text_path_width += extents + letter_spacing
+                if i:
+                    extents += letter_spacing
+                surface.text_path_width += extents
                 if not all((start_point, middle_point, end_point)):
                     continue
                 if not 0 <= middle <= length:
@@ -198,17 +193,19 @@ def text(surface, node, draw_as_text=False):
                 surface.context.save()
                 x = surface.cursor_position[0] if x is None else x
                 y = surface.cursor_position[1] if y is None else y
-                surface.context.move_to(x + letter_spacing, y)
-                cursor_position = x + letter_spacing + extents, y
+                if i:
+                    x += letter_spacing
+                surface.context.move_to(x, y)
+                cursor_position = x + extents, y
                 surface.context.rel_move_to(*surface.cursor_d_position)
-                surface.context.rel_move_to(-x_align, y_align)
+                surface.context.rel_move_to(x_align, y_align)
                 surface.context.rotate(last_r if r is None else r)
                 points = (
-                    (cursor_position[0] - x_align +
+                    (cursor_position[0] + x_align +
                      surface.cursor_d_position[0],
                      cursor_position[1] + y_align +
                      surface.cursor_d_position[1]),
-                    (cursor_position[0] - x_align + text_extents[4] +
+                    (cursor_position[0] + x_align + text_extents[4] +
                      surface.cursor_d_position[0],
                      cursor_position[1] + y_align + text_extents[3] +
                      surface.cursor_d_position[1]))
