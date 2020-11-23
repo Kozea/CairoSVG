@@ -184,6 +184,14 @@ class Surface(object):
 
         if output_width and output_height:
             width, height = output_width, output_height
+        elif output_width:
+            if width:
+                height *= output_width / width
+            width = output_width
+        elif output_height:
+            if height:
+                width *= output_height / height
+            height = output_height
         else:
             width *= scale
             height *= scale
