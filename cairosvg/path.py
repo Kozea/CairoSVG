@@ -426,7 +426,7 @@ def path(surface, node):
             # Vertical line
             y, string = (string + ' ').split(' ', 1)
             old_x, old_y = current_point
-            angle = pi / 2 if size(surface, y, 'y') > 0 else -pi / 2
+            angle = pi / 2 if size(surface, y, 'y') > old_y else -pi / 2
             node.vertices.append((-angle, angle))
             y = size(surface, y, 'y')
             surface.context.line_to(old_x, y)
