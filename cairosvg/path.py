@@ -3,7 +3,7 @@ Paths manager.
 
 """
 
-from math import pi, radians
+from math import pi, radians, cos, sin
 
 from .bounding_box import calculate_bounding_box
 from .helpers import (
@@ -34,11 +34,13 @@ def draw_markers(surface, node):
         point = node.vertices.pop(0)
         angles = node.vertices.pop(0) if node.vertices else None
         if angles:
+            angle1 = angles[0]
             if position == 'start':
-                angle = pi + angles[0]
+                angle = angle1
             else:
-                angle = (angle2 + pi + angles[0]) / 2
-            angle1, angle2 = angles
+                # Bisect the angle difference by summing the corresponding unit vectors
+                angle = point_angle(0, 0, cos(angle1) + cos(angle2), sin(angle1) + sin(angle2))
+            angle2 = angles[1]
         else:
             angle = angle2
             position = 'end'
