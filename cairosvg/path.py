@@ -7,8 +7,8 @@ from math import pi, radians, cos, sin
 
 from .bounding_box import calculate_bounding_box
 from .helpers import (
-    PATH_LETTERS, clip_marker_box, node_format, normalize, point, point_angle,
-    preserve_ratio, quadratic_points, rotate, size)
+    PATH_LETTERS, bezier_angles, clip_marker_box, node_format, normalize,
+    point, point_angle, preserve_ratio, quadratic_points, rotate, size)
 from .url import parse_url
 
 
@@ -246,7 +246,7 @@ def path(surface, node):
             x1, y1, string = point(surface, string)
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append((point_angle(0, 0, x1, y1), point_angle(x2, y2, x3, y3)))
+            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             current_point = current_point[0] + x3, current_point[1] + y3
 
@@ -264,7 +264,7 @@ def path(surface, node):
             x1, y1, string = point(surface, string)
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append((point_angle(x, y, x1, y1), point_angle(x2, y2, x3, y3)))
+            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
             current_point = x3, y3
 
@@ -328,7 +328,7 @@ def path(surface, node):
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(0, 0, x1, y1, x2, y2)
             surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
-            node.vertices.append((point_angle(0, 0, x1, y1), point_angle(x1, y1, x2, y2)))
+            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2)))
             current_point = x + x2, y + y2
 
             # Save absolute values for x and y, useful if next letter is t or T
@@ -344,7 +344,7 @@ def path(surface, node):
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(x, y, x1, y1, x2, y2)
             surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
-            node.vertices.append((point_angle(x, y, x1, y1), point_angle(x1, y1, x2, y2)))
+            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2)))
             current_point = x2, y2
 
         elif letter == 's':
@@ -354,7 +354,7 @@ def path(surface, node):
             y1 = y - y2 if last_letter in 'csCS' else 0
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append((point_angle(0, 0, x1, y1), point_angle(x2, y2, x3, y3)))
+            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             current_point = x + x3, y + y3
 
@@ -373,7 +373,7 @@ def path(surface, node):
             y1 = y + (y - y2) if last_letter in 'csCS' else y
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append((point_angle(x, y, x1, y1), point_angle(x2, y2, x3, y3)))
+            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
             current_point = x3, y3
 
@@ -384,7 +384,7 @@ def path(surface, node):
             y1 = y - y1 if last_letter in 'qtQT' else 0
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(0, 0, x1, y1, x2, y2)
-            node.vertices.append((point_angle(0, 0, x1, y1), point_angle(x1, y1, x2, y2)))
+            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2)))
             surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             current_point = x + x2, y + y2
 
@@ -401,7 +401,7 @@ def path(surface, node):
             y1 = y + (y - y1) if last_letter in 'qtQT' else y
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(x, y, x1, y1, x2, y2)
-            node.vertices.append((point_angle(x, y, x1, y1), point_angle(x1, y1, x2, y2)))
+            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2)))
             surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             current_point = x2, y2
 
