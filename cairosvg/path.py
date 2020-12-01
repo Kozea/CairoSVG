@@ -3,7 +3,7 @@ Paths manager.
 
 """
 
-from math import pi, radians, cos, sin
+from math import pi, radians, cos, sin, atan2
 
 from .bounding_box import calculate_bounding_box
 from .helpers import (
@@ -228,8 +228,12 @@ def path(surface, node):
             angle2 = point_angle(xc, yc, xe, ye)
 
             # Store the tangent angles
-            radius_to_tangent = pi/2 if sweep else -pi/2
-            node.vertices.append((angle1 + radius_to_tangent, angle2 + radius_to_tangent))
+            tangent1 = angle1 + (pi/2 if sweep else -pi/2)
+            tangent2 = angle2 + (pi/2 if sweep else -pi/2)
+            if radii_ratio != 1:
+                tangent1 = atan2(radii_ratio*sin(tangent1), cos(tangent1))
+                tangent2 = atan2(radii_ratio*sin(tangent2), cos(tangent2))
+            node.vertices.append((tangent1 + rotation, tangent2 + rotation))
 
             # Draw the arc
             surface.context.save()
