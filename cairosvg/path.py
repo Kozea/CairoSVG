@@ -26,98 +26,109 @@ def draw_markers(surface, node):
         else:
             markers[position] = common_marker
 
-    angle1, angle2 = None, None
     position = 'start'
 
     while node.vertices:
-        # Calculate position and angle
-        point = node.vertices.pop(0)
-        angles = node.vertices.pop(0) if node.vertices else None
-        if angles:
-            angle1 = angles[0]
-            if position == 'start':
-                angle = angle1
-            else:
-                # Bisect the angle difference by summing the corresponding unit vectors
-                angle = point_angle(0, 0, cos(angle1) + cos(angle2), sin(angle1) + sin(angle2))
-            angle2 = angles[1]
-        else:
-            angle = angle2
-            position = 'end'
+        subpath = node.vertices.pop(0)
+        angle1, angle2 = None, None
+        while subpath:
+            # Calculate position and angle
+            point = subpath.pop(0)
+            angles = subpath.pop(0) if subpath else None
+            if angle2 is None and len(subpath) % 2 == 0:
+                # Start of closed subpath: average angles of first and last segment
+                angle2 = subpath[-1][1]
 
-        # Draw marker (if a marker exists for 'position')
-        marker = markers[position]
-        if marker:
-            marker_node = surface.markers.get(marker)
+            if angles:
+                angle1 = angles[0]
+                if angle2 is None:
+                    # Start of unclosed subpath
+                    angle = angle1
+                else:
+                    # Two adjoining segments: bisect the angle difference
+                    # by summing the corresponding unit vectors
+                    angle = point_angle(0, 0, cos(angle1) + cos(angle2), sin(angle1) + sin(angle2))
+                angle2 = angles[1]
+            else: # End of unclosed subpath
+                angle = angle2
 
-            # Calculate scale based on current stroke (if requested)
-            if marker_node.get('markerUnits') == 'userSpaceOnUse':
-                scale = 1
-            else:
-                scale = size(
-                    surface, surface.parent_node.get('stroke-width', '1'))
+            if not node.vertices and not subpath:
+                # Last node of path
+                position = 'end'
 
-            # Calculate position, (additional) scale and clipping based on
-            # marker properties
-            viewbox = node_format(surface, marker_node)[2]
-            if viewbox:
-                scale_x, scale_y, translate_x, translate_y = preserve_ratio(
-                    surface, marker_node)
-                clip_box = clip_marker_box(
-                    surface, marker_node, scale_x, scale_y)
-            else:
-                # Calculate sizes
-                marker_width = size(surface,
-                                    marker_node.get('markerWidth', '3'), 'x')
-                marker_height = size(surface,
-                                     marker_node.get('markerHeight', '3'), 'y')
-                bounding_box = calculate_bounding_box(surface, marker_node)
+            # Draw marker (if a marker exists for 'position')
+            marker = markers[position]
+            if marker:
+                marker_node = surface.markers.get(marker)
 
-                # Calculate position and scale (preserve aspect ratio)
-                translate_x = -size(surface, marker_node.get('refX', '0'), 'x')
-                translate_y = -size(surface, marker_node.get('refY', '0'), 'y')
-                scale_x = scale_y = min(
-                    marker_width / bounding_box[2],
-                    marker_height / bounding_box[3])
+                # Calculate scale based on current stroke (if requested)
+                if marker_node.get('markerUnits') == 'userSpaceOnUse':
+                    scale = 1
+                else:
+                    scale = size(
+                        surface, surface.parent_node.get('stroke-width', '1'))
 
-                # No clipping since viewbox is not present
-                clip_box = None
+                # Calculate position, (additional) scale and clipping based on
+                # marker properties
+                viewbox = node_format(surface, marker_node)[2]
+                if viewbox:
+                    scale_x, scale_y, translate_x, translate_y = preserve_ratio(
+                        surface, marker_node)
+                    clip_box = clip_marker_box(
+                        surface, marker_node, scale_x, scale_y)
+                else:
+                    # Calculate sizes
+                    marker_width = size(surface,
+                                        marker_node.get('markerWidth', '3'), 'x')
+                    marker_height = size(surface,
+                                         marker_node.get('markerHeight', '3'), 'y')
+                    bounding_box = calculate_bounding_box(surface, marker_node)
 
-            # Add extra path for marker
-            temp_path = surface.context.copy_path()
-            surface.context.new_path()
+                    # Calculate position and scale (preserve aspect ratio)
+                    translate_x = -size(surface, marker_node.get('refX', '0'), 'x')
+                    translate_y = -size(surface, marker_node.get('refY', '0'), 'y')
+                    scale_x = scale_y = min(
+                        marker_width / bounding_box[2],
+                        marker_height / bounding_box[3])
 
-            # Override angle (if requested)
-            node_angle = marker_node.get('orient', '0')
-            if node_angle not in ('auto', 'auto-start-reverse'):
-                angle = radians(float(node_angle))
-            elif node_angle == 'auto-start-reverse' and position == 'start':
-                angle += radians(180)
+                    # No clipping since viewbox is not present
+                    clip_box = None
 
-            # Draw marker path
-            # See http://www.w3.org/TR/SVG/painting.html#MarkerAlgorithm
-            for child in marker_node.children:
-                surface.context.save()
-                surface.context.translate(*point)
-                surface.context.rotate(angle)
-                surface.context.scale(scale)
-                surface.context.scale(scale_x, scale_y)
-                surface.context.translate(translate_x, translate_y)
+                # Add extra path for marker
+                temp_path = surface.context.copy_path()
+                surface.context.new_path()
 
-                # Add clipping (if present and requested)
-                overflow = marker_node.get('overflow', 'hidden')
-                if clip_box and overflow in ('hidden', 'scroll'):
+                # Override angle (if requested)
+                node_angle = marker_node.get('orient', '0')
+                if node_angle not in ('auto', 'auto-start-reverse'):
+                    angle = radians(float(node_angle))
+                elif node_angle == 'auto-start-reverse' and position == 'start':
+                    angle += radians(180)
+
+                # Draw marker path
+                # See http://www.w3.org/TR/SVG/painting.html#MarkerAlgorithm
+                for child in marker_node.children:
                     surface.context.save()
-                    surface.context.rectangle(*clip_box)
+                    surface.context.translate(*point)
+                    surface.context.rotate(angle)
+                    surface.context.scale(scale)
+                    surface.context.scale(scale_x, scale_y)
+                    surface.context.translate(translate_x, translate_y)
+
+                    # Add clipping (if present and requested)
+                    overflow = marker_node.get('overflow', 'hidden')
+                    if clip_box and overflow in ('hidden', 'scroll'):
+                        surface.context.save()
+                        surface.context.rectangle(*clip_box)
+                        surface.context.restore()
+                        surface.context.clip()
+
+                    surface.draw(child)
                     surface.context.restore()
-                    surface.context.clip()
 
-                surface.draw(child)
-                surface.context.restore()
+                surface.context.append_path(temp_path)
 
-            surface.context.append_path(temp_path)
-
-        position = 'mid' if angles else 'start'
+            position = 'mid'
 
 
 def path(surface, node):
@@ -139,13 +150,17 @@ def path(surface, node):
     else:
         surface.context.move_to(0, 0)
         current_point = 0, 0
+    if string[0] not in 'Mm':
+      # Avoid index error for invalid paths that do not start with
+      # a moveto; should this raise an error or skip the path?
+      node.vertices.append([])
 
     while string:
         string = string.strip()
         if string.split(' ', 1)[0] in PATH_LETTERS:
             letter, string = (string + ' ').split(' ', 1)
             if last_letter in (None, 'z', 'Z') and letter not in 'mM':
-                node.vertices.append(current_point)
+                node.vertices[-1].append(current_point)
                 first_path_point = current_point
         elif letter == 'M':
             letter = 'L'
@@ -233,7 +248,7 @@ def path(surface, node):
             if radii_ratio != 1:
                 tangent1 = atan2(radii_ratio*sin(tangent1), cos(tangent1))
                 tangent2 = atan2(radii_ratio*sin(tangent2), cos(tangent2))
-            node.vertices.append((tangent1 + rotation, tangent2 + rotation))
+            node.vertices[-1].append((tangent1 + rotation, tangent2 + rotation))
 
             # Draw the arc
             surface.context.save()
@@ -250,7 +265,7 @@ def path(surface, node):
             x1, y1, string = point(surface, string)
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2), (x3, y3)))
+            node.vertices[-1].append(bezier_angles((0, 0), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             current_point = current_point[0] + x3, current_point[1] + y3
 
@@ -268,7 +283,7 @@ def path(surface, node):
             x1, y1, string = point(surface, string)
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2), (x3, y3)))
+            node.vertices[-1].append(bezier_angles((x, y), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
             current_point = x3, y3
 
@@ -278,7 +293,7 @@ def path(surface, node):
             x = size(surface, x, 'x')
             old_x, old_y = current_point
             angle = 0 if x > 0 else pi
-            node.vertices.append((angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.rel_line_to(x, 0)
             current_point = current_point[0] + x, current_point[1]
 
@@ -288,7 +303,7 @@ def path(surface, node):
             x = size(surface, x, 'x')
             old_x, old_y = current_point
             angle = 0 if x > old_x else pi
-            node.vertices.append((angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.line_to(x, old_y)
             current_point = x, current_point[1]
 
@@ -296,7 +311,7 @@ def path(surface, node):
             # Relative straight line
             x, y, string = point(surface, string)
             angle = point_angle(0, 0, x, y)
-            node.vertices.append((angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.rel_line_to(x, y)
             current_point = current_point[0] + x, current_point[1] + y
 
@@ -305,23 +320,21 @@ def path(surface, node):
             x, y, string = point(surface, string)
             old_x, old_y = current_point
             angle = point_angle(old_x, old_y, x, y)
-            node.vertices.append((angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.line_to(x, y)
             current_point = x, y
 
         elif letter == 'm':
             # Current point relative move
             x, y, string = point(surface, string)
-            if last_letter and last_letter not in 'zZ':
-                node.vertices.append(None)
+            node.vertices.append([])
             surface.context.rel_move_to(x, y)
             current_point = current_point[0] + x, current_point[1] + y
 
         elif letter == 'M':
             # Current point move
             x, y, string = point(surface, string)
-            if last_letter and last_letter not in 'zZ':
-                node.vertices.append(None)
+            node.vertices.append([])
             surface.context.move_to(x, y)
             current_point = x, y
 
@@ -332,7 +345,7 @@ def path(surface, node):
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(0, 0, x1, y1, x2, y2)
             surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
-            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2)))
+            node.vertices[-1].append(bezier_angles((0, 0), (x1, y1), (x2, y2)))
             current_point = x + x2, y + y2
 
             # Save absolute values for x and y, useful if next letter is t or T
@@ -348,7 +361,7 @@ def path(surface, node):
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(x, y, x1, y1, x2, y2)
             surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
-            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2)))
+            node.vertices[-1].append(bezier_angles((x, y), (x1, y1), (x2, y2)))
             current_point = x2, y2
 
         elif letter == 's':
@@ -358,7 +371,7 @@ def path(surface, node):
             y1 = y - y2 if last_letter in 'csCS' else 0
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2), (x3, y3)))
+            node.vertices[-1].append(bezier_angles((0, 0), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.rel_curve_to(x1, y1, x2, y2, x3, y3)
             current_point = x + x3, y + y3
 
@@ -377,7 +390,7 @@ def path(surface, node):
             y1 = y + (y - y2) if last_letter in 'csCS' else y
             x2, y2, string = point(surface, string)
             x3, y3, string = point(surface, string)
-            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2), (x3, y3)))
+            node.vertices[-1].append(bezier_angles((x, y), (x1, y1), (x2, y2), (x3, y3)))
             surface.context.curve_to(x1, y1, x2, y2, x3, y3)
             current_point = x3, y3
 
@@ -388,7 +401,7 @@ def path(surface, node):
             y1 = y - y1 if last_letter in 'qtQT' else 0
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(0, 0, x1, y1, x2, y2)
-            node.vertices.append(bezier_angles((0, 0), (x1, y1), (x2, y2)))
+            node.vertices[-1].append(bezier_angles((0, 0), (x1, y1), (x2, y2)))
             surface.context.rel_curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             current_point = x + x2, y + y2
 
@@ -405,7 +418,7 @@ def path(surface, node):
             y1 = y + (y - y1) if last_letter in 'qtQT' else y
             x2, y2, string = point(surface, string)
             xq1, yq1, xq2, yq2, xq3, yq3 = quadratic_points(x, y, x1, y1, x2, y2)
-            node.vertices.append(bezier_angles((x, y), (x1, y1), (x2, y2)))
+            node.vertices[-1].append(bezier_angles((x, y), (x1, y1), (x2, y2)))
             surface.context.curve_to(xq1, yq1, xq2, yq2, xq3, yq3)
             current_point = x2, y2
 
@@ -415,7 +428,7 @@ def path(surface, node):
             y = size(surface, y, 'y')
             old_x, old_y = current_point
             angle = pi / 2 if y > 0 else -pi / 2
-            node.vertices.append((angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.rel_line_to(0, y)
             current_point = current_point[0], current_point[1] + y
 
@@ -425,18 +438,19 @@ def path(surface, node):
             y = size(surface, y, 'y')
             old_x, old_y = current_point
             angle = pi / 2 if y > old_y else -pi / 2
-            node.vertices.append((angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.line_to(old_x, y)
             current_point = current_point[0], y
 
         elif letter in 'zZ':
             # End of path
-            node.vertices.append(None)
+            angle = point_angle(*current_point, *first_path_point)
+            node.vertices[-1].append((angle, angle))
             surface.context.close_path()
             current_point = first_path_point or (0, 0)
 
         if letter not in 'zZ':
-            node.vertices.append(current_point)
+            node.vertices[-1].append(current_point)
 
         string = string.strip()
         last_letter = letter
