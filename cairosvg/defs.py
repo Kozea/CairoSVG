@@ -346,9 +346,13 @@ def use(surface, node):
     if 'mask' in node:
         del node['mask']
     href = parse_url(node.get_href()).geturl()
-    tree = Tree(
-        url=href, url_fetcher=node.url_fetcher, parent=node,
-        tree_cache=surface.tree_cache, unsafe=node.unsafe)
+    try:
+        tree = Tree(
+            url=href, url_fetcher=node.url_fetcher, parent=node,
+            tree_cache=surface.tree_cache, unsafe=node.unsafe)
+    except TypeError:
+        surface.context.restore()
+        return
 
     if not match_features(tree.xml_tree):
         surface.context.restore()
