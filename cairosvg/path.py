@@ -31,13 +31,17 @@ def draw_markers(surface, node):
     while node.vertices:
         subpath = node.vertices.pop(0)
         angle1, angle2 = None, None
+
+        if len(subpath) % 2 == 0:
+            # Closed subpath: assign final angle to average with initial angle &
+            # append copy of first vertex and angle at the end
+            angle2 = subpath[-1][1]
+            subpath += subpath[:2]
+
         while subpath:
             # Calculate position and angle
             point = subpath.pop(0)
             angles = subpath.pop(0) if subpath else None
-            if angle2 is None and len(subpath) % 2 == 0:
-                # Start of closed subpath: average angles of first and last segment
-                angle2 = subpath[-1][1]
 
             if angles:
                 angle1 = angles[0]
