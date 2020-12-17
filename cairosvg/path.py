@@ -81,21 +81,17 @@ def draw_markers(surface, node):
                     clip_box = clip_marker_box(
                         surface, marker_node, scale_x, scale_y)
                 else:
-                    # Calculate sizes
+                    # Calculate sizes and position
                     marker_width = size(surface,
                                         marker_node.get('markerWidth', '3'), 'x')
                     marker_height = size(surface,
                                          marker_node.get('markerHeight', '3'), 'y')
-                    bounding_box = calculate_bounding_box(surface, marker_node)
 
-                    # Calculate position and scale (preserve aspect ratio)
                     translate_x = -size(surface, marker_node.get('refX', '0'), 'x')
                     translate_y = -size(surface, marker_node.get('refY', '0'), 'y')
-                    scale_x = scale_y = min(
-                        marker_width / bounding_box[2],
-                        marker_height / bounding_box[3])
 
-                    # No clipping since viewbox is not present
+                    # No clipping or scaling since viewbox is not present
+                    scale_x = scale_y = 1
                     clip_box = None
 
                 # Add extra path for marker
