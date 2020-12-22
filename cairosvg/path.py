@@ -186,7 +186,14 @@ def path(surface, node):
 
             # rx=0 or ry=0 means straight line
             if not rx or not ry:
-                string = 'l {} {} {}'.format(x3, y3, string)
+                if string and string[0] not in PATH_LETTERS:
+                    # As we replace the current operation by l, we must be sure
+                    # that the next letter is set to the real current letter (a
+                    # or A) in case it’s omitted
+                    next_letter = '{} '.format(letter)
+                else:
+                    next_letter = ''
+                string = 'l {} {} {}{}'.format(x3, y3, next_letter, string)
                 continue
 
             radii_ratio = ry / rx
