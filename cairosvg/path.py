@@ -210,7 +210,7 @@ def path(surface, node):
                     next_letter = '{} '.format(letter)
                 else:
                     next_letter = ''
-                string = 'l {} {} {}{}'.format(x3, y3, next_letter, string)                continue
+                string = 'l {} {} {}{}'.format(x3, y3, next_letter, string)
                 continue
 
             radii_ratio = ry / rx
