@@ -3,6 +3,27 @@
 ======
 
 
+Version 2.5.1 released on 2021-01-06
+====================================
+
+**WARNING:** this is a security update.
+
+When processing SVG files, CairoSVG was using two regular expressions which are
+vulnerable to Regular Expression Denial of Service (REDoS).
+
+If an attacker provided a malicious SVG, it could make CairoSVG get stuck
+processing the file for a very long time.
+
+Other bug fixes:
+
+* Fix marker positions for unclosed paths
+* Follow hint when only output_width or output_height is set
+* Handle opacity on raster images
+* Don’t crash when use tags reference unknown tags
+* Take care of the next letter when A/a is replaced by l
+* Fix misalignment in node.vertices
+
+
 Version 2.5.0 released on 2020-10-29
 ====================================
 
