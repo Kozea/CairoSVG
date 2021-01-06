@@ -187,8 +187,8 @@ COLORS = {
     'transparent': (0, 0, 0, 0),
 }
 
-RGBA = re.compile(r'rgba\([ \n\r\t]*(.+?)[ \n\r\t]*\)')
-RGB = re.compile(r'rgb\([ \n\r\t]*(.+?)[ \n\r\t]*\)')
+RGBA = re.compile(r'rgba\((.+?)\)')
+RGB = re.compile(r'rgb\((.+?)\)')
 HEX_RRGGBB = re.compile('#[0-9a-f]{6}')
 HEX_RGB = re.compile('#[0-9a-f]{3}')
 
@@ -212,14 +212,14 @@ def color(string, opacity=1):
     if match:
         r, g, b, a = tuple(
             float(i.strip(' %')) / 100 if '%' in i else float(i) / 255
-            for i in match.group(1).split(','))
+            for i in match.group(1).strip().split(','))
         return (r, g, b, a * 255 * opacity)
 
     match = RGB.search(string)
     if match:
         r, g, b = tuple(
             float(i.strip(' %')) / 100 if '%' in i else float(i) / 255
-            for i in match.group(1).split(','))
+            for i in match.group(1).strip().split(','))
         return (r, g, b, opacity)
 
     match = HEX_RRGGBB.search(string)
