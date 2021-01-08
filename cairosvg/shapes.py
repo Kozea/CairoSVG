@@ -45,13 +45,15 @@ def line(surface, node):
     surface.context.move_to(x1, y1)
     surface.context.line_to(x2, y2)
     angle = point_angle(x1, y1, x2, y2)
-    node.vertices = [(x1, y1), (pi - angle, angle), (x2, y2)]
+    node.vertices = [[(x1, y1), (angle, angle), (x2, y2)]]
 
 
 def polygon(surface, node):
     """Draw a polygon ``node`` on ``surface``."""
     polyline(surface, node)
     surface.context.close_path()
+    closing_angle = point_angle(*node.vertices[-1][-1], *node.vertices[-1][0])
+    node.vertices[-1].append((closing_angle, closing_angle))
 
 
 def polyline(surface, node):
@@ -60,14 +62,14 @@ def polyline(surface, node):
     if points:
         x, y, points = point(surface, points)
         surface.context.move_to(x, y)
-        node.vertices = [(x, y)]
+        node.vertices = [[(x, y)]]
         while points:
             x_old, y_old = x, y
             x, y, points = point(surface, points)
             angle = point_angle(x_old, y_old, x, y)
-            node.vertices.append((pi - angle, angle))
+            node.vertices[-1].append((angle, angle))
             surface.context.line_to(x, y)
-            node.vertices.append((x, y))
+            node.vertices[-1].append((x, y))
 
 
 def rect(surface, node):
