@@ -15,8 +15,8 @@ CairoSVG is written in Python and based on the famous 2D graphics library
 called [Cairo](http://cairographics.org/). It is tested on SVG samples coming
 from the [W3C test
 suite](http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview). It also
-relies on [tinycss2](http://tinycss2.readthedocs.io/) plus
-[cssselect2](http://cssselect2.readthedocs.io/) to apply CSS, and on
+relies on [tinycss2](https://doc.courtbouillon.org/tinycss2) plus
+[cssselect2](https://doc.courtbouillon.org/cssselect2) to apply CSS, and on
 [defusedxml](https://pypi.python.org/pypi/defusedxml) to detect unsafe SVG
 files. Embedded raster images are handled by
 [Pillow](http://python-imaging.github.io/).
@@ -31,7 +31,7 @@ install it with pip:
 
     $ pip3 install cairosvg
 
-The current version of CairoSVG requires at least Python 3.5, it doesn't work
+The current version of CairoSVG requires at least Python 3.6, it doesn't work
 with Python 2.x. Older versions of CairoSVG (1.x) work with Python 2.x, but
 they're not supported anymore.
 
@@ -101,7 +101,7 @@ standard input.
 
 ### Python
 
-CairoSVG provides a module for Python 3.5+.
+CairoSVG provides a module for Python 3.6+.
 
 The `cairosvg` module offers 4 functions:
 
@@ -160,7 +160,7 @@ at handling erratic SVG files, with for example unknown syntaxes or unavailable
 external resources.
 
 CairoSVG is pretty small, and quite fast once the Python interpreter is
-launched. When [Travis](https://travis-ci.org/Kozea/CairoSVG/) launches our
+launched. When [GitHub Actions](https://github.com/Kozea/CairoSVG/actions) launches our
 tests, it is able to render more than 270 reference images twice in less than
 7.5 seconds (yes, that's about 75 simple images per second).
 
@@ -186,9 +186,9 @@ advanced features (overflow and relative units for example) are not supported.
 Styling is possible thanks to both dedicated XML attributes and CSS.
 
 Stylesheets are parsed with an external parser called
-[tinycss2](http://tinycss2.readthedocs.io/) and applied using an external
+[tinycss2](https://doc.courtbouillon.org/tinycss2) and applied using an external
 selector-to-python converter called
-[cssselect2](http://cssselect2.readthedocs.io/): styling is thus pretty
+[cssselect2](https://doc.courtbouillon.org/cssselect2): styling is thus pretty
 solid. Nevertheless, some minor priority bugs are known (such as `!important`
 CSS properties being less important than the ones defined in XML attributes,
 for example).
