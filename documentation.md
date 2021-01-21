@@ -8,7 +8,7 @@ permalink: /documentation/
 
 CairoSVG is a **[SVG 1.1](http://www.w3.org/TR/SVG/) to PNG, PDF, PS** and
 SVG converter. It provides both a **command-line interface** and **Python
-3.5+** library, for Unix-like operating systems (at least **Linux** and
+3.6+** library, for Unix-like operating systems (at least **Linux** and
 **macOS**) and **Windows**. It is a free software, distributed under **LGPLv3**.
 
 CairoSVG is written in Python and based on the famous 2D graphics library
