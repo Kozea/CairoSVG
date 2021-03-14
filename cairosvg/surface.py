@@ -31,6 +31,7 @@ SHAPE_ANTIALIAS = {
 }
 
 TEXT_ANTIALIAS = {
+    'crispEdges': cairo.ANTIALIAS_NONE,
     'optimizeSpeed': cairo.ANTIALIAS_FAST,
     'optimizeLegibility': cairo.ANTIALIAS_GOOD,
     'geometricPrecision': cairo.ANTIALIAS_BEST,
