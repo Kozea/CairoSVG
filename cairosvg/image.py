@@ -79,7 +79,7 @@ def image(surface, node):
 
         if surface.map_image:
             image = surface.map_image(image)
-        if image.mode == "P":
+        if image.mode == "CMYK":
             image = image.convert("RGB")
         image.save(png_file, 'PNG')
         png_file.seek(0)
