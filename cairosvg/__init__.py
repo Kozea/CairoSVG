@@ -96,13 +96,15 @@ def svg2eps(bytestring=None, *, file_obj=None, url=None, dpi=96,
         output_width=output_width, output_height=output_height)
 
 
-svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
-    'the format for this class', 'SVG')
-svg2png.__doc__ = surface.Surface.convert.__doc__.replace(
-    'the format for this class', 'PNG')
-svg2pdf.__doc__ = surface.Surface.convert.__doc__.replace(
-    'the format for this class', 'PDF')
-svg2ps.__doc__ = surface.Surface.convert.__doc__.replace(
-    'the format for this class', 'PS')
-svg2eps.__doc__ = surface.Surface.convert.__doc__.replace(
-    'the format for this class', 'EPS')
+if __debug__:
+    svg2svg.__doc__ = surface.Surface.convert.__doc__.replace(
+        'the format for this class', 'SVG')
+    svg2png.__doc__ = surface.Surface.convert.__doc__.replace(
+        'the format for this class', 'PNG')
+    svg2pdf.__doc__ = surface.Surface.convert.__doc__.replace(
+        'the format for this class', 'PDF')
+    svg2ps.__doc__ = surface.Surface.convert.__doc__.replace(
+        'the format for this class', 'PS')
+    svg2eps.__doc__ = surface.Surface.convert.__doc__.replace(
+        'the format for this class', 'EPS')
+    
