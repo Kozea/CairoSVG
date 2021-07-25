@@ -107,4 +107,3 @@ if __debug__:
         'the format for this class', 'PS')
     svg2eps.__doc__ = surface.Surface.convert.__doc__.replace(
         'the format for this class', 'EPS')
-    
