@@ -439,11 +439,11 @@ def path(surface, node):
             surface.context.line_to(old_x, y)
             current_point = current_point[0], y
 
-        elif letter in 'zZ':
+        elif letter in 'zZ' and first_path_point:
             # End of path
             node.vertices.append(None)
             surface.context.close_path()
-            current_point = first_path_point or (0, 0)
+            current_point = first_path_point
 
         if letter not in 'zZ':
             node.vertices.append(current_point)
