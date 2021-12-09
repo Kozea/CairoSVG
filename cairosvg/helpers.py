@@ -386,3 +386,16 @@ def size(surface, string, reference='xy'):
 
     # Unknown size
     return 0
+
+
+def find_child(node, element_id, default=None):
+    if element_id is not None:
+        if node.element.id == element_id:
+            return node
+
+        for child in node.children:
+            found = find_child(child, element_id)
+            if found is not None:
+                return found
+
+    return default
