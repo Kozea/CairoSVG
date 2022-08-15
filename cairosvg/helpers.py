@@ -378,6 +378,9 @@ def size(surface, string, reference='xy'):
     elif string.endswith('ex'):
         # Assume that 1em == 2ex
         return surface.font_size * float(string[:-2]) / 2
+    elif string.endswith('ch'):
+        # A '0' must be assumed to be 0.5em wide.
+        return surface.font_size * float(string[:-2]) / 2
 
     for unit, coefficient in UNITS.items():
         if string.endswith(unit):
