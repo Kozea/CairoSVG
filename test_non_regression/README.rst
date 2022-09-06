@@ -19,10 +19,10 @@ http://www.w3.org/Graphics/SVG/WG/wiki/Test_Suite_Overview
 
 These tests are really useful if you changed the code. You can launch both
 these tests and the API tests by getting the submodule and launching
-``./setup.py test`` in the root folder of the repository::
+``pytest`` in the root folder of the repository::
 
   git submodule update --init
-  ./setup.py test
+  pytest
 
 You can launch the tests only on one image (or more than one, separated by a
 comma) using::
