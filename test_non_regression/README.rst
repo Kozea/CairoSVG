@@ -27,7 +27,7 @@ these tests and the API tests by getting the submodule and launching
 You can launch the tests only on one image (or more than one, separated by a
 comma) using::
 
-  env CAIROSVG_TEST_FILES=image.svg pytest test_non_regression/test_non_regression.py
+  env CAIROSVG_TEST_FILES=svg/image.svg pytest test_non_regression/test_non_regression.py
 
 As CairoSVG does not handle SVG fonts, you can install the corresponding OTF
 fonts in order to test CairoSVG with the right fonts. They have already been

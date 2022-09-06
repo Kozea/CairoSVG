@@ -3,30 +3,30 @@ Cairo test suite.
 
 """
 
-import imp
+import importlib.util
 import os
+import sys
+from pathlib import Path
 
 import cairosvg
 
-reference_cairosvg = imp.load_source(
-    'cairosvg_reference', pathname=os.path.join(
-        os.path.dirname(__file__), 'cairosvg_reference', 'cairosvg',
-        '__init__.py'))
+CURRENT_FOLDER = Path(__file__).parent
+TEST_FOLDER = CURRENT_FOLDER / 'svg'
+
+reference_spec = importlib.util.spec_from_file_location(
+    'cairosvg_reference',
+    CURRENT_FOLDER / 'cairosvg_reference' / 'cairosvg' / '__init__.py')
+reference_cairosvg = importlib.util.module_from_spec(reference_spec)
+sys.modules['cairosvg_reference'] = reference_cairosvg
+reference_spec.loader.exec_module(reference_cairosvg)
 
 cairosvg.features.LOCALE = reference_cairosvg.features.LOCALE = 'en_US'
-
-TEST_FOLDER = os.path.join(os.path.dirname(__file__), 'svg')
-
 os.chdir(TEST_FOLDER)  # relative image urls
 
 if os.environ.get('CAIROSVG_TEST_FILES'):  # pragma: no cover
-    ALL_FILES = os.environ['CAIROSVG_TEST_FILES'].split(',')
+    FILES = [
+        str(CURRENT_FOLDER / filename) for filename in
+        os.environ['CAIROSVG_TEST_FILES'].split(',')]
 else:
-    ALL_FILES = os.listdir(TEST_FOLDER)
-
-ALL_FILES.sort(key=lambda name: name.lower())
-FILES = [
-    os.path.join(
-        os.path.dirname(TEST_FOLDER) if name.startswith('fail')
-        else TEST_FOLDER, name)
-    for name in ALL_FILES]
+    FILES = [str(path) for path in TEST_FOLDER.iterdir()]
+FILES.sort(key=lambda path: path.lower())
