@@ -3,10 +3,23 @@
 ======
 
 
+Version 2.6.0 released on 2023-01-12
+====================================
+
+* Drop support of Python 3.5 and 3.6, add support of Python 3.9, 3.10 and 3.11
+* Support crispEdges value for text antialiasing
+* Don’t crash when including CMYK images
+* Only update docstrings when not optimized
+* Don’t restore current point after empty paths
+* Assume that 1ch equals 0.5em
+* Fix various deprecation warnings
+
+
 Version 2.5.2 released on 2021-03-06
 ====================================
 
 * Fix marker path scale
+
 
 Version 2.5.1 released on 2021-01-06
 ====================================
