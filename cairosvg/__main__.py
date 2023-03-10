@@ -42,8 +42,8 @@ def main(argv=None, stdout=None, stdin=None):
         help='replace every raster pixel with its complementary color')
     parser.add_argument(
         '-u', '--unsafe', action='store_true',
-        help='resolve XML entities and allow very large files '
-             '(WARNING: vulnerable to XXE attacks and various DoS)')
+        help='fetch external files, resolve XML entities and allow very large '
+             'files (WARNING: vulnerable to XXE attacks and various DoS)')
     parser.add_argument(
         '--output-width', default=None, type=float,
         help='desired output width in pixels')

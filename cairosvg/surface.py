@@ -113,7 +113,8 @@ class Surface(object):
         :param parent_width: The width of the parent container in pixels.
         :param parent_height: The height of the parent container in pixels.
         :param scale: The ouptut scaling factor.
-        :param unsafe: A boolean allowing XML entities and very large files
+        :param unsafe: A boolean allowing external file access, XML entities
+                       and very large files
                        (WARNING: vulnerable to XXE attacks and various DoS).
 
         Specifiy the output with:

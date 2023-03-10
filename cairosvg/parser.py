@@ -390,6 +390,12 @@ class Tree(Node):
             tree = ElementTree.fromstring(
                 bytestring, forbid_entities=not unsafe,
                 forbid_external=not unsafe)
+
+        # Don’t allow fetching external files unless explicitly asked for
+        if 'url_fetcher' not in kwargs and not unsafe:
+            self.url_fetcher = (
+                lambda *args, **kwargs: b'<svg width="1" height="1"></svg>')
+
         self.xml_tree = tree
         root = cssselect2.ElementWrapper.from_xml_root(tree)
         style = parent.style if parent else css.parse_stylesheets(self, url)
