@@ -3,6 +3,18 @@
 ======
 
 
+Version 2.7.0 released on 2023-03-20
+====================================
+
+**WARNING:** this is a security update.
+
+When processing SVG files, CairoSVG could access other files online, possibly
+leading to very long renderings or other security problems.
+
+This feature is now disabled by default. External resources can still be
+accessed using the "unsafe" or the "url_fetcher" parameter.
+
+
 Version 2.6.0 released on 2023-01-12
 ====================================
 
