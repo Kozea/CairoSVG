@@ -14,7 +14,7 @@ from defusedxml import ElementTree
 from . import css
 from .features import match_features
 from .helpers import flatten, pop_rotation, rotations
-from .url import fetch, parse_url, read_url
+from .url import fetch, parse_url, read_url, safe_fetch
 
 # 'display' is actually inherited but handled differently because some markers
 # are part of a none-displaying group (see test painting-marker-07-f.svg)
@@ -393,8 +393,7 @@ class Tree(Node):
 
         # Don’t allow fetching external files unless explicitly asked for
         if 'url_fetcher' not in kwargs and not unsafe:
-            self.url_fetcher = (
-                lambda *args, **kwargs: b'<svg width="1" height="1"></svg>')
+            self.url_fetcher = safe_fetch
 
         self.xml_tree = tree
         root = cssselect2.ElementWrapper.from_xml_root(tree)

@@ -84,6 +84,17 @@ def fetch(url, resource_type):
     return urlopen(Request(url, headers=HTTP_HEADERS)).read()
 
 
+def safe_fetch(url, resource_type):
+    """Fetch the content of ``url`` only if it’s a data-URL.
+
+    Otherwise, return an empty SVG.
+
+    """
+    if url and url.startswith('data:'):
+        return fetch(url, resource_type)
+    return b'<svg width="1" height="1"></svg>'
+
+
 def parse_url(url, base=None):
     """Parse an URL.
 
