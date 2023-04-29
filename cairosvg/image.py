@@ -91,8 +91,10 @@ def image(surface, node):
 
     node.image_width = image_surface.get_width()
     node.image_height = image_surface.get_height()
+    width = width or node.image_width
+    height = height or node.image_height
     scale_x, scale_y, translate_x, translate_y = preserve_ratio(
-        surface, node)
+        surface, node, width, height)
 
     # Clip image region (if necessary)
     if not (translate_x == 0 and
