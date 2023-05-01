@@ -102,6 +102,10 @@ def parse_url(url, base=None):
     the "folder" part of it is prepended to the URL.
 
     """
+    return urlparse(_parse_url(url, base) or '')
+
+
+def _parse_url(url, base):
     if url:
         match = URL.search(url)
         if match:
@@ -137,7 +141,7 @@ def parse_url(url, base=None):
                 # `urljoin` automatically uses the "folder" part of `base`
                 url = urljoin(base, url)
         url = normalize_url(url.strip('\'"'))
-    return urlparse(url or '')
+    return url
 
 
 def read_url(url, url_fetcher, resource_type):
@@ -145,10 +149,12 @@ def read_url(url, url_fetcher, resource_type):
 
     If ``url_fetcher`` is None a default (no limitations) URLFetcher is used.
     """
-    if url.scheme:
-        url = url.geturl()
+    parsed_url = urlparse(url) if isinstance(url, str) else url
+    str_url = url if isinstance(url, str) else url.geturl()
+    if parsed_url.scheme:
+        url = parsed_url.geturl()
     else:
-        url = 'file://{}'.format(os.path.abspath(url.geturl()))
+        url = 'file://{}'.format(os.path.abspath(str_url))
         url = normalize_url(url)
 
     return url_fetcher(url, resource_type)

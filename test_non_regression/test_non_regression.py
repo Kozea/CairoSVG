@@ -42,3 +42,7 @@ def test_image(svg_filename):
         raise AssertionError(
             'Images are different: {} {}'.format(
                 ref_png.name, test_png.name))
+
+
+def test_image_with_relative_path():
+    test_image('./struct-image-01-t.svg')
