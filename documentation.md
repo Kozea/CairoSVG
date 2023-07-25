@@ -39,15 +39,13 @@ CairoSVG and its dependencies may require additional tools during the
 installation: a compiler, Python headers, Cairo, and FFI headers. These
 tools have different names depending on the OS you are using, but:
 
-- on Windows, you'll have to install Visual C++ compiler for Python and Cairo;
+- on Windows, you'll have to install Cairo (with
+  [GTK](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
+  for example) and Visual C++ compiler for Python;
 - on macOS, you'll have to install `cairo` and `libffi`
   (with [Homebrew](https://brew.sh/) for example);
 - on Linux, you'll have to install the `cairo`, `python3-dev`
   and `libffi-dev` packages (names may vary for your distribution).
-
-If you don't know how to install these tools, you can follow the simple steps of
-[WeasyPrint's installation guide](http://weasyprint.readthedocs.io/en/latest/install.html):
-installing WeasyPrint will also install CairoSVG.
 
 ### Command line
 
