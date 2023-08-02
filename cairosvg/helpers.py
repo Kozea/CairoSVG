@@ -111,8 +111,9 @@ def preserve_ratio(surface, node, width=None, height=None):
         viewbox_width, viewbox_height = node.image_width, node.image_height
     else:
         raise TypeError(
-            ('Root node is {}. Should be one of '
-             'marker, svg, image, or g.').format(node.tag))
+            f'Root node is {node.tag}. Should be one of '
+            'marker, svg, image, or g.'
+        )
 
     translate_x = 0
     translate_y = 0

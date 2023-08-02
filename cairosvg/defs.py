@@ -37,7 +37,7 @@ def update_def_href(surface, def_name, def_dict):
         update_def_href(surface, href, def_dict)
         href_node = def_dict[href]
         def_dict[def_name] = Tree(
-            url='#{}'.format(def_name), url_fetcher=def_node.url_fetcher,
+            url=f'#{def_name}', url_fetcher=def_node.url_fetcher,
             parent=href_node, parent_children=(not def_node.children),
             tree_cache=surface.tree_cache, unsafe=def_node.unsafe)
         # Inherit attributes generally not inherited
@@ -64,7 +64,7 @@ def parse_def(surface, node):
             'marker', 'gradient', 'pattern', 'path', 'mask', 'filter',
             'image'):
         if def_type in node.tag.lower() and 'id' in node:
-            getattr(surface, '{}s'.format(def_type))[node['id']] = node
+            getattr(surface, f'{def_type}s')[node['id']] = node
 
 
 def gradient_or_pattern(surface, node, name, opacity):
@@ -139,9 +139,7 @@ def paint_mask(surface, node, name, opacity):
     if mask_node.get('maskUnits') == 'userSpaceOnUse':
         x = mask_node['x']
         y = mask_node['y']
-        mask_node['viewBox'] = '{} {} {} {}'.format(
-            mask_node['x'], mask_node['y'],
-            mask_node['width'], mask_node['height'])
+        mask_node['viewBox'] = '{x} {y} {width} {height}'.format(**mask_node)
 
     from .surface import SVGSurface  # circular import
     mask_surface = SVGSurface(mask_node, None, surface.dpi, surface)
@@ -248,8 +246,7 @@ def draw_pattern(surface, node, name, opacity):
             pattern_node['width'] = pattern_width
             pattern_node['height'] = pattern_height
             if pattern_node.get('patternContentUnits') == 'objectBoundingBox':
-                pattern_node['transform'] = 'scale({}, {})'.format(
-                    width, height)
+                pattern_node['transform'] = f'scale({width}, {height})'
 
     # Fail if pattern has an invalid size
     if pattern_width == 0.0 or pattern_height == 0.0:

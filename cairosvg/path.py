@@ -20,7 +20,7 @@ def draw_markers(surface, node):
     markers = {}
     common_marker = parse_url(node.get('marker', '')).fragment
     for position in ('start', 'mid', 'end'):
-        attribute = 'marker-{}'.format(position)
+        attribute = f'marker-{position}'
         if attribute in node:
             markers[position] = parse_url(node[attribute]).fragment
         else:
@@ -125,7 +125,7 @@ def path(surface, node):
     node.vertices = []
 
     for letter in PATH_LETTERS:
-        string = string.replace(letter, ' {} '.format(letter))
+        string = string.replace(letter, f' {letter} ')
 
     last_letter = None
     string = normalize(string)
@@ -190,10 +190,10 @@ def path(surface, node):
                     # As we replace the current operation by l, we must be sure
                     # that the next letter is set to the real current letter (a
                     # or A) in case it’s omitted
-                    next_letter = '{} '.format(letter)
+                    next_letter = f'{letter} '
                 else:
                     next_letter = ''
-                string = 'l {} {} {}{}'.format(x3, y3, next_letter, string)
+                string = f'l {x3} {y3} {next_letter}{string}'
                 continue
 
             radii_ratio = ry / rx

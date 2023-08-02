@@ -168,7 +168,7 @@ class Node(dict):
         self.tag = (
             element.local_name
             if element.namespace_url in ('', 'http://www.w3.org/2000/svg') else
-            '{%s}%s' % (element.namespace_url, element.local_name))
+            f'{{{element.namespace_url}}}{element.local_name}')
         self.text = node.text
         self.url_fetcher = url_fetcher
         self.unsafe = unsafe
@@ -406,7 +406,7 @@ class Tree(Node):
                     break
             else:
                 raise TypeError(
-                    'No tag with id="{}" found.'.format(element_id))
+                    f'No tag with id="{element_id}" found.')
         super().__init__(
             root, style, self.url_fetcher, parent, parent_children, self.url,
             unsafe)

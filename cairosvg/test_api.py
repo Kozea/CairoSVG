@@ -74,7 +74,7 @@ def test_api():
         # Read from a filename
         assert svg2png(url=temp_0) == expected_content
         assert svg2png(
-            url='file://{}'.format(temp_0)) == expected_content
+            url=f'file://{temp_0}') == expected_content
 
         with open(temp_0, 'rb') as file_object:
             # Read from a real file object
