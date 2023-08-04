@@ -434,9 +434,9 @@ class Surface(object):
             # Fill
             self.context.save()
             paint_source, paint_color = paint(node.get('fill', 'black'))
+            if node.get('fill-rule') == 'evenodd':
+                self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
             if not gradient_or_pattern(self, node, paint_source, fill_opacity):
-                if node.get('fill-rule') == 'evenodd':
-                    self.context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
                 self.context.set_source_rgba(
                     *self.map_color(paint_color, fill_opacity))
             if TAGS[node.tag] == text:
