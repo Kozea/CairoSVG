@@ -386,6 +386,7 @@ class Surface(object):
                 self.stroke_and_fill = False
                 self.draw(path)
                 self.stroke_and_fill = True
+                path.tag = 'clipPath'
                 self.context.restore()
                 # TODO: fill rules are not handled by cairo for clips
                 # if node.get('clip-rule') == 'evenodd':
