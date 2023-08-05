@@ -3,7 +3,7 @@ Paths manager.
 
 """
 
-from math import pi, radians
+from math import copysign, hypot, pi, radians
 
 from .bounding_box import calculate_bounding_box
 from .helpers import (
@@ -206,7 +206,7 @@ def path(surface, node):
             angle = point_angle(0, 0, xe, ye)
 
             # Put the second point onto the x axis
-            xe = (xe ** 2 + ye ** 2) ** .5
+            xe = hypot(xe, ye)
             ye = 0
 
             # Update the x radius if it is too small
@@ -423,7 +423,7 @@ def path(surface, node):
             # Relative vertical line
             y, string = (string + ' ').split(' ', 1)
             old_x, old_y = current_point
-            angle = pi / 2 if size(surface, y, 'y') > 0 else -pi / 2
+            angle = copysign(pi / 2, size(surface, y, 'y'))
             node.vertices.append((-angle, angle))
             y = size(surface, y, 'y')
             surface.context.rel_line_to(0, y)
@@ -433,7 +433,7 @@ def path(surface, node):
             # Vertical line
             y, string = (string + ' ').split(' ', 1)
             old_x, old_y = current_point
-            angle = pi / 2 if size(surface, y, 'y') > old_y else -pi / 2
+            angle = copysign(pi / 2, size(surface, y, 'y') - old_y)
             node.vertices.append((-angle, angle))
             y = size(surface, y, 'y')
             surface.context.line_to(old_x, y)

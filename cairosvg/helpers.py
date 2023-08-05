@@ -4,7 +4,7 @@ Surface helpers.
 """
 
 import re
-from math import atan2, cos, radians, sin, tan
+from math import atan2, cos, hypot, radians, sin, tan
 
 from .surface import cairo
 from .url import parse_url
@@ -29,7 +29,7 @@ class PointError(Exception):
 
 def distance(x1, y1, x2, y2):
     """Get the distance between two points."""
-    return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+    return hypot(x2 - x1, y2 - y1)
 
 
 def paint(value):
@@ -345,8 +345,7 @@ def size(surface, string, reference='xy'):
     If ``reference`` is a float, it is used as reference for percentages. If it
     is ``'x'``, we use the viewport width as reference. If it is ``'y'``, we
     use the viewport height as reference. If it is ``'xy'``, we use
-    ``(viewport_width ** 2 + viewport_height ** 2) ** .5 / 2 ** .5`` as
-    reference.
+    ``hypot(viewport_width, viewport_height) / 2 ** .5`` as reference.
 
     """
     if not string:
@@ -370,9 +369,8 @@ def size(surface, string, reference='xy'):
             reference = surface.context_height or 0
         elif reference == 'xy':
             reference = (
-                (surface.context_width ** 2 +
-                 surface.context_height ** 2) ** .5 /
-                2 ** .5)
+                hypot(surface.context_width, surface.context_height) / 2 ** .5
+            )
         return float(string[:-1]) * reference / 100
     elif string.endswith('em'):
         return surface.font_size * float(string[:-2])

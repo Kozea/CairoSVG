@@ -5,7 +5,9 @@ A bounding box is a (minx, miny, width, height) tuple.
 
 """
 
-from math import acos, atan, cos, fmod, isinf, pi, radians, sin, sqrt, tan
+from math import (
+    acos, atan, copysign, cos, fmod, hypot, isinf, pi, radians, sin, sqrt, tan,
+    tau)
 
 from .features import match_features
 from .helpers import PATH_LETTERS, normalize, point, size
@@ -220,9 +222,7 @@ def bounding_box_text(surface, node):
 
 def angle(bx, by):
     """Get the angle between vector (1,0) and vector (bx,by)."""
-    return fmod(
-        2 * pi + (1 if by > 0 else -1) * acos(bx / sqrt(bx * bx + by * by)),
-        2 * pi)
+    return fmod(tau + copysign(acos(bx / hypot(bx, by)), by), tau)
 
 
 def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
