@@ -34,10 +34,12 @@ def image(surface, node):
     width = size(surface, node.get('width'), 'x')
     height = size(surface, node.get('height'), 'y')
 
-    if image_bytes[:4] == b'\x89PNG' and not surface.map_image:
+    if image_bytes.startswith(b'\x89PNG') and not surface.map_image:
         png_file = BytesIO(image_bytes)
-    elif (image_bytes[:5] in (b'<svg ', b'<?xml', b'<!DOC') or
-            image_bytes[:2] == b'\x1f\x8b') or b'<svg' in image_bytes:
+    elif (
+        image_bytes.startswith((b'<svg ', b'<?xml', b'<!DOC', b'\x1f\x8b'))
+        or b'<svg' in image_bytes
+    ):
         if 'x' in node:
             del node['x']
         if 'y' in node:

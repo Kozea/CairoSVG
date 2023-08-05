@@ -260,7 +260,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
     cx = cxprime * cos(phi) - cyprime * sin(phi) + (x1 + x) / 2
     cy = cxprime * sin(phi) + cyprime * cos(phi) + (y1 + y) / 2
 
-    if phi == 0 or phi == pi:
+    if phi in (0, pi):
         minx = cx - rx
         tminx = angle(-rx, 0)
         maxx = cx + rx
@@ -269,7 +269,7 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         tminy = angle(0, -ry)
         maxy = cy + ry
         tmaxy = angle(0, ry)
-    elif phi == pi / 2 or phi == 3 * pi / 2:
+    elif phi in (pi / 2, 3 * pi / 2):
         minx = cx - ry
         tminx = angle(-ry, 0)
         maxx = cx + ry
@@ -314,17 +314,13 @@ def bounding_box_elliptical_arc(x1, y1, rx, ry, phi, large, sweep, x, y):
         angle1, angle2 = angle2, angle1
         other_arc = True
 
-    if ((not other_arc and (angle1 > tminx or angle2 < tminx)) or
-            (other_arc and not (angle1 > tminx or angle2 < tminx))):
+    if other_arc == (angle1 <= tminx <= angle2):
         minx = min(x, x1)
-    if ((not other_arc and (angle1 > tmaxx or angle2 < tmaxx)) or
-            (other_arc and not (angle1 > tmaxx or angle2 < tmaxx))):
+    if other_arc == (angle1 <= tmaxx <= angle2):
         maxx = max(x, x1)
-    if ((not other_arc and (angle1 > tminy or angle2 < tminy)) or
-            (other_arc and not (angle1 > tminy or angle2 < tminy))):
+    if other_arc == (angle1 <= tminy <= angle2):
         miny = min(y, y1)
-    if ((not other_arc and (angle1 > tmaxy or angle2 < tmaxy)) or
-            (other_arc and not (angle1 > tmaxy or angle2 < tmaxy))):
+    if other_arc == (angle1 <= tmaxy <= angle2):
         maxy = max(y, y1)
 
     return minx, miny, maxx - minx, maxy - miny
