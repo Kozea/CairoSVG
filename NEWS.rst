@@ -6,11 +6,11 @@
 Version 2.7.1 released on 2023-08-05
 ====================================
 
-- Don’t draw clipPath when defined after reference
-- Handle evenodd fill rule with gradients and patterns
-- Fix ratio and clip for "image" tags with no size
-- Handle data-URLs in safe mode
-- Use f-strings
+* Don’t draw clipPath when defined after reference
+* Handle evenodd fill rule with gradients and patterns
+* Fix ratio and clip for "image" tags with no size
+* Handle data-URLs in safe mode
+* Use f-strings
 
 
 Version 2.7.0 released on 2023-03-20
