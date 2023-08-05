@@ -40,5 +40,5 @@ def test_image(svg_filename):
         test_surface.finish()
 
         raise AssertionError(
-            'Images are different: {} {}'.format(
-                ref_png.name, test_png.name))
+            f'Images are different: {ref_png.name} {test_png.name}'
+        )

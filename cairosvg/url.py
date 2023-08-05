@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 
 from . import VERSION
 
-HTTP_HEADERS = {'User-Agent': 'CairoSVG {}'.format(VERSION)}
+HTTP_HEADERS = {'User-Agent': f'CairoSVG {VERSION}'}
 
 URL = re.compile(r'url\((.+)\)')
 
@@ -132,7 +132,7 @@ def parse_url(url, base=None):
                     else:
                         url = ''
                     if parsed_url.fragment:
-                        url = '{}#{}'.format(url, parsed_url.fragment)
+                        url = f'{url}#{parsed_url.fragment}'
             elif parsed_url.scheme in ('', parsed_base.scheme):
                 # `urljoin` automatically uses the "folder" part of `base`
                 url = urljoin(base, url)
@@ -148,7 +148,7 @@ def read_url(url, url_fetcher, resource_type):
     if url.scheme:
         url = url.geturl()
     else:
-        url = 'file://{}'.format(os.path.abspath(url.geturl()))
+        url = f'file://{os.path.abspath(url.geturl())}'
         url = normalize_url(url)
 
     return url_fetcher(url, resource_type)

@@ -80,7 +80,7 @@ def bounding_box_path(surface, node):
 
     # Normalize path data for correct parsing
     for letter in PATH_LETTERS:
-        path_data = path_data.replace(letter, ' {} '.format(letter))
+        path_data = path_data.replace(letter, f' {letter} ')
     path_data = normalize(path_data)
 
     bounding_box = EMPTY_BOUNDING_BOX
