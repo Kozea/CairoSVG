@@ -101,7 +101,7 @@ def text(surface, node, draw_as_text=False):
 
     text_anchor = node.get('text-anchor')
     if text_anchor == 'middle':
-        x_align = - (width / 2. + x_bearing)
+        x_align = - (width / 2 + x_bearing)
         if letter_spacing and node.text:
             x_align -= (len(node.text) - 1) * letter_spacing / 2
     elif text_anchor == 'end':
@@ -121,7 +121,7 @@ def text(surface, node, draw_as_text=False):
         alignment_baseline = (node.get('dominant-baseline') or
                               node.get('alignment-baseline'))
         if display_anchor == 'middle':
-            y_align = -height / 2.0 - y_bearing
+            y_align = -height / 2 - y_bearing
         elif display_anchor == 'top':
             y_align = -y_bearing
         elif display_anchor == 'bottom':
@@ -130,7 +130,7 @@ def text(surface, node, draw_as_text=False):
               alignment_baseline == 'middle'):
             # TODO: This is wrong, Cairo gives no reasonable access to x-height
             # information, so we use font top-to-bottom
-            y_align = (ascent + descent) / 2.0 - descent
+            y_align = (ascent + descent) / 2 - descent
         elif (alignment_baseline == 'text-before-edge' or
               alignment_baseline == 'before_edge' or
               alignment_baseline == 'top' or
