@@ -6,10 +6,7 @@ These tests can be used as deployment tests.
 """
 
 import io
-import os
-import shutil
 import sys
-import tempfile
 
 import cairocffi as cairo
 import pytest
@@ -46,7 +43,7 @@ def read_file(filename):
         return file_object.read()
 
 
-def test_api():
+def test_api(tmp_path):
     """Test the Python API with various parameters."""
     expected_content = svg2png(SVG_SAMPLE)
     # Already tested above: just a sanity check:
@@ -65,34 +62,27 @@ def test_api():
     svg2png(SVG_SAMPLE, write_to=file_like)
     assert file_like.getvalue() == expected_content
 
-    temp = tempfile.mkdtemp()
-    try:
-        temp_0 = os.path.join(temp, 'sample_0.svg')
-        with open(temp_0, 'wb') as file_object:
-            file_object.write(SVG_SAMPLE)
+    temp_0 = tmp_path / 'sample_0.svg'
+    temp_0.write_bytes(SVG_SAMPLE)
 
-        # Read from a filename
-        assert svg2png(url=temp_0) == expected_content
-        assert svg2png(
-            url=f'file://{temp_0}') == expected_content
+    # Read from a filename
+    assert svg2png(url=str(temp_0)) == expected_content
+    assert svg2png(url=f'file://{temp_0}') == expected_content
 
-        with open(temp_0, 'rb') as file_object:
-            # Read from a real file object
-            assert svg2png(file_obj=file_object) == expected_content
+    with temp_0.open('rb') as file_object:
+        # Read from a real file object
+        assert svg2png(file_obj=file_object) == expected_content
 
-        temp_1 = os.path.join(temp, 'result_1.png')
-        with open(temp_1, 'wb') as file_object:
-            # Write to a real file object
-            svg2png(SVG_SAMPLE, write_to=file_object)
-        assert read_file(temp_1) == expected_content
+    temp_1 = tmp_path / 'result_1.png'
+    with temp_1.open('wb') as file_object:
+        # Write to a real file object
+        svg2png(SVG_SAMPLE, write_to=file_object)
+    assert read_file(str(temp_1)) == expected_content
 
-        temp_2 = os.path.join(temp, 'result_2.png')
-        # Write to a filename
-        svg2png(SVG_SAMPLE, write_to=temp_2)
-        assert read_file(temp_2) == expected_content
-
-    finally:
-        shutil.rmtree(temp)
+    temp_2 = tmp_path / 'result_2.png'
+    # Write to a filename
+    svg2png(SVG_SAMPLE, write_to=str(temp_2))
+    assert read_file(str(temp_2)) == expected_content
 
     file_like = io.BytesIO()
     try:
@@ -126,7 +116,7 @@ def test_low_level_api():
     assert cairo.SurfacePattern(png_surface.cairo)
 
 
-def test_script():
+def test_script(tmp_path):
     """Test the ``cairosvg`` script and the ``main`` function."""
     expected_png = svg2png(SVG_SAMPLE)[:100]
     expected_pdf = svg2pdf(SVG_SAMPLE)[:100]
@@ -165,52 +155,36 @@ def test_script():
         sys.stdin, sys.stdout = old_stdin, old_stdout
         return output if full else output[:100]
 
-    with tempfile.NamedTemporaryFile(delete=False) as file_object:
-        file_object.write(SVG_SAMPLE)
-        file_object.flush()
-        svg_filename = file_object.name
-        file_object.close()
+    svg_path = tmp_path / "test.svg"
+    svg_path.write_bytes(SVG_SAMPLE)
+    svg_filename = str(svg_path)
 
-        assert test_main(['--help'], exit_=True).startswith(b'usage: ')
-        assert test_main(['--version'], exit_=True).strip() == (
-            VERSION.encode('ascii'))
+    assert test_main(['--help'], exit_=True).startswith(b'usage: ')
+    assert test_main(['--version'], exit_=True).strip() == (
+        VERSION.encode('ascii'))
 
-        assert test_main([svg_filename]) == expected_pdf
-        assert test_main([svg_filename, '-d', '96', '-f', 'pdf']) == (
-            expected_pdf)
-        assert test_main([svg_filename, '-f', 'png']) == expected_png
-        assert test_main(['-'], input_=svg_filename) == expected_pdf
+    assert test_main([svg_filename]) == expected_pdf
+    assert test_main([svg_filename, '-d', '96', '-f', 'pdf']) == expected_pdf
+    assert test_main([svg_filename, '-f', 'png']) == expected_png
+    assert test_main(['-'], input_=svg_filename) == expected_pdf
 
-        # Test DPI
-        output = test_main([svg_filename, '-d', '10', '-f', 'png'], full=True)
-        image = cairo.ImageSurface.create_from_png(io.BytesIO(output))
-        assert image.get_width() == 40
-        assert image.get_height() == 50
+    # Test DPI
+    output = test_main([svg_filename, '-d', '10', '-f', 'png'], full=True)
+    image = cairo.ImageSurface.create_from_png(io.BytesIO(output))
+    assert image.get_width() == 40
+    assert image.get_height() == 50
 
-        temp = tempfile.mkdtemp()
-        try:
-            temp_1 = os.path.join(temp, 'result_1')
-            # Default to PDF
-            assert not test_main([svg_filename, '-o', temp_1])
-            assert read_file(temp_1)[:100] == expected_pdf
+    temp_1 = tmp_path / 'result_1'
+    # Default to PDF
+    assert not test_main([svg_filename, '-o', str(temp_1)])
+    assert read_file(temp_1)[:100] == expected_pdf
 
-            temp_2 = os.path.join(temp, 'result_2.png')
-            # Guess from the file extension
-            assert not test_main([svg_filename, '-o', temp_2])
-            assert read_file(temp_2)[:100] == expected_png
+    temp_2 = tmp_path / 'result_2.png'
+    # Guess from the file extension
+    assert not test_main([svg_filename, '-o', str(temp_2)])
+    assert read_file(temp_2)[:100] == expected_png
 
-            temp_3 = os.path.join(temp, 'result_3.png')
-            # Explicit -f wins
-            assert not test_main([svg_filename, '-o', temp_3, '-f', 'pdf'])
-            assert read_file(temp_3)[:100] == expected_pdf
-        finally:
-            shutil.rmtree(temp)
-
-        try:
-            os.remove(svg_filename)
-        except PermissionError:
-            # On Windows/NT systems, the temporary file sometimes fails to
-            # get deleted due to ``PermissionError`` exception. This is due
-            # to how Windows/NT handles the same file being opened twice at
-            # the same time.
-            pass
+    temp_3 = tmp_path / 'result_3.png'
+    # Explicit -f wins
+    assert not test_main([svg_filename, '-o', str(temp_3), '-f', 'pdf'])
+    assert read_file(str(temp_3))[:100] == expected_pdf

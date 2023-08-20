@@ -3,7 +3,7 @@ Utils dealing with URLs.
 
 """
 
-import os.path
+import os
 import re
 from pathlib import Path
 from urllib.parse import urljoin, urlparse

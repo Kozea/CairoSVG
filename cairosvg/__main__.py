@@ -4,8 +4,8 @@ Command-line interface to CairoSVG.
 """
 
 import argparse
-import os
 import sys
+from pathlib import Path
 
 from . import SURFACES, VERSION
 
@@ -72,7 +72,7 @@ def main(argv=None, stdout=None, stdin=None):
         kwargs['url'] = options.input
     output_format = (
         options.format or
-        os.path.splitext(options.output)[1].lstrip('.') or
+        Path(options.output).suffix.lstrip('.') or
         'pdf').upper()
 
     SURFACES[output_format.upper()].convert(**kwargs)

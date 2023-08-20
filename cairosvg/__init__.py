@@ -3,7 +3,6 @@ CairoSVG - A simple SVG converter based on Cairo.
 
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -15,9 +14,9 @@ if hasattr(sys, 'frozen'):
     else:
         # Frozen with something else (py2exe, etc.)
         # See https://github.com/Kozea/WeasyPrint/pull/269
-        ROOT = Path(os.path.dirname(sys.executable))
+        ROOT = Path(sys.executable).parent
 else:
-    ROOT = Path(os.path.dirname(__file__))
+    ROOT = Path(__file__).resolve().parent
 
 VERSION = __version__ = (ROOT / 'VERSION').read_text().strip()
 
