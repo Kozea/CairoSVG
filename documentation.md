@@ -120,8 +120,10 @@ command-line options:
 - `parent_width`,
 - `parent_height`,
 - `dpi`,
-- `scale`, and
-- `unsafe`.
+- `scale`,
+- `unsafe`,
+- `output_width`, and
+- `output_height`.
 
 If the `write_to` argument is provided (filename or file-like object), the
 output is written there. Otherwise, the function returns a byte string.
