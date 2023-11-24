@@ -18,6 +18,7 @@ def circle(surface, node):
 
     surface.context.new_sub_path()
     surface.context.arc(cx, cy, r, 0, 2 * pi)
+    surface.context.close_path()
 
 
 def ellipse(surface, node):
@@ -34,6 +35,7 @@ def ellipse(surface, node):
     surface.context.save()
     surface.context.scale(1, ratio)
     surface.context.arc(cx, cy / ratio, rx, 0, 2 * pi)
+    surface.context.close_path()
     surface.context.restore()
 
 
