@@ -233,8 +233,8 @@ class Surface(object):
     def device_units_per_user_units(self):
         """Ratio between Cairo device units and user units.
 
-        Device units are points for everything but PNG, and pixels for
-        PNG. User units are pixels.
+        Device units are pixels for PNG and SVG, and points for everything
+        else. User units are pixels.
 
         """
         return self.points_per_pixel
@@ -540,6 +540,7 @@ class SVGSurface(Surface):
     with ``output=None`` to get a vector-based single page cairo surface.
 
     """
+    device_units_per_user_units = 1
     surface_class = cairo.SVGSurface
 
 
