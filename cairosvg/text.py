@@ -49,8 +49,9 @@ def point_following_path(path, width):
                 return x, y
 
 
-def text(surface, node, draw_as_text=False):
-    """Draw a text ``node``."""
+def initial_context_font(surface, node, context=None):
+    if context is None:
+        context = surface.context
     font_family = (
         (node.get('font-family') or 'sans-serif').split(',')[0].strip('"\' '))
     font_style = getattr(
@@ -63,8 +64,49 @@ def text(surface, node, draw_as_text=False):
     font_weight = getattr(
         cairo, (f'font_weight_{node_font_weight}'.upper()),
         cairo.FONT_WEIGHT_NORMAL)
-    surface.context.select_font_face(font_family, font_style, font_weight)
-    surface.context.set_font_size(surface.font_size)
+    context.select_font_face(font_family, font_style, font_weight)
+    node_font_size = node.get('font-size')
+    if node_font_size and node_font_size.isdigit():
+        font_size = float(node_font_size)
+    else:
+        font_size = surface.font_size
+    context.set_font_size(font_size)
+
+
+def get_single_node_text_extends(surface, node):
+    with surface.context as context:
+        initial_context_font(surface, node, context)
+        return context.text_extents(node.text)
+
+
+def iter_nodes(node):
+    yield node
+    for sub_node in node.children:
+        yield from iter_nodes(sub_node)
+
+
+def get_node_text_extents(surface, node):
+    parent_text_node = node
+    while parent_text_node.tag != 'text' and parent_text_node.parent:
+        parent_text_node = parent_text_node.parent
+    if parent_text_node is not node and parent_text_node.tag != 'text':
+        parent_text_node = node
+    x_bearing, y_bearing, width, height, x_advance, y_advance = 0, 0, 0, 0, 0, 0
+    for sub_node in iter_nodes(parent_text_node):
+        a, b, c, d, e, f = get_single_node_text_extends(surface, sub_node)
+        if sub_node is node:
+            x_bearing = a
+            y_bearing = b
+            height = d
+        width += c
+    x_advance = width - x_bearing
+    y_advance = height - y_bearing
+    return x_bearing, y_bearing, width, height, x_advance, y_advance
+
+
+def text(surface, node, draw_as_text=False):
+    """Draw a text ``node``."""
+    initial_context_font(surface, node)
     ascent, descent, _, max_x_advance, max_y_advance = (
         surface.context.font_extents())
 
@@ -74,8 +116,8 @@ def text(surface, node, draw_as_text=False):
     else:
         text_path = None
     letter_spacing = size(surface, node.get('letter-spacing'))
-    x_bearing, y_bearing, width, height = (
-        surface.context.text_extents(node.text)[:4])
+    # quick fix for https://github.com/Kozea/CairoSVG/issues/317
+    x_bearing, y_bearing, width, height = get_node_text_extents(surface, node)[:4]
 
     x, y, dx, dy, rotate = [], [], [], [], [0]
     if 'x' in node:
