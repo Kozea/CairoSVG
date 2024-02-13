@@ -29,12 +29,15 @@ EXTEND_OPERATORS = {
 }
 
 
-def update_def_href(surface, def_name, def_dict):
+def update_def_href(surface, def_name, def_dict, chain=None):
     """Update the attributes of the def according to its href attribute."""
     def_node = def_dict[def_name]
     href = parse_url(def_node.get_href()).fragment
-    if href in def_dict:
-        update_def_href(surface, href, def_dict)
+    if chain is None:
+        chain = set()
+    if href in def_dict and href not in chain:
+        chain.add(href)
+        update_def_href(surface, href, def_dict, chain)
         href_node = def_dict[href]
         def_dict[def_name] = Tree(
             url=f'#{def_name}', url_fetcher=def_node.url_fetcher,
