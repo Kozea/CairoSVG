@@ -8,13 +8,14 @@ import io
 
 import cairocffi as cairo
 
+from .bounding_box import calculate_bounding_box
 from .colors import color, negate_color
 from .defs import (
     apply_filter_after_painting, apply_filter_before_painting, clip_path,
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
     parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
-    UNITS, PointError, clip_rect, node_format, normalize, paint,
+    UNITS, PointError, clip_rect, find_child, node_format, normalize, paint,
     preserve_ratio, size, transform)
 from .image import image, invert_image
 from .parser import Tree
@@ -96,6 +97,7 @@ class Surface(object):
     @classmethod
     def convert(cls, bytestring=None, *, file_obj=None, url=None, dpi=96,
                 parent_width=None, parent_height=None, scale=1, unsafe=False,
+                viewbox_id=None,
                 background_color=None, negate_colors=False,
                 invert_images=False, write_to=None, output_width=None,
                 output_height=None, **kwargs):
@@ -116,6 +118,7 @@ class Surface(object):
         :param unsafe: A boolean allowing external file access, XML entities
                        and very large files
                        (WARNING: vulnerable to XXE attacks and various DoS).
+        :param viewbox_id: SVG element id defining the area to export.
 
         Specifiy the output with:
 
@@ -133,6 +136,7 @@ class Surface(object):
         instance = cls(
             tree, output, dpi, None, parent_width, parent_height, scale,
             output_width, output_height, background_color,
+            viewbox_id=viewbox_id if viewbox_id else None,
             map_rgba=negate_color if negate_colors else None,
             map_image=invert_image if invert_images else None)
         instance.finish()
@@ -142,7 +146,8 @@ class Surface(object):
     def __init__(self, tree, output, dpi, parent_surface=None,
                  parent_width=None, parent_height=None,
                  scale=1, output_width=None, output_height=None,
-                 background_color=None, map_rgba=None, map_image=None):
+                 background_color=None, map_rgba=None, map_image=None,
+                 viewbox_id=None):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
@@ -180,7 +185,17 @@ class Surface(object):
         self.dpi = dpi
         self.font_size = size(self, '12pt')
         self.stroke_and_fill = True
-        width, height, viewbox = node_format(self, tree)
+
+        width, height, viewbox = (0, 0, None)
+        viewbox_node = find_child(tree, viewbox_id)
+        if viewbox_node:
+            viewbox = calculate_bounding_box(self, viewbox_node)
+            if viewbox:
+                width, height = viewbox[2:]
+
+        if viewbox is None:
+            width, height, viewbox = node_format(self, tree)
+
         if viewbox is None:
             viewbox = (0, 0, width, height)
 
