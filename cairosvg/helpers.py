@@ -383,7 +383,10 @@ def size(surface, string, reference='xy'):
 
     for unit, coefficient in UNITS.items():
         if string.endswith(unit):
-            number = float(string[:-len(unit)])
+            try:
+                number = float(string[:-len(unit)])
+            except Exception as e:
+                number = 0.0
             return number * (surface.dpi * coefficient if coefficient else 1)
 
     # Unknown size
