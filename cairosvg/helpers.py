@@ -386,6 +386,7 @@ def size(surface, string, reference='xy'):
             try:
                 number = float(string[:-len(unit)])
             except Exception as e:
+                print(f"{string=}")
                 number = 0.0
             return number * (surface.dpi * coefficient if coefficient else 1)
 
