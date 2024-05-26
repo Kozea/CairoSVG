@@ -5,6 +5,7 @@ Surface helpers.
 
 import re
 from math import atan2, cos, hypot, radians, sin, tan
+import warning
 
 from .surface import cairo
 from .url import parse_url
@@ -385,8 +386,9 @@ def size(surface, string, reference='xy'):
         if string.endswith(unit):
             try:
                 number = float(string[:-len(unit)])
-            except (ValueError, TypeError, IndexError) as e:
+            except ValueError:
                 number = 0.0
+                warnings.warn("Numeric value is invalid. Value is set to 0")
             return number * (surface.dpi * coefficient if coefficient else 1)
 
     # Unknown size
