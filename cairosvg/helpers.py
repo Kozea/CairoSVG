@@ -387,8 +387,8 @@ def size(surface, string, reference='xy'):
             try:
                 number = float(string[:-len(unit)])
             except ValueError:
-                number = 0.0
                 warnings.warn("Numeric value is invalid. Value is set to 0")
+                return 0
             return number * (surface.dpi * coefficient if coefficient else 1)
 
     # Unknown size
