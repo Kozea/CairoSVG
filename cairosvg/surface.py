@@ -242,11 +242,15 @@ class Surface(object):
                 raise ValueError("Cannot provide a surface as an output unless it is multipage.")
             self.cairo = output.cairo
             self.output = output.output
-            self.width = width * self.device_units_per_user_units
-            self.height = height * self.device_units_per_user_units
+            self.width = output.width
+            self.height = output.height
             # Add new page for this conversion
             if not output.first_page:
                 self.cairo.show_page()
+            if isinstance(self.cairo, cairo.surfaces.PDFSurface):
+                self.width = width * self.device_units_per_user_units
+                self.height = height * self.device_units_per_user_units
+                self.cairo.set_size(self.width, self.height)
             output.first_page = False
         else:
             # Actual surface dimensions: may be rounded on raster surfaces types
