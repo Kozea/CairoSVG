@@ -122,8 +122,8 @@ class Surface(object):
         Specifiy the output with:
 
         :param write_to: The filename of file-like object where to write the
-                         output or MultipageSurface to write to. If None or not
-                         provided, return a byte string.
+                         output or a ```Surface``` created with `multi_page` set to
+                         True. If None or not provided, return a byte string.
 
         Only ``bytestring`` can be passed as a positional argument, other
         parameters are keyword-only.
