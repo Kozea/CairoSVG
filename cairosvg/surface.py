@@ -5,6 +5,7 @@ Cairo surface creators.
 
 import copy
 import io
+from itertools import zip_longest
 
 import cairocffi as cairo
 
@@ -101,7 +102,8 @@ class Surface(object):
                 output_height=None, **kwargs):
         """Convert an SVG document to the format for this class.
 
-        Specify the input by passing one of these:
+        Specify the input by passing one of these. They may also be a list
+        which will result in a multipage output:
 
         :param bytestring: The SVG source as a byte-string.
         :param file_obj: A file-like object.
@@ -127,18 +129,37 @@ class Surface(object):
         parameters are keyword-only.
 
         """
-        tree = Tree(
-            bytestring=bytestring, file_obj=file_obj, url=url, unsafe=unsafe,
-            **kwargs)
+        bytestring = bytestring if isinstance(bytestring, list) else [bytestring]
+        file_obj = file_obj if isinstance(file_obj, list) else [file_obj]
+        url = url if isinstance(url, list) else [url]
+
         output = write_to or io.BytesIO()
-        instance = cls(
-            tree, output, dpi, None, parent_width, parent_height, scale,
-            output_width, output_height, background_color,
-            map_rgba=negate_color if negate_colors else None,
-            map_image=invert_image if invert_images else None)
+
+        multi_page = max(len(bytestring), len(file_obj), len(url)) > 1
+
+        if multi_page and not isinstance(write_to, Surface):
+            template_tree = Tree(
+                bytestring=bytestring[0], file_obj=file_obj[0], url=url[0], unsafe=unsafe,
+                **kwargs)
+            output = cls(template_tree, output, dpi, None, parent_width, parent_height, scale,
+                output_width, output_height, background_color,
+                map_rgba=negate_color if negate_colors else None,
+                map_image=invert_image if invert_images else None,
+                multi_page=True)
+
+        for bs, fo, u in zip_longest(bytestring, file_obj, url, fillvalue=None):
+            tree = Tree(
+                bytestring=bs, file_obj=fo, url=u, unsafe=unsafe,
+                **kwargs)
+            instance = cls(
+                tree, output, dpi, None, parent_width, parent_height, scale,
+                output_width, output_height, background_color,
+                map_rgba=negate_color if negate_colors else None,
+                map_image=invert_image if invert_images else None)
 
         # Don't finish surface if surface is the output as it must be
-        # a multipage surface.
+        # a multipage surface that is the responsibility of the calling
+        # function to finish.
         if not isinstance(write_to, Surface):
             instance.finish()
 
