@@ -120,7 +120,8 @@ class Surface(object):
         Specifiy the output with:
 
         :param write_to: The filename of file-like object where to write the
-                         output. If None or not provided, return a byte string.
+                         output or MultipageSurface to write to. If None or not
+                         provided, return a byte string.
 
         Only ``bytestring`` can be passed as a positional argument, other
         parameters are keyword-only.
@@ -135,19 +136,30 @@ class Surface(object):
             output_width, output_height, background_color,
             map_rgba=negate_color if negate_colors else None,
             map_image=invert_image if invert_images else None)
-        instance.finish()
+
+        # Don't finish surface if surface is the output as it must be
+        # a multipage surface.
+        if not isinstance(write_to, Surface):
+            instance.finish()
+
         if write_to is None:
             return output.getvalue()
 
     def __init__(self, tree, output, dpi, parent_surface=None,
                  parent_width=None, parent_height=None,
                  scale=1, output_width=None, output_height=None,
-                 background_color=None, map_rgba=None, map_image=None):
+                 background_color=None, map_rgba=None, map_image=None,
+                 multi_page=False):
         """Create the surface from a filename or a file-like object.
 
         The rendered content is written to ``output`` which can be a filename,
         a file-like object, ``None`` (render in memory but do not write
         anything) or the built-in ``bytes`` as a marker.
+
+        If ``multi_page`` is True, the provided content is instead only used
+        as a template for page size and no drawing is done. The created
+        object can then be used as the ``output`` for subsequent content for
+        each of which a new page will be added.
 
         Call the ``.finish()`` method to make sure that the output is
         actually written.
@@ -200,29 +212,47 @@ class Surface(object):
             width *= scale
             height *= scale
 
-        # Actual surface dimensions: may be rounded on raster surfaces types
-        self.cairo, self.width, self.height = self._create_surface(
-            width * self.device_units_per_user_units,
-            height * self.device_units_per_user_units)
+
+        self.multi_page = multi_page
+        self.first_page = True
+
+        if isinstance(output, Surface):
+            if not output.multi_page:
+                raise ValueError("Cannot provide a surface as an output unless it is multipage.")
+            self.cairo = output.cairo
+            self.output = output.output
+            self.width = width * self.device_units_per_user_units
+            self.height = height * self.device_units_per_user_units
+            # Add new page for this conversion
+            if not output.first_page:
+                self.cairo.show_page()
+            output.first_page = False
+        else:
+            # Actual surface dimensions: may be rounded on raster surfaces types
+            self.cairo, self.width, self.height = self._create_surface(
+                width * self.device_units_per_user_units,
+                height * self.device_units_per_user_units)
 
         if 0 in (self.width, self.height):
             raise ValueError('The SVG size is undefined')
 
-        self.context = cairo.Context(self.cairo)
-        # We must scale the context as the surface size is using physical units
-        self.context.scale(
-            self.device_units_per_user_units, self.device_units_per_user_units)
-        # Initial, non-rounded dimensions
-        self.set_context_size(width, height, viewbox, tree)
-        self.context.move_to(0, 0)
+        # If creating multipage surface don't draw for this instance.
+        if not self.multi_page:
+            self.context = cairo.Context(self.cairo)
+            # We must scale the context as the surface size is using physical units
+            self.context.scale(
+                self.device_units_per_user_units, self.device_units_per_user_units)
+            # Initial, non-rounded dimensions
+            self.set_context_size(width, height, viewbox, tree)
+            self.context.move_to(0, 0)
 
-        if background_color:
-            self.context.set_source_rgba(*color(background_color))
-            self.context.paint()
+            if background_color:
+                self.context.set_source_rgba(*color(background_color))
+                self.context.paint()
 
-        self.map_rgba = map_rgba
-        self.map_image = map_image
-        self.draw(tree)
+            self.map_rgba = map_rgba
+            self.map_image = map_image
+            self.draw(tree)
 
     @property
     def points_per_pixel(self):
