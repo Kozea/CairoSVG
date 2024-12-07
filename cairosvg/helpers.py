@@ -264,11 +264,11 @@ def transform(surface, transform_string, gradient=None, transform_origin=None):
         elif transformation_type == 'translate':
             if len(values) == 1:
                 values += (0,)
-            matrix.translate(*values)
+            matrix.translate(*values[:2])
         elif transformation_type == 'scale':
             if len(values) == 1:
                 values = 2 * values
-            matrix.scale(*values)
+            matrix.scale(*values[:2])
 
     if transform_origin:
         matrix.translate(-float(origin_x), -float(origin_y))
