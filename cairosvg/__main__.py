@@ -50,6 +50,9 @@ def main(argv=None, stdout=None, stdin=None):
     parser.add_argument(
         '--output-height', default=None, type=float,
         help='desired output height in pixels')
+    parser.add_argument(
+        '--viewbox-id', default=None,
+        help='export viewbox defined by the element with the given id')
 
     parser.add_argument('-o', '--output', default='-', help='output filename')
 
@@ -61,7 +64,8 @@ def main(argv=None, stdout=None, stdin=None):
         'negate_colors': options.negate_colors,
         'invert_images': options.invert_images,
         'output_width': options.output_width,
-        'output_height': options.output_height}
+        'output_height': options.output_height,
+        'viewbox_id': options.viewbox_id}
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
     kwargs['write_to'] = (
