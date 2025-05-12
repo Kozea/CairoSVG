@@ -3,6 +3,19 @@
 ======
 
 
+Version 2.8.0 released on 2025-05-12
+====================================
+
+* Drop support of Python 3.7 and 3.8, add support of Python 3.12 and 3.13
+* Optimize math operations
+* Use pathlib
+* Close paths for ellipses and circles
+* Fix output ratio for SVG surfaces
+* Avoid endless loops when updating def attributes
+* Round PNG size
+* Don’t crash when more than 2 values are given to translate and scale functions
+
+
 Version 2.7.1 released on 2023-08-05
 ====================================
 
