@@ -3,6 +3,12 @@
 ======
 
 
+Version 2.8.1 released on 2025-05-14
+====================================
+
+* Allow both text- and bytes-based file objects as input
+
+
 Version 2.8.0 released on 2025-05-12
 ====================================
 
