@@ -387,6 +387,8 @@ class Tree(Node):
             if not bytestring:
                 bytestring = self.fetch_url(
                     parse_url(self.url), 'image/svg+xml')
+            if isinstance(bytestring, str):
+                bytestring = bytestring.encode('utf-8')
             if bytestring.startswith(b'\x1f\x8b'):
                 bytestring = gzip.decompress(bytestring)
             tree = ElementTree.fromstring(
