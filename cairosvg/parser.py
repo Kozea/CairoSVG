@@ -357,6 +357,8 @@ class Tree(Node):
             self.url = url
         elif file_obj is not None:
             bytestring = file_obj.read()
+            if isinstance(bytestring, str):
+                bytestring = bytestring.encode()
             self.url = getattr(file_obj, 'name', None)
             if self.url == '<stdin>':
                 self.url = None
