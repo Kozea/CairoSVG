@@ -357,8 +357,6 @@ class Tree(Node):
             self.url = url
         elif file_obj is not None:
             bytestring = file_obj.read()
-            if isinstance(bytestring, str):
-                bytestring = bytestring.encode()
             self.url = getattr(file_obj, 'name', None)
             if self.url == '<stdin>':
                 self.url = None
@@ -375,6 +373,8 @@ class Tree(Node):
         else:
             raise TypeError(
                 'No input. Use one of bytestring, file_obj or url.')
+        if isinstance(bytestring, str):
+            bytestring = bytestring.encode()
         self_is_parent = (
             (parent and self.url == parent.url) or
             (url and url.startswith('#') and not self.url))
@@ -387,8 +387,6 @@ class Tree(Node):
             if not bytestring:
                 bytestring = self.fetch_url(
                     parse_url(self.url), 'image/svg+xml')
-            if isinstance(bytestring, str):
-                bytestring = bytestring.encode('utf-8')
             if bytestring.startswith(b'\x1f\x8b'):
                 bytestring = gzip.decompress(bytestring)
             tree = ElementTree.fromstring(
