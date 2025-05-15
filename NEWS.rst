@@ -3,6 +3,12 @@
 ======
 
 
+Version 2.8.2 released on 2025-05-15
+====================================
+
+* Allow both Unicode strings and bytes as input
+
+
 Version 2.8.1 released on 2025-05-14
 ====================================
 
