@@ -334,6 +334,9 @@ def apply_filter_after_painting(surface, node, name):
 
 def use(surface, node):
     """Draw the content of another SVG node."""
+    surface.reference_count += 1
+    if not node.unsafe and surface.reference_count > 100_000:
+        raise ValueError('Abort rendering: more than 100 000 referenced elements')
     surface.context.save()
     surface.context.translate(
         size(surface, node.get('x'), 'x'), size(surface, node.get('y'), 'y'))
