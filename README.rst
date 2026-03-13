@@ -2,7 +2,7 @@ CairoSVG is an SVG converter based on Cairo. It can export SVG files to PDF,
 EPS, PS, and PNG files.
 
 * Free software: LGPL license
-* For Python 3.9+
+* For Python 3.10+
 * Documentation: https://cairosvg.org/documentation/
 * Changelog: https://github.com/Kozea/CairoSVG/releases
 * Code, issues, tests: https://github.com/Kozea/CairoSVG

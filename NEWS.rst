@@ -3,6 +3,20 @@
 ======
 
 
+Version 2.9.0 released on 2026-03-13
+====================================
+
+**WARNING:** this is a security update.
+
+Using a lot of recursively nested use tags could lead to long rendering times with
+relatively small inputs. CairoSVG now stops rendering when more than 100k use tags are
+rendered.
+
+Using the --unsafe option allows to render larger documents.
+
+* Drop support of Python 3.9, add support of Python 3.14
+
+
 Version 2.8.2 released on 2025-05-15
 ====================================
 
