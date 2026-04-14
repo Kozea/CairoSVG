@@ -69,7 +69,7 @@ def nt_compatible_path(path):
     """
     if os.name == 'nt' and re.match(
             '^/[a-z]:/', path, re.IGNORECASE | re.MULTILINE | re.DOTALL):
-        return re.sub('^/', '', path, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+        return re.sub('^/', '', path, count=1, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
     else:
         return path
 
