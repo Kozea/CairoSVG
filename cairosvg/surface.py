@@ -105,7 +105,7 @@ class Surface(object):
 
         :param bytestring: The SVG source as a byte-string.
         :param file_obj: A file-like object.
-        :param url: A filename.
+        :param url: A filename, given as a string or a path-like object.
 
         Give some options:
 

@@ -4,6 +4,7 @@ SVG Parser.
 """
 
 import gzip
+import os
 import re
 from urllib.parse import urlunparse
 from xml.etree.ElementTree import Element
@@ -345,6 +346,8 @@ class Tree(Node):
         bytestring = kwargs.get('bytestring')
         file_obj = kwargs.get('file_obj')
         url = kwargs.get('url')
+        if isinstance(url, os.PathLike):
+            url = os.fspath(url)
         unsafe = kwargs.get('unsafe')
         parent = kwargs.get('parent')
         parent_children = kwargs.get('parent_children')
