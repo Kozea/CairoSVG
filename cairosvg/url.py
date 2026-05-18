@@ -104,6 +104,8 @@ def parse_url(url, base=None):
     the "folder" part of it is prepended to the URL.
 
     """
+    if isinstance(url, os.PathLike):
+        url = os.fspath(url)
     if url:
         match = URL.search(url)
         if match:

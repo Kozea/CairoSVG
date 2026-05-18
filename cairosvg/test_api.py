@@ -69,6 +69,9 @@ def test_api(tmp_path):
     assert svg2png(url=str(temp_0)) == expected_content
     assert svg2png(url=f'file://{temp_0}') == expected_content
 
+    # Read from a pathlib.Path
+    assert svg2png(url=temp_0) == expected_content
+
     with temp_0.open('rb') as file_object:
         # Read from a real file object
         assert svg2png(file_obj=file_object) == expected_content
