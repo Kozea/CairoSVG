@@ -37,6 +37,17 @@ def test_formats(format_name):
     assert content.startswith(MAGIC_NUMBERS[format_name])
 
 
+def test_path_number_after_exponent():
+    """Render adjacent path numbers after an exponent."""
+    template = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">'
+        '<path d="{}" />'
+        '</svg>')
+    adjacent = template.format('M1 1 A2e2 2e2.0 0 0 5 5').encode()
+    separated = template.format('M1 1 A2e2 2e2 .0 0 0 5 5').encode()
+    assert svg2png(adjacent) == svg2png(separated)
+
+
 def read_file(filename):
     """Shortcut to return the whole content of a file as a byte string."""
     with open(filename, 'rb') as file_object:
