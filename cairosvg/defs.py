@@ -139,6 +139,10 @@ def paint_mask(surface, node, name, opacity):
     mask_node['width'] = size(
         surface, mask_node.get('width', '120%'), width_ref)
 
+    # Fail if mask has an invalid size
+    if mask_node['width'] == 0.0 or mask_node['height'] == 0.0:
+        return False
+
     if mask_node.get('maskUnits') == 'userSpaceOnUse':
         x = mask_node['x']
         y = mask_node['y']
@@ -153,6 +157,7 @@ def paint_mask(surface, node, name, opacity):
         mask_node['height'] / mask_surface.height)
     surface.context.mask_surface(mask_surface.cairo)
     surface.context.restore()
+    return True
 
 
 def draw_gradient(surface, node, name, opacity):
