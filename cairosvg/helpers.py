@@ -75,6 +75,7 @@ def node_format(surface, node, reference=True):
 def normalize(string):
     """Normalize a string corresponding to an array of various values."""
     string = string.replace('E', 'e')
+    string = re.sub(r'(e[+-]?\d+)(?=\.)', r'\1 ', string)
     string = re.sub('(?<!e)-', ' -', string)
     string = re.sub('[ \n\r\t,]+', ' ', string)
     string = re.sub(r'(\.[0-9-]+)(?=\.)', r'\1 ', string)
