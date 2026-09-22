@@ -388,3 +388,24 @@ def size(surface, string, reference='xy'):
 
     # Unknown size
     return 0
+
+
+def parse_opacity(string, default=1):
+    """Return the opacity of ``string`` as a float clamped to ``[0, 1]``.
+
+    ``string`` may be a number or a percentage (e.g. ``'50%'``). Any value
+    that cannot be parsed falls back to ``default`` instead of raising, so an
+    invalid ``*-opacity`` attribute never aborts the whole rendering.
+
+    """
+    if string is None:
+        return default
+    string = string.strip()
+    try:
+        if string.endswith('%'):
+            value = float(string[:-1]) / 100
+        else:
+            value = float(string)
+    except ValueError:
+        return default
+    return min(1, max(0, value))

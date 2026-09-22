@@ -37,6 +37,31 @@ def test_formats(format_name):
     assert content.startswith(MAGIC_NUMBERS[format_name])
 
 
+def _rect_svg(attribute, value):
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">'
+        f'<rect width="10" height="10" fill="red" {attribute}="{value}"/>'
+        '</svg>').encode('ascii')
+
+
+@pytest.mark.parametrize('attribute', (
+    'opacity', 'fill-opacity', 'stroke-opacity'))
+def test_opacity_percentage(attribute):
+    """Percentage opacities render like their equivalent fractions (#422)."""
+    percentage = svg2png(bytestring=_rect_svg(attribute, '50%'))
+    fraction = svg2png(bytestring=_rect_svg(attribute, '0.5'))
+    assert percentage == fraction
+
+
+@pytest.mark.parametrize('attribute', (
+    'opacity', 'fill-opacity', 'stroke-opacity'))
+def test_opacity_invalid(attribute):
+    """Invalid opacities fall back to opaque instead of crashing (#422)."""
+    invalid = svg2png(bytestring=_rect_svg(attribute, 'null'))
+    opaque = svg2png(bytestring=_rect_svg(attribute, '1'))
+    assert invalid == opaque
+
+
 def read_file(filename):
     """Shortcut to return the whole content of a file as a byte string."""
     with open(filename, 'rb') as file_object:

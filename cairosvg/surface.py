@@ -14,7 +14,7 @@ from .defs import (
     filter_, gradient_or_pattern, linear_gradient, marker, mask, paint_mask,
     parse_all_defs, pattern, prepare_filter, radial_gradient, use)
 from .helpers import (
-    UNITS, PointError, clip_rect, node_format, normalize, paint,
+    UNITS, PointError, clip_rect, node_format, normalize, paint, parse_opacity,
     preserve_ratio, size, transform)
 from .image import image, invert_image
 from .parser import Tree
@@ -322,7 +322,7 @@ class Surface(object):
         # Find and prepare opacity, masks and filters
         mask = parse_url(node.get('mask')).fragment
         filter_ = parse_url(node.get('filter')).fragment
-        opacity = float(node.get('opacity', 1))
+        opacity = parse_opacity(node.get('opacity'))
 
         if filter_:
             prepare_filter(self, node, filter_)
@@ -412,8 +412,8 @@ class Surface(object):
                 pass
 
         # Get stroke and fill opacity
-        stroke_opacity = float(node.get('stroke-opacity', 1))
-        fill_opacity = float(node.get('fill-opacity', 1))
+        stroke_opacity = parse_opacity(node.get('stroke-opacity'))
+        fill_opacity = parse_opacity(node.get('fill-opacity'))
         if opacity < 1 and not node.children:
             stroke_opacity *= opacity
             fill_opacity *= opacity
