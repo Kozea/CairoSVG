@@ -30,6 +30,32 @@ SVG_SAMPLE = b'''\
 '''
 
 
+@pytest.mark.parametrize('placement', ('before', 'after', 'defs'))
+def test_mask_definition_is_not_painted(placement):
+    """A referenced mask must not become visible during document traversal."""
+    mask = '''
+      <mask id="m" maskUnits="userSpaceOnUse"
+            x="0" y="0" width="10" height="10">
+        <rect width="10" height="10" fill="white"/>
+      </mask>'''
+    rect = '<rect width="10" height="10" fill="red" mask="url(#m)"/>'
+    if placement == 'before':
+        content = mask + rect
+    elif placement == 'after':
+        content = rect + mask
+    else:
+        content = f'<defs>{mask}</defs>{rect}'
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">'
+        f'{content}</svg>')
+    png = svg2png(bytestring=svg.encode())
+    image = cairo.ImageSurface.create_from_png(io.BytesIO(png))
+    offset = 5 * image.get_stride() + 5 * 4
+    pixel = int.from_bytes(
+        bytes(image.get_data()[offset:offset + 4]), sys.byteorder)
+    assert pixel & 0xffffff == 0xff0000
+
+
 @pytest.mark.parametrize('format_name', MAGIC_NUMBERS)
 def test_formats(format_name):
     """Convert to a given format and test that output looks right."""
