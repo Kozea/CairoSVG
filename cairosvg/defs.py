@@ -5,6 +5,8 @@ This module handles clips, gradients, masks, patterns and external nodes.
 
 """
 
+from copy import copy
+
 from .bounding_box import calculate_bounding_box, is_non_empty_bounding_box
 from .features import match_features
 from .helpers import paint, size, transform
@@ -118,7 +120,9 @@ def clip_path(surface, node):
 
 def paint_mask(surface, node, name, opacity):
     """Paint the mask of the current surface."""
-    mask_node = surface.masks[name]
+    # Rendering changes the tag and geometry. Keep the definition intact for
+    # subsequent references and for normal traversal outside a defs element.
+    mask_node = copy(surface.masks[name])
     mask_node.tag = 'g'
     mask_node['opacity'] = opacity
 
