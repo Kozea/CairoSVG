@@ -3,7 +3,6 @@ Images manager.
 
 """
 
-import os.path
 from io import BytesIO
 
 from PIL import Image, ImageOps
@@ -23,7 +22,7 @@ def image(surface, node):
     """Draw an image ``node``."""
     base_url = node.get('{http://www.w3.org/XML/1998/namespace}base')
     if not base_url and node.url:
-        base_url = os.path.dirname(node.url) + '/'
+        base_url = node.url
     url = parse_url(node.get_href(), base_url)
     image_bytes = node.fetch_url(url, 'image/*')
 
