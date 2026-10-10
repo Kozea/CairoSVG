@@ -96,6 +96,19 @@ def test_api(tmp_path):
         raise Exception('TypeError not raised')
 
 
+def test_relative_filename(tmp_path, monkeypatch):
+    """Test that images are found from a relative SVG file name."""
+    image = cairo.ImageSurface(cairo.FORMAT_ARGB32, 2, 2)
+    image.write_to_png(str(tmp_path / 'image.png'))
+    svg = (
+        b'<svg xmlns="http://www.w3.org/2000/svg"'
+        b' xmlns:xlink="http://www.w3.org/1999/xlink" width="2" height="2">'
+        b'<image width="2" height="2" xlink:href="image.png" /></svg>')
+    (tmp_path / 'doc.svg').write_bytes(svg)
+    monkeypatch.chdir(tmp_path)
+    assert svg2png(url='doc.svg', unsafe=True)
+
+
 def test_low_level_api():
     """Test the low-level Python API with various parameters."""
     expected_content = svg2png(SVG_SAMPLE)
