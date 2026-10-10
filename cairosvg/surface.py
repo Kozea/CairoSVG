@@ -481,9 +481,8 @@ class Surface(object):
             self.context.pop_group_to_source()
             if filter_:
                 apply_filter_before_painting(self, node, filter_)
-            if mask in self.masks:
-                paint_mask(self, node, mask, opacity)
-            else:
+            if mask not in self.masks or not paint_mask(
+                    self, node, mask, opacity):
                 self.context.paint_with_alpha(opacity)
             if filter_:
                 apply_filter_after_painting(self, node, filter_)

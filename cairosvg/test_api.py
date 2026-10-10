@@ -191,3 +191,19 @@ def test_script(tmp_path):
     # Explicit -f wins
     assert not test_main([svg_filename, '-o', str(temp_3), '-f', 'pdf'])
     assert read_file(str(temp_3))[:100] == expected_pdf
+
+
+def test_zero_size_mask_is_ignored():
+    """Masks with width or height of 0 must be ignored, not crash (#440)."""
+    svg = b"""<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">
+  <defs>
+    <mask id="empty" x="0" y="0" width="0" height="0">
+      <rect width="10" height="10" fill="white"/>
+    </mask>
+  </defs>
+  <rect width="10" height="10" fill="red" mask="url(#empty)"/>
+</svg>
+"""
+    result = svg2png(svg)
+    assert result.startswith(MAGIC_NUMBERS['PNG'])
